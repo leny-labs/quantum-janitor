@@ -39,21 +39,37 @@ export function bob(w: number): THREE.Group {
   const antenna = at(cyl(r * 0.02, r * 0.02, r * 0.5, '#3f4652', { edges: false }), r * 0.4, h + r * 0.3, -r * 0.3);
   const tip = at(sphere(r * 0.06, '#ff5c7a', { glow: true }), r * 0.4, h + r * 0.56, -r * 0.3);
   const plate = at(label('B.O.B.', r * 0.7, r * 0.18, { color: '#1a1a1a', bold: true }), 0, h * 0.28, r * 1.05);
-  // « bouche » : égaliseur LED sur la plaque, éteint au repos (invisible en salle)
-  const screen = at(box(r * 0.74, r * 0.2, r * 0.02, '#0b1018', { edges: false, shadow: false }), 0, h * 0.28, r * 1.06);
-  const bars = [-2, -1, 0, 1, 2].map((i) => at(box(r * 0.09, r * 0.16, r * 0.02, '#7fffd4', { glow: true, edges: false, shadow: false }), i * r * 0.13, h * 0.28, r * 1.08));
-  screen.visible = false;
-  bars.forEach((b) => (b.visible = false));
-  const g = group([body, bumper, lid, ...eyes, antenna, tip, plate, screen, ...bars]);
+  // « bouche » façon Bender : écran-grille où une onde danse avec la voix.
+  // Caché en salle (plaque B.O.B. visible) ; le studio de portraits l'allume.
+  const sy = h * 0.28;
+  const sz = r * 1.06;
+  const bezel = at(box(r * 0.8, r * 0.26, r * 0.02, '#c9d2dc', { edges: false, shadow: false }), 0, sy, sz - r * 0.01);
+  const screen = at(box(r * 0.74, r * 0.2, r * 0.02, '#0b1018', { edges: false, shadow: false }), 0, sy, sz);
+  // grille des « dents » : montants fins par-dessus l'onde
+  const grille = [-1, 0, 1].map((i) => at(box(r * 0.012, r * 0.2, r * 0.02, '#2a3442', { edges: false, shadow: false }), i * r * 0.185, sy, sz + r * 0.03));
+  // ligne plate : LED ambre triste au repos, trait cyan pâle sous l'onde en parlant
+  const flat = at(box(r * 0.62, r * 0.018, r * 0.02, '#ffb347', { glow: true, edges: false, shadow: false }), 0, sy, sz + r * 0.015);
+  const N = 11;
+  const bars = Array.from({ length: N }, (_, i) => at(box(r * 0.046, r * 0.17, r * 0.02, '#7fffd4', { glow: true, edges: false, shadow: false }), (i - (N - 1) / 2) * r * 0.06, sy, sz + r * 0.02));
+  const mouthParts = [bezel, screen, ...grille, flat, ...bars];
+  mouthParts.forEach((m) => (m.visible = false));
+  const g = group([body, bumper, lid, ...eyes, antenna, tip, plate, ...mouthParts]);
   g.userData.tip = tip;
   g.userData.setFace = (p: FacePose) => {
     const on = p.mouth > 0.02;
-    screen.visible = on;
+    plate.visible = false;
+    [bezel, screen, ...grille, flat].forEach((m) => (m.visible = true));
+    (flat.material as THREE.MeshBasicMaterial).color.set(on ? '#2f8f7a' : '#ffb347');
+    flat.scale.x = on ? 1 : 0.55;
     bars.forEach((b, i) => {
       b.visible = on;
-      // hauteur pseudo-aléatoire par barre, enveloppe = ouverture
-      const k = 0.25 + 0.75 * Math.abs(Math.sin(p.phase * 2.3 + i * 1.7));
-      b.scale.y = Math.max(0.12, p.mouth * k);
+      // onde symétrique autour de l'axe : enveloppe en cloche × sinusoïde qui glisse avec la phase
+      const t = (i - (N - 1) / 2) / ((N - 1) / 2);
+      const bell = 0.35 + 0.65 * Math.cos((t * Math.PI) / 2);
+      const wave = 0.3 + 0.7 * Math.abs(Math.sin(p.phase * 2.1 + i * 0.95));
+      b.scale.y = Math.max(0.1, p.mouth * bell * wave);
+      // crêtes en ambre, corps en cyan
+      (b.material as THREE.MeshBasicMaterial).color.set(b.scale.y > 0.62 ? '#ffd166' : '#7fffd4');
     });
     eyes.forEach((e) => (e.scale.y = p.blink ? 0.2 : 1));
     tip.visible = !p.blink;

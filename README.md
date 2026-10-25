@@ -1,6 +1,6 @@
 # Quantum Janitor — Chapitre 0 : « Le Seau »
 
-Point & click narratif, *Space Quest* × *Rick & Morty*.
+Point & click narratif, *Space Quest* × *Rick & Morty* × *Paranoia* × *Futurama*.
 
 Gary Plunk (badge « Garry », merci la RH), agent d'entretien intérimaire sur la
 station *Klepsydra-9*, renverse son seau dans un Réacteur d'Improbabilité. La

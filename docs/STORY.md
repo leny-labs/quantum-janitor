@@ -1,6 +1,6 @@
 # Quantum Janitor — Bible courte
 
-> *Space Quest* × *Rick & Morty*. Un agent d'entretien intérimaire, un seau
+> *Space Quest* × *Rick & Morty* × *Paranoia* × *Futurama*. Un agent d'entretien intérimaire, un seau
 > d'eau sale, et un multivers qui n'avait rien demandé.
 
 ## Pitch
