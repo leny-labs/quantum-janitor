@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { TalkingPortrait, TypewriterMouth, typewrite } from 'talking-portrait';
+import type { BlinkOptions, MouthOptions, TypewriteHandle } from 'talking-portrait';
 import type { DialogueView } from '../engine/DialogueRunner';
 import type { CharacterDef } from '../engine/types';
 import { portraitKey } from '../three/Studio';
@@ -11,13 +13,51 @@ const PANEL_W = W - 40;
 const PANEL_H = H - PANEL_Y - 16;
 const PORTRAIT = 176;
 const TEXT_X = PANEL_X + PORTRAIT + 48;
+/** Vitesse du typewriter (caractères/s), partagée avec la bouche. */
+const CPS = 32;
+
+/**
+ * Ancrages bouche / yeux sur les portraits 3D (fractions de la texture 300×300
+ * générée par Studio). Les non-humains ont une bouche « LED » sans lèvres.
+ */
+const FACES: Record<string, { mouth: MouthOptions; blink?: BlinkOptions }> = {
+  gary: {
+    mouth: { x: 0.42, y: 0.73, width: 0.19, rotation: -0.08, style: { lipColor: '#c4605a' } },
+    blink: {
+      eyes: [
+        { x: 0.32, y: 0.445, width: 0.1, height: 0.075 },
+        { x: 0.495, y: 0.445, width: 0.1, height: 0.075 },
+      ],
+      lidColor: '#f4c18d',
+    },
+  },
+  bob: {
+    mouth: { x: 0.45, y: 0.68, width: 0.26, style: { lipColor: '#2a3340', innerColor: '#7fffd4', teethColor: null, tongueColor: null, outlineColor: '#0b1018' } },
+  },
+  sylvie: {
+    mouth: { x: 0.5, y: 0.6, width: 0.26, style: { lipColor: '#7fffd4', innerColor: '#0b3a35', teethColor: null, tongueColor: null, outlineColor: null } },
+  },
+  reine: {
+    mouth: { x: 0.58, y: 0.79, width: 0.2, style: { lipColor: '#3a1a08', innerColor: '#120600', teethColor: '#e8d890', tongueColor: null } },
+    blink: {
+      eyes: [
+        { x: 0.405, y: 0.51, width: 0.17, height: 0.18 },
+        { x: 0.76, y: 0.51, width: 0.17, height: 0.18 },
+      ],
+      lidColor: '#5a2e0c',
+      lashColor: '#1a0a02',
+    },
+  },
+};
 
 /** Boîte de dialogue : portrait 3D, cartouche de nom, texte, choix. */
 export class DialogueBox implements DialogueView {
   private root: Phaser.GameObjects.Container;
   private blocker: Phaser.GameObjects.Rectangle;
   private portraitFrame: Phaser.GameObjects.Graphics;
-  private portraitImg: Phaser.GameObjects.Image;
+  private face: TalkingPortrait;
+  private mouth: TypewriterMouth;
+  private typing: TypewriteHandle | null = null;
   private portraitBg: Phaser.GameObjects.Rectangle;
   private portraitText: Phaser.GameObjects.Text;
   private nameTab: Phaser.GameObjects.Graphics;
@@ -54,12 +94,12 @@ export class DialogueBox implements DialogueView {
     this.portraitFrame = scene.add.graphics();
     drawPanel(this.portraitFrame, px - 4, py - 4, PORTRAIT + 8, ps + 8, { fill: COLORS.ink, edge: 0xffffff, edgeAlpha: 0.5, cut: 14, glow: false });
     this.portraitBg = scene.add.rectangle(px, py, PORTRAIT, ps, 0x444444).setOrigin(0);
-    this.portraitImg = scene.add.image(px + PORTRAIT / 2, py + ps / 2, '__WHITE').setVisible(false);
+    this.face = new TalkingPortrait(scene, { x: px + PORTRAIT / 2, y: py + ps / 2, width: PORTRAIT, height: ps, breathe: 0.006 });
+    this.face.setVisible(false);
+    this.mouth = new TypewriterMouth(this.face, { cps: CPS });
     this.portraitText = scene.add
       .text(px + PORTRAIT / 2, py + ps / 2, '', { fontFamily: FONT, fontSize: '28px', color: '#ffffff', align: 'center', fontStyle: '700' })
       .setOrigin(0.5);
-    const mask = scene.make.graphics({}, false).fillRect(px, py, PORTRAIT, ps).createGeometryMask();
-    this.portraitImg.setMask(mask);
 
     this.nameTab = scene.add.graphics();
     this.nameText = scene.add.text(TEXT_X + 14, PANEL_Y - 2, '', { fontFamily: FONT, fontSize: '17px', fontStyle: '700', color: '#07050f' }).setOrigin(0, 0.5).setLetterSpacing(2);
@@ -80,7 +120,7 @@ export class DialogueBox implements DialogueView {
       .setOrigin(1, 0.5)
       .setLetterSpacing(2);
     scene.tweens.add({ targets: this.hint, alpha: 0.35, duration: 650, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    this.root.add([panel, this.portraitFrame, this.portraitBg, this.portraitImg, this.portraitText, this.nameTab, this.nameText, this.channel, this.bodyText, this.hint]);
+    this.root.add([panel, this.portraitFrame, this.portraitBg, this.face.container, this.portraitText, this.nameTab, this.nameText, this.channel, this.bodyText, this.hint]);
 
     this.keyHandler = (e: KeyboardEvent) => {
       if (!this.root.visible) return;
@@ -105,7 +145,14 @@ export class DialogueBox implements DialogueView {
 
   private tryAdvance(): void {
     // évite que le clic qui a ouvert la boîte ne la referme aussitôt
-    if (!this.advance || this.scene.time.now - this.shownAt < 180) return;
+    if (this.scene.time.now - this.shownAt < 180) return;
+    // premier clic pendant la frappe : texte complet, bouche fermée
+    if (this.typing && !this.typing.finished) {
+      this.typing.skip();
+      return;
+    }
+    if (!this.advance) return;
+    this.mouth.idle();
     const a = this.advance;
     this.advance = null;
     a();
@@ -118,11 +165,14 @@ export class DialogueBox implements DialogueView {
     this.portraitFrame.setVisible(hasPortrait);
     this.portraitBg.setVisible(hasPortrait && !has3d);
     this.portraitText.setVisible(hasPortrait && !has3d);
-    this.portraitImg.setVisible(has3d);
+    this.face.setVisible(has3d);
     if (has3d) {
-      this.portraitImg.setTexture(key);
-      const ps = PANEL_H - 44;
-      this.portraitImg.setScale(Math.max(PORTRAIT, ps) / this.portraitImg.width);
+      const f = FACES[speaker!.id];
+      // portrait inconnu : bouche discrète, invisible au repos ; pas de clignement
+      this.face.setTexture(key, undefined, {
+        mouth: f?.mouth ?? { y: 0.68, width: 0.14, showClosed: false },
+        blink: f?.blink ?? { enabled: false },
+      });
     }
     const named = !!speaker && speaker.id !== 'narrateur' && !!speaker.name;
     this.setName(named ? speaker!.name : '', speaker?.color);
@@ -163,17 +213,33 @@ export class DialogueBox implements DialogueView {
     this.choiceDecor = [];
   }
 
+  /** Arrête la frappe en cours et ferme la bouche. */
+  private stopTalking(): void {
+    this.typing?.stop();
+    this.typing = null;
+    this.mouth.idle();
+  }
+
   showLine(speaker: CharacterDef | null, text: string): Promise<void> {
     this.clearChoices();
+    this.stopTalking();
     this.setSpeaker(speaker);
-    this.bodyText.setText(text);
-    this.hint.setVisible(true);
+    this.hint.setVisible(false);
     this.open();
+    const typing = typewrite(this.bodyText, text, { cps: CPS });
+    this.typing = typing;
+    if (this.face.visible) void this.mouth.speak(text);
+    void typing.done.then(() => {
+      if (this.typing !== typing) return;
+      this.mouth.idle();
+      this.hint.setVisible(true);
+    });
     return new Promise((resolve) => (this.advance = resolve));
   }
 
   showChoices(choices: string[]): Promise<number> {
     this.clearChoices();
+    this.stopTalking();
     this.setSpeaker(null);
     this.bodyText.setText('');
     this.setName('Réponse — formulaire R-12', COLORS.hover);
@@ -224,6 +290,7 @@ export class DialogueBox implements DialogueView {
 
   close(): void {
     this.clearChoices();
+    this.stopTalking();
     this.advance = null;
     this.blocker.setVisible(false);
     this.root.setVisible(false);
