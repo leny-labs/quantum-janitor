@@ -7,7 +7,7 @@ import { ActionRunner, type ActionHost } from '../src/engine/ActionRunner';
 import { parseContent, toActions } from '../src/engine/content';
 import { DialogueRunner, type DialogueView } from '../src/engine/DialogueRunner';
 import { GameState } from '../src/engine/GameState';
-import { resolveCombine } from '../src/engine/Inventory';
+import { resolveCombine } from '../src/engine/combine';
 import type { Interaction } from '../src/engine/types';
 import { readRawContent } from './readContent';
 

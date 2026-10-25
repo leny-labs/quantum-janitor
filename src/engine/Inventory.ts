@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import type { GameState } from './GameState';
-import type { GameContent, Interaction } from './types';
+import type { GameContent } from './types';
 import { iconKey } from '../three/Studio';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
 import { COLORS, FONT, H, ROOM_H, W, hex } from '../ui/theme';
@@ -8,11 +8,6 @@ import { COLORS, FONT, H, ROOM_H, W, hex } from '../ui/theme';
 export interface InventoryCallbacks {
   click(itemId: string, p: Phaser.Input.Pointer): void;
   hover(itemId: string | null): void;
-}
-
-/** Résout la combinaison objet sélectionné + objet cliqué (dans les deux sens). */
-export function resolveCombine(content: GameContent, a: string, b: string): Interaction | undefined {
-  return content.items.get(a)?.combine?.[b] ?? content.items.get(b)?.combine?.[a];
 }
 
 const SLOT = 96;
