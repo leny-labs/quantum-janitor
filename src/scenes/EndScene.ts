@@ -1,8 +1,12 @@
 import Phaser from 'phaser';
 import { getSession } from '../session';
 import { makeButton } from '../ui/Button';
+import { HeroView } from '../three/Hero';
+import { endShot } from '../three/shots/end';
+import { bakeStudio } from '../three/Studio';
+import { drawHazard, drawPanel } from '../ui/chrome';
 import { DialogueBox } from '../ui/DialogueBox';
-import { COLORS, FONT, H, W } from '../ui/theme';
+import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
 
 interface EndData {
   knot?: string;
@@ -11,6 +15,8 @@ interface EndData {
 
 /** Cliffhanger : la dimension des cafards, puis « À suivre… ». */
 export class EndScene extends Phaser.Scene {
+  private hero: HeroView | null = null;
+
   constructor() {
     super('End');
   }
@@ -22,6 +28,7 @@ export class EndScene extends Phaser.Scene {
     state.ended = true;
     state.setFlag('chapitre0_termine');
     state.emit();
+    bakeStudio(this.textures);
 
     this.drawRoachDimension();
 
@@ -35,76 +42,73 @@ export class EndScene extends Phaser.Scene {
     this.showToBeContinued();
   }
 
-  private drawRoachDimension(): void {
-    // ciel violet maladif
-    const bands = [0x2a0f3d, 0x3a1450, 0x4d1a5e, 0x63206a, 0x7a2a6e];
-    bands.forEach((c, i) => this.add.rectangle(0, i * 90, W, 90, c).setOrigin(0));
-    // deux soleils
-    this.add.circle(1040, 110, 60, 0xffb347, 0.9);
-    this.add.circle(1150, 170, 28, 0x9cff57, 0.9);
-    // sol
-    this.add.rectangle(0, 380, W, H - 380, 0x3b2a1a).setOrigin(0);
-    this.add.rectangle(0, 380, W, 8, 0x5c4026).setOrigin(0);
-    // cafards géants (placeholders)
-    const roach = (x: number, y: number, s: number, crown = false) => {
-      const g = this.add.graphics();
-      g.lineStyle(4 * s, 0x1a0f05, 1);
-      for (let i = -1; i <= 1; i++) {
-        g.lineBetween(x + i * 40 * s, y, x + i * 55 * s - 30 * s, y + 70 * s);
-        g.lineBetween(x + i * 40 * s, y, x + i * 55 * s + 30 * s, y + 70 * s);
-      }
-      g.lineBetween(x - 70 * s, y - 20 * s, x - 150 * s, y - 110 * s);
-      g.lineBetween(x - 70 * s, y - 20 * s, x - 120 * s, y - 130 * s);
-      this.add.ellipse(x, y, 180 * s, 90 * s, 0x6b3a12).setStrokeStyle(3, 0x2a1406);
-      this.add.ellipse(x - 85 * s, y - 10 * s, 50 * s, 44 * s, 0x4a2608);
-      if (crown) this.add.text(x - 85 * s, y - 52 * s, '♛', { fontFamily: FONT, fontSize: `${46 * s}px`, color: '#ffd166' }).setOrigin(0.5);
-    };
-    roach(300, 300, 1.4, true);
-    roach(840, 290, 0.8);
-    roach(1080, 330, 1.0);
-    roach(560, 220, 0.5);
-    // Gary à plat ventre + B.O.B.
-    this.add.rectangle(560, 405, 150, 34, 0xff8c42).setStrokeStyle(2, 0xffffff);
-    this.add.text(560, 405, 'GARY (à plat)', { fontFamily: FONT, fontSize: '16px', color: '#ffffff' }).setOrigin(0.5);
-    this.add.ellipse(720, 415, 80, 30, 0x9aa5b1).setStrokeStyle(2, 0xffffff);
-    this.add.text(720, 415, 'B.O.B.', { fontFamily: FONT, fontSize: '14px', color: '#000000' }).setOrigin(0.5);
-    // seau renversé, évidemment
-    this.add.rectangle(640, 425, 40, 34, 0x3d7dd8).setAngle(80).setStrokeStyle(2, 0xffffff);
+  update(): void {
+    this.hero?.update();
+  }
 
+  private drawRoachDimension(): void {
+    this.hero = new HeroView(this, endShot(W, H));
+    const g = this.add.graphics();
+    g.fillGradientStyle(COLORS.ink, COLORS.ink, COLORS.ink, COLORS.ink, 0.7, 0.7, 0, 0);
+    g.fillRect(0, 0, W, 90);
+    // cartouche de localisation
+    const label = 'DIMENSION B-7  ·  « BLATTARIA PRIME »';
+    const t = this.add.text(W / 2, 34, label, { fontFamily: FONT, fontSize: '17px', fontStyle: '700', color: COLORS.hover }).setOrigin(0.5).setLetterSpacing(4);
+    const p = this.add.graphics();
+    drawPanel(p, W / 2 - t.width / 2 - 30, 16, t.width + 60, 36, { fill: COLORS.ink, fillAlpha: 0.75, edge: hex(COLORS.hover), cut: 10 });
+    t.setDepth(1);
     this.add
-      .text(W / 2, 30, 'Dimension B-7 « Blattaria Prime »', { fontFamily: FONT, fontSize: '24px', color: '#ffd166', backgroundColor: '#00000088', padding: { x: 10, y: 4 } })
-      .setOrigin(0.5, 0);
+      .text(W / 2, 64, 'HORS JURIDICTION DE SYLVIE · VOTRE BONHEUR N’Y EST PLUS GARANTI', { fontFamily: FONT, fontSize: '11px', color: COLORS.dim })
+      .setOrigin(0.5)
+      .setLetterSpacing(2);
   }
 
   private showToBeContinued(): void {
-    const veil = this.add.rectangle(0, 0, W, H, 0x000000, 0).setOrigin(0).setDepth(1000);
-    this.tweens.add({ targets: veil, fillAlpha: 0.85, duration: 1200 });
+    const veil = this.add.rectangle(0, 0, W, H, COLORS.ink, 0).setOrigin(0).setDepth(1000);
+    this.tweens.add({ targets: veil, fillAlpha: 0.78, duration: 1200 });
     const items: Phaser.GameObjects.GameObject[] = [];
+    const bands = this.add.graphics().setDepth(1001).setAlpha(0);
+    drawHazard(bands, 0, 196, W, 8);
+    drawHazard(bands, 0, 470, W, 8);
     const title = this.add
-      .text(W / 2, 250, 'À SUIVRE…', { fontFamily: FONT, fontSize: '96px', color: COLORS.accent, fontStyle: 'bold' })
+      .text(W / 2, 290, 'À SUIVRE…', { fontFamily: DISPLAY, fontSize: '110px', color: '#ffffff', padding: { x: 4, y: 8 } })
       .setOrigin(0.5)
       .setDepth(1001)
       .setAlpha(0);
+    const grad = title.context.createLinearGradient(0, 18, 0, title.height - 18);
+    grad.addColorStop(0, '#d9fff4');
+    grad.addColorStop(0.55, '#7fffd4');
+    grad.addColorStop(0.56, '#ff8ab8');
+    grad.addColorStop(1, '#ff4f9a');
+    title.setFill(grad).setStroke('#07050f', 10).setShadow(0, 10, 'rgba(255,79,154,0.55)', 26, true, true);
     const sub = this.add
-      .text(W / 2, 350, 'Prochainement — Chapitre 1 : « La Reine des Cafards »', { fontFamily: FONT, fontSize: '28px', color: COLORS.text })
+      .text(W / 2, 385, 'PROCHAINEMENT — CHAPITRE 1 : « LA REINE DES CAFARDS »', { fontFamily: FONT, fontSize: '22px', fontStyle: '600', color: COLORS.hover })
       .setOrigin(0.5)
+      .setLetterSpacing(3)
       .setDepth(1001)
       .setAlpha(0);
     const thanks = this.add
-      .text(W / 2, 400, "Merci d'avoir joué le chapitre 0 de Quantum Janitor.", { fontFamily: FONT, fontSize: '18px', color: COLORS.dim })
+      .text(W / 2, 425, "Merci d'avoir joué le chapitre 0. Votre satisfaction a été enregistrée d'office.", { fontFamily: FONT, fontSize: '17px', color: COLORS.dim })
       .setOrigin(0.5)
       .setDepth(1001)
       .setAlpha(0);
-    items.push(title, sub, thanks);
+    items.push(bands, title, sub, thanks);
     this.tweens.add({ targets: items, alpha: 1, duration: 1400, delay: 600 });
 
     this.time.delayedCall(1800, () => {
       const session = getSession();
-      makeButton(this, W / 2 - 170, 520, 'Menu principal', () => this.scene.start('Title')).setDepth(1001);
-      makeButton(this, W / 2 + 170, 520, 'Rejouer', () => {
-        session.newGame();
-        this.scene.start('Room');
-      }).setDepth(1001);
+      makeButton(this, W / 2 - 16, 560, 'Menu principal', () => this.scene.start('Title'), { align: 'right', size: 20, minWidth: 300 }).setDepth(1001);
+      makeButton(
+        this,
+        W / 2 + 16,
+        560,
+        'Rejouer',
+        () => {
+          session.newGame();
+          this.scene.start('Room');
+        },
+        { align: 'left', size: 20, primary: true, minWidth: 300, kicker: 'UN NOUVEAU CLONE EST PRÊT' },
+      ).setDepth(1001);
     });
   }
 }

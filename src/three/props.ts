@@ -103,3 +103,117 @@ export function mug(w: number): THREE.Group {
   const handle = at(torus(w * 0.22, w * 0.06, '#ffffff'), w * 0.52, w * 0.5, 0);
   return group([body, coffee, handle]);
 }
+
+/** Badge d'accès « GARRY » (plaque + clip), debout face +Z. */
+export function badge(w: number): THREE.Group {
+  const h = w * 1.35;
+  const card = at(box(w, h, w * 0.06, '#e8e4da'), 0, h / 2, 0);
+  const band = at(box(w * 1.001, h * 0.22, w * 0.062, '#1f7f73', { edges: false }), 0, h * 0.86, 0);
+  const photo = at(box(w * 0.42, w * 0.5, 0.01, '#ff8c42', { edges: false }), -w * 0.2, h * 0.46, w * 0.035);
+  const head = at(sphere(w * 0.1, '#f2c49b', { seg: 10 }), -w * 0.2, h * 0.5, w * 0.045);
+  head.scale.z = 0.3;
+  const name = at(label('GARRY', w * 0.42, w * 0.18, { color: '#14102a', bold: true }), w * 0.22, h * 0.52, w * 0.035);
+  const bar = at(box(w * 0.42, w * 0.05, 0.01, '#14102a', { edges: false }), w * 0.22, h * 0.36, w * 0.035);
+  const clip = at(box(w * 0.3, w * 0.14, w * 0.1, '#c9ced6'), 0, h + w * 0.05, 0);
+  return group([card, band, photo, head, name, bar, clip]);
+}
+
+/** Sandwich « Thon-Mayo-Mystère » sous film, en triangle. */
+export function sandwich(w: number): THREE.Group {
+  const tri = (h: number, color: string, y: number, scale = 1) => {
+    const m = at(cyl(w * 0.6 * scale, w * 0.6 * scale, h, color, { seg: 3 }), 0, y, 0);
+    m.rotation.y = Math.PI / 6;
+    return m;
+  };
+  const t = w * 0.12;
+  const parts = [
+    tri(t, '#e8c27a', t / 2),
+    tri(t * 0.5, '#8fae3a', t * 1.2, 0.97),
+    tri(t * 0.5, '#f0e6c8', t * 1.6, 0.95),
+    tri(t, '#e8c27a', t * 2.3),
+  ];
+  const wrap = at(cyl(w * 0.64, w * 0.64, t * 3.1, '#d9f2ff', { seg: 3, opacity: 0.28, edges: false }), 0, t * 1.5, 0);
+  wrap.rotation.y = Math.PI / 6;
+  const sticker = at(box(w * 0.36, 0.01, w * 0.2, '#ff5c7a', { edges: false }), w * 0.05, t * 3.08, w * 0.1);
+  const g = group([...parts, wrap, sticker]);
+  return g;
+}
+
+/** Buste de Gary Plunk : combinaison orange, casquette, moustache tombante. */
+export function gary(h: number): THREE.Group {
+  const u = h / 2;
+  const torso = at(cyl(u * 0.52, u * 0.62, u * 0.7, '#ff8c42', { seg: 10 }), 0, u * 0.35, 0);
+  const collar = at(cyl(u * 0.3, u * 0.4, u * 0.12, '#d96a2a', { seg: 10 }), 0, u * 0.72, 0);
+  const strapL = at(box(u * 0.1, u * 0.6, u * 0.04, '#2b5fa8', { edges: false }), -u * 0.22, u * 0.38, u * 0.53);
+  const strapR = at(box(u * 0.1, u * 0.6, u * 0.04, '#2b5fa8', { edges: false }), u * 0.22, u * 0.38, u * 0.53);
+  strapL.rotation.x = strapR.rotation.x = -0.18;
+  const tag = at(box(u * 0.2, u * 0.12, u * 0.02, '#e8e4da', { edges: false }), u * 0.2, u * 0.5, u * 0.55);
+  const neck = at(cyl(u * 0.15, u * 0.17, u * 0.2, '#e9b48a', { seg: 8 }), 0, u * 0.85, 0);
+  const head = at(sphere(u * 0.42, '#f2c49b', { seg: 16 }), 0, u * 1.25, 0);
+  head.scale.set(0.95, 1.08, 0.95);
+  const nose = at(sphere(u * 0.13, '#e8987a', { seg: 10 }), 0, u * 1.2, u * 0.4);
+  const eyes = [-1, 1].map((sx) => {
+    const white = at(sphere(u * 0.09, '#ffffff', { seg: 10 }), sx * u * 0.15, u * 1.36, u * 0.33);
+    const pupil = at(sphere(u * 0.045, '#14102a', { seg: 8, glow: true }), sx * u * 0.14, u * 1.35, u * 0.41);
+    const lid = at(box(u * 0.2, u * 0.05, u * 0.12, '#e9b48a', { edges: false }), sx * u * 0.15, u * 1.43, u * 0.35);
+    lid.rotation.z = sx * 0.2;
+    return group([white, pupil, lid]);
+  });
+  const stache = [-1, 1].map((sx) => {
+    const m = at(cyl(u * 0.06, u * 0.03, u * 0.3, '#6b3a1a', { seg: 6, edges: false }), sx * u * 0.13, u * 1.06, u * 0.37);
+    m.rotation.z = sx * 1.1;
+    return m;
+  });
+  const cap = at(cyl(u * 0.42, u * 0.44, u * 0.22, '#1f7f73', { seg: 16 }), 0, u * 1.6, 0);
+  const visor = at(box(u * 0.6, u * 0.04, u * 0.38, '#155f56'), 0, u * 1.51, u * 0.42);
+  visor.rotation.x = 0.15;
+  const logo = at(sphere(u * 0.07, '#7fffd4', { glow: true }), 0, u * 1.62, u * 0.42);
+  const ears = [-1, 1].map((sx) => at(sphere(u * 0.1, '#e9b48a', { seg: 8 }), sx * u * 0.4, u * 1.25, 0));
+  return group([torso, collar, strapL, strapR, tag, neck, head, nose, ...eyes, ...stache, cap, visor, logo, ...ears]);
+}
+
+/** SYLVIE, IA de station : écran flottant à visage + anneaux. */
+export function sylvie(h: number): THREE.Group {
+  const u = h / 2;
+  const frame = at(box(u * 1.3, u * 1.0, u * 0.18, '#16314a'), 0, u, 0);
+  const screen = at(box(u * 1.16, u * 0.86, 0.01, '#1f7f73', { glow: true }), 0, u, u * 0.095);
+  const face = at(label('◉   ◉\n‿', u * 1.0, u * 0.7, { color: '#d9fff4', bold: true }), 0, u, u * 0.1);
+  const ring = at(torus(u * 0.9, u * 0.03, '#7fffd4', { glow: true }), 0, u, -u * 0.1);
+  const halo = at(glow('#7fffd4', u * 3, 0.35), 0, u, -u * 0.3);
+  const g = group([halo, ring, frame, screen, face]);
+  g.userData.ring = ring;
+  return g;
+}
+
+/** Cafard géant low-poly (origine au sol, tête vers +X). */
+export function roach(len: number, crown = false): THREE.Group {
+  const u = len;
+  const shellM = at(sphere(u * 0.4, '#6b3a12', { seg: 12 }), 0, u * 0.22, 0);
+  shellM.scale.set(1.25, 0.45, 0.8);
+  const stripe = at(box(u * 0.9, u * 0.02, u * 0.02, '#2a1406', { edges: false }), 0, u * 0.4, 0);
+  const head = at(sphere(u * 0.16, '#4a2608', { seg: 10 }), u * 0.52, u * 0.2, 0);
+  const eyes = [-1, 1].map((s) => at(sphere(u * 0.045, '#ffd166', { glow: true, seg: 8 }), u * 0.62, u * 0.27, s * u * 0.08));
+  const parts: THREE.Object3D[] = [shellM, stripe, head, ...eyes];
+  for (const s of [-1, 1]) {
+    for (let i = -1; i <= 1; i++) {
+      const leg = at(cyl(u * 0.018, u * 0.012, u * 0.42, '#2a1406', { seg: 5, edges: false }), i * u * 0.22, u * 0.12, s * u * 0.32);
+      leg.rotation.x = s * 1.05;
+      leg.rotation.z = i * 0.3;
+      parts.push(leg);
+    }
+    const ant = at(cyl(u * 0.01, u * 0.006, u * 0.7, '#2a1406', { seg: 4, edges: false }), u * 0.85, u * 0.5, s * u * 0.12);
+    ant.rotation.z = -0.9;
+    ant.rotation.x = s * 0.3;
+    parts.push(ant);
+  }
+  if (crown) {
+    const c = at(cyl(u * 0.12, u * 0.1, u * 0.1, '#ffd166', { seg: 6 }), u * 0.55, u * 0.38, 0);
+    parts.push(c);
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      parts.push(at(cyl(0, u * 0.03, u * 0.08, '#ffd166', { seg: 4, edges: false }), u * 0.55 + Math.cos(a) * u * 0.1, u * 0.47, Math.sin(a) * u * 0.1));
+    }
+    parts.push(at(sphere(u * 0.03, '#ff5c7a', { glow: true }), u * 0.66, u * 0.4, 0));
+  }
+  return group(parts);
+}

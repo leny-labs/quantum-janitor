@@ -4,14 +4,24 @@ import * as THREE from 'three';
 
 const gradientMaps = new Map<number, THREE.DataTexture>();
 
-/** Rampe de lumière en paliers (filtrage nearest) : aplats francs. */
+/**
+ * Rampe de lumière en paliers (filtrage nearest) : aplats francs. Les paliers
+ * sont teintés — ombres violettes, lumière crème — façon affiche rétro-SF :
+ * la couleur de l'objet ne vire jamais au gris sale dans l'ombre.
+ */
+const RAMP: [number, number, number][] = [
+  [92, 78, 150],
+  [176, 168, 214],
+  [255, 248, 236],
+];
+
 function gradientMap(steps = 3): THREE.DataTexture {
   let t = gradientMaps.get(steps);
   if (t) return t;
   const data = new Uint8Array(steps * 4);
   for (let i = 0; i < steps; i++) {
-    const v = Math.round(90 + (165 * i) / (steps - 1));
-    data.set([v, v, v, 255], i * 4);
+    const c = RAMP[Math.round((i * (RAMP.length - 1)) / Math.max(1, steps - 1))];
+    data.set([...c, 255], i * 4);
   }
   t = new THREE.DataTexture(data, steps, 1, THREE.RGBAFormat);
   t.minFilter = t.magFilter = THREE.NearestFilter;
@@ -32,11 +42,11 @@ export function mat(color: THREE.ColorRepresentation, o: MatOpts = {}): THREE.Ma
   const opacity = o.opacity ?? 1;
   // three.js avertit sur les paramètres `undefined` : on ne passe que ceux fournis
   const params = { color, transparent: opacity < 1, opacity, ...(o.map && { map: o.map }), ...(o.side !== undefined && { side: o.side }) };
-  if (o.glow) return new THREE.MeshBasicMaterial({ ...params, toneMapped: false });
+  if (o.glow) return new THREE.MeshBasicMaterial({ ...params, toneMapped: false, fog: false });
   return new THREE.MeshToonMaterial({ ...params, gradientMap: gradientMap() });
 }
 
-const EDGE = new THREE.LineBasicMaterial({ color: 0x0a0812, transparent: true, opacity: 0.55 });
+const EDGE = new THREE.LineBasicMaterial({ color: 0x0a0618, transparent: true, opacity: 0.7 });
 
 /** Ajoute des arêtes sombres (trait d'illustration) à un mesh. */
 export function outline(mesh: THREE.Mesh, angle = 30): THREE.Mesh {
@@ -82,7 +92,7 @@ export function plane(w: number, h: number, color: THREE.ColorRepresentation, o:
 
 // ── textures peintes ───────────────────────────────────────────────────
 
-const FONT = '"Trebuchet MS", "DejaVu Sans", Verdana, sans-serif';
+const FONT = '"Chakra Petch", "Trebuchet MS", "DejaVu Sans", sans-serif';
 
 export interface LabelOpts {
   color?: string;
@@ -269,7 +279,7 @@ export function glow(color: string, size: number, opacity = 0.6): THREE.Sprite {
     glowTextures.set(color, t);
   }
   const s = new THREE.Sprite(
-    new THREE.SpriteMaterial({ map: t, blending: THREE.AdditiveBlending, transparent: true, opacity, depthWrite: false, toneMapped: false }),
+    new THREE.SpriteMaterial({ map: t, blending: THREE.AdditiveBlending, transparent: true, opacity, depthWrite: false, toneMapped: false, fog: false }),
   );
   s.scale.set(size, size, 1);
   return s;

@@ -77,9 +77,11 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.titleText = this.add
       .text(14, 10, '', { fontFamily: FONT, fontSize: '18px', color: COLORS.dim, backgroundColor: '#00000088', padding: { x: 8, y: 4 } })
       .setDepth(700);
-    makeButton(this, W - 14, 10, 'Menu', () => !this.busy && this.scene.start('Title'), { size: 18, origin: 0 })
-      .setOrigin(1, 0)
-      .setDepth(700);
+    makeButton(this, W - 14, 10, 'Menu', () => !this.busy && this.scene.start('Title'), {
+      size: 18,
+      align: 'right',
+      valign: 'top',
+    }).setDepth(700);
     if (this.session.debug.overlay) {
       this.debugText = this.add
         .text(14, 44, '', { fontFamily: MONO, fontSize: '13px', color: '#ff99ff', backgroundColor: '#000000aa', wordWrap: { width: 700 } })
