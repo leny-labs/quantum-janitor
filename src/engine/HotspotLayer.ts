@@ -18,7 +18,11 @@ export const EXIT_CURSORS: Record<ExitDirection, string> = {
   down: 's-resize',
 };
 
-/** Dessine une vue fixe (placeholders) et ses zones cliquables. */
+/**
+ * Zones cliquables d'une vue fixe + flèches de sortie. Si la pièce est rendue
+ * en 3D (`art3d`), le fond et l'`art` du YAML ne sont pas dessinés : seul
+ * l'overlay interactif reste au-dessus de l'image Three.js.
+ */
 export class HotspotLayer {
   readonly container: Phaser.GameObjects.Container;
 
@@ -31,17 +35,21 @@ export class HotspotLayer {
     this.container = scene.add.container(0, 0).setDepth(10);
   }
 
-  render(def: SceneDef, width: number, height: number): void {
+  render(def: SceneDef, width: number, height: number, art3d = false): void {
     const s = this.scene;
     this.container.removeAll(true);
-    this.container.add(s.add.rectangle(0, 0, width, height, hex(def.background)).setOrigin(0));
-    this.drawArt(def.art ?? []);
+    if (!art3d) {
+      this.container.add(s.add.rectangle(0, 0, width, height, hex(def.background)).setOrigin(0));
+      this.drawArt(def.art ?? []);
+    }
 
     for (const e of def.exits ?? []) {
       if (!this.state.check(e.if)) continue;
       const [x, y, w, h] = e.rect;
       const locked = !this.state.check(e.requires);
-      const box = s.add.rectangle(x, y, w, h, 0x000000, 0.18).setOrigin(0).setStrokeStyle(2, hex(COLORS.accent), 0.45);
+      const box = art3d
+        ? s.add.circle(x + w / 2, y + h / 2, 30, 0x000000, 0.45).setStrokeStyle(2, hex(COLORS.accent), 0.6)
+        : s.add.rectangle(x, y, w, h, 0x000000, 0.18).setOrigin(0).setStrokeStyle(2, hex(COLORS.accent), 0.45);
       const arrow = s.add
         .text(x + w / 2, y + h / 2, ARROWS[e.dir ?? 'right'], {
           fontFamily: FONT,
@@ -59,7 +67,7 @@ export class HotspotLayer {
 
     for (const h of def.hotspots ?? []) {
       if (!this.state.check(h.if)) continue;
-      if (h.art) this.drawArt(h.art);
+      if (h.art && !art3d) this.drawArt(h.art);
       const [x, y, w, hh] = h.rect;
       if (this.debug) {
         this.container.add(s.add.rectangle(x, y, w, hh).setOrigin(0).setStrokeStyle(1, 0xff00ff, 0.9));

@@ -13,6 +13,8 @@ export class SceneManager {
     private state: GameState,
     private layer: HotspotLayer,
     private size: { width: number; height: number },
+    /** Affiche la pièce 3D de la scène ; renvoie false s'il n'y en a pas (rendu 2D). */
+    private show3d: (def: SceneDef) => boolean = () => false,
   ) {}
 
   current(): SceneDef {
@@ -22,7 +24,8 @@ export class SceneManager {
   }
 
   refresh(): void {
-    this.layer.render(this.current(), this.size.width, this.size.height);
+    const def = this.current();
+    this.layer.render(def, this.size.width, this.size.height, this.show3d(def));
   }
 
   /** Affiche la scène courante sans fondu (chargement de partie). */

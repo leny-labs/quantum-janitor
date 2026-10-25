@@ -6,6 +6,7 @@ import { Inventory, resolveCombine } from '../engine/Inventory';
 import { SceneManager } from '../engine/SceneManager';
 import type { Action, Exit, Hotspot, Interaction } from '../engine/types';
 import { getSession, type Session } from '../session';
+import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { makeButton } from '../ui/Button';
 import { DialogueBox } from '../ui/DialogueBox';
 import { HoverLabel } from '../ui/HoverLabel';
@@ -24,6 +25,7 @@ const WRONG_COMBINE = ["Je ne vais pas combiner {item} avec {target}. J'ai des p
 export class RoomScene extends Phaser.Scene implements ActionHost {
   private session!: Session;
   private layer!: HotspotLayer;
+  private room!: RoomView;
   private scenes!: SceneManager;
   private inventory!: Inventory;
   private dialogueBox!: DialogueBox;
@@ -58,7 +60,10 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       },
       this.session.debug.overlay,
     );
-    this.scenes = new SceneManager(this, content, state, this.layer, { width: W, height: ROOM_H });
+    this.room = new RoomView(this, RoomRenderer.get(W, ROOM_H));
+    this.scenes = new SceneManager(this, content, state, this.layer, { width: W, height: ROOM_H }, (def) =>
+      this.room.show(def, (c) => state.check(c)),
+    );
     this.inventory = new Inventory(this, content, state, {
       click: (id, p) => this.onClickItem(id, p),
       hover: (id) => this.onHoverItem(id),
@@ -104,6 +109,10 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
 
   // ── rendu ────────────────────────────────────────────────────────────
 
+  update(): void {
+    this.room.update();
+  }
+
   private refresh(): void {
     this.scenes.refresh();
     this.inventory.render();
@@ -113,6 +122,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.heldItem.setVisible(!!held);
     if (held) this.heldItem.setText(held.icon.glyph).setBackgroundColor(held.icon.color);
     this.hover.set(null);
+    this.room.highlight(null);
     if (!this.busy) setCursor(this, held ? 'crosshair' : 'default');
     this.debugText?.setText(
       `[debug] scène=${state.scene}\nflags=${[...state.flags].join(',') || '∅'}\nobjets=${state.items.join(',') || '∅'}`,
@@ -162,6 +172,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   // ── entrées ──────────────────────────────────────────────────────────
 
   private onHoverHotspot(h: Hotspot | null): void {
+    this.room.highlight(h && !this.blocked ? h.id : null);
     if (this.blocked) return;
     const { state, content } = this.session;
     if (!h) {
