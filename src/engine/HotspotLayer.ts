@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { GameState } from './GameState';
 import type { ArtShape, Exit, ExitDirection, Hotspot, SceneDef } from './types';
+import { drawNavButton } from '../ui/chrome';
 import { COLORS, FONT, hex } from '../ui/theme';
 
 export interface HotspotCallbacks {
@@ -10,7 +11,9 @@ export interface HotspotCallbacks {
   clickExit(e: Exit, p: Phaser.Input.Pointer): void;
 }
 
-const ARROWS: Record<ExitDirection, string> = { left: '◀', right: '▶', up: '▲', down: '▼' };
+/** Rayon du bouton de sortie ; zone tactile d'au moins 2 × NAV_HIT px. */
+const NAV_R = 28;
+const NAV_HIT = 32;
 export const EXIT_CURSORS: Record<ExitDirection, string> = {
   left: 'w-resize',
   right: 'e-resize',
@@ -47,22 +50,31 @@ export class HotspotLayer {
       if (!this.state.check(e.if)) continue;
       const [x, y, w, h] = e.rect;
       const locked = !this.state.check(e.requires);
-      const box = art3d
-        ? s.add.circle(x + w / 2, y + h / 2, 30, 0x000000, 0.45).setStrokeStyle(2, hex(COLORS.accent), 0.6)
-        : s.add.rectangle(x, y, w, h, 0x000000, 0.18).setOrigin(0).setStrokeStyle(2, hex(COLORS.accent), 0.45);
-      const arrow = s.add
-        .text(x + w / 2, y + h / 2, ARROWS[e.dir ?? 'right'], {
-          fontFamily: FONT,
-          fontSize: '34px',
-          color: locked ? COLORS.danger : COLORS.accent,
-        })
-        .setOrigin(0.5)
-        .setAlpha(0.8);
-      const zone = s.add.zone(x, y, w, h).setOrigin(0).setInteractive();
-      zone.on('pointerover', () => this.cb.hoverExit(e));
-      zone.on('pointerout', () => this.cb.hoverExit(null));
+      const dir = e.dir ?? 'right';
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+      if (!art3d) this.container.add(s.add.rectangle(x, y, w, h, 0x000000, 0.18).setOrigin(0).setStrokeStyle(2, hex(COLORS.accent), 0.45));
+      const g = s.add.graphics({ x: cx, y: cy }).setAlpha(locked ? 0.55 : 0.92);
+      drawNavButton(g, NAV_R, dir, locked ? 'locked' : 'idle');
+      // zone tactile : le rect du YAML, élargi à 64 × 64 px minimum
+      const zw = Math.max(w, NAV_HIT * 2);
+      const zh = Math.max(h, NAV_HIT * 2);
+      const zone = s.add.zone(cx - zw / 2, cy - zh / 2, zw, zh).setOrigin(0).setInteractive();
+      const hover = (on: boolean) => {
+        drawNavButton(g, NAV_R, dir, locked ? 'locked' : on ? 'hover' : 'idle');
+        s.tweens.killTweensOf(g);
+        s.tweens.add({ targets: g, scale: on ? 1.12 : 1, alpha: on ? 1 : locked ? 0.55 : 0.92, duration: 120, ease: 'Quad.easeOut' });
+      };
+      zone.on('pointerover', () => {
+        hover(true);
+        this.cb.hoverExit(e);
+      });
+      zone.on('pointerout', () => {
+        hover(false);
+        this.cb.hoverExit(null);
+      });
       zone.on('pointerdown', (p: Phaser.Input.Pointer) => this.cb.clickExit(e, p));
-      this.container.add([box, arrow, zone]);
+      this.container.add([g, zone]);
     }
 
     for (const h of def.hotspots ?? []) {

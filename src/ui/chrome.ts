@@ -81,6 +81,63 @@ export function drawLed(g: Phaser.GameObjects.Graphics, x: number, y: number, co
   g.fillCircle(x, y, r);
 }
 
+// ── boutons de navigation (sorties) ──────────────────────────────────
+
+export type NavDir = 'left' | 'right' | 'up' | 'down';
+export type NavState = 'idle' | 'hover' | 'locked';
+
+/**
+ * Bouton de sortie centré sur (0, 0), rayon `r` : octogone biseauté sombre,
+ * anneau du thème avec halo, chevron vectoriel. Cyan au repos, ambre au
+ * survol, rouge danger si verrouillé.
+ */
+export function drawNavButton(g: Phaser.GameObjects.Graphics, r: number, dir: NavDir, state: NavState): void {
+  g.clear();
+  const color = hex(state === 'hover' ? COLORS.hover : state === 'locked' ? COLORS.danger : COLORS.accent);
+  const oct = (rad: number) =>
+    Array.from({ length: 8 }, (_, i) => {
+      const a = Math.PI / 8 + (i * Math.PI) / 4;
+      return new Phaser.Geom.Point(Math.cos(a) * rad, Math.sin(a) * rad);
+    });
+  // halo
+  for (const [width, alpha] of [[12, 0.06], [7, 0.1], [4, 0.16]] as const) {
+    g.lineStyle(width, color, alpha * (state === 'hover' ? 1.8 : 1));
+    g.strokePoints(oct(r), true);
+  }
+  g.fillStyle(COLORS.panel, 0.72);
+  g.fillPoints(oct(r), true);
+  // reflet haut
+  g.fillStyle(0xffffff, 0.06);
+  g.fillPoints(oct(r - 3).filter((p) => p.y < 0), true);
+  g.lineStyle(2, color, 0.95);
+  g.strokePoints(oct(r), true);
+  g.lineStyle(1, color, 0.35);
+  g.strokePoints(oct(r - 5), true);
+  // encoches aux quatre points cardinaux
+  g.lineStyle(2, 0xffffff, state === 'locked' ? 0.25 : 0.6);
+  for (let i = 0; i < 4; i++) {
+    const a = (i * Math.PI) / 2;
+    g.lineBetween(Math.cos(a) * (r + 3), Math.sin(a) * (r + 3), Math.cos(a) * (r + 8), Math.sin(a) * (r + 8));
+  }
+  // chevron (pointe vers la droite, puis tourné)
+  const rot = { right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 }[dir];
+  const c = r * 0.36;
+  const pts = [
+    [-c * 0.55, -c],
+    [c * 0.55, 0],
+    [-c * 0.55, c],
+  ].map(([x, y]) => new Phaser.Geom.Point(x * Math.cos(rot) - y * Math.sin(rot), x * Math.sin(rot) + y * Math.cos(rot)));
+  g.lineStyle(9, color, 0.18);
+  g.strokePoints(pts, false);
+  g.lineStyle(5, color, 1);
+  g.strokePoints(pts, false);
+  for (const p of [pts[0], pts[2]]) {
+    g.fillStyle(color, 1);
+    g.fillCircle(p.x, p.y, 2.5);
+  }
+  g.fillCircle(pts[1].x, pts[1].y, 2.5);
+}
+
 // ── icônes de verbes ──────────────────────────────────────────────────
 // Pictos au trait (grille 24×24, tracés dans l'esprit de Lucide, ISC),
 // peints en blanc sur canvas puis teintés : cyan au repos, ambre au survol.

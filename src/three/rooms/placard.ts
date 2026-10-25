@@ -52,19 +52,18 @@ export const placard: RoomBuild = {
     }
 
     // produits ménagers (hotspot « produits »)
-    // Formes et couleurs suffisent à les distinguer ; étiquettes pictogrammes
-    // seulement (javel, brise du vide, anti-flux, dégraissant, fiole mystère).
+    // Étiquettes papier collées : nom en gras + pictogramme ; fiole « ??? ».
     type Kind = Parameters<typeof bottle>[4];
-    const products: [rect: [number, number, number, number], color: string, mark: Parameters<typeof bottle>[3], kind: Kind, shelf: number][] = [
-      [[70, 40, 50, 50], '#b33a3a', 'drop', 'square', 0],
-      [[140, 30, 40, 60], '#3a8fb3', 'swirl', 'round', 0],
-      [[200, 50, 70, 40], '#8f3ab3', 'atom', 'jar', 0],
-      [[80, 170, 90, 60], '#c9a13a', 'flame', 'square', 1],
+    const products: [rect: [number, number, number, number], color: string, tag: Parameters<typeof bottle>[3], kind: Kind, shelf: number][] = [
+      [[70, 40, 50, 50], '#b33a3a', { mark: 'drop', name: 'JAVEL\nQ.' }, 'square', 0],
+      [[140, 30, 40, 60], '#3a8fb3', { mark: 'swirl', name: 'BRISE\nDU VIDE' }, 'round', 0],
+      [[200, 50, 70, 40], '#8f3ab3', { mark: 'atom', name: 'ANTI-\nFLUX' }, 'jar', 0],
+      [[80, 170, 90, 60], '#c9a13a', { mark: 'flame', name: 'DÉGRAISSANT\nABSOLU' }, 'square', 1],
       [[200, 180, 60, 50], '#3ab36b', null, 'flask', 1],
     ];
-    for (const [rect, color, mark, kind, shelf] of products) {
+    for (const [rect, color, tag, kind, shelf] of products) {
       const p = s.stand(rect, shelfY[shelf]);
-      s.spot('produits', at(bottle(p.w, p.h, color, mark, kind), p.x, shelfY[shelf], p.z));
+      s.spot('produits', at(bottle(p.w, p.h, color, tag, kind), p.x, shelfY[shelf], p.z));
     }
 
     // seau

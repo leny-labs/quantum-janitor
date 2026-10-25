@@ -2,7 +2,7 @@
 // une pièce). Chaque fonction renvoie un Group dont l'origine est au sol, au
 // centre de la base : il suffit de le poser avec `at(prop, x, 0, z)`.
 import * as THREE from 'three';
-import { at, box, cyl, decal, glow, group, label, mat, sphere, torus, type DecalMark } from './kit';
+import { at, box, cyl, decal, glow, group, label, mat, mysteryTag, sphere, torus, type DecalMark } from './kit';
 
 /** B.O.B., aspirateur-robot dépressif. `w` = diamètre. */
 export function bob(w: number): THREE.Group {
@@ -74,10 +74,11 @@ export function fusible(len: number): THREE.Group {
 }
 
 /**
- * Flacon générique : corps + goulot + bouchon + étiquette pictographique
- * (sans texte : le nom vient du survol). `mark` à null : pas d'étiquette.
+ * Flacon générique : corps + goulot + bouchon + étiquette papier collée
+ * (nom du produit en gras + pictogramme). `tag` à null : pas d'étiquette ;
+ * la fiole (`flask`) porte une étiquette volante « ??? ».
  */
-export function bottle(w: number, h: number, color: string, mark: DecalMark | null, kind: 'round' | 'square' | 'jar' | 'flask' = 'round'): THREE.Group {
+export function bottle(w: number, h: number, color: string, tag: { mark: DecalMark; name: string } | null, kind: 'round' | 'square' | 'jar' | 'flask' = 'round'): THREE.Group {
   const parts: THREE.Object3D[] = [];
   const bodyH = kind === 'jar' ? h * 0.85 : h * 0.72;
   if (kind === 'square') parts.push(at(box(w, bodyH, w * 0.6, color), 0, bodyH / 2, 0));
@@ -92,17 +93,22 @@ export function bottle(w: number, h: number, color: string, mark: DecalMark | nu
   }
   if (kind === 'flask') parts.push(at(glow('#3ab36b', w * 2.2, 0.5), 0, w / 2, 0));
   if (kind === 'flask') {
-    // fiole mystère : juste une étiquette volante nouée au goulot
-    const tag = at(box(w * 0.22, w * 0.15, 0.008, '#efe7d4', { edges: false }), w * 0.2, top - h * 0.02, w * 0.16);
-    tag.rotation.z = -0.35;
-    parts.push(tag, at(cyl(0.004, 0.004, w * 0.16, '#2a1f3a', { edges: false }), w * 0.1, top + h * 0.04, w * 0.1));
-  } else if (mark) {
-    const band = new THREE.Color(color).multiplyScalar(0.7).getStyle();
-    const dh = bodyH * (kind === 'jar' ? 0.5 : 0.42);
-    const dw = Math.min(dh * 1.33, w * (kind === 'square' ? 0.72 : 0.9));
-    const y = bodyH * (kind === 'jar' ? 0.48 : 0.5);
-    if (kind === 'square') parts.push(at(decal(dw, dh, band, mark), 0, y, w * 0.3 + 0.004));
-    else parts.push(at(decal(dw, dh, band, mark, w / 2 + 0.004), 0, y, 0));
+    // fiole mystère : étiquette « ??? » nouée au goulot, pendue devant la panse
+    const tw = w * 0.5;
+    const th = tw / 1.5;
+    const t = at(mysteryTag(tw, th), w * 0.04, w * 0.62, w * 0.5 + 0.01);
+    t.rotation.z = -0.12;
+    const string = at(cyl(0.004, 0.004, w * 0.42, '#2a1f3a', { edges: false }), -w * 0.1, top - w * 0.05, w * 0.36);
+    string.rotation.x = 0.7;
+    parts.push(t, string);
+  } else if (tag) {
+    const band = new THREE.Color(color).multiplyScalar(0.8).getStyle();
+    // plaque large : ~70 % de la hauteur du corps, presque toute la face
+    const dh = bodyH * 0.7;
+    const dw = Math.min(dh * 2.4, w * (kind === 'square' ? 0.9 : 0.95));
+    const y = bodyH * 0.5;
+    if (kind === 'square') parts.push(at(decal(dw, dh, band, tag.mark, tag.name), 0, y, w * 0.3 + 0.004));
+    else parts.push(at(decal(dw, dh, band, tag.mark, tag.name, w / 2 + 0.004), 0, y, 0));
   }
   return group(parts);
 }
