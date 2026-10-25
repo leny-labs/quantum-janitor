@@ -6,13 +6,17 @@ import { resolveCombine } from '../engine/combine';
 import { Inventory } from '../engine/Inventory';
 import { SceneManager } from '../engine/SceneManager';
 import type { Action, Exit, Hotspot, Interaction } from '../engine/types';
+import { hotspotVerbs, smartVerb, type HotspotVerb } from '../engine/verbs';
 import { getSession, type Session } from '../session';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { makeButton } from '../ui/Button';
 import { DialogueBox } from '../ui/DialogueBox';
 import { HoverLabel } from '../ui/HoverLabel';
 import { ProgressCue } from '../ui/ProgressCue';
-import { VerbMenu, type Verb } from '../ui/VerbMenu';
+import { verbCursor, verbIcon, type VerbIcon } from '../ui/chrome';
+import { isTouch } from '../ui/input';
+import { PressRing } from '../ui/PressRing';
+import { VerbCoin } from '../ui/VerbCoin';
 import { COLORS, FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
 
 const WRONG_ITEM = [
@@ -33,7 +37,9 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   private dialogueBox!: DialogueBox;
   private hover!: HoverLabel;
   private cue!: ProgressCue;
-  private verbs!: VerbMenu;
+  private coin!: VerbCoin;
+  private press: PressRing | null = null;
+  private dropButton: Phaser.GameObjects.Container | null = null;
   private runner!: ActionRunner;
   private titleText!: Phaser.GameObjects.Text;
   private debugText: Phaser.GameObjects.Text | null = null;
@@ -74,7 +80,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.runner = new ActionRunner(state, this);
     this.dialogueBox = new DialogueBox(this);
     this.hover = new HoverLabel(this);
-    this.verbs = new VerbMenu(this);
+    this.coin = new VerbCoin(this);
     this.cue = new ProgressCue(this, state, () => this.dialogueBox.isOpen);
 
     // HUD
@@ -100,12 +106,15 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.input.on('pointerdown', (p: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]) => {
       if (p.rightButtonDown() && over.length === 0) state.select(null);
     });
+    this.dropButton = null;
+    this.press = null;
 
     const off = state.onChange(() => {
       this.refresh();
       this.cue.check();
     });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.press?.cancel();
       off();
       setCursor(this, 'default');
       if (this.session.activeScene === this) this.session.activeScene = null;
@@ -130,6 +139,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const held = state.selectedItem ? content.items.get(state.selectedItem) : null;
     this.heldItem.setVisible(!!held);
     if (held) this.heldItem.setText(held.icon.glyph).setBackgroundColor(held.icon.color);
+    this.renderDropButton(held?.name ?? null);
     this.hover.set(null);
     this.room.highlight(null);
     if (!this.busy) setCursor(this, held ? 'crosshair' : 'default');
@@ -150,7 +160,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   private async act(i: Interaction | undefined): Promise<void> {
     if (this.busy || !i || (Array.isArray(i) && i.length === 0)) return;
     this.busy = true;
-    this.verbs.close();
+    this.press?.cancel();
+    this.coin.close();
     this.hover.set(null);
     setCursor(this, 'default');
     try {
@@ -175,7 +186,61 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   }
 
   private get blocked(): boolean {
-    return this.busy || this.dialogueBox.isOpen || this.verbs.isOpen;
+    return this.busy || this.dialogueBox.isOpen || this.coin.isOpen;
+  }
+
+  /** Tactile : objet en main → bouton « Reposer » (pas de clic droit au doigt). */
+  private renderDropButton(heldName: string | null): void {
+    this.dropButton?.destroy();
+    this.dropButton = null;
+    if (!heldName || !isTouch()) return;
+    this.heldItem.setVisible(false);
+    this.dropButton = makeButton(this, 14, ROOM_H - 14, 'Reposer', () => this.session.state.select(null), {
+      size: 20,
+      align: 'left',
+      kicker: `EN MAIN : ${heldName.toUpperCase()}`,
+    }).setDepth(700);
+    this.dropButton.setY(this.dropButton.y - this.dropButton.height / 2);
+  }
+
+  private verbIcon(v: HotspotVerb): VerbIcon {
+    return v.kind === 'talk' ? 'talk' : v.kind === 'look' ? 'look' : verbIcon(v.label);
+  }
+
+  /** Ouvre le verb coin d'un hotspot au point (x, y). */
+  private openCoin(h: Hotspot, x: number, y: number, touch: boolean): void {
+    const verbs = hotspotVerbs(h).map((v) => ({ label: v.label, icon: this.verbIcon(v), run: () => void this.act(v.action) }));
+    this.hover.set(null);
+    setCursor(this, 'default');
+    this.coin.open(x, y, h.label, verbs, { touch });
+  }
+
+  /** Action du clic gauche / tap court. */
+  private smartAction(h: Hotspot, p: Phaser.Input.Pointer, touch: boolean): void {
+    const v = smartVerb(h);
+    if (v) void this.act(v.action);
+    else this.openCoin(h, p.x, p.y, touch);
+  }
+
+  private useHeldOn(h: Hotspot): void {
+    const { state, content } = this.session;
+    if (!state.selectedItem) return;
+    const item = content.items.get(state.selectedItem)!;
+    const reaction = h.useItem?.[item.id] ?? h.useItemDefault ?? this.fill(this.pick(WRONG_ITEM), item.name, h.label);
+    state.select(null);
+    void this.act(reaction);
+  }
+
+  /** Tactile : tap / appui long au point de contact. */
+  private startPress(p: Phaser.Input.Pointer, onTap: () => void, onLong: () => void): void {
+    this.press?.cancel();
+    this.press = new PressRing(
+      this,
+      p.x,
+      p.y,
+      () => !this.blocked && onTap(),
+      () => !this.blocked && onLong(),
+    );
   }
 
   // ── entrées ──────────────────────────────────────────────────────────
@@ -190,8 +255,14 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       return;
     }
     const held = state.selectedItem ? content.items.get(state.selectedItem) : null;
-    this.hover.set(held ? `Utiliser ${held.name} sur ${h.label}` : h.label);
-    setCursor(this, 'pointer');
+    if (held) {
+      this.hover.set(`Utiliser ${held.name} sur ${h.label}`);
+      setCursor(this, 'crosshair');
+      return;
+    }
+    const v = smartVerb(h);
+    this.hover.set(v ? `${v.label} : ${h.label}` : `${h.label}  ⋯`);
+    setCursor(this, v ? verbCursor(this.verbIcon(v)) : 'context-menu');
   }
 
   private onHoverExit(e: Exit | null): void {
@@ -219,25 +290,25 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
 
   private onClickHotspot(h: Hotspot, p: Phaser.Input.Pointer): void {
     if (this.blocked) return;
-    const { state, content } = this.session;
+    const { state } = this.session;
+    if (isTouch(p)) {
+      // pas de survol au doigt : on montre tout de suite ce qu'on touche
+      this.onHoverHotspot(h);
+      if (state.selectedItem) return this.startPress(p, () => this.useHeldOn(h), () => this.useHeldOn(h));
+      return this.startPress(
+        p,
+        () => this.smartAction(h, p, true),
+        () => this.openCoin(h, p.x, p.y, true),
+      );
+    }
     if (p.rightButtonDown()) {
+      // objet en main : clic droit = le reposer ; sinon verb coin
       if (state.selectedItem) state.select(null);
-      else void this.act(h.look ?? 'Rien de particulier.');
+      else this.openCoin(h, p.x, p.y, false);
       return;
     }
-    if (state.selectedItem) {
-      const item = content.items.get(state.selectedItem)!;
-      const reaction =
-        h.useItem?.[item.id] ?? h.useItemDefault ?? this.fill(this.pick(WRONG_ITEM), item.name, h.label);
-      state.select(null);
-      void this.act(reaction);
-      return;
-    }
-    const verbs: Verb[] = [{ label: 'Regarder', run: () => void this.act(h.look ?? 'Rien de particulier.') }];
-    if (h.use) verbs.push({ label: h.useLabel ?? 'Utiliser', run: () => void this.act(h.use) });
-    if (h.talk) verbs.push({ label: 'Parler', run: () => void this.act(h.talk) });
-    if (verbs.length === 1) verbs[0].run();
-    else this.verbs.show(p.x, p.y, h.label, verbs);
+    if (state.selectedItem) return this.useHeldOn(h);
+    this.smartAction(h, p, false);
   }
 
   private onClickExit(e: Exit, p: Phaser.Input.Pointer): void {
@@ -255,11 +326,19 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     if (this.blocked) return;
     const { state, content } = this.session;
     const def = content.items.get(id)!;
-    if (p.rightButtonDown()) {
+    const look = () => {
       state.select(null);
       void this.act(def.look);
-      return;
-    }
+    };
+    if (isTouch(p)) return this.startPress(p, () => this.itemPrimary(id), look);
+    if (p.rightButtonDown()) return look();
+    this.itemPrimary(id);
+  }
+
+  /** Clic / tap sur un objet : le prendre, le reposer ou le combiner. */
+  private itemPrimary(id: string): void {
+    const { state, content } = this.session;
+    const def = content.items.get(id)!;
     const held = state.selectedItem;
     if (!held) return state.select(id);
     if (held === id) return state.select(null);

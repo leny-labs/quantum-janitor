@@ -17,6 +17,7 @@ art:
 hotspots:
   - id: distributeur
     label: Distributeur « Distrib'Ô-Matic 3000 »
+    smart: menu
     rect: [140, 110, 220, 360]
     art:
       - { rect: [150, 120, 200, 345], color: "#8a2b3c", stroke: "#ffffff" }

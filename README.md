@@ -37,12 +37,28 @@ npm run dev          # http://localhost:5173
 
 ## Comment jouer
 
-- **Clic sur un élément** → menu *Regarder / Utiliser (Prendre, Appuyer…) / Parler*.
-- **Clic droit sur un élément** → le regarder directement.
+**Souris (PC)**
+
+- **Survol** → l'action par défaut s'affiche (« Prendre : Seau », « Parler : B.O.B. ») et le curseur prend son picto.
+- **Clic gauche** → action *smart* directe : Parler (personnage) > Utiliser > Regarder.
+  Un hotspot peut la forcer dans le YAML : `smart: look | use | talk | menu`
+  (`menu` = ouvrir le verb coin, quand aucun verbe ne s'impose).
+- **Clic droit** → *verb coin* collé au curseur (Regarder / Utiliser… / Parler),
+  touches **1 2 3** ; Échap, clic ailleurs ou clic droit dans le vide pour fermer.
+- **Objet en main** : clic gauche sur un élément = l'utiliser dessus ; clic droit = le reposer.
+- **Inventaire** : clic pour prendre un objet en main (puis clic sur un autre objet
+  pour les combiner) ; clic droit pour l'examiner.
+
+**Tactile** (pointeur `coarse` ou événement tactile ; `?touch=1` force le mode, `?touch=0` l'interdit)
+
+- **Tap** → libellé + action smart. **Appui long** (~400 ms, anneau de progression)
+  → verb coin au-dessus du doigt, boutons ≥ 52 px CSS.
+- **Objet en main** : tap sur un élément = l'utiliser ; bouton **Reposer** en bas à gauche
+  (ou tap sur l'objet dans l'inventaire). Appui long sur un objet : l'examiner.
+
+**Commun**
+
 - **Flèches** (◀ ▶ ▲ ▼) → changer de vue.
-- **Inventaire** (en bas) : clic pour prendre un objet en main, puis clic sur un
-  élément du décor pour l'utiliser dessus, ou sur un autre objet pour les
-  combiner. Clic droit sur un objet : l'examiner. Clic droit dans le vide : le reposer.
 - **Dialogues** : clic, Espace ou Entrée pour avancer ; touches 1–9 pour les choix.
 - Sauvegarde **automatique** (localStorage). « Menu » ramène à l'écran titre.
 
@@ -51,6 +67,7 @@ npm run dev          # http://localhost:5173
 ```
 ?scene=labo&flags=labo_ouvert,bob_suit&items=seau,badge   # démarre directement ici
 &debug=1                                                  # contours des hotspots + état affiché
+?touch=1                                                  # force le mode tactile (tap / appui long)
 ?scene=fin                                                # saute au cliffhanger
 ?reset=1                                                  # efface la sauvegarde
 ```
@@ -81,7 +98,7 @@ quantum-janitor/
 │  │  ├─ Stage.ts            caméra fixe, projection rect écran → monde, états
 │  │  ├─ kit.ts / props.ts   matériaux toon, primitives, textes peints, objets
 │  │  └─ rooms/*.ts          une pièce par scène YAML (placard, couloir…)
-│  ├─ ui/            # boîte de dialogue, menu de verbes, label de survol, thème
+│  ├─ ui/            # boîte de dialogue, verb coin, appui long, label de survol, thème
 │  ├─ scenes/        # scènes Phaser : Title, Room (jeu), End (cliffhanger)
 │  └─ main.ts
 ├─ content/
@@ -102,7 +119,7 @@ quantum-janitor/
 │  Image « room3d » (depth 0)  ← canvas WebGL Three.js hors écran,
 │                                 re-rendu et ré-uploadé à chaque frame
 │  HotspotLayer (depth 10)     ← zones cliquables (rect du YAML), flèches
-│  HUD / inventaire / dialogues / menu de verbes (depth 500+)
+│  HUD / inventaire / dialogues / verb coin (depth 500+)
 └────────────────────────────────────────────────┘
 ```
 

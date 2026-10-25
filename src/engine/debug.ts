@@ -3,6 +3,8 @@
  *   ?scene=labo&flags=lab_ouvert,bob_suit&items=seau,fusible   démarre directement là
  *   &debug=1                                                     contours des hotspots + état
  *   ?reset=1                                                     efface la sauvegarde
+ *   ?touch=1 / ?touch=0                                          force / interdit le mode tactile
+ *   ?intro=1                                                     rejoue l'intro animée même si déjà vue
  * `scene=fin` saute directement au cliffhanger.
  * En mode debug, la sauvegarde automatique est désactivée.
  */
@@ -13,6 +15,10 @@ export interface DebugOptions {
   items: string[];
   overlay: boolean;
   reset: boolean;
+  /** Mode tactile forcé (true) ou interdit (false) ; sinon détecté. */
+  touch?: boolean;
+  /** Rejouer l'intro animée même si déjà vue. */
+  intro: boolean;
 }
 
 export function parseDebug(search: string): DebugOptions {
@@ -30,5 +36,7 @@ export function parseDebug(search: string): DebugOptions {
     items: list('items'),
     overlay: q.has('debug') && q.get('debug') !== '0',
     reset: q.has('reset'),
+    touch: q.get('touch') === '1' ? true : q.get('touch') === '0' ? false : undefined,
+    intro: q.get('intro') === '1',
   };
 }

@@ -5,6 +5,7 @@
  */
 import { assembleInk, locateInkLine, parseContent, toActions } from '../src/engine/content';
 import { compileInk, INK_TAG_KEYS, parseTag } from '../src/engine/ink';
+import { SMART_VALUES } from '../src/engine/verbs';
 import type { Action, ArtShape, Condition, GameContent, Interaction } from '../src/engine/types';
 import { readRawContent } from './readContent';
 
@@ -154,6 +155,10 @@ for (const s of content.scenes.values()) {
     checkInteraction(h.look, `${hw}.look`);
     checkInteraction(h.use, `${hw}.use`);
     checkInteraction(h.talk, `${hw}.talk`);
+    if (h.smart !== undefined) {
+      if (!(SMART_VALUES as readonly string[]).includes(h.smart)) err(`${hw}.smart : valeur inconnue « ${h.smart} » (${SMART_VALUES.join(', ')})`);
+      else if (h.smart !== 'menu' && h.smart !== 'look' && !h[h.smart]) err(`${hw}.smart : « ${h.smart} » sans interaction correspondante`);
+    }
     checkInteraction(h.useItemDefault, `${hw}.useItemDefault`);
     for (const [item, i] of Object.entries(h.useItem ?? {})) {
       if (!content.items.has(item)) err(`${hw}.useItem : objet inconnu « ${item} »`);

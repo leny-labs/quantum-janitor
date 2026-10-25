@@ -16,6 +16,7 @@ art:
 hotspots:
   - id: produits
     label: Produits ménagers
+    smart: look
     rect: [50, 20, 310, 210]
     art:
       - { rect: [70, 40, 50, 50], color: "#b33a3a", stroke: "#ffffff", text: "JAVEL\nQ.", size: 11 }
@@ -86,6 +87,7 @@ hotspots:
 
   - id: casier
     label: Casier de Gary
+    smart: look
     rect: [960, 110, 150, 360]
     art:
       - { rect: [970, 120, 130, 345], color: "#4a5560", stroke: "#9aa5b1" }

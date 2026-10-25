@@ -56,6 +56,11 @@ export interface Hotspot {
   /** Libellé du verbe « utiliser » (ex. « Prendre », « Appuyer »). */
   useLabel?: string;
   talk?: Interaction;
+  /**
+   * Verbe du clic gauche / tap court (voir engine/verbs.ts). Par défaut :
+   * talk > use > look ; `menu` ouvre le verb coin.
+   */
+  smart?: 'look' | 'use' | 'talk' | 'menu';
   /** Utiliser un objet de l'inventaire sur ce hotspot : clé = id d'objet. */
   useItem?: Record<string, Interaction>;
   /** Réponse si l'objet utilisé n'a pas d'entrée dans useItem. */

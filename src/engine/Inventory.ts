@@ -3,6 +3,7 @@ import type { GameState } from './GameState';
 import type { GameContent } from './types';
 import { iconKey } from '../three/Studio';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
+import { isTouch } from '../ui/input';
 import { COLORS, FONT, H, ROOM_H, W, hex } from '../ui/theme';
 
 export interface InventoryCallbacks {
@@ -61,7 +62,7 @@ export class Inventory {
       }),
     );
     c.add(
-      s.add.text(18, 92, 'CLIC  prendre en main\nCLIC DROIT  examiner', { fontFamily: FONT, fontSize: '11px', fontStyle: '600', color: COLORS.text, lineSpacing: 4 }).setAlpha(0.75),
+      s.add.text(18, 92, isTouch() ? 'TAP  prendre en main\nAPPUI LONG  examiner' : 'CLIC  prendre en main\nCLIC DROIT  examiner', { fontFamily: FONT, fontSize: '11px', fontStyle: '600', color: COLORS.text, lineSpacing: 4 }).setAlpha(0.75),
     );
 
     const y = 20;

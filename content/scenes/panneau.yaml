@@ -29,6 +29,7 @@ hotspots:
 
   - id: logement
     label: Logement du fusible stabilisateur
+    smart: look
     rect: [110, 320, 200, 170]
     art:
       - { rect: [120, 330, 180, 150], color: "#2a3444", stroke: "#ffd166" }
@@ -49,6 +50,7 @@ hotspots:
 
   - id: cadran
     label: Cadran d'improbabilité
+    smart: look
     rect: [420, 330, 400, 160]
     art:
       - { rect: [430, 340, 380, 140], color: "#222c3a", stroke: "#9aa5b1" }
