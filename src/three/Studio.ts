@@ -86,8 +86,9 @@ const ICONS: Record<string, Pose> = {
       g.add(at(cyl(0.42, 0.42, 0.02, '#9cff57', { glow: true, edges: false }), 0, 0.84, 0));
       return g;
     },
-    look: [0, 0.48, 0],
-    dist: 2.6,
+    // cadre assez haut pour l'anse entière (sommet ≈ y 1.3)
+    look: [0, 0.62, 0],
+    dist: 3.1,
     pitch: 0.42,
     rim: '#7fffd4',
   },

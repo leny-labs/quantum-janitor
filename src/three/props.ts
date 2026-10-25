@@ -2,7 +2,7 @@
 // une pièce). Chaque fonction renvoie un Group dont l'origine est au sol, au
 // centre de la base : il suffit de le poser avec `at(prop, x, 0, z)`.
 import * as THREE from 'three';
-import { at, box, cyl, decal, glow, group, label, mat, mysteryTag, sphere, torus, type DecalMark } from './kit';
+import { at, box, cyl, decal, glow, group, label, mat, mysteryTag, outline, sphere, torus, type DecalMark } from './kit';
 
 /**
  * Expression d'un personnage pour le studio de portraits (frames de sprite).
@@ -85,11 +85,30 @@ export function seau(w: number, h: number): THREE.Group {
   const rim = at(torus(r * 0.98, r * 0.06, '#6fa8ff'), 0, bodyH, 0);
   rim.rotation.x = Math.PI / 2;
   const inside = at(cyl(r * 0.9, r * 0.9, 0.01, '#1d3d6e', { edges: false, shadow: false }), 0, bodyH - 0.02, 0);
-  const handle = new THREE.Mesh(new THREE.TorusGeometry(r * 0.95, r * 0.035, 5, 16, Math.PI), mat('#cfd8e3'));
-  handle.castShadow = true;
-  handle.position.set(0, bodyH, 0);
-  handle.rotation.y = 0.5;
   const band = at(cyl(r * 0.91, r * 0.91, bodyH * 0.12, '#2b5fa8', { seg: 16, edges: false }), 0, bodyH * 0.35, 0);
+  // anse : arc continu d'un flanc à l'autre, par-dessus l'ouverture, sur deux pivots
+  const pivotY = bodyH * 0.86;
+  const flank = r * (0.78 + 0.22 * 0.93); // rayon du corps (tronc de cône) à hauteur du pivot
+  const sx = flank + r * 0.07;
+  const arc = new THREE.CurvePath<THREE.Vector3>();
+  arc.add(new THREE.LineCurve3(new THREE.Vector3(-sx, pivotY, 0), new THREE.Vector3(-sx, bodyH + r * 0.12, 0)));
+  const top = new THREE.EllipseCurve(0, bodyH + r * 0.12, sx, r * 0.62, Math.PI, 0, true);
+  arc.add(new THREE.CatmullRomCurve3(top.getPoints(24).map((p) => new THREE.Vector3(p.x, p.y, 0))));
+  arc.add(new THREE.LineCurve3(new THREE.Vector3(sx, bodyH + r * 0.12, 0), new THREE.Vector3(sx, pivotY, 0)));
+  const wire = outline(new THREE.Mesh(new THREE.TubeGeometry(arc, 48, r * 0.05, 8, false), mat('#d9e2ec')), 50);
+  wire.castShadow = true;
+  // poignée plastique au sommet, couchée selon x
+  const grip = at(cyl(r * 0.09, r * 0.09, r * 0.5, '#2b5fa8', { seg: 10 }), 0, bodyH + r * 0.74, 0);
+  grip.rotation.z = Math.PI / 2;
+  // attaches moulées sur les flancs + rivet du pivot
+  const lugs = [-1, 1].flatMap((side) => {
+    const lug = at(box(r * 0.08, r * 0.26, r * 0.22, '#6fa8ff'), side * (flank + r * 0.02), pivotY, 0);
+    const rivet = at(cyl(r * 0.07, r * 0.07, r * 0.06, '#cfd8e3', { seg: 10 }), side * sx, pivotY, 0);
+    rivet.rotation.z = Math.PI / 2;
+    return [lug, rivet];
+  });
+  const handle = group([wire, grip, ...lugs]);
+  handle.rotation.y = 0.5;
   return group([body, band, rim, inside, handle]);
 }
 
