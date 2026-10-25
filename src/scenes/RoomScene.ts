@@ -11,6 +11,7 @@ import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { makeButton } from '../ui/Button';
 import { DialogueBox } from '../ui/DialogueBox';
 import { HoverLabel } from '../ui/HoverLabel';
+import { ProgressCue } from '../ui/ProgressCue';
 import { VerbMenu, type Verb } from '../ui/VerbMenu';
 import { COLORS, FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
 
@@ -31,6 +32,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   private inventory!: Inventory;
   private dialogueBox!: DialogueBox;
   private hover!: HoverLabel;
+  private cue!: ProgressCue;
   private verbs!: VerbMenu;
   private runner!: ActionRunner;
   private titleText!: Phaser.GameObjects.Text;
@@ -73,6 +75,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.dialogueBox = new DialogueBox(this);
     this.hover = new HoverLabel(this);
     this.verbs = new VerbMenu(this);
+    this.cue = new ProgressCue(this, state, () => this.dialogueBox.isOpen);
 
     // HUD
     this.titleText = this.add
@@ -98,7 +101,10 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       if (p.rightButtonDown() && over.length === 0) state.select(null);
     });
 
-    const off = state.onChange(() => this.refresh());
+    const off = state.onChange(() => {
+      this.refresh();
+      this.cue.check();
+    });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       off();
       setCursor(this, 'default');

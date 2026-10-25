@@ -15,6 +15,11 @@ const GAP = 14;
 const SLOTS = 8;
 const X0 = 236;
 
+/** Centre (coordonnées écran) et taille de la case d'inventaire `i`. */
+export function slotRect(i: number): { x: number; y: number; size: number } {
+  return { x: X0 + i * (SLOT + GAP) + SLOT / 2, y: ROOM_H + 20 + SLOT / 2, size: SLOT };
+}
+
 /** Barre d'inventaire en bas de l'écran (« objets autorisés »). */
 export class Inventory {
   private container: Phaser.GameObjects.Container;
