@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { END_SCENE_ID, getSession } from '../session';
+import { introSeen } from './IntroScene';
 import { HeroView } from '../three/Hero';
 import { titleShot } from '../three/shots/title';
 import { bakeStudio, preloadPortraitSheets } from '../three/Studio';
@@ -172,14 +173,16 @@ export class TitleScene extends Phaser.Scene {
       );
       y += 84;
     }
-    makeButton(
+    // l'intro animée se joue à la première prise de service (ou ?intro=1)
+    const playIntro = !introSeen() || session.debug.intro;
+    const start = makeButton(
       this,
       x,
       y,
       hasSave ? 'Nouveau clone' : 'Prendre son service',
       go(() => {
         session.newGame();
-        this.scene.start('Room');
+        this.scene.start(playIntro ? 'Intro' : 'Room');
       }),
       {
         align: 'left',
@@ -189,5 +192,12 @@ export class TitleScene extends Phaser.Scene {
         kicker: hasSave ? 'EFFACE LA SAUVEGARDE · LE CLONE ACTUEL SERA RECYCLÉ' : 'LE BONHEUR COMMENCE MAINTENANT',
       },
     );
+    if (introSeen()) {
+      makeButton(this, start.x + start.width / 2 + 20, y, 'Revoir l’intro', go(() => this.scene.start('Intro', { next: 'Title' })), {
+        align: 'left',
+        size: 15,
+        kicker: 'ARCHIVE SYLVIE · VISIONNAGE CONSIGNÉ',
+      });
+    }
   }
 }

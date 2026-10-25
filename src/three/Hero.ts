@@ -72,6 +72,11 @@ export class HeroView {
     this.update();
   }
 
+  /** Change de plan (le nouveau repart de t = 0). */
+  show(shot: HeroShot): void {
+    this.hero.show(shot);
+  }
+
   update(): void {
     this.hero.render();
     this.source.update();

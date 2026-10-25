@@ -5,6 +5,7 @@ import '@fontsource/chakra-petch/600.css';
 import '@fontsource/chakra-petch/700.css';
 import Phaser from 'phaser';
 import { EndScene } from './scenes/EndScene';
+import { IntroScene } from './scenes/IntroScene';
 import { RoomScene } from './scenes/RoomScene';
 import { TitleScene } from './scenes/TitleScene';
 import { H, W, loadFonts } from './ui/theme';
@@ -19,7 +20,7 @@ const game = new Phaser.Game({
   height: H,
   backgroundColor: '#0b0b12',
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [TitleScene, RoomScene, EndScene],
+  scene: [TitleScene, IntroScene, RoomScene, EndScene],
 });
 
 // Accès console / tests automatisés en développement uniquement.

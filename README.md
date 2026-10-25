@@ -59,6 +59,10 @@ npm run dev          # http://localhost:5173
 **Commun**
 
 - **Flèches** (◀ ▶ ▲ ▼) → changer de vue.
+- **Intro** : à la première prise de service, une intro animée (~50 s, 6 plans)
+  raconte la station, SYLVIE, Gary, B.O.B. et le job. Clic / tap = plan suivant ;
+  Échap, Espace, appui long ou « Passer » = la sauter. Vue une fois → mémorisée
+  (localStorage) ; « Revoir l'intro » sur l'écran titre, ou `?intro=1`.
 - **Dialogues** : clic, Espace ou Entrée pour avancer ; touches 1–9 pour les choix.
 - Sauvegarde **automatique** (localStorage). « Menu » ramène à l'écran titre.
 
@@ -68,6 +72,7 @@ npm run dev          # http://localhost:5173
 ?scene=labo&flags=labo_ouvert,bob_suit&items=seau,badge   # démarre directement ici
 &debug=1                                                  # contours des hotspots + état affiché
 ?touch=1                                                  # force le mode tactile (tap / appui long)
+?intro=1                                                  # rejoue l'intro animée à « Prendre son service »
 ?scene=fin                                                # saute au cliffhanger
 ?reset=1                                                  # efface la sauvegarde
 ```
@@ -99,7 +104,7 @@ quantum-janitor/
 │  │  ├─ kit.ts / props.ts   matériaux toon, primitives, textes peints, objets
 │  │  └─ rooms/*.ts          une pièce par scène YAML (placard, couloir…)
 │  ├─ ui/            # boîte de dialogue, verb coin, appui long, label de survol, thème
-│  ├─ scenes/        # scènes Phaser : Title, Room (jeu), End (cliffhanger)
+│  ├─ scenes/        # scènes Phaser : Title, Intro (motion design), Room (jeu), End (cliffhanger)
 │  └─ main.ts
 ├─ content/
 │  ├─ scenes/*.yaml  # une vue fixe par fichier : décor, hotspots, sorties

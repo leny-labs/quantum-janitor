@@ -6,6 +6,7 @@ import Phaser from 'phaser';
 import type { GameState } from '../engine/GameState';
 import { slotRect } from '../engine/Inventory';
 import { COLORS, ROOM_H, hex } from './theme';
+import { chime } from './sfx';
 
 const DURATION = 380;
 /** Écart minimal entre deux cues (ms) : plusieurs changements d'un coup = un seul retour. */
@@ -146,28 +147,3 @@ function drawSpark(g: Phaser.GameObjects.Graphics, color: number, r: number): vo
   g.fillPoints(pts, true);
 }
 
-let audio: AudioContext | null = null;
-
-/** Carillon discret : notes sinus courtes, enveloppe percussive. */
-function chime(freqs: number[]): void {
-  try {
-    audio ??= new AudioContext();
-    if (audio.state === 'suspended') void audio.resume();
-    const t0 = audio.currentTime;
-    freqs.forEach((f, i) => {
-      const t = t0 + i * 0.07;
-      const osc = audio!.createOscillator();
-      const gain = audio!.createGain();
-      osc.type = 'triangle';
-      osc.frequency.value = f;
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.05, t + 0.008);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
-      osc.connect(gain).connect(audio!.destination);
-      osc.start(t);
-      osc.stop(t + 0.24);
-    });
-  } catch {
-    // pas d'audio (navigateur restreint) : le retour visuel suffit
-  }
-}
