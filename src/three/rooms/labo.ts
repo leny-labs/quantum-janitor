@@ -44,7 +44,8 @@ export const labo: RoomBuild = {
     reactor.add(at(cyl(w * 0.42, w * 0.46, h * 0.06, '#3a2a66', { seg: 16 }), 0, h * 0.09, 0));
     const colH = h * 0.68;
     const colY = h * 0.12 + colH / 2;
-    reactor.add(at(cyl(w * 0.27, w * 0.27, colH, '#b06cff', { glow: true, opacity: 0.45, seg: 20 }), 0, colY, 0));
+    const column = at(cyl(w * 0.27, w * 0.27, colH, '#b06cff', { glow: true, opacity: 0.45, seg: 20 }), 0, colY, 0);
+    reactor.add(column);
     const core = at(cyl(w * 0.08, w * 0.08, colH * 0.95, '#f0dcff', { glow: true, seg: 10 }), 0, colY, 0);
     reactor.add(core);
     const coolant = at(cyl(w * 0.25, w * 0.25, colH * 0.5, '#7fbf3f', { glow: true, opacity: 0.55, seg: 20 }), 0, h * 0.12 + colH * 0.25, 0);
@@ -76,12 +77,28 @@ export const labo: RoomBuild = {
     const capY = h * 0.12 + colH;
     reactor.add(at(cyl(w * 0.44, w * 0.4, h * 0.08, '#3a2a66', { seg: 16 }), 0, capY + h * 0.04, 0));
     reactor.add(at(cyl(w * 0.2, w * 0.3, h * 0.07, '#2a1d4a', { seg: 16 }), 0, capY + h * 0.115, 0));
-    for (const sx of [-1, 1]) reactor.add(at(sphere(w * 0.05, '#ff5c7a', { glow: true }), sx * w * 0.3, capY + h * 0.09, w * 0.2));
+    const leds = [-1, 1].map((sx) => {
+      const led = at(sphere(w * 0.05, '#ff5c7a', { glow: true }), sx * w * 0.3, capY + h * 0.09, w * 0.2);
+      const halo = at(glow('#ff5c7a', w * 0.3, 0.5), sx * w * 0.3, capY + h * 0.09, w * 0.22);
+      reactor.add(led, halo);
+      return { led, halo };
+    });
     reactor.add(at(label('Mk IV', w * 0.34, h * 0.04, { color: '#ffffff', bold: true, bg: '#2a1d4a' }), 0, h * 0.09, w * 0.46 + 0.01));
     const glou = at(label('glou… glou…', w * 0.7, h * 0.06, { color: '#b6ff6a', bold: true, bg: '#120d20' }), 0, h * 0.55, w * 0.5);
     reactor.add(glou);
     s.when(FULL, glou);
-    reactor.add(at(glow('#b06cff', w * 3.2, 0.35), 0, colY, -w * 0.6));
+    const aura = at(glow('#b06cff', w * 3.2, 0.35), 0, colY, -w * 0.6);
+    reactor.add(aura);
+    // étincelles qui montent dans la colonne (plus nombreuses et vertes une fois refroidi)
+    const moteBottom = h * 0.14;
+    const moteRange = colH * 0.92;
+    const motes = Array.from({ length: 16 }, (_, i) => {
+      const m = glow('#ffffff', w * 0.09, 0);
+      const a = i * 2.4;
+      const r = w * (0.1 + ((i * 7) % 5) * 0.03);
+      reactor.add(m);
+      return { m, a, r, speed: 0.12 + ((i * 5) % 7) * 0.025, phase: (i * 0.618) % 1 };
+    });
     s.spot('reacteur', at(reactor, rs.x, 0, rs.z));
     // conduits vers le plafond
     for (const sx of [-1, 1]) s.add(at(cyl(w * 0.06, w * 0.06, 6, '#4d3a7a'), rs.x + sx * w * 0.12, capY + h * 0.15 + 3, rs.z - 0.2));
@@ -90,11 +107,54 @@ export const labo: RoomBuild = {
     hazard.rotation.x = -Math.PI / 2;
     hazard.position.set(rs.x, 0.006, rs.z);
     hazard.receiveShadow = true;
+    (hazard.material as THREE.Material).transparent = true;
     s.add(hazard);
+    const coreMat = core.material as THREE.MeshBasicMaterial;
+    const coreHot = new THREE.Color('#ffffff');
+    const coreDim = new THREE.Color('#b06cff');
+    const columnMat = column.material as THREE.MeshBasicMaterial;
+    const auraMat = aura.material as THREE.SpriteMaterial;
+    const hazardMat = hazard.material as THREE.Material;
+    const moteColor = new THREE.Color();
+    const moteViolet = new THREE.Color('#e6c8ff');
+    const moteGreen = new THREE.Color('#b6ff6a');
+    const ledRed = new THREE.Color('#ff5c7a');
     s.animate((t) => {
       rings.forEach((r, i) => (r.rotation.z = t * (0.6 + i * 0.35) * (i % 2 ? -1 : 1)));
       orbs.forEach((o, i) => o.scale.setScalar(1 + Math.sin(t * 2.2 + i * 1.7) * 0.12));
       core.scale.x = core.scale.z = 1 + Math.sin(t * 9) * 0.15;
+      // le cœur respire : lent souffle + petit frisson rapide
+      const breath = 0.5 + 0.5 * Math.sin(t * 2.4);
+      const flicker = 0.5 + 0.5 * Math.sin(t * 17.3) * Math.sin(t * 5.1);
+      coreMat.color.copy(coreDim).lerp(coreHot, 0.55 + breath * 0.35 + flicker * 0.1);
+      columnMat.opacity = 0.3 + breath * 0.25;
+      auraMat.opacity = 0.22 + breath * 0.22;
+      // anneaux : un sur deux pulse en décalage
+      rings.forEach((r, i) => r.scale.setScalar(1 + Math.sin(t * 3 + (i % 2) * Math.PI) * 0.05));
+      // étincelles
+      const full = coolant.visible;
+      const count = full ? 16 : 10;
+      moteColor.copy(full ? moteGreen : moteViolet);
+      motes.forEach(({ m, a, r, speed, phase }, i) => {
+        m.visible = i < count;
+        if (!m.visible) return;
+        const k = (t * speed * (full ? 1.4 : 1) + phase) % 1;
+        const ang = a + t * 0.8 + k * 3;
+        m.position.set(Math.cos(ang) * r, moteBottom + k * moteRange, Math.sin(ang) * r);
+        const sm = m.material as THREE.SpriteMaterial;
+        sm.color.copy(moteColor);
+        sm.opacity = Math.sin(k * Math.PI) * 0.9;
+        m.scale.setScalar(w * (0.06 + 0.05 * Math.sin(k * Math.PI)));
+      });
+      // anneau de sécurité : rotation lente + pulse
+      hazard.rotation.z = t * 0.12;
+      hazardMat.opacity = 0.78 + 0.22 * Math.sin(t * 1.6);
+      // leds du chapeau : clignotement asynchrone
+      leds.forEach(({ led, halo }, i) => {
+        const on = Math.sin(t * (1.3 + i * 0.47) + i * 2.1) > 0.35 ? 1 : 0.25;
+        (led.material as THREE.MeshBasicMaterial).color.copy(ledRed).multiplyScalar(on);
+        (halo.material as THREE.SpriteMaterial).opacity = on * 0.6;
+      });
       glou.position.y = h * 0.55 + Math.abs(Math.sin(t * 3)) * 0.06;
     });
 
