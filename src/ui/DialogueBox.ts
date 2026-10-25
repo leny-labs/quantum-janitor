@@ -61,6 +61,8 @@ export class DialogueBox implements DialogueView {
   private sprite: SpriteTalk;
   /** Driver actif pour le speaker courant (planche → SpriteTalk, sinon overlay). */
   private voice: TypewriterMouth | SpriteTalk;
+  /** Planche actuellement montée sur `face` (évite de la remonter à chaque réplique). */
+  private sheetOn: string | null = null;
   private typing: TypewriteHandle | null = null;
   private portraitBg: Phaser.GameObjects.Rectangle;
   private portraitText: Phaser.GameObjects.Text;
@@ -177,17 +179,22 @@ export class DialogueBox implements DialogueView {
     this.face.setVisible(has3d);
     this.voice = hasSheet ? this.sprite : this.mouth;
     if (hasSheet) {
-      // boucles sprite idle / talk ; la grille se déduit de la taille de l'image
-      // (une planche GenAI en 2048×1024 marche aussi)
-      const src = this.scene.textures.get(sheet).source[0];
-      this.face.setSpriteSheet({
-        key: sheet,
-        frameWidth: Math.floor(src.width / SHEET.cols),
-        frameHeight: Math.floor(src.height / SHEET.rows),
-        idle: { frames: [...SHEET.idle], frameRate: 30 },
-        talk: { frames: [...SHEET.talk], frameRate: SHEET.talkRate },
-      });
+      // même planche que la réplique précédente : on ne relance pas la boucle idle
+      if (this.sheetOn !== sheet) {
+        // boucles sprite idle / talk (chaque frame porte sa durée) ; la grille se
+        // déduit de la taille de l'image (une planche GenAI en 2048×1024 marche aussi)
+        const src = this.scene.textures.get(sheet).source[0];
+        this.face.setSpriteSheet({
+          key: sheet,
+          frameWidth: Math.floor(src.width / SHEET.cols),
+          frameHeight: Math.floor(src.height / SHEET.rows),
+          idle: { frames: [...SHEET.idle] },
+          talk: { frames: [...SHEET.talk] },
+        });
+        this.sheetOn = sheet;
+      }
     } else if (has3d) {
+      this.sheetOn = null;
       const f = FACES[speaker!.id];
       // portrait inconnu : bouche discrète, invisible au repos ; pas de clignement
       this.face.setTexture(key, undefined, {

@@ -44,8 +44,17 @@ export const SHEET = {
     { frame: 3, duration: 1100 },
     { frame: 2, duration: 450 },
   ],
-  talk: [4, 5, 6, 5, 7, 4, 6, 7],
-  talkRate: 9,
+  // durées irrégulières (~9 i/s en moyenne) : débit de parole, pas métronome
+  talk: [
+    { frame: 4, duration: 120 },
+    { frame: 5, duration: 95 },
+    { frame: 6, duration: 135 },
+    { frame: 5, duration: 100 },
+    { frame: 7, duration: 145 },
+    { frame: 4, duration: 90 },
+    { frame: 6, duration: 125 },
+    { frame: 7, duration: 110 },
+  ],
 } as const;
 
 const SHEET_FRAMES: SheetFrame[] = [

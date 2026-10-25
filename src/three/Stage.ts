@@ -52,6 +52,8 @@ export class Stage {
   private highlighted: string | null = null;
   private raycaster = new THREE.Raycaster();
   private check: Check = () => true;
+  /** Vrai quand l'image doit être recalculée (état, survol, première frame). */
+  dirty = true;
 
   constructor(
     readonly def: SceneDef,
@@ -226,6 +228,12 @@ export class Stage {
     const visible = new Map<THREE.Object3D, boolean>();
     for (const { cond, obj } of this.conditional) visible.set(obj, (visible.get(obj) ?? true) && check(cond));
     for (const [obj, v] of visible) obj.visible = v;
+    this.dirty = true;
+  }
+
+  /** Vrai si la pièce a des animations : elle se rend alors à chaque image. */
+  get animated(): boolean {
+    return this.ticks.length > 0;
   }
 
   tick(t: number, dt: number): void {
@@ -237,6 +245,7 @@ export class Stage {
     for (const { mat, base } of this.lit) mat.emissive.copy(base);
     this.lit = [];
     this.highlighted = id;
+    this.dirty = true;
     const members = id ? (this.spots.get(id) ?? []) : [];
     for (const g of members) {
       g.traverse((o) => {

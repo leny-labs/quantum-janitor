@@ -17,6 +17,8 @@ export class RoomRenderer {
   private stages = new Map<string, Stage>();
   private current: Stage | null = null;
   private timer = new THREE.Timer();
+  /** Pièce présente dans le canvas (le cache de Stage est partagé entre scènes Phaser). */
+  private drawn: Stage | null = null;
 
   /** Un seul contexte WebGL pour toute la partie (les scènes Phaser vont et viennent). */
   static get(width: number, height: number): RoomRenderer {
@@ -59,12 +61,19 @@ export class RoomRenderer {
     this.current?.highlight(id);
   }
 
-  /** Rend l'image courante. Renvoie false s'il n'y a pas de pièce 3D. */
+  /**
+   * Rend l'image courante si elle a pu changer (pièce animée, état, survol,
+   * changement de pièce). Renvoie false si le canvas n'a pas bougé — pas
+   * besoin alors de le re-téléverser côté Phaser.
+   */
   render(): boolean {
-    if (!this.current) return false;
+    const stage = this.current;
     this.timer.update();
-    this.current.tick(this.timer.getElapsed(), Math.min(this.timer.getDelta(), 0.1));
-    this.renderer.render(this.current.scene, this.current.camera);
+    if (!stage || (!stage.animated && !stage.dirty && stage === this.drawn)) return false;
+    stage.tick(this.timer.getElapsed(), Math.min(this.timer.getDelta(), 0.1));
+    this.renderer.render(stage.scene, stage.camera);
+    stage.dirty = false;
+    this.drawn = stage;
     return true;
   }
 }
@@ -96,6 +105,7 @@ export class RoomView {
 
   update(): void {
     if (!this.image.visible || !this.room.render()) return;
+    // téléversement canvas → texture : seulement quand Three a redessiné
     this.source.update();
   }
 }
