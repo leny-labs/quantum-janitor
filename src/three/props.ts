@@ -4,6 +4,23 @@
 import * as THREE from 'three';
 import { at, box, cyl, decal, glow, group, label, mat, mysteryTag, sphere, torus, type DecalMark } from './kit';
 
+/**
+ * Expression d'un personnage pour le studio de portraits (frames de sprite).
+ * `mouth` 0..1 = ouverture ; `phase` varie le détail d'une frame à l'autre
+ * (barres LED, antennes) pour que la boucle ne semble pas figée.
+ */
+export interface FacePose {
+  mouth: number;
+  blink: boolean;
+  phase: number;
+}
+
+/** Applique une expression si le prop en expose une (`userData.setFace`). */
+export function setFace(obj: THREE.Object3D, pose: FacePose): void {
+  obj.userData.mouthOpen = pose.mouth;
+  (obj.userData.setFace as ((p: FacePose) => void) | undefined)?.(pose);
+}
+
 /** B.O.B., aspirateur-robot dépressif. `w` = diamètre. */
 export function bob(w: number): THREE.Group {
   const r = w / 2;
@@ -22,8 +39,25 @@ export function bob(w: number): THREE.Group {
   const antenna = at(cyl(r * 0.02, r * 0.02, r * 0.5, '#3f4652', { edges: false }), r * 0.4, h + r * 0.3, -r * 0.3);
   const tip = at(sphere(r * 0.06, '#ff5c7a', { glow: true }), r * 0.4, h + r * 0.56, -r * 0.3);
   const plate = at(label('B.O.B.', r * 0.7, r * 0.18, { color: '#1a1a1a', bold: true }), 0, h * 0.28, r * 1.05);
-  const g = group([body, bumper, lid, ...eyes, antenna, tip, plate]);
+  // « bouche » : égaliseur LED sur la plaque, éteint au repos (invisible en salle)
+  const screen = at(box(r * 0.74, r * 0.2, r * 0.02, '#0b1018', { edges: false, shadow: false }), 0, h * 0.28, r * 1.06);
+  const bars = [-2, -1, 0, 1, 2].map((i) => at(box(r * 0.09, r * 0.16, r * 0.02, '#7fffd4', { glow: true, edges: false, shadow: false }), i * r * 0.13, h * 0.28, r * 1.08));
+  screen.visible = false;
+  bars.forEach((b) => (b.visible = false));
+  const g = group([body, bumper, lid, ...eyes, antenna, tip, plate, screen, ...bars]);
   g.userData.tip = tip;
+  g.userData.setFace = (p: FacePose) => {
+    const on = p.mouth > 0.02;
+    screen.visible = on;
+    bars.forEach((b, i) => {
+      b.visible = on;
+      // hauteur pseudo-aléatoire par barre, enveloppe = ouverture
+      const k = 0.25 + 0.75 * Math.abs(Math.sin(p.phase * 2.3 + i * 1.7));
+      b.scale.y = Math.max(0.12, p.mouth * k);
+    });
+    eyes.forEach((e) => (e.scale.y = p.blink ? 0.2 : 1));
+    tip.visible = !p.blink;
+  };
   return g;
 }
 
@@ -186,7 +220,29 @@ export function gary(h: number): THREE.Group {
   visor.rotation.x = 0.15;
   const logo = at(sphere(u * 0.07, '#7fffd4', { glow: true }), 0, u * 1.62, u * 0.42);
   const ears = [-1, 1].map((sx) => at(sphere(u * 0.1, '#e9b48a', { seg: 8 }), sx * u * 0.4, u * 1.25, 0));
-  return group([torso, collar, strapL, strapR, tag, neck, head, nose, ...eyes, ...stache, cap, visor, logo, ...ears]);
+  // bouche sous la moustache : fente sombre au repos, s'ouvre (mâchoire) en parlant
+  const mouthY = u * 0.97;
+  const inner = sphere(u * 0.12, '#3a0f1a', { seg: 12 });
+  const tongue = at(sphere(u * 0.075, '#d9606a', { seg: 10 }), 0, -u * 0.05, u * 0.03);
+  const teeth = at(box(u * 0.15, u * 0.035, u * 0.06, '#f4efe6', { edges: false }), 0, u * 0.075, u * 0.05);
+  const mouth = at(group([inner, tongue, teeth]), 0, mouthY, u * 0.32);
+  const g = group([torso, collar, strapL, strapR, tag, neck, head, nose, ...eyes, ...stache, mouth, cap, visor, logo, ...ears]);
+  const openMouth = (v: number) => {
+    mouth.scale.set(1 + v * 0.15, 0.14 + v * 0.95, 0.6);
+    mouth.position.y = mouthY - v * u * 0.05;
+    tongue.visible = teeth.visible = v > 0.2;
+  };
+  openMouth(0);
+  g.userData.setFace = (p: FacePose) => {
+    openMouth(p.mouth);
+    for (const e of eyes) {
+      const [white, pupil, lid] = e.children;
+      white.scale.y = p.blink ? 0.15 : 1;
+      pupil.visible = !p.blink;
+      lid.position.y = p.blink ? u * 1.37 : u * 1.43;
+    }
+  };
+  return g;
 }
 
 /** SYLVIE, IA de station : écran flottant à visage + anneaux. */
@@ -194,11 +250,30 @@ export function sylvie(h: number): THREE.Group {
   const u = h / 2;
   const frame = at(box(u * 1.3, u * 1.0, u * 0.18, '#16314a'), 0, u, 0);
   const screen = at(box(u * 1.16, u * 0.86, 0.01, '#1f7f73', { glow: true }), 0, u, u * 0.095);
-  const face = at(label('◉   ◉\n‿', u * 1.0, u * 0.7, { color: '#d9fff4', bold: true }), 0, u, u * 0.1);
+  // visage en deux lignes (mêmes tailles que l'ancien label unique « ◉ ◉ / ‿ »)
+  // devant la face avant de l'écran (sinon le texte est masqué)
+  const glyph = (t: string, dy: number) => at(label(t, u * 1.0, u * 0.35, { color: '#d9fff4', bold: true }), 0, u + dy, u * 0.13);
+  const eyesOpen = glyph('◉   ◉', u * 0.168);
+  const smile = glyph('‿', -u * 0.168);
+  // bouche parlante : ovale lumineux qui pulse
+  const talk = at(cyl(u * 0.11, u * 0.11, 0.005, '#d9fff4', { glow: true, edges: false, shadow: false, seg: 16 }), 0, u - u * 0.16, u * 0.13);
+  talk.rotation.x = Math.PI / 2;
+  talk.visible = false;
   const ring = at(torus(u * 0.9, u * 0.03, '#7fffd4', { glow: true }), 0, u, -u * 0.1);
   const halo = at(glow('#7fffd4', u * 3, 0.35), 0, u, -u * 0.3);
-  const g = group([halo, ring, frame, screen, face]);
+  const g = group([halo, ring, frame, screen, eyesOpen, smile, talk]);
   g.userData.ring = ring;
+  let eyesShut: THREE.Mesh | null = null;
+  g.userData.setFace = (p: FacePose) => {
+    const open = p.mouth > 0.12;
+    smile.visible = !open;
+    talk.visible = open;
+    talk.scale.set(0.8 + p.mouth * 0.5, 1, 0.15 + p.mouth * 0.85);
+    if (p.blink && !eyesShut) g.add((eyesShut = glyph('—   —', u * 0.168)));
+    if (eyesShut) eyesShut.visible = p.blink;
+    eyesOpen.visible = !p.blink;
+    ring.rotation.z = p.phase * 0.4;
+  };
   return g;
 }
 
@@ -223,6 +298,15 @@ export function roach(len: number, crown = false): THREE.Group {
     ant.rotation.x = s * 0.3;
     parts.push(ant);
   }
+  // mandibules + bouche : s'écartent en parlant
+  const maw = at(sphere(u * 0.05, '#1a0600', { seg: 8 }), u * 0.66, u * 0.13, 0);
+  const mandibles = [-1, 1].map((s) => {
+    const m = at(cyl(u * 0.022, u * 0.004, u * 0.12, '#2a1406', { seg: 5, edges: false }), u * 0.7, u * 0.12, s * u * 0.045);
+    m.rotation.z = 1.35;
+    return m;
+  });
+  parts.push(maw, ...mandibles);
+  const antennae = parts.filter((p) => Math.abs(p.rotation.z + 0.9) < 1e-6);
   if (crown) {
     const c = at(cyl(u * 0.12, u * 0.1, u * 0.1, '#ffd166', { seg: 6 }), u * 0.55, u * 0.38, 0);
     parts.push(c);
@@ -232,7 +316,15 @@ export function roach(len: number, crown = false): THREE.Group {
     }
     parts.push(at(sphere(u * 0.03, '#ff5c7a', { glow: true }), u * 0.66, u * 0.4, 0));
   }
-  return group(parts);
+  const g = group(parts);
+  maw.scale.y = 0.3;
+  g.userData.setFace = (p: FacePose) => {
+    maw.scale.set(1, 0.3 + p.mouth * 1.1, 1 + p.mouth * 0.4);
+    mandibles.forEach((m, i) => (m.rotation.x = (i ? 1 : -1) * p.mouth * 0.7));
+    eyes.forEach((e) => (e.scale.y = p.blink ? 0.2 : 1));
+    antennae.forEach((a, i) => (a.rotation.y = Math.sin(p.phase * 1.9 + i) * 0.12));
+  };
+  return g;
 }
 
 /** Texture de la plaque « Règlement n°1 » : émail bleu nuit, bandeau rouge, gravure ambre. */

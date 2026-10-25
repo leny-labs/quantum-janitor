@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { END_SCENE_ID, getSession } from '../session';
 import { HeroView } from '../three/Hero';
 import { titleShot } from '../three/shots/title';
-import { bakeStudio } from '../three/Studio';
+import { bakeStudio, preloadPortraitSheets } from '../three/Studio';
 import { makeButton } from '../ui/Button';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
 import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
@@ -23,6 +23,11 @@ export class TitleScene extends Phaser.Scene {
 
   constructor() {
     super('Title');
+  }
+
+  preload(): void {
+    // planches de portraits parlants (bake ou GenAI) ; absentes → bake runtime
+    preloadPortraitSheets(this.load);
   }
 
   create(): void {

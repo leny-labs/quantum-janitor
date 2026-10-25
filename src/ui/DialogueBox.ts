@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
-import { TalkingPortrait, TypewriterMouth, typewrite } from 'talking-portrait';
+import { SpriteTalk, TalkingPortrait, TypewriterMouth, typewrite } from 'talking-portrait';
 import type { BlinkOptions, MouthOptions, TypewriteHandle } from 'talking-portrait';
 import type { DialogueView } from '../engine/DialogueRunner';
 import type { CharacterDef } from '../engine/types';
-import { portraitKey } from '../three/Studio';
+import { SHEET, portraitKey, sheetKey } from '../three/Studio';
 import { drawHazard, drawPanel } from './chrome';
 import { COLORS, FONT, H, W, hex, setCursor } from './theme';
 
@@ -17,8 +17,9 @@ const TEXT_X = PANEL_X + PORTRAIT + 48;
 const CPS = 32;
 
 /**
- * Ancrages bouche / yeux sur les portraits 3D (fractions de la texture 300×300
- * générée par Studio). Les non-humains ont une bouche « LED » sans lèvres.
+ * Repli quand un personnage n'a pas de planche de sprites : ancrages bouche /
+ * yeux sur le portrait 3D fixe (fractions de la texture 300×300 générée par
+ * Studio). Les non-humains ont une bouche « LED » sans lèvres.
  */
 const FACES: Record<string, { mouth: MouthOptions; blink?: BlinkOptions }> = {
   gary: {
@@ -57,6 +58,9 @@ export class DialogueBox implements DialogueView {
   private portraitFrame: Phaser.GameObjects.Graphics;
   private face: TalkingPortrait;
   private mouth: TypewriterMouth;
+  private sprite: SpriteTalk;
+  /** Driver actif pour le speaker courant (planche → SpriteTalk, sinon overlay). */
+  private voice: TypewriterMouth | SpriteTalk;
   private typing: TypewriteHandle | null = null;
   private portraitBg: Phaser.GameObjects.Rectangle;
   private portraitText: Phaser.GameObjects.Text;
@@ -97,6 +101,8 @@ export class DialogueBox implements DialogueView {
     this.face = new TalkingPortrait(scene, { x: px + PORTRAIT / 2, y: py + ps / 2, width: PORTRAIT, height: ps, breathe: 0.006 });
     this.face.setVisible(false);
     this.mouth = new TypewriterMouth(this.face, { cps: CPS });
+    this.sprite = new SpriteTalk(this.face, { cps: CPS });
+    this.voice = this.mouth;
     this.portraitText = scene.add
       .text(px + PORTRAIT / 2, py + ps / 2, '', { fontFamily: FONT, fontSize: '28px', color: '#ffffff', align: 'center', fontStyle: '700' })
       .setOrigin(0.5);
@@ -146,13 +152,14 @@ export class DialogueBox implements DialogueView {
   private tryAdvance(): void {
     // évite que le clic qui a ouvert la boîte ne la referme aussitôt
     if (this.scene.time.now - this.shownAt < 180) return;
-    // premier clic pendant la frappe : texte complet, bouche fermée
+    // premier clic pendant la frappe : texte complet, retour immédiat à idle
     if (this.typing && !this.typing.finished) {
       this.typing.skip();
+      this.voice.idle();
       return;
     }
     if (!this.advance) return;
-    this.mouth.idle();
+    this.voice.idle();
     const a = this.advance;
     this.advance = null;
     a();
@@ -161,12 +168,26 @@ export class DialogueBox implements DialogueView {
   private setSpeaker(speaker: CharacterDef | null): void {
     const hasPortrait = !!speaker?.portrait;
     const key = speaker ? portraitKey(speaker.id) : '';
-    const has3d = hasPortrait && this.scene.textures.exists(key);
+    const sheet = speaker ? sheetKey(speaker.id) : '';
+    const hasSheet = hasPortrait && this.scene.textures.exists(sheet);
+    const has3d = hasPortrait && (hasSheet || this.scene.textures.exists(key));
     this.portraitFrame.setVisible(hasPortrait);
     this.portraitBg.setVisible(hasPortrait && !has3d);
     this.portraitText.setVisible(hasPortrait && !has3d);
     this.face.setVisible(has3d);
-    if (has3d) {
+    this.voice = hasSheet ? this.sprite : this.mouth;
+    if (hasSheet) {
+      // boucles sprite idle / talk ; la grille se déduit de la taille de l'image
+      // (une planche GenAI en 2048×1024 marche aussi)
+      const src = this.scene.textures.get(sheet).source[0];
+      this.face.setSpriteSheet({
+        key: sheet,
+        frameWidth: Math.floor(src.width / SHEET.cols),
+        frameHeight: Math.floor(src.height / SHEET.rows),
+        idle: { frames: [...SHEET.idle], frameRate: 30 },
+        talk: { frames: [...SHEET.talk], frameRate: SHEET.talkRate },
+      });
+    } else if (has3d) {
       const f = FACES[speaker!.id];
       // portrait inconnu : bouche discrète, invisible au repos ; pas de clignement
       this.face.setTexture(key, undefined, {
@@ -217,7 +238,7 @@ export class DialogueBox implements DialogueView {
   private stopTalking(): void {
     this.typing?.stop();
     this.typing = null;
-    this.mouth.idle();
+    this.voice.idle();
   }
 
   showLine(speaker: CharacterDef | null, text: string): Promise<void> {
@@ -228,10 +249,10 @@ export class DialogueBox implements DialogueView {
     this.open();
     const typing = typewrite(this.bodyText, text, { cps: CPS });
     this.typing = typing;
-    if (this.face.visible) void this.mouth.speak(text);
+    if (this.face.visible) void this.voice.speak(text);
     void typing.done.then(() => {
       if (this.typing !== typing) return;
-      this.mouth.idle();
+      this.voice.idle();
       this.hint.setVisible(true);
     });
     return new Promise((resolve) => (this.advance = resolve));
