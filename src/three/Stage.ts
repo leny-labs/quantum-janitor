@@ -4,6 +4,7 @@
 // décor 3D tombe exactement sous les hotspots.
 import * as THREE from 'three';
 import type { Condition, Rect, SceneDef } from '../engine/types';
+import { Vignette } from './kit';
 
 export type Vec3 = [x: number, y: number, z: number];
 
@@ -20,6 +21,14 @@ export interface LightSpec {
   key: { color: THREE.ColorRepresentation; intensity?: number; pos: Vec3; target?: Vec3 };
   /** Lumières ponctuelles colorées (sans ombre). */
   points?: { color: THREE.ColorRepresentation; intensity: number; pos: Vec3; distance?: number }[];
+  /** Contre-jour coloré (directionnel, sans ombre) : découpe les silhouettes. */
+  rim?: { color: THREE.ColorRepresentation; intensity?: number; pos: Vec3 };
+  /** Débouché opposé à la clé (directionnel, sans ombre), teinte froide. */
+  fill?: { color: THREE.ColorRepresentation; intensity?: number; pos: Vec3 };
+  /** Brouillard de profondeur (le fond s'enfonce dans la teinte de la pièce). */
+  fog?: { color: THREE.ColorRepresentation; near: number; far: number };
+  /** Vignette teintée de passe finale (+ voile chaud optionnel). */
+  vignette?: { color?: string; strength?: number; warm?: string };
 }
 
 /** Placement d'un objet posé au sol : base (x, z) et taille à l'écran. */
@@ -54,6 +63,8 @@ export class Stage {
   private check: Check = () => true;
   /** Vrai quand l'image doit être recalculée (état, survol, première frame). */
   dirty = true;
+  /** Passe finale (vignette) rendue par RoomRenderer après la scène. */
+  vignette: Vignette | null = null;
 
   constructor(
     readonly def: SceneDef,
@@ -207,6 +218,14 @@ export class Stage {
     sc.near = 0.5;
     sc.far = 60;
     this.scene.add(key, key.target);
+    for (const d of [l.rim, l.fill]) {
+      if (!d) continue;
+      const dl = new THREE.DirectionalLight(d.color, d.intensity ?? 1.2);
+      dl.position.set(...d.pos);
+      this.scene.add(dl);
+    }
+    if (l.fog) this.scene.fog = new THREE.Fog(l.fog.color, l.fog.near, l.fog.far);
+    this.vignette = new Vignette(l.vignette);
     for (const p of l.points ?? []) {
       const pl = new THREE.PointLight(p.color, p.intensity, p.distance ?? 12, 1.6);
       pl.position.set(...p.pos);

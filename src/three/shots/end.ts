@@ -3,7 +3,7 @@
 // le Seau renversé (évidemment).
 import * as THREE from 'three';
 import type { HeroShot } from '../Hero';
-import { at, box, cyl, glow, mat, sphere } from '../kit';
+import { at, box, cyl, glow, mat, sphere, Vignette } from '../kit';
 import { bob, gary, roach, seau } from '../props';
 import { skyPlane, skyTexture } from './backdrop';
 
@@ -111,5 +111,5 @@ export function endShot(width: number, height: number): HeroShot {
     robot.rotation.y = -0.6 + Math.sin(t * 0.7) * 0.15;
   };
   tick(0);
-  return { scene, camera, tick };
+  return { scene, camera, tick, vignette: new Vignette({ color: '#2a0a2a', strength: 0.55, warm: '#ffcf9a1c' }) };
 }

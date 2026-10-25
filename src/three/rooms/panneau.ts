@@ -17,6 +17,9 @@ export const panneau: RoomBuild = {
       ambient: 1.25,
       key: { color: '#ffffff', intensity: 2.4, pos: [-3, 8, 5], target: [0, 0, 0] },
       points: [{ color: '#b06cff', intensity: 14, pos: [0, 3, -3], distance: 10 }],
+      rim: { color: '#7fffd4', intensity: 0.9, pos: [0, 4, -6] },
+      fill: { color: '#ff8cc6', intensity: 0.35, pos: [5, 2, 4] },
+      vignette: { color: '#0b0618', strength: 0.55 },
     });
 
     // arrière-plan : le labo, flou et violet

@@ -1,7 +1,7 @@
 // Éléments communs aux pièces : sol, mur du fond, murs latéraux, plinthes.
 import * as THREE from 'three';
 import type { Rect } from '../../engine/types';
-import { at, box, gradientTexture, mat, tileTexture } from '../kit';
+import { aoStrip, at, box, mat, tileTexture, wallTexture } from '../kit';
 import type { Stage } from '../Stage';
 
 export interface ShellSpec {
@@ -32,7 +32,7 @@ export function shell(s: Stage, spec: ShellSpec): void {
   floor.position.set(cx, 0, depth / 2);
   floor.receiveShadow = true;
 
-  const wallTex = gradientTexture(spec.wall.top, spec.wall.bottom);
+  const wallTex = wallTexture(spec.wall.top, spec.wall.bottom, width, height);
   const wall = new THREE.Mesh(new THREE.PlaneGeometry(width, height), mat('#ffffff', { map: wallTex }));
   wall.position.set(cx, height / 2, 0);
   wall.receiveShadow = true;
@@ -46,14 +46,27 @@ export function shell(s: Stage, spec: ShellSpec): void {
     [spec.right, -1],
   ] as const) {
     if (x === undefined) continue;
-    const side = new THREE.Mesh(new THREE.PlaneGeometry(depth, height), mat('#ffffff', { map: gradientTexture(spec.wall.top, spec.wall.bottom) }));
+    const side = new THREE.Mesh(new THREE.PlaneGeometry(depth, height), mat('#ffffff', { map: wallTexture(spec.wall.top, spec.wall.bottom, depth, height) }));
     side.rotation.y = (dir * Math.PI) / 2;
     side.position.set(x, height / 2, depth / 2);
     side.receiveShadow = true;
     s.add(side, at(box(0.08, 0.22, depth, trim, { edges: false }), x + dir * 0.04, 0.11, depth / 2));
     // arête du coin, pour lire le volume
     s.add(at(box(0.12, height, 0.12, trim, { edges: false }), x, height / 2, 0));
+    // ombres d'angle : coin vertical + pied du mur latéral
+    const corner = at(aoStrip(1.2, height, 0.45), x + dir * 0.6, height / 2, 0.012);
+    corner.rotation.z = (dir * Math.PI) / 2;
+    const foot = at(aoStrip(depth, 0.9, 0.5), x + dir * 0.45, 0.004, depth / 2);
+    foot.rotation.set(-Math.PI / 2, 0, (dir * Math.PI) / 2);
+    s.add(corner, foot);
   }
+
+  // ombres peintes au pied du mur du fond (sol + bas du mur) : ancre les volumes
+  const floorAo = at(aoStrip(width, 1.1, 0.55), cx, 0.003, 0.55);
+  floorAo.rotation.x = -Math.PI / 2;
+  const wallAo = at(aoStrip(width, 0.9, 0.4), cx, 0.45, 0.011);
+  wallAo.rotation.z = Math.PI;
+  s.add(floorAo, wallAo);
 }
 
 /** Joints de panneaux verticaux sur le mur du fond. */

@@ -10,9 +10,9 @@ const gradientMaps = new Map<number, THREE.DataTexture>();
  * la couleur de l'objet ne vire jamais au gris sale dans l'ombre.
  */
 const RAMP: [number, number, number][] = [
-  [92, 78, 150],
-  [176, 168, 214],
-  [255, 248, 236],
+  [74, 58, 140],
+  [170, 158, 214],
+  [255, 246, 230],
 ];
 
 function gradientMap(steps = 3): THREE.DataTexture {
@@ -46,7 +46,7 @@ export function mat(color: THREE.ColorRepresentation, o: MatOpts = {}): THREE.Ma
   return new THREE.MeshToonMaterial({ ...params, gradientMap: gradientMap() });
 }
 
-const EDGE = new THREE.LineBasicMaterial({ color: 0x0a0618, transparent: true, opacity: 0.7 });
+const EDGE = new THREE.LineBasicMaterial({ color: 0x0a0618, transparent: true, opacity: 0.82 });
 
 /** Ajoute des arêtes sombres (trait d'illustration) à un mesh. */
 export function outline(mesh: THREE.Mesh, angle = 30): THREE.Mesh {
@@ -246,6 +246,35 @@ export function tileTexture(a: string, b: string, joint: string, repeat: [number
   g.fillStyle = b;
   g.fillRect(0, 0, 64, 64);
   g.fillRect(64, 64, 64, 64);
+  // biseau : arête claire en haut à gauche de chaque dalle, sombre en bas à droite
+  for (const [x, y] of [[0, 0], [64, 0], [0, 64], [64, 64]]) {
+    g.fillStyle = 'rgba(255,240,220,0.09)';
+    g.fillRect(x + 2, y + 2, 60, 3);
+    g.fillRect(x + 2, y + 2, 3, 60);
+    g.fillStyle = 'rgba(8,4,20,0.22)';
+    g.fillRect(x + 2, y + 59, 60, 3);
+    g.fillRect(x + 59, y + 2, 3, 60);
+  }
+  // usure : rayures et taches discrètes (illustration, pas de bruit photo)
+  let s = 13;
+  const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+  g.lineCap = 'round';
+  for (let i = 0; i < 6; i++) {
+    g.strokeStyle = `rgba(8,4,20,${0.1 + rnd() * 0.1})`;
+    g.lineWidth = 1 + rnd() * 1.5;
+    const x = rnd() * 128;
+    const y = rnd() * 128;
+    g.beginPath();
+    g.moveTo(x, y);
+    g.lineTo(x + 8 + rnd() * 18, y + (rnd() - 0.5) * 6);
+    g.stroke();
+  }
+  for (let i = 0; i < 3; i++) {
+    g.fillStyle = 'rgba(8,4,20,0.12)';
+    g.beginPath();
+    g.ellipse(rnd() * 128, rnd() * 128, 4 + rnd() * 8, 2 + rnd() * 4, rnd() * 3, 0, Math.PI * 2);
+    g.fill();
+  }
   g.strokeStyle = joint;
   g.lineWidth = 3;
   g.strokeRect(0, 0, 64, 64);
@@ -488,4 +517,248 @@ export function decal(w: number, h: number, band: string, mark: DecalMark, name:
   const mesh = new THREE.Mesh(geo, m);
   mesh.receiveShadow = true;
   return mesh;
+}
+
+// ── mise en lumière « affiche » : murs peints, flaques, faisceaux, néons ──
+
+/**
+ * Mur peint façon illustration : dégradé haut → bas, corniche sombre, joint
+ * horizontal à mi-hauteur, soubassement plus foncé liseré de clair, coulures
+ * de crasse. `width` / `height` en unités monde ; le motif se répète tous les
+ * 4 unités en largeur.
+ */
+export function wallTexture(top: string, bottom: string, width: number, height: number): THREE.CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = 256;
+  c.height = 512;
+  const g = c.getContext('2d')!;
+  const H = c.height;
+  const px = H / height;
+  const grad = g.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, top);
+  grad.addColorStop(1, bottom);
+  g.fillStyle = grad;
+  g.fillRect(0, 0, c.width, H);
+  // corniche : ombre portée du plafond
+  const cor = g.createLinearGradient(0, 0, 0, px * 1.4);
+  cor.addColorStop(0, 'rgba(6,3,16,0.55)');
+  cor.addColorStop(1, 'rgba(6,3,16,0)');
+  g.fillStyle = cor;
+  g.fillRect(0, 0, c.width, px * 1.4);
+  // joint horizontal (panneaux hauts / bas)
+  const seam = H - px * 3.4;
+  g.fillStyle = 'rgba(6,3,16,0.35)';
+  g.fillRect(0, seam, c.width, 3);
+  g.fillStyle = 'rgba(255,240,220,0.1)';
+  g.fillRect(0, seam + 3, c.width, 2);
+  // soubassement
+  const wain = H - px * 1.1;
+  g.fillStyle = 'rgba(6,3,16,0.28)';
+  g.fillRect(0, wain, c.width, H - wain);
+  g.fillStyle = 'rgba(255,240,220,0.16)';
+  g.fillRect(0, wain, c.width, 3);
+  g.fillStyle = 'rgba(6,3,16,0.4)';
+  g.fillRect(0, wain + 3, c.width, 2);
+  // coulures sous le joint
+  let s = 29;
+  const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+  for (let i = 0; i < 7; i++) {
+    const x = rnd() * c.width;
+    const len = px * (0.3 + rnd() * 1.2);
+    const lg = g.createLinearGradient(0, seam, 0, seam + len);
+    lg.addColorStop(0, 'rgba(6,3,16,0.22)');
+    lg.addColorStop(1, 'rgba(6,3,16,0)');
+    g.fillStyle = lg;
+    g.fillRect(x, seam + 5, 2 + rnd() * 4, len);
+  }
+  // rivets le long du joint
+  g.fillStyle = 'rgba(255,240,220,0.18)';
+  for (let x = 16; x < c.width; x += 64) {
+    g.beginPath();
+    g.arc(x, seam - 8, 2.5, 0, Math.PI * 2);
+    g.fill();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = THREE.RepeatWrapping;
+  t.repeat.set(width / 4, 1);
+  t.anisotropy = 4;
+  return t;
+}
+
+const softTextures = new Map<string, THREE.CanvasTexture>();
+
+/** Dégradé alpha (blanc → transparent) : radial (`disc`) ou vertical (`fade`). */
+function softTexture(kind: 'disc' | 'fade' | 'edge'): THREE.CanvasTexture {
+  let t = softTextures.get(kind);
+  if (t) return t;
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d')!;
+  if (kind === 'disc') {
+    const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.45, 'rgba(255,255,255,0.55)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grad;
+  } else {
+    // fade : opaque en haut → transparent en bas ; edge : idem, en marche plus raide
+    const grad = g.createLinearGradient(0, 0, 0, 128);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    if (kind === 'edge') grad.addColorStop(0.35, 'rgba(255,255,255,0.45)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grad;
+  }
+  g.fillRect(0, 0, 128, 128);
+  t = new THREE.CanvasTexture(c);
+  softTextures.set(kind, t);
+  return t;
+}
+
+function additive(color: THREE.ColorRepresentation, map: THREE.Texture, opacity: number, side: THREE.Side = THREE.FrontSide): THREE.MeshBasicMaterial {
+  return new THREE.MeshBasicMaterial({ color, map, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, fog: false, side });
+}
+
+/** Flaque de lumière au sol (reflet de néon, halo de lampe). Ellipse w × d. */
+export function pool(color: THREE.ColorRepresentation, w: number, d: number, opacity = 0.35): THREE.Mesh {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), additive(color, softTexture('disc'), opacity));
+  m.rotation.x = -Math.PI / 2;
+  m.renderOrder = 2;
+  return m;
+}
+
+/**
+ * Faisceau de lumière volumétrique (cône ouvert, additif, qui s'éteint vers
+ * le bas). Origine au sommet ; s'étend vers -Y sur `h`.
+ */
+export function beam(color: THREE.ColorRepresentation, rTop: number, rBot: number, h: number, opacity = 0.16): THREE.Mesh {
+  const geo = new THREE.CylinderGeometry(rTop, rBot, h, 24, 1, true);
+  geo.translate(0, -h / 2, 0);
+  const m = new THREE.Mesh(geo, additive(color, softTexture('fade'), opacity, THREE.DoubleSide));
+  m.renderOrder = 3;
+  return m;
+}
+
+/**
+ * Ombre d'angle (occlusion peinte) : bande sombre qui s'estompe, posée au
+ * pied d'un mur ou au sol. Plan w × h face +Z, sombre côté haut de la texture.
+ */
+export function aoStrip(w: number, h: number, opacity = 0.5, color: THREE.ColorRepresentation = '#07030f'): THREE.Mesh {
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(w, h),
+    new THREE.MeshBasicMaterial({ color, alphaMap: softTexture('edge'), transparent: true, opacity, depthWrite: false, toneMapped: false }),
+  );
+  m.renderOrder = 1;
+  return m;
+}
+
+/**
+ * Enseigne néon : texte en tube lumineux (halo peint) sur plaque sombre
+ * optionnelle. Renvoie le mesh ; `material.opacity` sert au grésillement.
+ * `off` : tube éteint (verre teinté, ni halo ni âme blanche).
+ */
+export function neon(text: string, w: number, h: number, color: string, o: { plate?: string; font?: string; off?: boolean } = {}): THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial> {
+  const PX = Math.min(256, 2048 / Math.max(w, h));
+  const c = document.createElement('canvas');
+  c.width = Math.round(w * PX);
+  c.height = Math.round(h * PX);
+  const g = c.getContext('2d')!;
+  if (o.plate) {
+    g.fillStyle = o.plate;
+    g.beginPath();
+    g.roundRect(4, 4, c.width - 8, c.height - 8, c.height * 0.18);
+    g.fill();
+    g.strokeStyle = color;
+    g.globalAlpha = 0.35;
+    g.lineWidth = 3;
+    g.stroke();
+    g.globalAlpha = 1;
+  }
+  const lines = text.split('\n');
+  const family = o.font ?? 'Bungee, "Chakra Petch", Impact, sans-serif';
+  let size = c.height / (lines.length * 1.35);
+  g.font = `${size}px ${family}`;
+  const widest = Math.max(...lines.map((l) => g.measureText(l).width));
+  if (widest > c.width * 0.86) size *= (c.width * 0.86) / widest;
+  g.font = `${size}px ${family}`;
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  const lh = size * 1.15;
+  const draw = () => lines.forEach((l, i) => g.fillText(l, c.width / 2, c.height / 2 + (i - (lines.length - 1) / 2) * lh));
+  if (o.off) {
+    g.fillStyle = color;
+    draw();
+  } else {
+    // halo large, puis tube coloré, puis âme presque blanche
+    g.shadowColor = color;
+    g.shadowBlur = size * 0.6;
+    g.fillStyle = color;
+    draw();
+    draw();
+    g.shadowBlur = size * 0.15;
+    g.fillStyle = '#ffffff';
+    g.globalAlpha = 0.55;
+    draw();
+    g.globalAlpha = 1;
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false, fog: false, depthWrite: false }));
+  m.renderOrder = 2;
+  return m;
+}
+
+/**
+ * Passe finale plein écran : vignette teintée (coins violets) + léger voile
+ * chaud au centre-haut. Rendue par-dessus la scène, sans profondeur.
+ */
+export class Vignette {
+  readonly scene = new THREE.Scene();
+  readonly camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+  constructor(o: { color?: string; strength?: number; warm?: string } = {}) {
+    // quad en z = 0 : la caméra recule pour qu'il ne tombe pas sur le plan near
+    this.camera.position.z = 0.5;
+    const c = document.createElement('canvas');
+    c.width = 320;
+    c.height = 180;
+    const g = c.getContext('2d')!;
+    const grad = g.createRadialGradient(160, 80, 40, 160, 90, 200);
+    const col = new THREE.Color(o.color ?? '#120626');
+    const rgb = `${Math.round(col.r * 255)},${Math.round(col.g * 255)},${Math.round(col.b * 255)}`;
+    const k = o.strength ?? 0.6;
+    grad.addColorStop(0, `rgba(${rgb},0)`);
+    grad.addColorStop(0.55, `rgba(${rgb},${k * 0.12})`);
+    grad.addColorStop(1, `rgba(${rgb},${k})`);
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 320, 180);
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthTest: false, depthWrite: false, toneMapped: false }));
+    this.scene.add(quad);
+    if (o.warm) {
+      const wc = document.createElement('canvas');
+      wc.width = wc.height = 64;
+      const wg = wc.getContext('2d')!;
+      const wgrad = wg.createRadialGradient(32, 18, 0, 32, 18, 40);
+      wgrad.addColorStop(0, o.warm);
+      wgrad.addColorStop(1, o.warm.slice(0, 7) + '00');
+      wg.fillStyle = wgrad;
+      wg.fillRect(0, 0, 64, 64);
+      const wt = new THREE.CanvasTexture(wc);
+      const veil = new THREE.Mesh(
+        new THREE.PlaneGeometry(2, 2),
+        new THREE.MeshBasicMaterial({ map: wt, transparent: true, blending: THREE.AdditiveBlending, depthTest: false, depthWrite: false, toneMapped: false }),
+      );
+      this.scene.add(veil);
+    }
+  }
+
+  render(renderer: THREE.WebGLRenderer): void {
+    const auto = renderer.autoClear;
+    renderer.autoClear = false;
+    renderer.render(this.scene, this.camera);
+    renderer.autoClear = auto;
+  }
 }

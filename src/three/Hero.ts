@@ -3,6 +3,7 @@
 // principe que RoomRenderer, mais en 1280 × 720 et sans hotspots.
 import Phaser from 'phaser';
 import * as THREE from 'three';
+import type { Vignette } from './kit';
 
 export const HERO_TEXTURE = 'hero3d';
 
@@ -11,6 +12,8 @@ export interface HeroShot {
   camera: THREE.PerspectiveCamera;
   /** Animation (t en secondes depuis l'affichage). */
   tick?: (t: number, dt: number) => void;
+  /** Passe finale (vignette teintée) rendue par-dessus le plan. */
+  vignette?: Vignette;
 }
 
 let shared: HeroRenderer | null = null;
@@ -50,6 +53,7 @@ export class HeroRenderer {
     this.timer.update();
     this.current.tick?.(this.timer.getElapsed() - this.t0, Math.min(this.timer.getDelta(), 0.1));
     this.renderer.render(this.current.scene, this.current.camera);
+    this.current.vignette?.render(this.renderer);
   }
 }
 

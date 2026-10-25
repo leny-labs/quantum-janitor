@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { Condition } from '../../engine/types';
-import { at, box, cyl, glow, label, mat, plane, sphere, stripeTexture, torus } from '../kit';
+import { at, beam, box, cyl, glow, label, mat, neon, plane, pool, sphere, stripeTexture, torus } from '../kit';
 import { bob, mug } from '../props';
 import type { RoomBuild } from './index';
 import { against, backDoor, pipe, shell, wallPanels } from './shell';
@@ -26,6 +26,10 @@ export const labo: RoomBuild = {
       ambient: 1.1,
       key: { color: '#f3e8ff', intensity: 2.2, pos: [5, 11, 8], target: [-1, 0, 1] },
       points: [{ color: '#b06cff', intensity: 40, pos: [0, 2.5, 3.6], distance: 14 }],
+      rim: { color: '#7fffd4', intensity: 1.2, pos: [-6, 6, -4] },
+      fill: { color: '#ff8cc6', intensity: 0.4, pos: [-6, 3, 6] },
+      fog: { color: '#1a1030', near: 8, far: 28 },
+      vignette: { color: '#0e061e', strength: 0.66, warm: '#d8b0ff22' },
     });
 
     // bandeau d'avertissement en haut du mur
@@ -246,6 +250,25 @@ export const labo: RoomBuild = {
 
     // ── porte vers le couloir ──
     backDoor(s, s.rect('vers_couloir'), 0.12, '#2a1d4a', '#3a2a66');
+
+    // ── néon motivationnel au-dessus de la console ──
+    const nf = s.fit([165, 165, 290, 92], 0.05);
+    const motto = at(neon('SOURIEZ :\nC\'EST IMPROBABLE', nf.w, nf.h, '#7fffd4', { plate: '#0c0818' }), nf.x, nf.y, 0.05);
+    const mottoGlow = at(pool('#7fffd4', nf.w * 1.8, nf.h * 2.4, 0.13), nf.x, nf.y, 0.03);
+    mottoGlow.rotation.x = 0;
+    s.add(motto, mottoGlow);
+    s.animate((t) => {
+      motto.material.opacity = Math.sin(t * 0.6 + 2) > 0.99 ? 0.45 : 0.95 + Math.sin(t * 29) * 0.04;
+    });
+
+    // ── faisceau du plafond sur le réacteur + flaque violette qui respire ──
+    const shaft = at(beam('#d6b8ff', 0.6, 2.6, 8, 0.09), rs.x, 8, rs.z);
+    const halo = at(pool('#b06cff', rs.w * 2.6, rs.w * 1.6, 0.32), rs.x, 0.012, rs.z);
+    const coolPool = at(pool('#7fffd4', 2.4, 1.4, 0.18), s.stand(s.rect('trappe')).x, 0.012, s.stand(s.rect('trappe')).z + 0.4);
+    s.add(shaft, halo, coolPool);
+    s.animate((t) => {
+      (halo.material as THREE.MeshBasicMaterial).opacity = 0.28 + Math.sin(t * 1.6) * 0.06;
+    });
 
     // ── B.O.B. ──
     const bb = s.stand(s.rect('bob'));

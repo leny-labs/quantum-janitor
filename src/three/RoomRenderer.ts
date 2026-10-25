@@ -72,6 +72,7 @@ export class RoomRenderer {
     if (!stage || (!stage.animated && !stage.dirty && stage === this.drawn)) return false;
     stage.tick(this.timer.getElapsed(), Math.min(this.timer.getDelta(), 0.1));
     this.renderer.render(stage.scene, stage.camera);
+    stage.vignette?.render(this.renderer);
     stage.dirty = false;
     this.drawn = stage;
     return true;

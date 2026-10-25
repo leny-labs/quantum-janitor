@@ -2,7 +2,7 @@
 // réacteur d'improbabilité. Lumière chaude de face, contre-jour cyan/magenta.
 import * as THREE from 'three';
 import type { HeroShot } from '../Hero';
-import { at, box, cyl, glow, mat, sphere, stripeTexture, tileTexture, torus } from '../kit';
+import { at, box, cyl, glow, mat, sphere, stripeTexture, tileTexture, torus, Vignette } from '../kit';
 import { bob, seau, serpilliere } from '../props';
 import { skyPlane, skyTexture } from './backdrop';
 
@@ -199,5 +199,5 @@ export function titleShot(width: number, height: number): HeroShot {
     robot.rotation.y = -0.9 + Math.sin(t * 0.6) * 0.08;
   };
   tick(0);
-  return { scene, camera, tick };
+  return { scene, camera, tick, vignette: new Vignette({ color: '#12052a', strength: 0.7, warm: '#ffd2a120' }) };
 }

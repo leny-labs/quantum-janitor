@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { at, box, cyl, glow, label, mat, plane, sphere, starTexture, stripeTexture, torus } from '../kit';
+import { at, box, cyl, glow, label, mat, neon, plane, pool, sphere, starTexture, stripeTexture, torus } from '../kit';
 import { bob, fusible } from '../props';
 import type { RoomBuild } from './index';
 import { against, backDoor, pipe, shell, wallPanels } from './shell';
@@ -31,6 +31,10 @@ export const couloir: RoomBuild = {
       ground: '#151a28',
       ambient: 1.2,
       key: { color: '#e6f0ff', intensity: 2.3, pos: [-4, 10, 7], target: [1, 0, 0] },
+      rim: { color: '#ff5c9a', intensity: 1.0, pos: [6, 5, -4] },
+      fill: { color: '#6a8cff', intensity: 0.4, pos: [6, 3, 6] },
+      fog: { color: '#151a2c', near: 7, far: 26 },
+      vignette: { color: '#0a0c1c', strength: 0.7, warm: '#9fd8ff1c' },
     });
 
     // néon du plafond : bleu, ou rouge de secours sans le fusible
@@ -42,7 +46,21 @@ export const couloir: RoomBuild = {
     lightOn.position.set(0, 3, 4);
     const lightOff = new THREE.PointLight('#ff3355', 26, 14, 1.4);
     lightOff.position.set(0, 3, 4);
-    s.when(POWER_ON, neonOn, lightOn).when(POWER_OFF, neonOff, lightOff);
+    // reflets du néon sur le sol carrelé, bleus ou rouges selon le courant
+    const shineOn = at(pool('#9fd8ff', 22, 2.6, 0.22), 0, 0.012, 1.6);
+    const shineOff = at(pool('#ff3355', 22, 2.6, 0.2), 0, 0.012, 1.6);
+    s.when(POWER_ON, neonOn, lightOn, shineOn).when(POWER_OFF, neonOff, lightOff, shineOff);
+
+    // enseigne néon sur le circuit 7B (« éclairage d'ambiance ») : s'éteint avec le fusible
+    const bf = s.fit([470, 92, 200, 62], 0.06);
+    const motto = at(neon('BONHEUR\nOBLIGATOIRE', bf.w, bf.h, '#ff5c9a', { plate: '#120818' }), bf.x, bf.y, 0.06);
+    const mottoGlow = at(pool('#ff5c9a', bf.w * 1.9, bf.h * 2.6, 0.15), bf.x, bf.y, 0.035);
+    mottoGlow.rotation.x = 0;
+    const mottoDead = at(neon('BONHEUR\nOBLIGATOIRE', bf.w, bf.h, '#4a2a44', { plate: '#120818', off: true }), bf.x, bf.y, 0.06);
+    s.when(POWER_ON, motto, mottoGlow).when(POWER_OFF, mottoDead);
+    s.animate((t) => {
+      motto.material.opacity = Math.sin(t * 0.7 + 1) > 0.99 ? 0.4 : 0.95 + Math.sin(t * 27) * 0.04;
+    });
     s.animate((t) => {
       if (s.is(POWER_OFF)) lightOff.intensity = 18 + Math.max(0, Math.sin(t * 3)) * 16;
     });

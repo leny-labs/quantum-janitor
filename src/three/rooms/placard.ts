@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { at, box, cyl, glow, label, sphere, stripeTexture, mat } from '../kit';
+import { at, beam, box, cyl, glow, label, mat, neon, pool, sphere, stripeTexture } from '../kit';
 import { bob, bottle, reglementPlaque, seau, serpilliere } from '../props';
 import type { RoomBuild } from './index';
 import { against, pipe, shell, wallPanels } from './shell';
@@ -24,6 +24,10 @@ export const placard: RoomBuild = {
       ambient: 1.3,
       key: { color: '#fff1c4', intensity: 2.4, pos: [2.5, 9, 6], target: [-0.5, 0, 0] },
       points: [{ color: '#ffe9a0', intensity: 18, pos: [0, 4.6, 3], distance: 10 }],
+      rim: { color: '#7fffd4', intensity: 1.1, pos: [-6, 5, -4] },
+      fill: { color: '#8a7cff', intensity: 0.45, pos: [-6, 3, 6] },
+      fog: { color: '#1a2620', near: 7, far: 26 },
+      vignette: { color: '#0a1410', strength: 0.62, warm: '#fff1c428' },
     });
 
     // ampoule nue au bout de son fil
@@ -32,9 +36,26 @@ export const placard: RoomBuild = {
     const wire = at(cyl(0.012, 0.012, 3, '#222222', { edges: false }), bulbAt.x, bulbAt.y + 1.6, 3);
     const socket = at(cyl(0.07, 0.09, 0.16, '#555555', { edges: false }), bulbAt.x, bulbAt.y + 0.2, 3);
     const halo = at(glow('#fff4b0', 2.6, 0.35), bulbAt.x, bulbAt.y, 3);
-    s.add(bulb, wire, socket, halo);
+    // cône de lumière poussiéreuse et flaque chaude au sol, qui grésillent avec l'ampoule
+    const cone = at(beam('#fff1c4', 0.12, 1.9, bulbAt.y - 0.1, 0.13), bulbAt.x, bulbAt.y - 0.1, 3);
+    const spill = at(pool('#ffe2a0', 5, 3, 0.3), bulbAt.x, 0.012, 3);
+    s.add(bulb, wire, socket, halo, cone, spill);
     s.animate((t) => {
-      halo.material.opacity = 0.32 + Math.sin(t * 13) * 0.02 + (Math.sin(t * 2.3) > 0.97 ? -0.15 : 0);
+      const k = 1 + Math.sin(t * 13) * 0.06 + (Math.sin(t * 2.3) > 0.97 ? -0.45 : 0);
+      halo.material.opacity = 0.33 * k;
+      (cone.material as THREE.MeshBasicMaterial).opacity = 0.13 * k;
+      (spill.material as THREE.MeshBasicMaterial).opacity = 0.3 * k;
+    });
+
+    // néon de propagande : Sylvie veille (avec amour)
+    const nf = s.fit([775, 205, 150, 72], 0.05);
+    const sylvie = at(neon('SYLVIE\nVEILLE ♥', nf.w, nf.h, '#ff7ab8', { plate: '#160a14' }), nf.x, nf.y, 0.05);
+    const sylvieGlow = at(pool('#ff7ab8', nf.w * 2.2, nf.h * 2.4, 0.16), nf.x, nf.y, 0.03);
+    sylvieGlow.rotation.x = 0;
+    s.add(sylvie, sylvieGlow);
+    s.animate((t) => {
+      // micro-grésillement, une coupure franche de temps en temps
+      sylvie.material.opacity = Math.sin(t * 0.9) > 0.985 ? 0.35 : 0.94 + Math.sin(t * 31) * 0.04;
     });
 
     // inscription pochoir
