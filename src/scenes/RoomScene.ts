@@ -9,6 +9,7 @@ import type { Action, Exit, Hotspot, Interaction } from '../engine/types';
 import { hotspotVerbs, smartVerb, type HotspotVerb } from '../engine/verbs';
 import { getSession, type Session } from '../session';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
+import { CLOSEUPS } from '../three/rooms';
 import { makeButton } from '../ui/Button';
 import { DialogueBox } from '../ui/DialogueBox';
 import { HoverLabel } from '../ui/HoverLabel';
@@ -69,9 +70,15 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       },
       this.session.debug.overlay,
     );
-    this.room = new RoomView(this, RoomRenderer.get(W, ROOM_H));
-    this.scenes = new SceneManager(this, content, state, this.layer, { width: W, height: ROOM_H }, (def) =>
-      this.room.show(def, (c) => state.check(c)),
+    this.room = new RoomView(this, RoomRenderer.get(W, ROOM_H), (id) => content.scenes.get(id));
+    this.scenes = new SceneManager(
+      this,
+      content,
+      state,
+      this.layer,
+      { width: W, height: ROOM_H },
+      (def) => this.room.show(def, (c) => state.check(c)),
+      (from, to) => this.room.travel(from, to),
     );
     this.inventory = new Inventory(this, content, state, {
       click: (id, p) => this.onClickItem(id, p),
@@ -102,10 +109,20 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       .setDepth(790)
       .setVisible(false);
     this.input.on('pointermove', (p: Phaser.Input.Pointer) => this.heldItem.setPosition(p.x + 14, p.y + 14));
-    // clic droit dans le vide = reposer l'objet tenu
+    // clic dans le vide : reposer l'objet tenu ; en gros plan, sinon, reculer vers la pièce
     this.input.on('pointerdown', (p: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]) => {
-      if (p.rightButtonDown() && over.length === 0) state.select(null);
+      if (over.length > 0 || p.y >= ROOM_H) return;
+      if (state.selectedItem) {
+        if (p.rightButtonDown()) state.select(null);
+        return;
+      }
+      if (p.rightButtonDown() || !this.room.onSubject(p.x, p.y)) this.leaveCloseup();
     });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') this.leaveCloseup();
+    };
+    window.addEventListener('keydown', onKey);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => window.removeEventListener('keydown', onKey));
     this.dropButton = null;
     this.press = null;
 
@@ -320,6 +337,14 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       return;
     }
     void this.act([{ goto: e.to }]);
+  }
+
+  /** En gros plan (console…) : retour en travel caméra vers la pièce hôte. */
+  private leaveCloseup(): void {
+    const host = CLOSEUPS[this.session.state.scene];
+    if (!host || this.blocked) return;
+    this.session.state.selectedItem = null;
+    void this.act([{ goto: host }]);
   }
 
   private onClickItem(id: string, p: Phaser.Input.Pointer): void {

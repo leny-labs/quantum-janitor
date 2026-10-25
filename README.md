@@ -138,8 +138,14 @@ quantum-janitor/
   depuis la caméra : `stage.stand(rect)` (objet posé au sol), `stage.fit(rect, z)`
   (objet mural), `stage.fitX(rect, x)` (mur latéral), `stage.fitIn(rect, groupe)`
   (surface inclinée, ex. le pupitre). Déplacer un hotspot dans le YAML déplace
-  l'objet 3D. `stage.project(v)` fait l'inverse (ancre 3D → pixel), pour de
-  futurs hotspots projetés / gros plans.
+  l'objet 3D. `stage.project(v)` fait l'inverse (ancre 3D → pixel).
+- **Gros plans filmés dans la pièce** : une scène YAML listée dans `CLOSEUPS`
+  (`src/three/rooms/index.ts`, ex. `panneau: 'labo'`) n'a pas de décor à elle.
+  La pièce hôte la construit via `stage.closeup(def, camera, build)` (le
+  pupitre de `panneau.ts` est posé sur la console du labo) ; `goto` entre les
+  deux vues fait un travel caméra (~1 s, easing + léger arc, vignette serrée)
+  au lieu du fondu. En gros plan : flèche bas, Échap, clic droit ou clic à côté
+  de l'objet filmé ramènent à la pièce.
 - **État** : `stage.spot(id, …objets)` lie des meshes à un hotspot — ils suivent
   son `if:` YAML et s'éclairent au survol. `stage.when(condition, …objets)`
   affiche/masque selon les flags (même syntaxe que le YAML : `flags`,

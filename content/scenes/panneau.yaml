@@ -3,18 +3,18 @@ title: Panneau de contrôle du réacteur (gros plan)
 background: "#10161f"
 
 art:
-  - { rect: [40, 30, 1200, 510], color: "#1b2533", stroke: "#4a5a70" }
-  - { text: "CONSOLE DE STABILISATION — RÉACTEUR D'IMPROBABILITÉ Mk IV", at: [640, 50], size: 16, color: "#9aa5b1" }
+  - { rect: [207, 103, 866, 368], color: "#1b2533", stroke: "#4a5a70" }
+  - { text: "CONSOLE DE STABILISATION — RÉACTEUR D'IMPROBABILITÉ Mk IV", at: [640, 117], size: 11, color: "#9aa5b1" }
 
 hotspots:
   - id: ecran
     label: Écran de diagnostic
-    rect: [360, 80, 560, 220]
+    rect: [438, 139, 404, 158]
     art:
-      - { rect: [370, 90, 540, 200], color: "#050a08", stroke: "#7fffd4" }
-      - { if: { notFlags: [panneau_allume] }, text: "— HORS TENSION —\n\nfusible stabilisateur 7B absent", at: [640, 190], size: 18, color: "#335544" }
-      - { if: { flags: [panneau_allume], notFlags: [refroidissement_verse] }, text: "ALIMENTATION ....... OK\nREFROIDISSEMENT .... 0 %\nSTABILITÉ ...... CRITIQUE\n\n> REMPLIR LE RÉSERVOIR", at: [640, 190], size: 20, color: "#7fffd4" }
-      - { if: { flags: [refroidissement_verse] }, text: "ALIMENTATION ....... OK\nREFROIDISSEMENT .. 100 %\nCOMPOSITION ...... ???\n\n> APPUYER SUR STABILISER", at: [640, 190], size: 20, color: "#ffd166" }
+      - { rect: [446, 146, 390, 144], color: "#050a08", stroke: "#7fffd4" }
+      - { if: { notFlags: [panneau_allume] }, text: "— HORS TENSION —\n\nfusible stabilisateur 7B absent", at: [640, 218], size: 13, color: "#335544" }
+      - { if: { flags: [panneau_allume], notFlags: [refroidissement_verse] }, text: "ALIMENTATION ....... OK\nREFROIDISSEMENT .... 0 %\nSTABILITÉ ...... CRITIQUE\n\n> REMPLIR LE RÉSERVOIR", at: [640, 218], size: 14, color: "#7fffd4" }
+      - { if: { flags: [refroidissement_verse] }, text: "ALIMENTATION ....... OK\nREFROIDISSEMENT .. 100 %\nCOMPOSITION ...... ???\n\n> APPUYER SUR STABILISER", at: [640, 218], size: 14, color: "#ffd166" }
     look:
       - if: { notFlags: [panneau_allume] }
         say: "L'écran est éteint. Juste une ligne en veille : « fusible stabilisateur 7B absent »."
@@ -30,12 +30,12 @@ hotspots:
   - id: logement
     label: Logement du fusible stabilisateur
     smart: look
-    rect: [110, 320, 200, 170]
+    rect: [257, 312, 144, 122]
     art:
-      - { rect: [120, 330, 180, 150], color: "#2a3444", stroke: "#ffd166" }
-      - { text: "STABILISATEUR\n7B", at: [210, 360], size: 13, color: "#ffd166" }
-      - { if: { notFlags: [fusible_pose] }, rect: [185, 400, 50, 50], color: "#000000", stroke: "#666666" }
-      - { if: { flags: [fusible_pose] }, rect: [185, 400, 50, 50], color: "#d94f4f", stroke: "#ffffff", text: "7B", size: 14 }
+      - { rect: [265, 319, 130, 108], color: "#2a3444", stroke: "#ffd166" }
+      - { text: "STABILISATEUR\n7B", at: [329, 340], size: 10, color: "#ffd166" }
+      - { if: { notFlags: [fusible_pose] }, rect: [312, 369, 36, 36], color: "#000000", stroke: "#666666" }
+      - { if: { flags: [fusible_pose] }, rect: [312, 369, 36, 36], color: "#d94f4f", stroke: "#ffffff", text: "7B", size: 10 }
     look:
       - if: { flags: [fusible_pose] }
         say: "Le fusible 7B est en place. Le distributeur me manque un peu. Non, en fait, pas du tout."
@@ -51,12 +51,12 @@ hotspots:
   - id: cadran
     label: Cadran d'improbabilité
     smart: look
-    rect: [420, 330, 400, 160]
+    rect: [482, 319, 289, 115]
     art:
-      - { rect: [430, 340, 380, 140], color: "#222c3a", stroke: "#9aa5b1" }
-      - { text: "PROBABLE   ·   IMPROBABLE   ·   GARY", at: [620, 370], size: 15, color: "#ffffff" }
-      - { if: { notFlags: [refroidissement_verse] }, rect: [600, 395, 6, 70], color: "#ff5c7a" }
-      - { if: { flags: [refroidissement_verse] }, rect: [760, 395, 6, 70], color: "#ff5c7a" }
+      - { rect: [489, 326, 275, 101], color: "#222c3a", stroke: "#9aa5b1" }
+      - { text: "PROBABLE   ·   IMPROBABLE   ·   GARY", at: [626, 348], size: 11, color: "#ffffff" }
+      - { if: { notFlags: [refroidissement_verse] }, rect: [611, 366, 4, 50], color: "#ff5c7a" }
+      - { if: { flags: [refroidissement_verse] }, rect: [726, 366, 4, 50], color: "#ff5c7a" }
     look:
       - say: "Un cadran gradué de « PROBABLE » à « IMPROBABLE ». La dernière graduation dit « GARY »."
       - say: "Je ne sais pas si je dois être vexé ou flatté. Je choisis vexé. C'est plus confortable."
@@ -64,12 +64,12 @@ hotspots:
 
   - id: bouton
     label: Gros bouton rouge « STABILISER »
-    rect: [880, 320, 260, 180]
+    rect: [813, 312, 187, 130]
     art:
-      - { rect: [890, 330, 240, 160], color: "#2a1a1a", stroke: "#ff5c7a" }
-      - { circle: [1010, 405, 55], color: "#d62839", stroke: "#ffffff" }
-      - { text: "STABILISER", at: [1010, 405], size: 16, color: "#ffffff" }
-      - { text: "(ne pas appuyer sans raison)", at: [1010, 475], size: 11, color: "#ff99aa" }
+      - { rect: [820, 319, 173, 115], color: "#2a1a1a", stroke: "#ff5c7a" }
+      - { circle: [907, 373, 40], color: "#d62839", stroke: "#ffffff" }
+      - { text: "STABILISER", at: [907, 373], size: 11, color: "#ffffff" }
+      - { text: "(ne pas appuyer sans raison)", at: [907, 424], size: 8, color: "#ff99aa" }
     look: "Un gros bouton rouge marqué « STABILISER ». Les gros boutons rouges veulent toujours qu'on appuie dessus. C'est leur seul but dans la vie. Je les comprends."
     useLabel: Appuyer
     use:

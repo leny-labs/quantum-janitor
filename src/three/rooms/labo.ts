@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 import type { Condition } from '../../engine/types';
-import { at, beam, box, cyl, glow, label, mat, neon, plane, pool, sphere, stripeTexture, torus } from '../kit';
+import { at, beam, box, cyl, glow, label, mat, neon, pool, sphere, stripeTexture, torus } from '../kit';
 import { bob, mug } from '../props';
+import type { Stage, Standing } from '../Stage';
 import type { RoomBuild } from './index';
+import { consolePanel, PANNEAU_CAMERA } from './panneau';
 import { against, backDoor, pipe, shell, wallPanels } from './shell';
 
 const FULL = { flags: ['refroidissement_verse'] };
@@ -11,7 +13,7 @@ const POWERED = { flags: ['panneau_allume'] };
 /** Laboratoire du Réacteur : violet, halo d'improbabilité, plafond invisible. */
 export const labo: RoomBuild = {
   camera: { pos: [0, 2.0, 9], look: [0, 1.85, 0], fov: 50 },
-  build(s) {
+  build(s, scene) {
     shell(s, {
       floor: { a: '#191127', b: '#21173a', joint: '#0c0815', tile: 1.1 },
       wall: { top: '#3a2766', bottom: '#1c1430' },
@@ -229,25 +231,11 @@ export const labo: RoomBuild = {
       steam.material.opacity = 0.18 - ((t * 0.3) % 0.4) * 0.4;
     });
 
-    // ── console (sortie vers le gros plan du panneau) ──
+    // ── console : le pupitre du gros plan `panneau`, posé ici en vrai ──
+    // (on y entre par un travel caméra, cf. Stage.closeup)
     const cs = s.stand([180, 290, 220, 170]);
-    const cw = cs.w * 0.95;
-    const consoleG = new THREE.Group();
-    const baseH = cs.h * 0.62;
-    consoleG.add(at(box(cw, baseH, 0.9, '#2a3444'), 0, baseH / 2, 0));
-    const top = new THREE.Group();
-    top.add(at(box(cw, 0.08, 0.9, '#3a4658'), 0, 0, 0));
-    top.add(at(box(cw * 0.8, 0.02, 0.55, '#050a08', { edges: false }), 0, 0.05, -0.08));
-    top.add(at(plane(cw * 0.76, 0.5, '#7fffd4', { glow: true, opacity: 0.25 }), 0, 0.065, -0.08));
-    top.children[top.children.length - 1].rotation.x = -Math.PI / 2;
-    top.add(at(cyl(0.11, 0.11, 0.08, '#d62839', { seg: 12 }), cw * 0.32, 0.06, 0.3));
-    for (let i = 0; i < 6; i++) top.add(at(box(0.09, 0.04, 0.09, i % 3 ? '#222c3a' : '#ffd166'), -cw * 0.3 + (i % 3) * 0.13, 0.04, 0.22 + Math.floor(i / 3) * 0.13));
-    top.position.set(0, baseH, 0);
-    top.rotation.x = 0.45;
-    consoleG.add(top);
-    consoleG.add(at(label('CONSOLE', cw * 0.5, 0.18, { color: '#9aa5b1', bold: true }), 0, baseH * 0.35, 0.46));
-    s.add(at(consoleG, cs.x, 0, against(cs.z, 0.9)));
-
+    const panel = scene('panneau');
+    if (panel) s.closeup(panel, PANNEAU_CAMERA, () => consoleRig(s, cs));
     // ── porte vers le couloir ──
     backDoor(s, s.rect('vers_couloir'), 0.12, '#2a1d4a', '#3a2a66');
 
@@ -279,3 +267,39 @@ export const labo: RoomBuild = {
     });
   },
 };
+
+/**
+ * Console du labo : pupitre `panneau` mis à l'échelle sur un socle, dans
+ * l'emprise `cs` (vue pièce). Renvoie le repère du pupitre (similitude) :
+ * la caméra du gros plan est transportée avec lui.
+ */
+function consoleRig(s: Stage, cs: Standing): THREE.Group {
+  const { rig, desk, frame } = consolePanel(s);
+  const k = (cs.w * 0.95) / frame.w;
+  rig.scale.setScalar(k);
+  rig.updateMatrixWorld(true);
+  // arête basse avant du pupitre : posée sur le bord avant du socle
+  const edge = desk.localToWorld(new THREE.Vector3(frame.x, frame.y - frame.h / 2, 0));
+  const local = new THREE.Box3().setFromObject(rig);
+  const baseH = Math.max(0.45, cs.h - (local.max.y - edge.y));
+  const depth = local.max.z - local.min.z;
+  const front = Math.max(cs.z, depth + 0.05);
+  rig.position.set(cs.x - edge.x, baseH - edge.y, front - edge.z);
+  rig.updateMatrixWorld(true);
+  const box3 = new THREE.Box3().setFromObject(rig);
+  const bw = box3.max.x - box3.min.x;
+  const bd = front - box3.min.z;
+  // socle : caisson + plinthe sombre + plaque CONSOLE
+  const base = new THREE.Group();
+  base.add(at(box(bw, baseH, bd, '#2a3444'), 0, baseH / 2, 0));
+  base.add(at(box(bw * 1.02, 0.08, bd * 1.02, '#141a24', { edges: false }), 0, 0.04, 0));
+  base.add(at(box(bw * 0.86, 0.012, 0.012, '#4fbfa6', { glow: true, edges: false }), 0, baseH - 0.06, bd / 2 + 0.008));
+  base.add(at(label('CONSOLE', bw * 0.4, 0.14, { color: '#9aa5b1', bold: true }), 0, baseH * 0.4, bd / 2 + 0.012));
+  s.add(at(base, cs.x, 0, front - bd / 2));
+  // halo cyan de l'écran sur le mur et le sol : on lit la console de loin
+  s.add(at(pool('#7fffd4', bw * 2.2, bd * 2.4, 0.12), cs.x, 0.011, front + 0.2));
+  const lamp = new THREE.PointLight('#bff8ff', 3, 2.6, 1.6);
+  lamp.position.set(cs.x, baseH + 1.1, front + 0.9);
+  s.add(lamp);
+  return rig;
+}

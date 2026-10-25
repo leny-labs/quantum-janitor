@@ -5,7 +5,7 @@
  *   ?reset=1                                                     efface la sauvegarde
  *   ?touch=1 / ?touch=0                                          force / interdit le mode tactile
  *   ?intro=1                                                     rejoue l'intro animée même si déjà vue
- * `scene=fin` saute directement au cliffhanger.
+ * `scene=fin` saute directement au cliffhanger ; `scene=panneau` ouvre le labo cadré sur la console.
  * En mode debug, la sauvegarde automatique est désactivée.
  */
 export interface DebugOptions {

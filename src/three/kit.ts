@@ -755,6 +755,14 @@ export class Vignette {
     }
   }
 
+  /** Dose de la passe (0 = invisible, 1 = pleine). */
+  setOpacity(a: number): void {
+    this.scene.traverse((o) => {
+      const m = (o as THREE.Mesh).material as THREE.MeshBasicMaterial | undefined;
+      if (m) m.opacity = a;
+    });
+  }
+
   render(renderer: THREE.WebGLRenderer): void {
     const auto = renderer.autoClear;
     renderer.autoClear = false;

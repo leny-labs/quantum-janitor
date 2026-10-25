@@ -4,7 +4,7 @@
 import Phaser from 'phaser';
 import * as THREE from 'three';
 import type { Condition, SceneDef } from '../engine/types';
-import { ROOMS } from './rooms';
+import { CLOSEUPS, ROOMS } from './rooms';
 import { Stage } from './Stage';
 
 export const ROOM_TEXTURE = 'room3d';
@@ -38,27 +38,51 @@ export class RoomRenderer {
     this.renderer.setClearColor(0x0b0b12);
   }
 
-  /** Affiche la pièce `def` (construite à la première visite puis gardée en cache). */
-  show(def: SceneDef, check: (c: Condition | undefined) => boolean): Stage | null {
-    const build = ROOMS[def.id];
-    if (!build) {
+  /** Décor qui filme la scène `id` (une pièce, ou la pièce hôte d'un gros plan). */
+  private stage(id: string, lookup: (id: string) => SceneDef | undefined): Stage | null {
+    const hostId = CLOSEUPS[id] ?? id;
+    const build = ROOMS[hostId];
+    const host = lookup(hostId);
+    if (!build || !host) return null;
+    let stage = this.stages.get(hostId);
+    if (!stage) {
+      stage = new Stage(host, build.camera, this.width, this.height);
+      build.build(stage, lookup);
+      this.stages.set(hostId, stage);
+    }
+    return stage.films(id) ? stage : null;
+  }
+
+  /** Affiche la scène `def` (décor construit à la première visite puis gardé en cache). */
+  show(def: SceneDef, check: (c: Condition | undefined) => boolean, lookup: (id: string) => SceneDef | undefined): Stage | null {
+    const stage = this.stage(def.id, lookup);
+    if (!stage) {
       this.current = null;
       return null;
     }
-    let stage = this.stages.get(def.id);
-    if (!stage) {
-      stage = new Stage(def, build.camera, this.width, this.height);
-      build.build(stage);
-      this.stages.set(def.id, stage);
-    }
     if (stage !== this.current) this.current?.highlight(null);
     this.current = stage;
+    stage.view(def.id);
     stage.sync(check);
     return stage;
   }
 
+  /**
+   * Si `from` et `to` sont deux vues du décor affiché (pièce ⇄ gros plan),
+   * lance un travel caméra et renvoie sa promesse ; sinon null (fondu classique).
+   */
+  travel(from: string, to: string): Promise<void> | null {
+    const stage = this.current;
+    if (!stage || !stage.films(from) || !stage.films(to) || from === to) return null;
+    return stage.travelTo(to);
+  }
+
   highlight(id: string | null): void {
     this.current?.highlight(id);
+  }
+
+  onSubject(x: number, y: number): boolean {
+    return this.current?.onSubject(x, y) ?? true;
   }
 
   /**
@@ -73,6 +97,10 @@ export class RoomRenderer {
     stage.tick(this.timer.getElapsed(), Math.min(this.timer.getDelta(), 0.1));
     this.renderer.render(stage.scene, stage.camera);
     stage.vignette?.render(this.renderer);
+    if (stage.focus && stage.focusAmount > 0.01) {
+      stage.focus.setOpacity(stage.focusAmount);
+      stage.focus.render(this.renderer);
+    }
     stage.dirty = false;
     this.drawn = stage;
     return true;
@@ -87,6 +115,7 @@ export class RoomView {
   constructor(
     scene: Phaser.Scene,
     private room: RoomRenderer,
+    private lookup: (id: string) => SceneDef | undefined,
   ) {
     // addImage accepte un canvas (WebGL compris) et crée la frame de base.
     if (!scene.textures.exists(ROOM_TEXTURE)) scene.textures.addImage(ROOM_TEXTURE, room.canvas as unknown as HTMLImageElement);
@@ -95,13 +124,22 @@ export class RoomView {
   }
 
   show(def: SceneDef, check: (c: Condition | undefined) => boolean): boolean {
-    const ok = !!this.room.show(def, check);
+    const ok = !!this.room.show(def, check, this.lookup);
     this.image.setVisible(ok);
     return ok;
   }
 
   highlight(id: string | null): void {
     this.room.highlight(id);
+  }
+
+  /** Gros plan : le pixel tombe-t-il sur l'objet filmé (console…) ? */
+  onSubject(x: number, y: number): boolean {
+    return !this.image.visible || this.room.onSubject(x, y);
+  }
+
+  travel(from: string, to: string): Promise<void> | null {
+    return this.image.visible ? this.room.travel(from, to) : null;
   }
 
   update(): void {

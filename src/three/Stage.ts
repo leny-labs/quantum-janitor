@@ -51,10 +51,40 @@ export interface Fitted {
 type Check = (c: Condition | undefined) => boolean;
 type Tick = (t: number, dt: number) => void;
 
+/** Cadrage caméra d'une vue (pièce ou gros plan filmé dans le même décor). */
+interface Pose {
+  pos: THREE.Vector3;
+  quat: THREE.Quaternion;
+  fov: number;
+}
+
+/** Travel caméra en cours entre deux vues. */
+interface Travel {
+  from: Pose;
+  to: Pose;
+  /** Hauteur de l'arc (monde) au milieu du trajet. */
+  lift: number;
+  /** Dose de vignette serrée au départ / à l'arrivée. */
+  focus: readonly [number, number];
+  k: number;
+  dur: number;
+  done: () => void;
+}
+
+const TRAVEL_S = 1.0;
+const easeInOut = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+
 export class Stage {
   readonly scene = new THREE.Scene();
   readonly camera: THREE.PerspectiveCamera;
   private conditional: { cond: Condition; obj: THREE.Object3D }[] = [];
+  /** Vues filmées dans ce décor : id de scène YAML → cadrage. */
+  private views = new Map<string, Pose>();
+  /** Scène YAML dont la caméra est active (hotspots surlignables). */
+  private viewId: string;
+  /** Scène YAML en cours de construction (rect / spot la consultent). */
+  private building: SceneDef;
+  private travel: Travel | null = null;
   private spots = new Map<string, THREE.Object3D[]>();
   private ticks: Tick[] = [];
   private lit: { mat: THREE.MeshToonMaterial; base: THREE.Color }[] = [];
@@ -65,6 +95,12 @@ export class Stage {
   dirty = true;
   /** Passe finale (vignette) rendue par RoomRenderer après la scène. */
   vignette: Vignette | null = null;
+  /** Vignette serrée des gros plans (le décor s'assombrit en bord de cadre). */
+  focus: Vignette | null = null;
+  /** Dose de `focus` : 0 en vue pièce, 1 en gros plan. */
+  focusAmount = 0;
+  /** Gros plans filmés ici : id de scène YAML → objet filmé (pour le clic « à côté »). */
+  private closeups = new Map<string, THREE.Object3D>();
 
   constructor(
     readonly def: SceneDef,
@@ -76,6 +112,130 @@ export class Stage {
     this.camera.position.set(...cam.pos);
     this.camera.lookAt(...cam.look);
     this.camera.updateMatrixWorld();
+    this.building = def;
+    this.viewId = def.id;
+    this.views.set(def.id, this.pose());
+  }
+
+  // ── vues & travel caméra ─────────────────────────────────────────────
+
+  private pose(): Pose {
+    return { pos: this.camera.position.clone(), quat: this.camera.quaternion.clone(), fov: this.camera.fov };
+  }
+
+  private apply(p: Pose): void {
+    this.camera.position.copy(p.pos);
+    this.camera.quaternion.copy(p.quat);
+    if (this.camera.fov !== p.fov) {
+      this.camera.fov = p.fov;
+      this.camera.updateProjectionMatrix();
+    }
+    this.camera.updateMatrixWorld();
+    this.dirty = true;
+  }
+
+  private place(cam: CameraSpec, frame?: THREE.Matrix4): Pose {
+    const pos = new THREE.Vector3(...cam.pos);
+    const look = new THREE.Vector3(...cam.look);
+    if (frame) {
+      pos.applyMatrix4(frame);
+      look.applyMatrix4(frame);
+    }
+    const m = new THREE.Matrix4().lookAt(pos, look, new THREE.Vector3(0, 1, 0));
+    return { pos, quat: new THREE.Quaternion().setFromRotationMatrix(m), fov: cam.fov ?? 50 };
+  }
+
+  /**
+   * Gros plan d'une autre scène YAML filmé dans ce décor. `build` construit le
+   * contenu dans un repère local (groupe renvoyé, encore à l'identité pendant
+   * la construction) comme si la caméra était `cam` : les rect du YAML se
+   * projettent donc comme dans une pièce à part. Le groupe peut ensuite être
+   * déplacé / mis à l'échelle (similitude) : la vue suit le même repère, si
+   * bien que les hotspots du gros plan restent exactement sous les objets.
+   */
+  closeup(def: SceneDef, cam: CameraSpec, build: (s: Stage) => THREE.Object3D): void {
+    const room = this.pose();
+    const host = this.building;
+    this.apply(this.place(cam));
+    this.building = def;
+    try {
+      const rig = build(this);
+      if (!rig.parent) this.scene.add(rig);
+      rig.updateMatrixWorld(true);
+      this.views.set(def.id, this.place(cam, rig.matrixWorld));
+      this.closeups.set(def.id, rig);
+      this.focus ??= new Vignette({ color: '#06030e', strength: 0.8 });
+    } finally {
+      this.building = host;
+      this.apply(room);
+    }
+  }
+
+  /**
+   * En gros plan : vrai si le pixel (x, y) tombe sur l'objet filmé. Hors gros
+   * plan (ou pendant un travel) : toujours vrai.
+   */
+  onSubject(x: number, y: number): boolean {
+    const subject = this.closeups.get(this.viewId);
+    if (!subject || this.travel) return true;
+    const ndc = new THREE.Vector2((x / this.width) * 2 - 1, -(y / this.height) * 2 + 1);
+    this.raycaster.setFromCamera(ndc, this.camera);
+    // maillages seulement (les contours LineSegments ont un seuil de picking trop large)
+    const shown = (o: THREE.Object3D | null): boolean => !o || (o.visible && shown(o.parent));
+    return this.raycaster.intersectObject(subject, true).some((h) => h.object instanceof THREE.Mesh && shown(h.object));
+  }
+
+  /** Vrai si la scène YAML `id` est une vue de ce décor. */
+  films(id: string): boolean {
+    return this.views.has(id);
+  }
+
+  /** Cadre la vue `id` sans transition (sauf si un travel y mène déjà). */
+  view(id: string): void {
+    const p = this.views.get(id);
+    if (!p || (id === this.viewId && (this.travel || this.camera.position.equals(p.pos)))) return;
+    this.travel?.done();
+    this.travel = null;
+    this.highlight(null);
+    this.viewId = id;
+    this.focusAmount = this.closeups.has(id) ? 1 : 0;
+    this.apply(p);
+  }
+
+  /** Travel caméra (dolly + léger arc, easing) vers la vue `id`. */
+  travelTo(id: string, dur = TRAVEL_S): Promise<void> {
+    const to = this.views.get(id);
+    if (!to) return Promise.resolve();
+    this.travel?.done();
+    this.highlight(null);
+    this.viewId = id;
+    return new Promise((resolve) => {
+      const from = this.pose();
+      const focus = [this.focusAmount, this.closeups.has(id) ? 1 : 0] as const;
+      this.travel = { from, to, focus, lift: Math.min(0.6, from.pos.distanceTo(to.pos) * 0.06), k: 0, dur, done: resolve };
+      this.dirty = true;
+    });
+  }
+
+  private stepTravel(dt: number): void {
+    const tr = this.travel;
+    if (!tr) return;
+    tr.k = Math.min(1, tr.k + dt / tr.dur);
+    const e = easeInOut(tr.k);
+    this.camera.position.lerpVectors(tr.from.pos, tr.to.pos, e);
+    this.camera.position.y += Math.sin(Math.PI * e) * tr.lift;
+    this.camera.quaternion.slerpQuaternions(tr.from.quat, tr.to.quat, e);
+    const fov = THREE.MathUtils.lerp(tr.from.fov, tr.to.fov, e);
+    if (fov !== this.camera.fov) {
+      this.camera.fov = fov;
+      this.camera.updateProjectionMatrix();
+    }
+    this.camera.updateMatrixWorld();
+    this.focusAmount = THREE.MathUtils.lerp(tr.focus[0], tr.focus[1], e);
+    if (tr.k >= 1) {
+      this.travel = null;
+      tr.done();
+    }
   }
 
   // ── écran ⇄ monde ────────────────────────────────────────────────────
@@ -156,8 +316,9 @@ export class Stage {
 
   /** Rectangle d'un hotspot ou d'une sortie du YAML. */
   rect(id: string): Rect {
-    const r = this.def.hotspots?.find((h) => h.id === id)?.rect ?? this.def.exits?.find((e) => e.id === id)?.rect;
-    if (!r) throw new Error(`[3D] ${this.def.id} : hotspot/sortie « ${id} » introuvable`);
+    const def = this.building;
+    const r = def.hotspots?.find((h) => h.id === id)?.rect ?? def.exits?.find((e) => e.id === id)?.rect;
+    if (!r) throw new Error(`[3D] ${def.id} : hotspot/sortie « ${id} » introuvable`);
     return r;
   }
 
@@ -185,15 +346,17 @@ export class Stage {
    * s'illuminent au survol. Un objet déjà rattaché (ex. à un pupitre) y reste.
    */
   spot(id: string, ...objs: THREE.Object3D[]): this {
-    if (!this.def.hotspots?.some((h) => h.id === id)) throw new Error(`[3D] ${this.def.id} : hotspot « ${id} » introuvable`);
-    const cond = this.def.hotspots.find((h) => h.id === id)?.if;
-    const members = this.spots.get(id) ?? [];
+    const def = this.building;
+    if (!def.hotspots?.some((h) => h.id === id)) throw new Error(`[3D] ${def.id} : hotspot « ${id} » introuvable`);
+    const cond = def.hotspots.find((h) => h.id === id)?.if;
+    const key = `${def.id}/${id}`;
+    const members = this.spots.get(key) ?? [];
     for (const obj of objs) {
       if (!obj.parent) this.scene.add(obj);
       if (cond) this.conditional.push({ cond, obj });
       members.push(obj);
     }
-    this.spots.set(id, members);
+    this.spots.set(key, members);
     return this;
   }
 
@@ -252,10 +415,11 @@ export class Stage {
 
   /** Vrai si la pièce a des animations : elle se rend alors à chaque image. */
   get animated(): boolean {
-    return this.ticks.length > 0;
+    return this.ticks.length > 0 || !!this.travel;
   }
 
   tick(t: number, dt: number): void {
+    this.stepTravel(dt);
     for (const f of this.ticks) f(t, dt);
   }
 
@@ -265,7 +429,7 @@ export class Stage {
     this.lit = [];
     this.highlighted = id;
     this.dirty = true;
-    const members = id ? (this.spots.get(id) ?? []) : [];
+    const members = id ? (this.spots.get(`${this.viewId}/${id}`) ?? []) : [];
     for (const g of members) {
       g.traverse((o) => {
         const m = (o as THREE.Mesh).material;

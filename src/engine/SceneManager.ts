@@ -15,6 +15,8 @@ export class SceneManager {
     private size: { width: number; height: number },
     /** Affiche la pièce 3D de la scène ; renvoie false s'il n'y en a pas (rendu 2D). */
     private show3d: (def: SceneDef) => boolean = () => false,
+    /** Travel caméra entre deux vues du même décor 3D (sinon null → fondu). */
+    private travel: (from: string, to: string) => Promise<void> | null = () => null,
   ) {}
 
   current(): SceneDef {
@@ -38,6 +40,16 @@ export class SceneManager {
     if (!this.content.scenes.has(id)) {
       console.error(`goto : scène inconnue "${id}"`);
       return false;
+    }
+    const move = this.travel(this.state.scene, id);
+    if (move) {
+      // gros plan ⇄ pièce : la caméra 3D voyage, les hotspots s'effacent le temps du trajet
+      this.layer.container.setVisible(false);
+      await move;
+      this.state.scene = id;
+      const first = this.markVisited();
+      this.layer.container.setVisible(true);
+      return first;
     }
     const cam = this.scene.cameras.main;
     await new Promise<void>((resolve) => {
