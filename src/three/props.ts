@@ -2,7 +2,7 @@
 // une pièce). Chaque fonction renvoie un Group dont l'origine est au sol, au
 // centre de la base : il suffit de le poser avec `at(prop, x, 0, z)`.
 import * as THREE from 'three';
-import { at, box, cyl, glow, group, label, mat, sphere, torus } from './kit';
+import { at, box, cyl, decal, glow, group, label, mat, sphere, torus, type DecalMark } from './kit';
 
 /** B.O.B., aspirateur-robot dépressif. `w` = diamètre. */
 export function bob(w: number): THREE.Group {
@@ -73,8 +73,11 @@ export function fusible(len: number): THREE.Group {
   return group([g]);
 }
 
-/** Flacon générique : corps + goulot + bouchon + étiquette. */
-export function bottle(w: number, h: number, color: string, text: string, kind: 'round' | 'square' | 'jar' | 'flask' = 'round'): THREE.Group {
+/**
+ * Flacon générique : corps + goulot + bouchon + étiquette pictographique
+ * (sans texte : le nom vient du survol). `mark` à null : pas d'étiquette.
+ */
+export function bottle(w: number, h: number, color: string, mark: DecalMark | null, kind: 'round' | 'square' | 'jar' | 'flask' = 'round'): THREE.Group {
   const parts: THREE.Object3D[] = [];
   const bodyH = kind === 'jar' ? h * 0.85 : h * 0.72;
   if (kind === 'square') parts.push(at(box(w, bodyH, w * 0.6, color), 0, bodyH / 2, 0));
@@ -88,11 +91,19 @@ export function bottle(w: number, h: number, color: string, text: string, kind: 
     parts.push(at(cyl(w * 0.52, w * 0.52, h * 0.12, '#f2efe6', { seg: 14 }), 0, bodyH + h * 0.06, 0));
   }
   if (kind === 'flask') parts.push(at(glow('#3ab36b', w * 2.2, 0.5), 0, w / 2, 0));
-  const lw = w * 0.92;
-  const lh = Math.min(bodyH * 0.6, w * 0.9);
-  const tag = label(text, lw, lh, { color: '#ffffff', bg: '#00000055', bold: true });
-  const front = kind === 'square' ? w * 0.31 : w / 2 + 0.005;
-  parts.push(at(tag, 0, kind === 'flask' ? w / 2 : bodyH * 0.5, front));
+  if (kind === 'flask') {
+    // fiole mystère : juste une étiquette volante nouée au goulot
+    const tag = at(box(w * 0.22, w * 0.15, 0.008, '#efe7d4', { edges: false }), w * 0.2, top - h * 0.02, w * 0.16);
+    tag.rotation.z = -0.35;
+    parts.push(tag, at(cyl(0.004, 0.004, w * 0.16, '#2a1f3a', { edges: false }), w * 0.1, top + h * 0.04, w * 0.1));
+  } else if (mark) {
+    const band = new THREE.Color(color).multiplyScalar(0.7).getStyle();
+    const dh = bodyH * (kind === 'jar' ? 0.5 : 0.42);
+    const dw = Math.min(dh * 1.33, w * (kind === 'square' ? 0.72 : 0.9));
+    const y = bodyH * (kind === 'jar' ? 0.48 : 0.5);
+    if (kind === 'square') parts.push(at(decal(dw, dh, band, mark), 0, y, w * 0.3 + 0.004));
+    else parts.push(at(decal(dw, dh, band, mark, w / 2 + 0.004), 0, y, 0));
+  }
   return group(parts);
 }
 
@@ -216,4 +227,127 @@ export function roach(len: number, crown = false): THREE.Group {
     parts.push(at(sphere(u * 0.03, '#ff5c7a', { glow: true }), u * 0.66, u * 0.4, 0));
   }
   return group(parts);
+}
+
+/** Texture de la plaque « Règlement n°1 » : émail bleu nuit, bandeau rouge, gravure ambre. */
+function reglementTexture(aspect: number): THREE.CanvasTexture {
+  const W = 1024;
+  const H = Math.round(W / aspect);
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d')!;
+  const DISPLAY = 'Bungee, "Chakra Petch", Impact, sans-serif';
+  const UI = '"Chakra Petch", "Trebuchet MS", sans-serif';
+  const bg = g.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#1d2148');
+  bg.addColorStop(1, '#10122c');
+  g.fillStyle = bg;
+  g.fillRect(0, 0, W, H);
+  // filet intérieur cyan + équerres
+  const m = 34;
+  g.strokeStyle = '#7fffd4';
+  g.globalAlpha = 0.5;
+  g.lineWidth = 3;
+  g.strokeRect(m, m, W - m * 2, H - m * 2);
+  g.globalAlpha = 1;
+  g.lineWidth = 8;
+  for (const [x, y, dx, dy] of [[m, m, 1, 1], [W - m, m, -1, 1], [m, H - m, 1, -1], [W - m, H - m, -1, -1]]) {
+    g.beginPath();
+    g.moveTo(x + dx * 60, y);
+    g.lineTo(x, y);
+    g.lineTo(x, y + dy * 60);
+    g.stroke();
+  }
+  // bandeau rouge
+  const bandY = m + 22;
+  const bandH = H * 0.16;
+  g.fillStyle = '#d62839';
+  g.fillRect(m + 22, bandY, W - (m + 22) * 2, bandH);
+  g.fillStyle = '#ffffff';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.font = `${Math.round(bandH * 0.55)}px ${DISPLAY}`;
+  g.fillText('RÈGLEMENT N°1', W / 2, bandY + bandH / 2 + 2);
+  // bande de danger
+  const hzY = bandY + bandH + 10;
+  g.save();
+  g.beginPath();
+  g.rect(m + 22, hzY, W - (m + 22) * 2, 16);
+  g.clip();
+  g.fillStyle = '#ffd166';
+  g.fillRect(0, hzY, W, 16);
+  g.fillStyle = '#10122c';
+  for (let x = -20; x < W; x += 36) {
+    g.beginPath();
+    g.moveTo(x, hzY + 16);
+    g.lineTo(x + 16, hzY);
+    g.lineTo(x + 34, hzY);
+    g.lineTo(x + 18, hzY + 16);
+    g.fill();
+  }
+  g.restore();
+  // consigne
+  const lines = ['NE JAMAIS NETTOYER', 'LE RÉACTEUR'];
+  let size = H * 0.13;
+  g.font = `${size}px ${DISPLAY}`;
+  const widest = Math.max(...lines.map((l) => g.measureText(l).width));
+  if (widest > W * 0.8) size *= (W * 0.8) / widest;
+  g.font = `${size}px ${DISPLAY}`;
+  g.fillStyle = '#ffd166';
+  g.shadowColor = '#ffd166';
+  g.shadowBlur = 14;
+  const textY = hzY + 30 + size * 0.75;
+  lines.forEach((l, i) => g.fillText(l, W / 2, textY + i * size * 1.15));
+  g.shadowBlur = 0;
+  // petits caractères
+  g.font = `600 ${Math.round(H * 0.035)}px ${UI}`;
+  g.fillStyle = '#a39cc4';
+  g.fillText("TOUTE INFRACTION SERA CÉLÉBRÉE · L'ORDINATEUR VOUS AIME", W / 2, textY + size * 1.15 + size * 0.9);
+  // ajout au marqueur, de travers
+  g.save();
+  g.translate(W * 0.6, H - m - H * 0.09);
+  g.rotate(-0.05);
+  g.font = `italic 600 ${Math.round(H * 0.05)}px ${UI}`;
+  g.fillStyle = '#f6efe2';
+  g.globalAlpha = 0.85;
+  g.fillText('n°2 : voir n°1. Sérieusement, Gary.', 0, 0);
+  g.restore();
+  // usure : rayures fines
+  g.globalAlpha = 0.06;
+  g.strokeStyle = '#ffffff';
+  g.lineWidth = 1.5;
+  for (let i = 0; i < 40; i++) {
+    const x = (i * 197) % W;
+    const y = (i * 131) % H;
+    g.beginPath();
+    g.moveTo(x, y);
+    g.lineTo(x + 30 + (i % 5) * 12, y + (i % 3) * 4 - 4);
+    g.stroke();
+  }
+  g.globalAlpha = 1;
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+
+/**
+ * Plaque réglementaire émaillée « Règlement n°1 », vissée au mur : cadre
+ * acier, quatre rivets, liseuse lumineuse au-dessus. Face +Z, origine au centre.
+ */
+export function reglementPlaque(w: number, h: number): THREE.Group {
+  const d = 0.06;
+  const frame = box(w, h, d, '#3a3f52');
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.94, h * 0.92), mat('#ffffff', { map: reglementTexture((w * 0.94) / (h * 0.92)) }));
+  face.receiveShadow = true;
+  face.position.z = d / 2 + 0.003;
+  const rivets = [-1, 1].flatMap((sx) => [-1, 1].map((sy) => at(sphere(w * 0.012, '#c9ced6', { seg: 8 }), sx * w * 0.485, sy * h * 0.47, d / 2 + 0.006)));
+  // liseuse : réglette métal + tube lumineux + halo
+  const lampY = h / 2 + h * 0.07;
+  const arm = at(box(w * 0.5, h * 0.05, 0.14, '#2b2f3a'), 0, lampY, 0.08);
+  const tube = at(box(w * 0.46, h * 0.018, 0.02, '#fff1c4', { glow: true }), 0, lampY - h * 0.03, 0.14);
+  const halo = at(glow('#fff1c4', w * 0.9, 0.22), 0, lampY - h * 0.08, 0.12);
+  halo.scale.y = 0.35;
+  return group([frame, face, ...rivets, arm, tube, halo]);
 }

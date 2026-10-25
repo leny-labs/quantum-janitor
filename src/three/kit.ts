@@ -97,7 +97,7 @@ const FONT = '"Chakra Petch", "Trebuchet MS", "DejaVu Sans", sans-serif';
 export interface LabelOpts {
   color?: string;
   bg?: string;
-  /** Hauteur de ligne en px de texture (résolution : 128 px / unité). */
+  /** Hauteur de ligne en px de texture, à l'échelle 128 px / unité. */
   size?: number;
   bold?: boolean;
   mono?: boolean;
@@ -106,7 +106,8 @@ export interface LabelOpts {
 
 /** Texture de texte, à poser sur un plan de taille w × h (unités monde). */
 export function textTexture(text: string, w: number, h: number, o: LabelOpts = {}): THREE.CanvasTexture {
-  const PX = 128;
+  // 320 px / unité, plafonné à 2048 : textes nets même en gros plan
+  const PX = Math.min(320, 2048 / Math.max(w, h));
   const c = document.createElement('canvas');
   c.width = Math.max(8, Math.round(w * PX));
   c.height = Math.max(8, Math.round(h * PX));
@@ -118,7 +119,7 @@ export function textTexture(text: string, w: number, h: number, o: LabelOpts = {
   const lines = text.split('\n');
   const family = o.mono ? '"Courier New", monospace' : FONT;
   const font = (px: number) => `${o.bold ? 'bold ' : ''}${px}px ${family}`;
-  let size = o.size ?? Math.min(c.height / (lines.length * 1.25), 48);
+  let size = o.size !== undefined ? (o.size * PX) / 128 : Math.min(c.height / (lines.length * 1.25), (48 * PX) / 128);
   // rétrécit le texte pour qu'il tienne en largeur
   g.font = font(size);
   const widest = Math.max(...lines.map((l) => g.measureText(l).width));
@@ -283,4 +284,123 @@ export function glow(color: string, size: number, opacity = 0.6): THREE.Sprite {
   );
   s.scale.set(size, size, 1);
   return s;
+}
+
+// ── décalcomanies (étiquettes sans texte) ─────────────────────────────
+
+/** Pictogramme imprimé sur une étiquette de produit. */
+export type DecalMark = 'drop' | 'swirl' | 'atom' | 'flame' | 'skull';
+
+const decalTextures = new Map<string, THREE.CanvasTexture>();
+
+/**
+ * Étiquette de flacon : papier crème, bandeau de la couleur du produit,
+ * pictogramme encré et lignes de « petits caractères » illisibles. Le nom
+ * du produit n'est donné qu'au survol (HUD) : l'objet reste un objet.
+ */
+export function decalTexture(band: string, mark: DecalMark): THREE.CanvasTexture {
+  const id = `${band}|${mark}`;
+  const cached = decalTextures.get(id);
+  if (cached) return cached;
+  const W = 256;
+  const H = 192;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d')!;
+  const ink = '#2a1f3a';
+  g.fillStyle = '#efe7d4';
+  g.beginPath();
+  g.roundRect(4, 4, W - 8, H - 8, 18);
+  g.fill();
+  g.save();
+  g.clip();
+  g.fillStyle = band;
+  g.fillRect(0, 0, W, 34);
+  g.fillStyle = ink;
+  g.globalAlpha = 0.85;
+  g.fillRect(0, 34, W, 5);
+  g.globalAlpha = 1;
+  g.restore();
+  // losange de danger, pictogramme au centre
+  const cx = W / 2;
+  const cy = 100;
+  const r = 44;
+  g.lineWidth = 7;
+  g.strokeStyle = ink;
+  g.lineJoin = 'round';
+  g.lineCap = 'round';
+  g.beginPath();
+  g.moveTo(cx, cy - r);
+  g.lineTo(cx + r, cy);
+  g.lineTo(cx, cy + r);
+  g.lineTo(cx - r, cy);
+  g.closePath();
+  g.stroke();
+  g.fillStyle = ink;
+  g.lineWidth = 5;
+  g.beginPath();
+  switch (mark) {
+    case 'drop':
+      g.moveTo(cx, cy - 20);
+      g.bezierCurveTo(cx + 18, cy, cx + 14, cy + 18, cx, cy + 18);
+      g.bezierCurveTo(cx - 14, cy + 18, cx - 18, cy, cx, cy - 20);
+      g.fill();
+      break;
+    case 'swirl':
+      for (let i = 0; i < 3; i++) {
+        const y = cy - 12 + i * 12;
+        g.moveTo(cx - 20, y);
+        g.bezierCurveTo(cx - 8, y - 8, cx + 4, y + 8, cx + 20, y - 2);
+      }
+      g.stroke();
+      break;
+    case 'atom':
+      for (const a of [0, Math.PI / 3, -Math.PI / 3]) g.ellipse(cx, cy, 22, 8, a, 0, Math.PI * 2);
+      g.stroke();
+      g.beginPath();
+      g.arc(cx, cy, 5, 0, Math.PI * 2);
+      g.fill();
+      break;
+    case 'flame':
+      g.moveTo(cx, cy - 22);
+      g.bezierCurveTo(cx + 22, cy - 2, cx + 14, cy + 20, cx, cy + 20);
+      g.bezierCurveTo(cx - 14, cy + 20, cx - 20, cy + 4, cx - 6, cy - 8);
+      g.bezierCurveTo(cx - 6, cy + 2, cx - 2, cy + 4, cx, cy + 2);
+      g.bezierCurveTo(cx + 2, cy - 6, cx - 2, cy - 14, cx, cy - 22);
+      g.fill();
+      break;
+    case 'skull':
+      g.arc(cx, cy - 4, 14, 0, Math.PI * 2);
+      g.fill();
+      g.fillRect(cx - 8, cy + 6, 16, 10);
+      g.fillStyle = '#efe7d4';
+      g.beginPath();
+      g.arc(cx - 5, cy - 4, 4, 0, Math.PI * 2);
+      g.arc(cx + 5, cy - 4, 4, 0, Math.PI * 2);
+      g.fill();
+      break;
+  }
+  // petits caractères (illisibles à dessein)
+  g.fillStyle = ink;
+  g.globalAlpha = 0.35;
+  for (const [y, w] of [[158, 150], [170, 110]] as const) g.fillRect(cx - w / 2, y, w, 5);
+  g.globalAlpha = 1;
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  decalTextures.set(id, t);
+  return t;
+}
+
+/**
+ * Étiquette collée sur un flacon, éclairée comme lui. Sans `radius` : plan
+ * face +Z ; avec : portion de cylindre qui épouse le corps (centrée sur +Z).
+ */
+export function decal(w: number, h: number, band: string, mark: DecalMark, radius?: number): THREE.Mesh {
+  const geo = radius ? new THREE.CylinderGeometry(radius, radius, h, 20, 1, true, -w / radius / 2, w / radius) : new THREE.PlaneGeometry(w, h);
+  const m = new THREE.MeshToonMaterial({ map: decalTexture(band, mark), gradientMap: gradientMap(), transparent: true, polygonOffset: true, polygonOffsetFactor: -2 });
+  const mesh = new THREE.Mesh(geo, m);
+  mesh.receiveShadow = true;
+  return mesh;
 }

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { at, box, cyl, glow, label, sphere, stripeTexture, mat } from '../kit';
-import { bob, bottle, seau, serpilliere } from '../props';
+import { bob, bottle, reglementPlaque, seau, serpilliere } from '../props';
 import type { RoomBuild } from './index';
 import { against, pipe, shell, wallPanels } from './shell';
 
@@ -52,16 +52,19 @@ export const placard: RoomBuild = {
     }
 
     // produits ménagers (hotspot « produits »)
-    const products: [rect: [number, number, number, number], color: string, text: string, kind: Parameters<typeof bottle>[4], shelf: number][] = [
-      [[70, 40, 50, 50], '#b33a3a', 'JAVEL\nQ.', 'square', 0],
-      [[140, 30, 40, 60], '#3a8fb3', 'BRISE\nDU VIDE', 'round', 0],
-      [[200, 50, 70, 40], '#8f3ab3', 'ANTI-\nFLUX', 'jar', 0],
-      [[80, 170, 90, 60], '#c9a13a', 'DÉGRAISSANT\nABSOLU', 'square', 1],
-      [[200, 180, 60, 50], '#3ab36b', '???', 'flask', 1],
+    // Formes et couleurs suffisent à les distinguer ; étiquettes pictogrammes
+    // seulement (javel, brise du vide, anti-flux, dégraissant, fiole mystère).
+    type Kind = Parameters<typeof bottle>[4];
+    const products: [rect: [number, number, number, number], color: string, mark: Parameters<typeof bottle>[3], kind: Kind, shelf: number][] = [
+      [[70, 40, 50, 50], '#b33a3a', 'drop', 'square', 0],
+      [[140, 30, 40, 60], '#3a8fb3', 'swirl', 'round', 0],
+      [[200, 50, 70, 40], '#8f3ab3', 'atom', 'jar', 0],
+      [[80, 170, 90, 60], '#c9a13a', 'flame', 'square', 1],
+      [[200, 180, 60, 50], '#3ab36b', null, 'flask', 1],
     ];
-    for (const [rect, color, text, kind, shelf] of products) {
+    for (const [rect, color, mark, kind, shelf] of products) {
       const p = s.stand(rect, shelfY[shelf]);
-      s.spot('produits', at(bottle(p.w, p.h, color, text, kind), p.x, shelfY[shelf], p.z));
+      s.spot('produits', at(bottle(p.w, p.h, color, mark, kind), p.x, shelfY[shelf], p.z));
     }
 
     // seau
@@ -96,12 +99,9 @@ export const placard: RoomBuild = {
     locker.add(dent);
     s.spot('casier', at(locker, cs.x, 0, against(cs.z, 0.9)));
 
-    // affiche de sécurité (de travers)
-    const af = s.fit(s.rect('affiche'), 0.03);
-    const poster = at(label('RÈGLEMENT\nN°1 :\nNE JAMAIS\nNETTOYER LE\nRÉACTEUR', af.w * 0.92, af.h * 0.92, { color: '#b33a3a', bg: '#e8e1c8', bold: true, lit: true }), af.x, af.y, 0.04);
-    poster.rotation.z = 0.04;
-    const pinA = at(sphere(0.05, '#d62839'), af.x - af.w * 0.4, af.y + af.h * 0.42, 0.06);
-    s.spot('affiche', poster, pinA);
+    // plaque réglementaire émaillée
+    const af = s.fit(s.rect('affiche'), 0.04);
+    s.spot('affiche', at(reglementPlaque(af.w * 0.96, af.h * 0.86), af.x, af.y - af.h * 0.04, 0.04));
 
     // porte vers le couloir, dans le mur de droite
     const d = s.fitX(s.rect('vers_couloir'), 6);

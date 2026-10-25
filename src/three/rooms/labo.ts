@@ -151,7 +151,11 @@ export const labo: RoomBuild = {
     for (const sx of [-1, 1]) for (const sz of [-1, 1]) desk.add(at(box(0.08, topY - 0.08, 0.08, '#4a3520'), sx * bs.w * 0.4, (topY - 0.08) / 2, sz * 0.48));
     desk.position.set(bs.x, 0, deskZ);
     const note = s.stand([1030, 350, 60, 30], topY);
-    const noteMesh = at(label('mot', note.w, note.h * 0.8, { color: '#333333', bg: '#ffffaa', lit: true }), note.x, topY + note.h * 0.4, Math.min(note.z, deskZ + 0.35));
+    // tablette de notes posée sur son pied (écran allumé)
+    const noteMesh = new THREE.Group();
+    noteMesh.add(box(note.w, note.h * 0.8, 0.04, '#2b2f3a'));
+    noteMesh.add(at(label('NOTE DE SERVICE\n— — — —\n— — —', note.w * 0.86, note.h * 0.66, { color: '#7fffd4', bg: '#0d1a24', bold: true }), 0, 0, 0.022));
+    noteMesh.position.set(note.x, topY + note.h * 0.4, Math.min(note.z, deskZ + 0.35));
     noteMesh.rotation.x = -0.35;
     const cup = s.stand([1120, 340, 40, 40], topY);
     const steam = at(glow('#ffffff', cup.w * 2, 0.15), cup.x, topY + cup.w * 1.8, Math.min(cup.z, deskZ + 0.2));

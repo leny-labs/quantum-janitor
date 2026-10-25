@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
-import { drawLed, drawPanel } from './chrome';
+import { drawLed, drawPanel, verbIcon, verbIconScale, verbIconTexture, type VerbIcon } from './chrome';
 import { COLORS, FONT, H, W, hex } from './theme';
 
 export interface Verb {
   label: string;
   run: () => void;
+  /** Picto forcé ; sinon déduit du libellé. */
+  icon?: VerbIcon;
 }
 
 /** Petit menu contextuel « Regarder / Utiliser / Parler ». */
@@ -27,8 +29,8 @@ export class VerbMenu {
     this.blocker = s.add.rectangle(0, 0, W, H, 0, 0.001).setOrigin(0).setDepth(850).setInteractive();
     this.blocker.on('pointerdown', () => this.close());
 
-    const itemH = 38;
-    const width = 250;
+    const itemH = 44;
+    const width = 272;
     const head = 40;
     const foot = 24;
     const height = head + verbs.length * itemH + foot;
@@ -49,22 +51,26 @@ export class VerbMenu {
     verbs.forEach((v, i) => {
       const ry = head + 4 + i * itemH;
       const bar = s.add.graphics();
-      const label = s.add.text(40, ry + itemH / 2, v.label, { fontFamily: FONT, fontSize: '21px', fontStyle: '600', color: COLORS.text }).setOrigin(0, 0.5);
-      const key = s.add.text(width - 16, ry + itemH / 2, String(i + 1), { fontFamily: FONT, fontSize: '12px', fontStyle: '700', color: COLORS.dim }).setOrigin(1, 0.5);
+      const cy = ry + itemH / 2;
+      const slot = 30;
+      const sx = 14;
+      const icon = s.add.image(sx + slot / 2, cy, verbIconTexture(s, v.icon ?? verbIcon(v.label))).setScale(verbIconScale());
+      const label = s.add.text(sx + slot + 14, cy, v.label, { fontFamily: FONT, fontSize: '21px', fontStyle: '600', color: COLORS.text }).setOrigin(0, 0.5);
+      const key = s.add.text(width - 16, cy, String(i + 1), { fontFamily: FONT, fontSize: '12px', fontStyle: '700', color: COLORS.dim }).setOrigin(1, 0.5);
       const paint = (on: boolean) => {
         bar.clear();
+        const tone = hex(on ? COLORS.hover : COLORS.accent);
         if (on) {
-          bar.fillStyle(hex(COLORS.hover), 0.14);
-          bar.fillRect(6, ry + 2, width - 12, itemH - 4);
+          bar.fillStyle(hex(COLORS.hover), 0.12);
+          bar.fillRect(6, ry + 3, width - 12, itemH - 6);
           bar.fillStyle(hex(COLORS.hover), 1);
-          bar.fillRect(6, ry + 2, 3, itemH - 4);
+          bar.fillRect(6, ry + 3, 3, itemH - 6);
         }
-        bar.fillStyle(hex(on ? COLORS.hover : COLORS.accent), 1);
-        const cx = 24;
-        const cy = ry + itemH / 2;
-        bar.fillTriangle(cx - 5, cy, cx, cy - 5, cx + 5, cy);
-        bar.fillTriangle(cx - 5, cy, cx, cy + 5, cx + 5, cy);
+        // logement du picto : petit cadre biseauté
+        drawPanel(bar, sx, cy - slot / 2, slot, slot, { cut: 6, fill: COLORS.ink, fillAlpha: 0.7, edge: tone, edgeAlpha: on ? 0.95 : 0.45, glow: on });
+        icon.setTint(tone);
         label.setColor(on ? COLORS.hover : COLORS.text);
+        key.setColor(on ? COLORS.hover : COLORS.dim);
       };
       paint(false);
       const zone = s.add.zone(0, ry, width, itemH).setOrigin(0).setInteractive({ useHandCursor: true });
@@ -74,7 +80,7 @@ export class VerbMenu {
         this.close();
         v.run();
       });
-      root.add([bar, label, key, zone]);
+      root.add([bar, icon, label, key, zone]);
     });
     root.add(
       s.add

@@ -97,14 +97,14 @@ hotspots:
     use: "Rien d'utile là-dedans. Sauf si on doit vaincre l'univers avec de la culpabilité maternelle."
 
   - id: affiche
-    label: Affiche de sécurité
+    label: Plaque réglementaire
     rect: [560, 190, 190, 150]
     art:
       - { rect: [565, 195, 180, 140], color: "#e8e1c8", stroke: "#b33a3a" }
       - { text: "RÈGLEMENT\nN°1 :\nNE JAMAIS\nNETTOYER LE\nRÉACTEUR", at: [655, 265], size: 14, color: "#b33a3a" }
     look:
-      - say: "« Règlement n°1 : ne jamais nettoyer le Réacteur d'Improbabilité. » En dessous, à la main : « Règlement n°2 : voir règlement n°1. Sérieusement, Gary. »"
-      - say: "Ils m'ont nommé. Sur une affiche officielle. C'est presque une promotion."
+      - say: "« Règlement n°1 : ne jamais nettoyer le Réacteur d'Improbabilité. » En dessous, au marqueur : « Règlement n°2 : voir règlement n°1. Sérieusement, Gary. »"
+      - say: "Ils m'ont nommé. Sur une plaque officielle, émaillée. C'est presque une promotion."
 
 exits:
   - id: vers_couloir
