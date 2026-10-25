@@ -1,0 +1,26 @@
+# Configuration générale du jeu
+title: "Quantum Janitor — Chapitre 0 : Le Seau"
+startScene: placard
+
+# Personnages pouvant parler. Dans l'Ink ou un `say:`, préfixer la ligne par
+# l'id : « bob: Bonjour. ». Sans préfixe : narrateur (Ink) ou Gary (say YAML).
+characters:
+  - id: gary
+    name: Gary Plunk
+    color: "#ff8c42"
+    portrait: "GARY\n(o_O)"
+  - id: bob
+    name: B.O.B.
+    color: "#7c8794"
+    portrait: "B.O.B.\n(T_T)"
+  - id: sylvie
+    name: SYLVIE — IA de station
+    color: "#1f7f73"
+    portrait: "[ S ]\n≋≋≋≋"
+  - id: reine
+    name: Sa Majesté Blattaria XIV
+    color: "#6b3a12"
+    portrait: "♛\n(◉ ◉)"
+  - id: narrateur
+    name: ""
+    color: "#000000"

@@ -1,0 +1,167 @@
+id: couloir
+title: Couloir de service C
+background: "#22283a"
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#171b28" }                   # sol
+  - { rect: [0, 462, 1280, 8], color: "#3a4260" }
+  - { rect: [0, 30, 1280, 10], color: "#3a4260" }                      # rail lumineux
+  - { if: { notFlags: [fusible_retire] }, rect: [0, 40, 1280, 4], color: "#9fd8ff", alpha: 0.7 }
+  - { if: { flags: [fusible_retire] }, rect: [0, 40, 1280, 4], color: "#ff5c7a", alpha: 0.5 }
+  - { rect: [1000, 120, 170, 350], color: "#2f3a55", stroke: "#7fffd4" } # porte du labo (cadre)
+  - { if: { notFlags: [labo_ouvert] }, rect: [1010, 130, 150, 335], color: "#3d4a6b" }
+  - { if: { notFlags: [labo_ouvert] }, text: "LABO\nRÉACTEUR\n☢ ACCÈS\nRESTREINT", at: [1085, 210], size: 16, color: "#ffd166" }
+  - { if: { flags: [labo_ouvert] }, rect: [1010, 130, 150, 335], color: "#0b0b12" }
+  - { if: { flags: [labo_ouvert] }, text: "(ouvert)", at: [1085, 300], size: 16, color: "#7fffd4" }
+
+hotspots:
+  - id: distributeur
+    label: Distributeur « Distrib'Ô-Matic 3000 »
+    rect: [140, 110, 220, 360]
+    art:
+      - { rect: [150, 120, 200, 345], color: "#8a2b3c", stroke: "#ffffff" }
+      - { rect: [170, 140, 160, 220], color: "#1a2a3a", stroke: "#9fd8ff", alpha: 0.9 }
+      - { text: "DISTRIB'Ô-MATIC 3000", at: [250, 385], size: 13, color: "#ffffff" }
+      - { rect: [190, 420, 120, 28], color: "#111111" }
+      - { if: { notFlags: [sandwich_tombe] }, rect: [210, 250, 80, 40], color: "#8fae3a", stroke: "#ffffff", text: "SAND", size: 12 }
+      - { if: { flags: [fusible_retire] }, rect: [150, 120, 200, 345], color: "#000000", alpha: 0.55 }
+    look:
+      - if: { flags: [sandwich_tombe] }
+        say: "Le distributeur est vide. Comme mon compte en banque. Comme le regard de B.O.B."
+        stop: true
+      - say: "Un distributeur. Un seul produit dedans : un sandwich coincé contre la spirale depuis l'inauguration de la station."
+      - say: "Étiquette : « Thon-Mayo-Mystère ». Le mystère, c'est surtout la date limite."
+    use:
+      - if: { flags: [sandwich_tombe] }
+        say: "Il n'y a plus rien à tirer de cette machine. À part de la tristesse, et elle est gratuite."
+        stop: true
+      - say: "narrateur: Gary donne un coup de pied dans la machine. L'écran affiche : « COUP DE PIED FACTURÉ : 2 CRÉDITS »."
+      - say: "Le sandwich est coincé contre la vitre. Il faudrait le pousser avec quelque chose de long, par la trappe de sortie."
+    useItem:
+      serpilliere:
+        - if: { flags: [sandwich_tombe] }
+          say: "Il n'y a plus rien à décoincer."
+          stop: true
+        - say: "narrateur: Gary glisse le manche de la serpillière par la trappe, vise, et donne un petit coup. Le sandwich tombe avec un bruit mou, presque un soupir."
+          give: sandwich
+          set: sandwich_tombe
+        - say: "Il est à moi. Je ne sais pas si c'est une victoire."
+      badge: "Ce n'est pas un lecteur de badge, c'est un distributeur. Même s'il me prend aussi pour un pigeon."
+
+  - id: fusibles
+    label: Boîte à fusibles
+    rect: [480, 170, 150, 170]
+    art:
+      - { rect: [490, 180, 130, 150], color: "#5b5f6b", stroke: "#ffd166" }
+      - { text: "⚡ CIRCUIT 7B\nDistributeur &\néclairage\nd'ambiance", at: [555, 235], size: 12, color: "#ffd166" }
+      - { if: { notFlags: [fusible_retire] }, rect: [535, 290, 40, 26], color: "#d94f4f", stroke: "#ffffff", text: "7B", size: 12 }
+      - { if: { flags: [fusible_retire] }, rect: [535, 290, 40, 26], color: "#111111", stroke: "#666666" }
+    look:
+      - if: { flags: [fusible_retire] }
+        say: "Le logement du fusible 7B est vide. Le distributeur est mort. Je ne le regretterai pas. Lui non plus."
+        stop: true
+      - say: "Une boîte à fusibles. Le fusible 7B alimente le distributeur et « l'éclairage d'ambiance », qui consiste en une seule LED bleue triste."
+    useLabel: Prendre le fusible
+    use:
+      - if: { flags: [fusible_retire] }
+        say: "Il n'y a plus de fusible. J'ai déjà tout pris. C'est mon côté pirate."
+        stop: true
+      - if: { notFlags: [sait_fusible] }
+        say: "Je ne touche pas aux fusibles sans raison. C'est dans mon contrat, page 47, juste après la clause « pas de pleurs dans les sas »."
+        stop: true
+      - say: "narrateur: Gary retire le fusible 7B. Le distributeur s'éteint dans un dernier « bzzouiiip ». La LED d'ambiance vire au rouge."
+        give: fusible
+        set: fusible_retire
+      - say: "Un panneau de réacteur a besoin d'un fusible. Un distributeur n'a besoin que d'amour. Priorités."
+
+  - id: hublot
+    label: Hublot
+    rect: [680, 90, 240, 160]
+    art:
+      - { rect: [690, 100, 220, 140], color: "#05050c", stroke: "#9aa5b1" }
+      - { circle: [730, 140, 2], color: "#ffffff" }
+      - { circle: [800, 200, 1.5], color: "#ffffff" }
+      - { circle: [860, 130, 2.5], color: "#ffffff" }
+      - { circle: [880, 210, 10], color: "#d97a3a" }
+    look: "L'espace. Infini, froid, silencieux. Et pourtant moins vide que ma vie sociale."
+
+  - id: compteur
+    label: Panneau « Jours sans incident »
+    rect: [680, 280, 240, 90]
+    art:
+      - { rect: [690, 290, 220, 70], color: "#111111", stroke: "#7fffd4" }
+      - { text: "KLEPSYDRA-9\n0098 JOURS SANS INCIDENT\nD'IMPROBABILITÉ", at: [800, 325], size: 13, color: "#7fffd4" }
+    look: "« 98 jours sans incident d'improbabilité. » Le record est de 99. Je ne sais pas pourquoi, mais j'ai l'impression qu'on ne va pas le battre."
+
+  - id: lecteur
+    label: Lecteur de badge
+    rect: [1180, 240, 70, 110]
+    art:
+      - { rect: [1190, 250, 50, 90], color: "#2a2a2a", stroke: "#ffffff" }
+      - { if: { notFlags: [lecteur_propre] }, rect: [1192, 262, 46, 60], color: "#7fbf3f", alpha: 0.85 }
+      - { if: { notFlags: [lecteur_propre] }, text: "beurk", at: [1215, 292], size: 11, color: "#1a3a00" }
+      - { if: { flags: [lecteur_propre] }, circle: [1215, 290, 10], color: "#7fffd4" }
+    look:
+      - if: { flags: [lecteur_propre] }
+        say: "Le lecteur est propre. Il brille. C'est la plus belle chose que j'aie jamais nettoyée. J'en ai un peu les larmes aux yeux."
+        stop: true
+      - say: "Un lecteur de badge recouvert d'une croûte verdâtre. On dirait du yaourt. Du yaourt qui... respire."
+    use:
+      - if: { notItems: [badge] }
+        say: "Pour ouvrir, il me faut mon badge. Que je n'ai pas. Classique."
+        stop: true
+      - say: "Il faudrait passer mon badge dessus. Je le sélectionne dans l'inventaire et j'essaie."
+    useItem:
+      badge:
+        - if: { flags: [labo_ouvert] }
+          say: "C'est déjà ouvert. Je ne vais pas badger deux fois, la RH compterait des heures sup'."
+          stop: true
+        - if: { notFlags: [lecteur_propre] }
+          say: "sylvie: LECTEUR ENCRASSÉ. VEUILLEZ CONTACTER UN AGENT D'ENTRETIEN."
+        - if: { notFlags: [lecteur_propre] }
+          say: "C'est moi, l'agent d'entretien."
+        - if: { notFlags: [lecteur_propre] }
+          say: "sylvie: VEUILLEZ CONTACTER UN AGENT D'ENTRETIEN COMPÉTENT."
+          stop: true
+        - dialogue: badge_porte
+      serpilliere:
+        - if: { flags: [lecteur_propre] }
+          say: "Il est déjà propre. Plus propre que ça, il deviendrait transparent."
+          stop: true
+        - if: { notFlags: [serpilliere_mouillee] }
+          say: "Avec une serpillière sèche ? Ça étale, ça ne nettoie pas. Il faut d'abord la tremper dans quelque chose. Quelque chose de bien sale, par tradition."
+          stop: true
+        - say: "narrateur: Gary frotte. Le yaourt résiste, couine, puis abandonne. Gary rince ensuite la serpillière dans son seau. Par habitude. Par professionnalisme."
+          set: lecteur_propre
+        - say: "Et voilà. Brillant. Le yaourt est maintenant dans mon seau, mais c'est un problème pour Gary du futur."
+      seau: "Jeter un seau d'eau sur un appareil électronique ? Non. Pas aujourd'hui. Peut-être plus tard, si la journée se passe mal."
+
+  - id: bob
+    label: B.O.B.
+    rect: [760, 440, 170, 70]
+    if: { flags: [bob_suit] }
+    art:
+      - { rect: [775, 455, 140, 45], color: "#7c8794", stroke: "#ffffff" }
+      - { circle: [815, 474, 6], color: "#ffffff" }
+      - { circle: [875, 474, 6], color: "#ffffff" }
+    look: "B.O.B. me suit partout. Il dit que c'est par loyauté. Je pense que c'est parce que je suis la seule source de miettes de la station."
+    talk:
+      - dialogue: bob_compagnon
+    useItemDefault: "bob: Non merci, Gary. Je suis encore en train de digérer le thon."
+
+exits:
+  - id: vers_placard
+    label: Placard à balais
+    to: placard
+    dir: left
+    rect: [10, 140, 110, 330]
+  - id: vers_labo
+    label: Laboratoire du Réacteur
+    to: labo
+    dir: right
+    rect: [1010, 130, 150, 335]
+    requires: { flags: [labo_ouvert] }
+    lockedText:
+      - say: "La porte du labo est verrouillée. Il y a un lecteur de badge juste à droite."
+      - if: { notItems: [badge] }
+        say: "Et je n'ai pas mon badge. Bien sûr."

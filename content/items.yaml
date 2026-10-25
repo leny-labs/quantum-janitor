@@ -1,0 +1,45 @@
+# Objets d'inventaire.
+# look    : texte (ou actions) quand on examine l'objet (clic droit).
+# combine : sélectionner CET objet puis cliquer sur l'objet <clé> dans l'inventaire.
+items:
+  - id: seau
+    name: Seau
+    icon: { color: "#3d7dd8", glyph: "SEAU" }
+    look:
+      - say: "Mon seau. Eau grise de catégorie 4, plus une dose de « Dégraissant Absolu ». Ça brille un peu dans le noir. C'est normal. Je crois."
+      - if: { flags: [lecteur_propre] }
+        say: "Maintenant avec du yaourt du lecteur de badge dedans. Le yaourt bouge. Je fais comme si je n'avais rien vu."
+
+  - id: serpilliere
+    name: Serpillière
+    icon: { color: "#c9b458", glyph: "SERP" }
+    look:
+      - if: { flags: [serpilliere_mouillee] }
+        say: "Ma serpillière. Trempée, lourde, légèrement phosphorescente. Prête au combat."
+        stop: true
+      - say: "Ma serpillière. Sèche. Une serpillière sèche, c'est juste un balai qui a abandonné ses rêves."
+    combine:
+      seau:
+        - if: { flags: [serpilliere_mouillee] }
+          say: "Elle est déjà trempée. Plus, ce serait de l'acharnement."
+          stop: true
+        - say: "narrateur: Gary trempe la serpillière dans le seau. Elle ressort gluante, lourde, et émet un léger bourdonnement."
+          set: serpilliere_mouillee
+        - say: "Parfait. Exactement la consistance réglementaire."
+
+  - id: badge
+    name: Badge « Garry »
+    icon: { color: "#e0e0e0", glyph: "ID" }
+    look: "Mon badge. « GARRY PLUNK — Agent d'entretien (intérim) ». Deux R. La RH refuse de corriger. Il est encore tiède de l'intérieur de B.O.B."
+
+  - id: sandwich
+    name: Sandwich douteux
+    icon: { color: "#8fae3a", glyph: "SAND" }
+    look: "« Thon-Mayo-Mystère ». Date limite dépassée de trois ans. Il émet un petit sifflement. Je ne savais pas que les sandwichs pouvaient siffler."
+    combine:
+      seau: "Tremper le sandwich dans le seau ? Non. Il a déjà assez souffert. Moi aussi."
+
+  - id: fusible
+    name: Fusible 7B
+    icon: { color: "#d94f4f", glyph: "7B" }
+    look: "Un fusible marqué « 7B ». Il est tiède. Tout est tiède sur cette station. C'est inquiétant."

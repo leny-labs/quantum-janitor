@@ -1,0 +1,124 @@
+id: labo
+title: Laboratoire du Réacteur d'Improbabilité
+background: "#1c1430"
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#120d20" }
+  - { rect: [0, 462, 1280, 8], color: "#4d3a7a" }
+  - { circle: [640, 260, 260], color: "#b06cff", alpha: 0.07 }        # halo du réacteur
+  - { circle: [640, 260, 190], color: "#b06cff", alpha: 0.08 }
+  - { text: "☢  ZONE D'IMPROBABILITÉ — PORT DU CASQUE CONSEILLÉ (CASQUE NON FOURNI)", at: [760, 32], size: 14, color: "#ffd166" }
+  # console de contrôle (la sortie « gros plan » est posée dessus)
+  - { rect: [180, 330, 220, 130], color: "#2a3444", stroke: "#9aa5b1" }
+  - { rect: [200, 290, 180, 50], color: "#050a08", stroke: "#7fffd4" }
+  - { circle: [350, 400, 18], color: "#d62839", stroke: "#ffffff" }
+  - { rect: [215, 380, 70, 40], color: "#222c3a", stroke: "#ffd166" }
+  - { text: "CONSOLE", at: [290, 440], size: 12, color: "#9aa5b1" }
+
+hotspots:
+  - id: reacteur
+    label: Réacteur d'Improbabilité Mk IV
+    rect: [500, 60, 280, 400]
+    art:
+      - { rect: [520, 80, 240, 380], color: "#2a1d4a", stroke: "#b06cff" }
+      - { rect: [580, 110, 120, 320], color: "#b06cff", alpha: 0.6, stroke: "#ffffff" }
+      - { circle: [640, 170, 26], color: "#ffffff", alpha: 0.8 }
+      - { circle: [640, 270, 18], color: "#ffd166", alpha: 0.8 }
+      - { circle: [640, 360, 30], color: "#7fffd4", alpha: 0.7 }
+      - { text: "Mk IV", at: [640, 445], size: 16, color: "#ffffff" }
+      - { if: { flags: [refroidissement_verse] }, text: "glou… glou…", at: [640, 60], size: 16, color: "#7fbf3f" }
+    look:
+      - say: "Le Réacteur d'Improbabilité Mark IV. Il transforme l'improbable en énergie. Il ronronne."
+      - say: "Parfois, il ronronne en morse. Le message dit « aidez-moi ». Ou « ail de moi ». Mon morse est rouillé."
+      - if: { flags: [refroidissement_verse] }
+        say: "Et maintenant il fait des bulles. Des bulles qui sentent le thon."
+    use: "Toucher le réacteur ? Règlement n°1. Il y a une affiche avec mon nom dessus, je ne vais pas la décevoir."
+    useItem:
+      seau: "Le verser directement dessus ? Non, il y a une trappe pour ça, à droite. Je suis un professionnel. Un professionnel désespéré, mais un professionnel."
+      serpilliere: "Nettoyer le réacteur avec Josiane ? Règlement n°1. Et Josiane a peur des radiations."
+
+  - id: trappe
+    label: Trappe d'admission de refroidissement
+    rect: [820, 360, 150, 100]
+    art:
+      - { rect: [830, 370, 130, 80], color: "#3a3f55", stroke: "#7fffd4" }
+      - { text: "REFROIDISSEMENT\n(admission)", at: [895, 395], size: 11, color: "#7fffd4" }
+      - { if: { notFlags: [panneau_allume] }, text: "VERROUILLÉ", at: [895, 430], size: 12, color: "#ff5c7a" }
+      - { if: { flags: [panneau_allume], notFlags: [refroidissement_verse] }, text: "OUVERT — VIDE 0 %", at: [895, 430], size: 12, color: "#ffd166" }
+      - { if: { flags: [refroidissement_verse] }, text: "PLEIN 100 %", at: [895, 430], size: 12, color: "#7fbf3f" }
+    look:
+      - if: { notFlags: [panneau_allume] }
+        say: "Une trappe marquée « REFROIDISSEMENT ». Verrouillée tant que le panneau de contrôle est hors tension."
+        stop: true
+      - if: { flags: [refroidissement_verse] }
+        say: "Le réservoir est plein. De mon eau. De mon seau. Avec du yaourt. J'ai un très léger doute."
+        stop: true
+      - say: "La trappe est ouverte. Étiquette : « Liquide de refroidissement réglementaire UNIQUEMENT ». Le réservoir est à sec."
+    use:
+      - if: { notFlags: [panneau_allume] }
+        say: "Verrouillée. Le panneau de contrôle doit être alimenté."
+        stop: true
+      - if: { flags: [refroidissement_verse] }
+        say: "Plein. Si j'en rajoute, ça va déborder. Et devinez qui devra nettoyer."
+        stop: true
+      - say: "Il faut verser un liquide de refroidissement là-dedans. Je n'ai pas de liquide de refroidissement. J'ai... un seau."
+    useItem:
+      seau:
+        - if: { notFlags: [panneau_allume] }
+          say: "La trappe est verrouillée. Il faut d'abord remettre le panneau sous tension."
+          stop: true
+        - dialogue: verser_seau
+      sandwich: "Refroidir un réacteur avec un sandwich. Ce serait l'idée la plus bête de la journée. La journée n'est pas finie."
+
+  - id: tableau
+    label: Tableau blanc
+    rect: [910, 80, 300, 190]
+    art:
+      - { rect: [920, 90, 280, 170], color: "#eeeeee", stroke: "#888888" }
+      - { text: "I = P⁻¹ × café\n\nNE JAMAIS VERSER\nDE LIQUIDE NON\nRÉGLEMENTAIRE !!!\n— Dr Halvorsen  :'(", at: [1060, 175], size: 14, color: "#333366" }
+    look:
+      - say: "« Improbabilité = Probabilité⁻¹ × café. » Et en dessous : « NE JAMAIS VERSER DE LIQUIDE NON RÉGLEMENTAIRE DANS LE RÉACTEUR. — Dr Halvorsen »."
+      - say: "Souligné trois fois. Avec un petit smiley qui pleure. Les scientifiques sont tellement dramatiques."
+
+  - id: bureau
+    label: Bureau des scientifiques
+    rect: [960, 300, 260, 160]
+    art:
+      - { rect: [990, 380, 220, 20], color: "#6b4e2e" }
+      - { rect: [1000, 400, 12, 60], color: "#6b4e2e" }
+      - { rect: [1190, 400, 12, 60], color: "#6b4e2e" }
+      - { rect: [1030, 350, 60, 30], color: "#ffffaa", stroke: "#999999", text: "mot", size: 12 }
+      - { rect: [1120, 340, 40, 40], color: "#ffffff", stroke: "#999999", text: "café", size: 11 }
+    look:
+      - say: "Un mot sur le bureau : « Partis en séminaire de cohésion sur Mercure. Si le réacteur fait des bruits bizarres, NE RIEN TOUCHER. »"
+      - say: "« Sauf si c'est un bruit de type PLOUF. Dans ce cas : fuyez. Bisous. L'équipe. »"
+    use: "Le café est froid depuis trois semaines. Il a développé une conscience. Je le laisse tranquille."
+
+  - id: bob
+    label: B.O.B.
+    rect: [250, 460, 170, 70]
+    if: { flags: [bob_suit] }
+    art:
+      - { rect: [265, 470, 140, 45], color: "#7c8794", stroke: "#ffffff" }
+      - { circle: [305, 489, 6], color: "#ffffff" }
+      - { circle: [365, 489, 6], color: "#ffffff" }
+    look: "B.O.B. tremble légèrement. Il dit que c'est le champ d'improbabilité. Je pense que c'est la peur."
+    talk:
+      - dialogue: bob_compagnon
+    useItemDefault: "bob: Gary, je ne suis pas une poubelle. Enfin, si. Mais j'ai des sentiments."
+
+exits:
+  - id: vers_couloir
+    label: Couloir de service
+    to: couloir
+    dir: left
+    rect: [10, 140, 110, 320]
+  - id: vers_panneau
+    label: Panneau de contrôle (gros plan)
+    to: panneau
+    dir: up
+    rect: [170, 270, 240, 170]
+
+
+onFirstEnter:
+  - dialogue: labo_entree
