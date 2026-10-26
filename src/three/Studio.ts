@@ -10,6 +10,7 @@
 import Phaser from 'phaser';
 import * as THREE from 'three';
 import { at, cyl, glow } from './kit';
+import type { Mood } from '../engine/mood';
 import { badge, bob, fusible, gary, roach, sandwich, seau, serpilliere, setFace, sylvie, type FacePose } from './props';
 
 export const iconKey = (id: string) => `icon3d:${id}`;
@@ -148,7 +149,7 @@ export const PORTRAIT_IDS = Object.keys(PORTRAITS);
  * Planches GenAI (docs/PORTRAIT_GENAI.md) : jamais rebakées, ni par
  * `bake:portraits` ni au runtime — le 3D suit l'image, pas l'inverse.
  */
-export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary']);
+export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie']);
 
 function makeRenderer(): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
@@ -300,6 +301,107 @@ export const PORTRAIT_OVERLAYS: Readonly<Record<string, PortraitOverlay>> = {
       { frame: 0, duration: 600 },
     ],
   },
+};
+
+/** Boucles idle / talk d'une planche (mêmes pas que SHEET). */
+export interface SheetLoops {
+  idle: readonly OverlayStep[];
+  talk: readonly OverlayStep[];
+}
+
+/**
+ * Planches à humeurs (contrat partagé avec docs/PORTRAIT_GENAI.md) : chaque
+ * humeur a ses propres boucles idle / talk dans la planche 4 × 2, à la place
+ * de SHEET. SYLVIE : ligne 1 = yeux calm · suspicious · angry · love, ligne 2 =
+ * leur variante « accent » (clignement, plissement, tressaillement, cœurs qui
+ * battent). Pas de bouche dans la planche : l'onde est procédurale (PORTRAIT_WAVES),
+ * donc talk ne change que le rythme des yeux.
+ */
+export const PORTRAIT_MOODS: Readonly<Record<string, { fallback: Mood; loops: Readonly<Record<Mood, SheetLoops>> }>> = {
+  sylvie: {
+    fallback: 'calm',
+    loops: {
+      calm: {
+        idle: [
+          { frame: 0, duration: 2600 },
+          { frame: 4, duration: 110 },
+          { frame: 0, duration: 1900 },
+          { frame: 4, duration: 90 },
+          { frame: 0, duration: 140 },
+          { frame: 4, duration: 90 },
+        ],
+        talk: [
+          { frame: 0, duration: 1800 },
+          { frame: 4, duration: 100 },
+        ],
+      },
+      suspicious: {
+        idle: [
+          { frame: 1, duration: 1500 },
+          { frame: 5, duration: 700 },
+          { frame: 1, duration: 2000 },
+          { frame: 5, duration: 300 },
+        ],
+        talk: [
+          { frame: 1, duration: 1200 },
+          { frame: 5, duration: 500 },
+        ],
+      },
+      angry: {
+        idle: [
+          { frame: 2, duration: 900 },
+          { frame: 6, duration: 80 },
+          { frame: 2, duration: 120 },
+          { frame: 6, duration: 80 },
+          { frame: 2, duration: 1500 },
+        ],
+        talk: [
+          { frame: 2, duration: 500 },
+          { frame: 6, duration: 70 },
+          { frame: 2, duration: 300 },
+          { frame: 6, duration: 70 },
+        ],
+      },
+      love: {
+        // battement de cœur : boum-boum, pause
+        idle: [
+          { frame: 3, duration: 700 },
+          { frame: 7, duration: 140 },
+          { frame: 3, duration: 160 },
+          { frame: 7, duration: 140 },
+        ],
+        talk: [
+          { frame: 3, duration: 450 },
+          { frame: 7, duration: 120 },
+          { frame: 3, duration: 130 },
+          { frame: 7, duration: 120 },
+        ],
+      },
+    },
+  },
+};
+
+/** Boucles d'un personnage pour une humeur (planche à humeurs), sinon SHEET. */
+export function sheetLoops(id: string, mood?: Mood): SheetLoops {
+  const m = PORTRAIT_MOODS[id];
+  return m ? m.loops[mood ?? m.fallback] : SHEET;
+}
+
+/**
+ * Bouche-onde procédurale (façon B.O.B.) dessinée par-dessus la planche
+ * (contrat partagé avec docs/PORTRAIT_GENAI.md) : de `x0` à `x1`, centrée en
+ * `y`, amplitude max `amp`, en px d'une cellule de `cell` px.
+ */
+export interface PortraitWave {
+  cell: number;
+  x0: number;
+  x1: number;
+  y: number;
+  amp: number;
+}
+
+export const PORTRAIT_WAVES: Readonly<Record<string, PortraitWave>> = {
+  sylvie: { cell: 256, x0: 62, x1: 188, y: 161, amp: 13 },
 };
 
 function shootSingle(renderer: THREE.WebGLRenderer, pose: Pose, size: number, bg?: [string, string]): HTMLCanvasElement {

@@ -4,7 +4,7 @@ import type { Action, Interaction } from './types';
 
 /** Services que l'hôte (la scène Phaser) fournit à l'exécuteur d'actions. */
 export interface ActionHost {
-  say(text: string): Promise<void>;
+  say(text: string, mood?: string): Promise<void>;
   dialogue(knot: string): Promise<Action[]>;
   goto(scene: string): Promise<void>;
   end(knot: string): Promise<void>;
@@ -25,7 +25,7 @@ export class ActionRunner {
   private async runList(actions: Action[]): Promise<boolean> {
     for (const a of actions) {
       if (!this.state.check(a.if)) continue;
-      if (a.say) await this.host.say(a.say);
+      if (a.say) await this.host.say(a.say, a.mood);
       if (a.dialogue) {
         const deferred = await this.host.dialogue(a.dialogue);
         if (deferred.length && (await this.runList(deferred))) return true;

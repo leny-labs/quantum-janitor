@@ -23,7 +23,7 @@ export function compileInk(source: string): { story: Story | null; errors: strin
   return { story: errors.length ? null : story, errors, warnings };
 }
 
-/** Tags reconnus dans l'Ink : `# give: badge`, `# set: flag`, `# shake`… */
+/** Tags reconnus dans l'Ink : `# give: badge`, `# set: flag`, `# shake`, `# mood: angry`… */
 export interface InkTag {
   key: string;
   value: string;
@@ -35,4 +35,4 @@ export function parseTag(raw: string): InkTag {
   return { key: m[1].toLowerCase(), value: (m[2] ?? '').trim() };
 }
 
-export const INK_TAG_KEYS = ['give', 'take', 'set', 'unset', 'goto', 'end', 'shake'] as const;
+export const INK_TAG_KEYS = ['give', 'take', 'set', 'unset', 'goto', 'end', 'shake', 'mood'] as const;

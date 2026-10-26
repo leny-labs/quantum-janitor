@@ -6,7 +6,8 @@ Deux sources selon le personnage :
 | Id | Source | Régénération |
 |---|---|---|
 | `gary` | **GenAI v2** (planche stabilisée validée par Leny, design « Janék ») — plus de bake | à la main, voir ci-dessous |
-| `bob`, `sylvie`, `reine` | bake du Studio 3D (`src/three/Studio.ts`) | `npm run bake:portraits` |
+| `sylvie` | **GenAI** (moniteur teal validé par Leny) — planche à **humeurs** + bouche-onde procédurale | à la main, voir « SYLVIE » |
+| `bob`, `reine` | bake du Studio 3D (`src/three/Studio.ts`) | `npm run bake:portraits` |
 
 Pas de GenAI au runtime. Un PNG présent dans `public/portraits/` prime ; s'il manque,
 le jeu bake la planche au démarrage — **sauf pour les planches GenAI** (`GENAI_SHEETS`
@@ -94,6 +95,69 @@ suivi), qui part du master v2 (`v2-gary-master.png`) et du masque robot v2b
 des 8 poses du calque. Garder la bande à 8 × (80 × 112) et l'ancrage 160/48, ou mettre à
 jour `PORTRAIT_OVERLAYS` en conséquence.
 
+## SYLVIE — planche GenAI à humeurs + onde
+
+**Validée par Leny (2026-10-26)** : moniteur teal à liseré cyan, visage cyan (2 yeux),
+une **onde** en guise de bouche, label « SYLVIE », fond navy.
+
+Fichiers :
+- `public/portraits/sylvie-sheet.png` — 1024 × 512, 4 × 2 frames de 256 px, **sans onde**
+  (zone de l'écran rebouchée en teal uni) : la bouche est dessinée par le jeu.
+- `public/portraits/sylvie-ref.png` — cellule « calme » complète (onde comprise), 256 × 256,
+  référence pour les prochaines générations.
+
+Mapping (une colonne par humeur) :
+
+| | col 0 · `calm` | col 1 · `suspicious` | col 2 · `angry` | col 3 · `love` |
+|---|---|---|---|---|
+| **ligne 1 — yeux** | 0 · ronds | 1 · paupières mi-closes | 2 · chevrons `> <` | 3 · cœurs |
+| **ligne 2 — accent** | 4 · clignement `—  —` | 5 · plisse encore | 6 · tressaillement | 7 · cœurs qui battent (plus petits) |
+
+Le moniteur est **pixel-identique** sur les 8 frames : seule la zone des yeux change
+(pas de saut de cadrage).
+
+Code :
+- `PORTRAIT_MOODS` dans `src/three/Studio.ts` : boucles idle / talk **par humeur** (à la
+  place de `SHEET`), via `sheetLoops(id, mood)`. Humeur par défaut : `calm`.
+- `PORTRAIT_WAVES` (`Studio.ts`) + `src/ui/WaveMouth.ts` : **bouche-onde** façon B.O.B. /
+  Bender, polyligne cyan à lueur (halo, lueur, cœur) dessinée par-dessus la planche, de
+  x 62 à 188, centrée en y 161, amplitude 13 (px de cellule 256). Au repos : signal quasi
+  plat qui ondule à peine ; en parole (`face.talking`) : amplitudes qui bougent (enveloppe
+  de syllabes), lissées à l'entrée / sortie. L'humeur change le tracé : `angry` en dents de
+  scie rapides, `love` en sinus doux, `suspicious` lent.
+- Dialogue (`DialogueBox`) : l'onde est enfant du contenu de `TalkingPortrait`, comme les
+  calques (même transform, respiration, visibilité). Changer d'humeur remonte la planche
+  avec les boucles de l'humeur ; même humeur → la boucle continue.
+- Intro (`SheetPortrait` dans `IntroScene`) : même planche + onde ; `say(…, mood)`.
+
+### Humeurs : tags et heuristique
+
+Humeurs : `calm` · `suspicious` · `angry` · `love` (`src/engine/mood.ts`).
+
+- **Ink** : tag en fin de réplique, combinable avec les autres tags :
+  `sylvie: MENSONGE ÉGALEMENT ENREGISTRÉ. # mood: angry`
+  (`… # shake # mood: suspicious` marche aussi).
+- **YAML** (scènes) : clé d'action `mood` à côté du `say` :
+  ```yaml
+  - say: "sylvie: LECTEUR ENCRASSÉ. VEUILLEZ CONTACTER UN AGENT D'ENTRETIEN."
+    mood: suspicious
+  ```
+- Sans tag : `guessMood(texte)`, FR + EN, sans accents ni casse : « !! », infraction,
+  sanction, interdit, négatif, mensonge, colère, retenue… → `angry` ; merci, bravo,
+  excellent, félicitations, ♥, thank, well done, good citizen… → `love` ; suspect,
+  vérification, hmm, non conforme, confirmer, analyse, surveillé, filmé, enregistré… →
+  `suspicious` ; sinon `calm`.
+- `npm run validate` refuse une humeur inconnue (tag Ink ou clé YAML).
+- Seuls les personnages listés dans `PORTRAIT_MOODS` ont des humeurs ; le tag est ignoré
+  pour les autres.
+
+Régénérer : script **hors repo** `_briefs/sylvie/build/build-sheet.py` (non suivi) à partir
+de `_briefs/sylvie/sylvie-eyes-grid.jpg` (grille 2 × 2 : calme, suspicieux, colère, amour) :
+recalage des cellules sur le moniteur (corrélation de phase), moniteur de la cellule calme
+avec yeux + onde effacés, yeux de chaque humeur collés en additif, variantes « accent »
+par redimensionnement des yeux. `python3 -I build-sheet.py <grille.jpg> <dossier de sortie>`.
+Ne **pas** lancer de bake pour SYLVIE : elle est dans `GENAI_SHEETS`.
+
 ## Layout de la planche (`{id}-sheet.png`)
 
 Grille **4 colonnes × 2 lignes**, frames carrées, lues ligne par ligne.
@@ -112,7 +176,7 @@ micro-mouvement de tête** changent : même cadrage, même fond, même éclairag
 - Gary (design « Janék », voir `docs/STORY.md`) : vraie bouche dans la barbe de trois jours ;
   le drone dorsal est un calque à part (voir « Gary : base + calque robot »).
 - B.O.B. : la « bouche » est un égaliseur LED cyan sur la plaque (barres plus ou moins hautes).
-- SYLVIE : visage-écran ; bouche = ovale lumineux qui grandit ; clignement = « —   — ».
+- SYLVIE : planche GenAI à humeurs, layout propre (voir « SYLVIE ») ; bouche = onde procédurale.
 - Reine : mandibules qui s'écartent, gueule sombre qui s'ouvre.
 
 ## Prompt — style lock
@@ -123,7 +187,7 @@ micro-mouvement de tête** changent : même cadrage, même fond, même éclairag
 À ajouter : le personnage et l'état de bouche de chaque frame, « same framing, same
 background gradient and scanlines as reference, 4×2 sprite sheet, no gaps, no borders ».
 
-Ce style lock vaut pour les personnages bakés (B.O.B., SYLVIE, Reine). Gary a quitté le
+Ce style lock vaut pour les personnages bakés (B.O.B., Reine). Gary a quitté le
 bake : son style est celui de la planche v2 de Leny (cartoon encré, fond bleu nuit
 `#071D40`) — joindre `public/portraits/gary-ref.png` et `gary-sheet.png`.
 
@@ -142,7 +206,8 @@ lisses façon 3D PBR, changement de palette, de cadrage ou de fond d'une frame �
 
 ## Expressions (suite possible)
 
-La planche n'a que idle/talk : pas de mécanisme d'humeur dans le dialogue. La sheet
-Janék propose 6 expressions (neutre, surpris, sceptique, content, agacé, réfléchit).
-Pour les brancher : un tag Ink (`# mood: sceptique`), une ligne de planche par humeur
-(ou une planche par humeur), et des poses de sourcils / bouche dans `setFace` de `gary()`.
+Le mécanisme d'humeur existe (voir « SYLVIE » : tag `# mood:`, clé YAML `mood`,
+`PORTRAIT_MOODS`). Pour Gary, la sheet Janék propose 6 expressions (neutre, surpris,
+sceptique, content, agacé, réfléchit) : il faudrait une planche plus grande (ou une planche
+par humeur, avec bouche), étendre `MOODS` dans `src/engine/mood.ts` et ajouter `gary` à
+`PORTRAIT_MOODS`.

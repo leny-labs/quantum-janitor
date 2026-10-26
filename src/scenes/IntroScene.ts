@@ -6,7 +6,8 @@ import Phaser from 'phaser';
 import { HeroView } from '../three/Hero';
 import { introShot } from '../three/shots/intro';
 import { titleShot } from '../three/shots/title';
-import { SHEET, iconKey, sheetKey } from '../three/Studio';
+import type { Mood } from '../engine/mood';
+import { SHEET, iconKey, sheetKey, sheetLoops, type SheetLoops } from '../three/Studio';
 import { makeButton } from '../ui/Button';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
 import { isTouch } from '../ui/input';
@@ -15,6 +16,7 @@ import { PressRing } from '../ui/PressRing';
 import { playMusic } from '../ui/music';
 import { blip, glitch, plouf, thud, whoosh } from '../ui/sfx';
 import { Blipper } from '../ui/voice';
+import { WaveMouth, waveFor } from '../ui/WaveMouth';
 import { t, tl, type TextKey } from '../i18n';
 import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
 
@@ -54,17 +56,29 @@ const BAR = 56;
 const SUB_Y = H - BAR - 74;
 const CPS = 40;
 
-/** Portrait animé depuis une planche Studio (boucles idle / talk), + calque éventuel. */
+/** Portrait animé depuis une planche Studio (boucles idle / talk), + calque / onde éventuels. */
 class SheetPortrait {
   readonly image: Phaser.GameObjects.Image;
   /** Calque sur sa propre timeline (drone dorsal de Gary), au-dessus de `image`. */
   readonly overlay: OverlayPlayer | null = null;
-  private seq: readonly { frame: number; duration: number }[] = SHEET.idle;
+  /** Bouche-onde procédurale (SYLVIE). */
+  readonly wave: WaveMouth | null = null;
+  private loops: SheetLoops;
+  private seq: readonly { frame: number; duration: number }[];
   private i = 0;
-  private left: number = SHEET.idle[0].duration;
+  private left: number;
   talking = false;
 
-  constructor(scene: Phaser.Scene, id: string, x: number, y: number, size: number) {
+  constructor(
+    scene: Phaser.Scene,
+    private id: string,
+    x: number,
+    y: number,
+    size: number,
+  ) {
+    this.loops = sheetLoops(id);
+    this.seq = this.loops.idle;
+    this.left = this.seq[0].duration;
     const key = sheetKey(id);
     const tex = scene.textures.get(key);
     if (!tex.has('f0')) {
@@ -73,19 +87,31 @@ class SheetPortrait {
       const fh = src.height / SHEET.rows;
       for (let i = 0; i < SHEET.cols * SHEET.rows; i++) tex.add(`f${i}`, 0, (i % SHEET.cols) * fw, Math.floor(i / SHEET.cols) * fh, fw, fh);
     }
-    this.image = scene.add.image(x, y, key, 'f0').setDisplaySize(size, size);
+    this.image = scene.add.image(x, y, key, `f${this.seq[0].frame}`).setDisplaySize(size, size);
     if (overlayFor(scene, id)) this.overlay = new OverlayPlayer(scene, id).place(x - size / 2, y - size / 2, size);
+    const wave = waveFor(id);
+    if (wave) this.wave = new WaveMouth(scene, wave).place(x - size / 2, y - size / 2, size);
   }
 
   /** Objets à empiler dans le cadre, de bas en haut. */
-  get layers(): Phaser.GameObjects.Image[] {
-    return this.overlay ? [this.image, this.overlay.image] : [this.image];
+  get layers(): Phaser.GameObjects.GameObject[] {
+    return [this.image, ...(this.overlay ? [this.overlay.image] : []), ...(this.wave ? [this.wave.g] : [])];
+  }
+
+  /** Humeur (planche à humeurs) : change les yeux et le tracé de l'onde. */
+  setMood(mood: Mood): void {
+    this.loops = sheetLoops(this.id, mood);
+    this.wave?.setMood(mood);
+    this.seq = this.talking ? this.loops.talk : this.loops.idle;
+    this.i = 0;
+    this.left = this.seq[0].duration;
+    this.image.setFrame(`f${this.seq[0].frame}`);
   }
 
   talk(on: boolean): void {
     if (on === this.talking) return;
     this.talking = on;
-    this.seq = on ? SHEET.talk : SHEET.idle;
+    this.seq = on ? this.loops.talk : this.loops.idle;
     this.i = 0;
     this.left = this.seq[0].duration;
     this.image.setFrame(`f${this.seq[0].frame}`);
@@ -100,6 +126,7 @@ class SheetPortrait {
     }
     this.overlay?.setTalking(this.talking);
     this.overlay?.update(dt);
+    this.wave?.update(dt, this.talking);
   }
 }
 
@@ -343,12 +370,13 @@ export class IntroScene extends Phaser.Scene {
   }
 
   /** Réplique sous-titrée, tapée au télétype ; le portrait du locuteur parle. */
-  private say(who: Speaker, text: string, delay: number): void {
+  private say(who: Speaker, text: string, delay: number, mood?: Mood): void {
     this.at(delay, () => {
       const { root, plate, name, body } = this.sub;
       const voice = who ? VOICES[who] : null;
       this.faces.forEach((f) => f.talk(false));
       const face = who ? this.faces.get(who) : undefined;
+      if (mood) face?.setMood(mood);
       face?.talk(true);
       // gabarit calculé sur le texte complet : la plaque ne bouge pas pendant la frappe
       body.setText(text).setFontStyle(voice ? '600' : 'italic 500').setColor(voice ? COLORS.text : '#d8d0f0');
@@ -569,8 +597,8 @@ export class IntroScene extends Phaser.Scene {
     this.stamp(930, 150, t('intro.sylvie.stamp1'), COLORS.hover, -4, 1500);
     this.stamp(960, 260, t('intro.sylvie.stamp2'), COLORS.accent, 3, 3300, 30);
     this.stamp(915, 380, t('intro.sylvie.stamp3'), COLORS.danger, -2, 5300);
-    this.say('sylvie', t('intro.sylvie.say1'), 500);
-    this.say('sylvie', t('intro.sylvie.say2'), 4100);
+    this.say('sylvie', t('intro.sylvie.say1'), 500, 'love');
+    this.say('sylvie', t('intro.sylvie.say2'), 4100, 'angry');
     return 9000;
   }
 
@@ -696,7 +724,7 @@ export class IntroScene extends Phaser.Scene {
     this.layer.add(digits);
     for (const o of [counterLabel, digits, record]) this.reveal(o, 4100, 0, 10, 350);
 
-    this.say('sylvie', t('intro.job.say1'), 1200);
+    this.say('sylvie', t('intro.job.say1'), 1200, 'suspicious');
     // … et pourtant : glitch, fissures, l'enjeu
     this.at(6200, () => {
       this.glitchBurst(true);

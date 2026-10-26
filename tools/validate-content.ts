@@ -5,6 +5,7 @@
  */
 import { assembleInk, locateInkLine, parseContent, toActions } from '../src/engine/content';
 import { compileInk, INK_TAG_KEYS, parseTag } from '../src/engine/ink';
+import { MOODS, isMood } from '../src/engine/mood';
 import { SMART_VALUES } from '../src/engine/verbs';
 import { ROOM_ICONS, type Action, type ArtShape, type Condition, type GameContent, type Interaction } from '../src/engine/types';
 import { readRawContent } from './readContent';
@@ -91,6 +92,9 @@ function checkEffect(key: string, value: string, where: string): void {
     case 'dialogue':
       note(knotsUsed, value, where);
       break;
+    case 'mood':
+      if (!isMood(value)) err(`${where} : mood « ${value} » inconnu (attendus : ${MOODS.join(', ')})`);
+      break;
   }
 }
 
@@ -105,7 +109,7 @@ function checkCondition(c: Condition | undefined, where: string): void {
   });
 }
 
-const ACTION_KEYS = ['if', 'say', 'dialogue', 'take', 'give', 'unset', 'set', 'shake', 'goto', 'end', 'stop'];
+const ACTION_KEYS = ['if', 'say', 'mood', 'dialogue', 'take', 'give', 'unset', 'set', 'shake', 'goto', 'end', 'stop'];
 
 function checkInteraction(i: Interaction | undefined, where: string): void {
   if (i === undefined) return;
@@ -117,10 +121,11 @@ function checkInteraction(i: Interaction | undefined, where: string): void {
     const w = `${where}[${n}]`;
     for (const k of Object.keys(a)) if (!ACTION_KEYS.includes(k)) err(`${w} : clé d'action inconnue « ${k} »`);
     checkCondition(a.if, w);
-    for (const key of ['give', 'take', 'set', 'unset', 'goto', 'end', 'dialogue'] as const) {
+    for (const key of ['give', 'take', 'set', 'unset', 'goto', 'end', 'dialogue', 'mood'] as const) {
       const v = a[key];
       if (typeof v === 'string') checkEffect(key, v, w);
     }
+    if (a.mood && !a.say) warn(`${w} : mood sans say`);
     if (a.say) {
       const m = a.say.match(/^([a-z_]+):\s/);
       if (m && !content.characters.has(m[1])) warn(`${w} : préfixe « ${m[1]}: » ne correspond à aucun personnage`);

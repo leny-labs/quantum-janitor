@@ -5,7 +5,8 @@ import type { Action, CharacterDef, GameContent } from './types';
 
 /** Ce que le moteur attend de l'interface de dialogue. */
 export interface DialogueView {
-  showLine(speaker: CharacterDef | null, text: string): Promise<void>;
+  /** `mood` : tag Ink `# mood: …` de la réplique (sinon la vue devine). */
+  showLine(speaker: CharacterDef | null, text: string, mood?: string): Promise<void>;
   showChoices(choices: string[]): Promise<number>;
   close(): void;
 }
@@ -66,10 +67,15 @@ export class DialogueRunner {
     for (;;) {
       while (story.canContinue) {
         const text = (story.Continue() ?? '').trim();
-        for (const t of story.currentTags ?? []) this.applyTag(t, deferred);
+        let mood: string | undefined;
+        for (const t of story.currentTags ?? []) {
+          const tag = parseTag(t);
+          if (tag.key === 'mood') mood = tag.value;
+          else this.applyTag(t, deferred);
+        }
         if (text) {
           const line = this.parseLine(text, 'narrateur');
-          await view.showLine(line.speaker, this.tr(line.text));
+          await view.showLine(line.speaker, this.tr(line.text), mood);
         }
       }
       const choices = story.currentChoices;

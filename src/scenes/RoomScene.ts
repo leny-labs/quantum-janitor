@@ -643,23 +643,23 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
 
   // ── ActionHost ───────────────────────────────────────────────────────
 
-  async say(text: string): Promise<void> {
+  async say(text: string, mood?: string): Promise<void> {
     const line = this.session.dialogue.parseLine(text, 'gary');
-    await this.spoken(line.speaker, line.text);
+    await this.spoken(line.speaker, line.text, mood);
   }
 
   dialogue(knot: string): Promise<Action[]> {
     const box = this.dialogueBox;
     return this.session.dialogue.run(knot, {
-      showLine: (speaker, text) => this.spoken(speaker, text),
+      showLine: (speaker, text, mood) => this.spoken(speaker, text, mood),
       showChoices: (choices) => box.showChoices(choices),
       close: () => box.close(),
     });
   }
 
   /** Affiche une réplique ; celles de B.O.B. le font parler en 3D (onde Bender, rebond). */
-  private spoken(speaker: CharacterDef | null, text: string): Promise<void> {
-    const shown = this.dialogueBox.showLine(speaker, text);
+  private spoken(speaker: CharacterDef | null, text: string, mood?: string): Promise<void> {
+    const shown = this.dialogueBox.showLine(speaker, text, mood);
     const voice = speaker?.id === 'bob' ? this.room.rig<BobVoice>('bobVoix') : null;
     if (!voice) return shown;
     voice.talk(text.length / TYPE_CPS + 0.15);

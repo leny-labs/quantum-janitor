@@ -19,6 +19,8 @@ export interface Condition {
 export interface Action {
   if?: Condition;
   say?: string;
+  /** Humeur du portrait pour `say` (calm, suspicious, angry, love ; voir engine/mood.ts). */
+  mood?: string;
   dialogue?: string;
   take?: string;
   give?: string;

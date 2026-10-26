@@ -37,7 +37,7 @@ const view: DialogueView = {
 };
 const dialogue = new DialogueRunner(content, state, { shake() {} });
 const host: ActionHost = {
-  say: (t) => view.showLine(dialogue.parseLine(t, 'gary').speaker, dialogue.parseLine(t, 'gary').text),
+  say: (t, mood) => view.showLine(dialogue.parseLine(t, 'gary').speaker, dialogue.parseLine(t, 'gary').text, mood),
   dialogue: (k) => dialogue.run(k, view),
   async goto(id) {
     if (!content.scenes.has(id)) throw new Error(`goto scène inconnue ${id}`);

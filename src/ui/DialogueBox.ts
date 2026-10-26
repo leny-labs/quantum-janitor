@@ -3,13 +3,15 @@ import { SpriteTalk, TalkingPortrait, TypewriterMouth, typewrite } from 'talking
 import type { BlinkOptions, MouthOptions, TypewriteHandle } from 'talking-portrait';
 import type { DialogueView } from '../engine/DialogueRunner';
 import { t } from '../i18n';
+import { guessMood, isMood, type Mood } from '../engine/mood';
 import type { CharacterDef } from '../engine/types';
-import { SHEET, portraitKey, sheetKey } from '../three/Studio';
+import { PORTRAIT_MOODS, SHEET, portraitKey, sheetKey, sheetLoops } from '../three/Studio';
 import { drawHazard, drawPanel } from './chrome';
 import { cssToGame, isTouch, uiPx } from './input';
 import { duckMusic } from './music';
 import { OverlayPlayer, overlayFor } from './PortraitOverlay';
 import { Blipper } from './voice';
+import { WaveMouth, waveFor } from './WaveMouth';
 import { COLORS, FONT, H, W, hex, setCursor } from './theme';
 
 const PANEL_Y = 462;
@@ -79,11 +81,14 @@ export class DialogueBox implements DialogueView {
   private sprite: SpriteTalk;
   /** Driver actif pour le speaker courant (planche → SpriteTalk, sinon overlay). */
   private voice: TypewriterMouth | SpriteTalk;
-  /** Planche actuellement montée sur `face` (évite de la remonter à chaque réplique). */
+  /** Planche (+ humeur) actuellement montée sur `face` (évite de la remonter à chaque réplique). */
   private sheetOn: string | null = null;
   /** Calques par-dessus la planche (drone de Gary), créés à la demande, par id. */
   private overlays = new Map<string, OverlayPlayer>();
   private overlayOn: OverlayPlayer | null = null;
+  /** Bouches-ondes procédurales (SYLVIE), créées à la demande, par id. */
+  private waves = new Map<string, WaveMouth>();
+  private waveOn: WaveMouth | null = null;
   private typing: TypewriteHandle | null = null;
   private portraitBg: Phaser.GameObjects.Rectangle;
   private portraitText: Phaser.GameObjects.Text;
@@ -165,6 +170,7 @@ export class DialogueBox implements DialogueView {
         this.overlayOn.setTalking(this.face.talking);
         this.overlayOn.update(dt);
       }
+      if (this.root.visible && this.waveOn) this.waveOn.update(dt, this.face.talking);
     };
     scene.events.on(Phaser.Scenes.Events.UPDATE, tick);
     scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -216,7 +222,16 @@ export class DialogueBox implements DialogueView {
     a();
   }
 
-  private setSpeaker(speaker: CharacterDef | null): void {
+  /**
+   * Humeur d'une réplique pour un personnage à planche à humeurs : tag
+   * `mood` (Ink ou YAML), sinon devinée sur le texte ; `undefined` sinon.
+   */
+  private moodOf(speaker: CharacterDef | null, text: string, tag?: string): Mood | undefined {
+    if (!speaker || !PORTRAIT_MOODS[speaker.id]) return undefined;
+    return isMood(tag) ? tag : guessMood(text);
+  }
+
+  private setSpeaker(speaker: CharacterDef | null, mood?: Mood): void {
     const hasPortrait = !!speaker?.portrait;
     const key = speaker ? portraitKey(speaker.id) : '';
     const sheet = speaker ? sheetKey(speaker.id) : '';
@@ -228,19 +243,21 @@ export class DialogueBox implements DialogueView {
     this.face.setVisible(has3d);
     this.voice = hasSheet ? this.sprite : this.mouth;
     if (hasSheet) {
-      // même planche que la réplique précédente : on ne relance pas la boucle idle
-      if (this.sheetOn !== sheet) {
+      // même planche (et même humeur) que la réplique précédente : on ne relance pas la boucle idle
+      const on = mood ? `${sheet}#${mood}` : sheet;
+      if (this.sheetOn !== on) {
         // boucles sprite idle / talk (chaque frame porte sa durée) ; la grille se
         // déduit de la taille de l'image (une planche GenAI en 2048×1024 marche aussi)
         const src = this.scene.textures.get(sheet).source[0];
+        const loops = sheetLoops(speaker!.id, mood);
         this.face.setSpriteSheet({
           key: sheet,
           frameWidth: Math.floor(src.width / SHEET.cols),
           frameHeight: Math.floor(src.height / SHEET.rows),
-          idle: { frames: [...SHEET.idle] },
-          talk: { frames: [...SHEET.talk] },
+          idle: { frames: [...loops.idle] },
+          talk: { frames: [...loops.talk] },
         });
-        this.sheetOn = sheet;
+        this.sheetOn = on;
       }
     } else if (has3d) {
       this.sheetOn = null;
@@ -252,6 +269,7 @@ export class DialogueBox implements DialogueView {
       });
     }
     this.showOverlay(hasSheet ? speaker!.id : null);
+    this.showWave(hasSheet ? speaker!.id : null, mood);
     const named = !!speaker && speaker.id !== 'narrateur' && !!speaker.name;
     this.setName(named ? speaker!.name : '', speaker?.color);
     if (speaker && !has3d) {
@@ -273,6 +291,32 @@ export class DialogueBox implements DialogueView {
    * la taille affichée (fit « cover » de TalkingPortrait, cellule centrée sur
    * le cadre).
    */
+  /** Coin haut-gauche et taille à l'écran d'une cellule de la planche de `id` (repère du contenu de `face`). */
+  private cellRect(id: string): [left: number, top: number, size: number] {
+    const src = this.scene.textures.get(sheetKey(id)).source[0];
+    const fw = src.width / SHEET.cols;
+    const fh = src.height / SHEET.rows;
+    const ps = PANEL_H - 44;
+    const k = Math.max(PORTRAIT / fw, ps / fh);
+    // repère du contenu : bas du cadre en y = 0, planche centrée en (0, -ps / 2)
+    return [(-fw * k) / 2, -ps / 2 - (fh * k) / 2, fw * k];
+  }
+
+  /** Bouche-onde du speaker (s'il en a une), au-dessus de la planche, comme les calques. */
+  private showWave(id: string | null, mood?: Mood): void {
+    const def = id ? waveFor(id) : null;
+    let w = def ? (this.waves.get(id!) ?? null) : null;
+    if (def && !w) {
+      w = new WaveMouth(this.scene, def);
+      this.waves.set(id!, w);
+      (this.face.container.list[0] as Phaser.GameObjects.Container).add(w.g);
+      w.place(...this.cellRect(id!));
+    }
+    if (w && mood) w.setMood(mood);
+    for (const x of this.waves.values()) x.g.setVisible(x === w);
+    this.waveOn = w;
+  }
+
   private showOverlay(id: string | null): void {
     const def = id ? overlayFor(this.scene, id) : null;
     let o = def ? (this.overlays.get(id!) ?? null) : null;
@@ -281,13 +325,7 @@ export class DialogueBox implements DialogueView {
       this.overlays.set(id!, o);
       // contenu interne de TalkingPortrait (celui qui respire), au-dessus de la planche
       (this.face.container.list[0] as Phaser.GameObjects.Container).add(o.image);
-      const src = this.scene.textures.get(sheetKey(id!)).source[0];
-      const fw = src.width / SHEET.cols;
-      const fh = src.height / SHEET.rows;
-      const ps = PANEL_H - 44;
-      const k = Math.max(PORTRAIT / fw, ps / fh);
-      // repère du contenu : bas du cadre en y = 0, planche centrée en (0, -ps / 2)
-      o.place((-fw * k) / 2, -ps / 2 - (fh * k) / 2, fw * k);
+      o.place(...this.cellRect(id!));
     }
     for (const p of this.overlays.values()) p.image.setVisible(p === o);
     this.overlayOn = o;
@@ -332,10 +370,10 @@ export class DialogueBox implements DialogueView {
     this.voice.idle();
   }
 
-  showLine(speaker: CharacterDef | null, text: string): Promise<void> {
+  showLine(speaker: CharacterDef | null, text: string, mood?: string): Promise<void> {
     this.clearChoices();
     this.stopTalking();
-    this.setSpeaker(speaker);
+    this.setSpeaker(speaker, this.moodOf(speaker, text, mood));
     this.hint.setVisible(false);
     this.fitBody(text);
     this.open();
