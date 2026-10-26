@@ -4,7 +4,8 @@
 // `labo_ouvert` passe à vrai. Pur Three.js : les sons sont joués côté Phaser
 // (scenes/beats.ts) via `onCue`.
 import * as THREE from 'three';
-import { at, box, cyl, glow, sphere } from '../kit';
+import { at, cyl, glow, sphere } from '../kit';
+import { badgeCard } from '../props';
 import type { Stage } from '../Stage';
 
 /** Moments forts, pour caler les bruitages côté Phaser. */
@@ -152,16 +153,8 @@ export class LecteurRig {
       this.drops.push({ mesh: d, vel: new THREE.Vector3(), life: 0 });
     }
 
-    // badge « GARRY » : carte blanche, bandeau teal, photo
-    const cw = w * 0.8;
-    const ch = cw * 0.64;
-    this.card.add(
-      at(box(cw, ch, 0.012, '#f1efe6'), 0, 0, 0),
-      at(box(cw, ch * 0.24, 0.014, '#2fbfa0', { edges: false }), 0, ch * 0.38, 0.001),
-      at(box(cw * 0.3, ch * 0.42, 0.016, '#e0a97a', { edges: false }), -cw * 0.27, -ch * 0.08, 0.001),
-      at(box(cw * 0.42, ch * 0.07, 0.016, '#3a4260', { edges: false }), cw * 0.16, -ch * 0.02, 0.001),
-      at(box(cw * 0.3, ch * 0.07, 0.016, '#3a4260', { edges: false }), cw * 0.1, -ch * 0.2, 0.001),
-    );
+    // badge « GARRY » : même carte GenAI que l'inventaire
+    this.card.add(badgeCard(w * 0.8, 0.012));
     this.card.visible = false;
     reader.add(this.card);
 

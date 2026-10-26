@@ -110,7 +110,7 @@ const ICONS: Record<string, Pose> = {
     dist: 2.6,
     rim: '#ffd166',
   },
-  badge: { build: () => badge(0.8), look: [0, 0.6, 0], dist: 2.2, yaw: -0.35, pitch: 0.12, rim: '#7fffd4' },
+  badge: { build: () => badge(0.8), look: [0, 0.3, 0], dist: 1.9, yaw: -0.35, pitch: 0.12, rim: '#7fffd4' },
   sandwich: { build: () => sandwich(1), look: [0, 0.12, 0], dist: 2.1, pitch: 0.75, rim: '#ff8ab8' },
   fusible: { build: () => fusible(1.1), look: [0, 0, 0], dist: 2, yaw: -0.3, pitch: 0.35, rim: '#ff5c7a' },
 };

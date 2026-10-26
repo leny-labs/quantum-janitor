@@ -232,18 +232,36 @@ export function mug(w: number): THREE.Group {
   return group([body, coffee, handle]);
 }
 
-/** Badge d'accès « GARRY » (plaque + clip), debout face +Z. */
+/** Recto GenAI du badge (carte redressée, 512×360). */
+export const BADGE_CARD_URL = `${import.meta.env.BASE_URL}inventory/badge-card.png`;
+const BADGE_RATIO = 360 / 512;
+let badgeFace: THREE.MeshToonMaterial | null = null;
+
+/** Matériau du recto, partagé : texture chargée une fois, recto masqué tant qu'elle n'est pas prête. */
+function badgeFaceMat(): THREE.MeshToonMaterial {
+  if (badgeFace) return badgeFace;
+  const map = new THREE.TextureLoader().load(BADGE_CARD_URL, () => (m.visible = true));
+  map.colorSpace = THREE.SRGBColorSpace;
+  const m = (badgeFace = paperMat(map, 0.15));
+  m.visible = false;
+  return m;
+}
+
+/** Carte « GARRY » (recto GenAI sur tranche blanc cassé), centrée, face +Z. `cw` = largeur. */
+export function badgeCard(cw: number, thick = cw * 0.03): THREE.Group {
+  const ch = cw * BADGE_RATIO;
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(cw, ch), badgeFaceMat());
+  face.receiveShadow = true;
+  face.position.z = thick / 2 + 0.001;
+  return group([box(cw, ch, thick, '#f1efe6'), face]);
+}
+
+/** Badge d'accès « GARRY » (carte paysage + clip), debout face +Z. */
 export function badge(w: number): THREE.Group {
-  const h = w * 1.35;
-  const card = at(box(w, h, w * 0.06, '#e8e4da'), 0, h / 2, 0);
-  const band = at(box(w * 1.001, h * 0.22, w * 0.062, '#1f7f73', { edges: false }), 0, h * 0.86, 0);
-  const photo = at(box(w * 0.42, w * 0.5, 0.01, '#ff8c42', { edges: false }), -w * 0.2, h * 0.46, w * 0.035);
-  const head = at(sphere(w * 0.1, '#f2c49b', { seg: 10 }), -w * 0.2, h * 0.5, w * 0.045);
-  head.scale.z = 0.3;
-  const name = at(label(tr('props.badge'), w * 0.42, w * 0.18, { color: '#14102a', bold: true }), w * 0.22, h * 0.52, w * 0.035);
-  const bar = at(box(w * 0.42, w * 0.05, 0.01, '#14102a', { edges: false }), w * 0.22, h * 0.36, w * 0.035);
-  const clip = at(box(w * 0.3, w * 0.14, w * 0.1, '#c9ced6'), 0, h + w * 0.05, 0);
-  return group([card, band, photo, head, name, bar, clip]);
+  const h = w * BADGE_RATIO;
+  const card = at(badgeCard(w, w * 0.04), 0, h / 2, 0);
+  const clip = at(box(w * 0.22, w * 0.1, w * 0.07, '#c9ced6'), 0, h + w * 0.04, 0);
+  return group([card, clip]);
 }
 
 /** Sandwich « Thon-Mayo-Mystère » sous film, en triangle. */

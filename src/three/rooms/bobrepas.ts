@@ -6,6 +6,7 @@
 // sont joués côté Phaser (scenes/beats.ts) via `onCue`.
 import * as THREE from 'three';
 import { at, box, cyl, glow } from '../kit';
+import { badgeCard } from '../props';
 import type { Stage } from '../Stage';
 
 export type BobCue = 'open' | 'slurp' | 'gulp' | 'chew' | 'retch' | 'burst' | 'land' | 'grab' | 'shut';
@@ -119,14 +120,13 @@ export class BobRig {
     }
     const card = new THREE.Group();
     const cw = w * 0.34;
-    const ch = cw * 0.64;
-    card.add(
-      at(box(cw, 0.012, ch, '#f1efe6'), 0, 0, 0),
-      at(box(cw, 0.014, ch * 0.24, '#2fbfa0', { edges: false }), 0, 0.001, -ch * 0.38),
-      at(box(cw * 0.3, 0.016, ch * 0.42, '#e0a97a', { edges: false }), -cw * 0.27, 0.001, ch * 0.08),
-    );
+    const ch = cw * 0.7;
+    // recto GenAI vers le haut
+    const face = badgeCard(cw, 0.012);
+    face.rotation.x = -Math.PI / 2;
+    card.add(face);
     // bave verte : il sort de B.O.B., après tout
-    card.add(at(box(cw * 0.5, 0.018, ch * 0.3, '#7fbf3f', { edges: false }), cw * 0.18, 0.002, ch * 0.2));
+    card.add(at(box(cw * 0.45, 0.018, ch * 0.22, '#7fbf3f', { edges: false }), cw * 0.2, 0.002, ch * 0.25));
     this.badge = this.addJunk(card, 0.01);
 
     stage.animate((_t, dt) => this.tick(dt));
