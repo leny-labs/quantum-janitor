@@ -78,6 +78,8 @@ export interface ShotSpec {
   fov?: number;
   /** Cadrage explicite (prioritaire sur le calcul automatique). */
   cam?: CameraSpec;
+  /** Hotspot dont le rect sert au cadrage (plan nommé autrement que le hotspot : intro, mini-jeu). */
+  of?: string;
 }
 
 /** Travel caméra en cours. */
@@ -147,6 +149,8 @@ export class Stage {
   focusAmount = 0;
   /** Gros plans filmés ici : id de scène YAML → objet filmé (pour le clic « à côté »). */
   private closeups = new Map<string, THREE.Object3D>();
+  /** Mécaniques exposées par le décor (mini-jeux…) : id → objet. */
+  private rigs = new Map<string, unknown>();
 
   constructor(
     readonly def: SceneDef,
@@ -285,8 +289,11 @@ export class Stage {
     return this.shotKey?.split('/')[1] ?? null;
   }
 
-  /** La caméra glisse vers le hotspot `id` (instantané si `instant`). Null s'il n'a pas de travel. */
-  examine(id: string, instant = false): Promise<void> | null {
+  /**
+   * La caméra glisse vers le hotspot `id` (instantané si `instant`, en `dur`
+   * secondes sinon). Null s'il n'a pas de travel.
+   */
+  examine(id: string, instant = false, dur = SHOT_IN): Promise<void> | null {
     const key = `${this.viewId}/${id}`;
     const spec = this.shotSpecs.get(key);
     if (!spec) return null;
@@ -303,12 +310,24 @@ export class Stage {
       this.apply(to);
       return Promise.resolve();
     }
-    return this.fly(to, SHOT_FOCUS, SHOT_IN, 0.045);
+    return this.fly(to, SHOT_FOCUS, dur, 0.045);
   }
 
-  /** Fin d'examen : retour à la vue courante. Null s'il n'y avait pas d'examen. */
-  release(): Promise<void> | null {
+  /**
+   * Fin d'examen : retour à la vue courante. Null s'il n'y avait pas d'examen.
+   * `instant` : coupe sèche sur la vue (saut de cinématique), même pendant un
+   * travel d'examen déjà en route.
+   */
+  release(instant = false): Promise<void> | null {
     const to = this.views.get(this.viewId);
+    if (instant && to && (this.shotKey || this.travel)) {
+      this.travel?.done();
+      this.travel = null;
+      this.shotKey = null;
+      this.focusAmount = this.closeups.has(this.viewId) ? 1 : 0;
+      this.apply(to);
+      return Promise.resolve();
+    }
     if (!this.shotKey || !to) return null;
     this.shotKey = null;
     return this.fly(to, this.closeups.has(this.viewId) ? 1 : 0, SHOT_OUT, 0.02);
@@ -327,8 +346,9 @@ export class Stage {
     const room = this.views.get(this.viewId)!;
     if (spec.cam) return this.place(spec.cam);
     const def = this.viewId === this.def.id ? this.def : null;
-    const r = def?.hotspots?.find((h) => h.id === id)?.rect;
-    if (!r) throw new Error(`[3D] ${this.viewId} : hotspot « ${id} » introuvable pour le travel`);
+    const of = spec.of ?? id;
+    const r = def?.hotspots?.find((h) => h.id === of)?.rect;
+    if (!r) throw new Error(`[3D] ${this.viewId} : hotspot « ${of} » introuvable pour le travel`);
     const probe = new THREE.PerspectiveCamera(room.fov, this.width / this.height, 0.1, 100);
     probe.position.copy(room.pos);
     probe.lookAt(room.look);
@@ -553,6 +573,17 @@ export class Stage {
     }
     this.spots.set(key, members);
     return this;
+  }
+
+  /** Expose une mécanique du décor (mini-jeu…) à la scène Phaser. */
+  expose(id: string, rig: unknown): this {
+    this.rigs.set(id, rig);
+    return this;
+  }
+
+  /** Mécanique exposée par ce décor, ou null. */
+  rig<T>(id: string): T | null {
+    return (this.rigs.get(id) as T | undefined) ?? null;
   }
 
   /** Animation appelée à chaque image (t en secondes). */

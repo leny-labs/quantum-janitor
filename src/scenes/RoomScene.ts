@@ -9,7 +9,8 @@ import type { Action, Exit, Hotspot, Interaction } from '../engine/types';
 import { hotspotVerbs, smartVerb, type HotspotVerb } from '../engine/verbs';
 import { getSession, type Session } from '../session';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
-import { CLOSEUPS } from '../three/rooms';
+import { CLOSEUPS, ROOMS } from '../three/rooms';
+import { VendingRig } from '../three/rooms/vending';
 import { Stage } from '../three/Stage';
 import { makeButton } from '../ui/Button';
 import { DialogueBox } from '../ui/DialogueBox';
@@ -24,7 +25,11 @@ import { swoosh } from '../ui/sfx';
 import { PressRing } from '../ui/PressRing';
 import { RoomPlaque } from '../ui/RoomPlaque';
 import { VerbCoin } from '../ui/VerbCoin';
+import { playVending } from './VendingGame';
 import { FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
+
+/** Durée (s) du push-in lent du plan d'arrivée. */
+const INTRO_PUSH = 2.1;
 
 /** La scène Phaser principale : une vue fixe + inventaire + dialogues. */
 export class RoomScene extends Phaser.Scene implements ActionHost {
@@ -49,6 +54,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   /** Flèche « retour » quand la caméra reste sur un travel d'examen (?shot=…). */
   private shotExit: Phaser.GameObjects.Container | null = null;
   private busy = false;
+  /** Plan d'arrivée en cours de travel : coupe sèche vers la vue de la pièce. */
+  private skipCine: (() => void) | null = null;
 
   constructor() {
     super('Room');
@@ -59,6 +66,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.session.activeScene = this;
     const { state, content } = this.session;
     this.busy = false;
+    this.skipCine = null;
     state.selectedItem = null;
     this.input.mouse?.disableContextMenu();
 
@@ -125,6 +133,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.input.on('pointermove', (p: Phaser.Input.Pointer) => this.heldItem.setPosition(p.x + 14, p.y + 14));
     // clic dans le vide : reposer l'objet tenu ; en gros plan, sinon, reculer vers la pièce
     this.input.on('pointerdown', (p: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]) => {
+      // plan d'arrivée : un clic / tap saute au plan de la pièce (la réplique, elle, se lit normalement)
+      if (this.skipCine && !this.dialogueBox.isOpen) return this.skipCine();
       // caméra rapprochée hors dialogue : n'importe quel clic dans la vue la ramène
       if (this.room.examining && !this.busy && p.y < ROOM_H) return this.leaveShot();
       if (over.length > 0 || p.y >= ROOM_H) return;
@@ -135,6 +145,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       if (p.rightButtonDown() || !this.room.onSubject(p.x, p.y)) this.leaveCloseup();
     });
     const onKey = (e: KeyboardEvent) => {
+      if (this.skipCine && !this.dialogueBox.isOpen && !e.repeat) return this.skipCine();
       if (e.key === 'Escape' || e.key === 'ArrowDown') this.leaveCloseup();
     };
     window.addEventListener('keydown', onKey);
@@ -155,9 +166,14 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     });
 
     this.cameras.main.fadeIn(400, 0, 0, 0);
-    const first = this.scenes.show();
+    let first = this.scenes.show();
+    // debug ?cine=1 : rejoue l'arrivée (une fois par chargement)
+    if (this.session.debug.cine && !this.registry.get('debugCine')) {
+      this.registry.set('debugCine', true);
+      first = true;
+    }
     this.parkDebugShot();
-    void this.act(this.enterActions(first));
+    void this.locked(() => this.enter(first));
   }
 
   // ── rendu ────────────────────────────────────────────────────────────
@@ -192,6 +208,76 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     return list;
   }
 
+  /** Actions d'arrivée dans la pièce ; en 3D, `onFirstEnter` peut être filmé (plan d'arrivée). */
+  private async enter(first: boolean): Promise<void> {
+    const def = this.scenes.current();
+    const intro = first && def.onFirstEnter ? ROOMS[def.id]?.intro : undefined;
+    if (intro) {
+      await this.filmed(intro, def.onFirstEnter);
+      if (def.onEnter) await this.runner.run(def.onEnter);
+      return;
+    }
+    await this.runner.run(this.enterActions(first));
+  }
+
+  /**
+   * Plan d'arrivée : push-in lent vers `shot`, répliques, retour à la pièce.
+   * Clic / tap / touche pendant un travel = coupe sèche sur la vue de la
+   * pièce ; les répliques sont jouées quoi qu'il arrive (l'état ne dépend
+   * jamais du saut).
+   */
+  private async filmed(shot: string, i: Interaction | undefined): Promise<void> {
+    const move = this.room.examine(shot, false, INTRO_PUSH);
+    if (!move) return this.runner.run(i);
+    this.scenes.spots(false);
+    swoosh('in', INTRO_PUSH);
+    let skipped = false;
+    const skip = new Promise<void>((resolve) => {
+      this.skipCine = () => {
+        skipped = true;
+        this.skipCine = null;
+        this.room.release(true);
+        resolve();
+      };
+    });
+    try {
+      await Promise.race([move, skip]);
+      await this.runner.run(i);
+      this.dialogueBox.close();
+      if (!skipped && this.sys.isActive()) {
+        const back = this.room.release();
+        if (back) {
+          swoosh('out', Stage.SHOT_TIMES.out);
+          await Promise.race([back, skip]);
+        }
+      }
+    } finally {
+      this.skipCine = null;
+      if (this.sys.isActive()) this.scenes.spots(true);
+    }
+  }
+
+  /** Bloque les entrées le temps de `fn` (interaction, plan, mini-jeu). */
+  private async locked(fn: () => Promise<void>): Promise<void> {
+    if (this.busy) return;
+    this.busy = true;
+    this.press?.cancel();
+    this.coin.close();
+    this.hover.set(null);
+    setCursor(this, 'default');
+    try {
+      await fn();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.busy = false;
+      if (this.sys.isActive()) {
+        this.dialogueBox.close();
+        this.refresh();
+      }
+    }
+  }
+
   /**
    * Exécute une interaction en bloquant les entrées. Avec `shot` (verbe
    * Regarder d'un hotspot qui a un travel d'examen), la caméra glisse vers
@@ -199,36 +285,54 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
    */
   private async act(i: Interaction | undefined, shot?: string): Promise<void> {
     if (this.busy || !i || (Array.isArray(i) && i.length === 0)) return;
-    this.busy = true;
-    this.press?.cancel();
-    this.coin.close();
-    this.hover.set(null);
-    setCursor(this, 'default');
-    const scene = this.session.state.scene;
-    const move = shot ? this.room.examine(shot) : null;
-    if (move) {
-      this.scenes.spots(false);
-      swoosh('in', Stage.SHOT_TIMES.in);
-    }
-    try {
-      await this.runner.run(i);
-      if (move && this.room.examining === shot && this.session.state.scene === scene && this.sys.isActive()) {
-        this.dialogueBox.close();
-        const back = this.room.release();
-        if (back) {
-          swoosh('out', Stage.SHOT_TIMES.out);
-          await back;
+    await this.locked(async () => {
+      const scene = this.session.state.scene;
+      const move = shot ? this.room.examine(shot) : null;
+      if (move) {
+        this.scenes.spots(false);
+        swoosh('in', Stage.SHOT_TIMES.in);
+      }
+      try {
+        await this.runner.run(i);
+        if (move && this.room.examining === shot && this.session.state.scene === scene && this.sys.isActive()) {
+          this.dialogueBox.close();
+          const back = this.room.release();
+          if (back) {
+            swoosh('out', Stage.SHOT_TIMES.out);
+            await back;
+          }
         }
+      } finally {
+        if (move && this.sys.isActive()) this.scenes.spots(true);
       }
-    } catch (e) {
-      console.error(e);
+    });
+  }
+
+  /**
+   * Serpillière sur le distributeur (en 3D) : travel sur la vitrine,
+   * mini-jeu du manche, puis la suite du YAML (objet, flag, réplique) — la
+   * ligne du narrateur, que le mini-jeu montre, est sautée. Abandon : rien
+   * ne change, on peut retenter.
+   */
+  private async vending(rig: VendingRig, reaction: Interaction): Promise<void> {
+    const move = this.room.examine(VendingRig.GAME_SHOT);
+    if (!move) return this.runner.run(reaction);
+    this.scenes.spots(false);
+    swoosh('in', Stage.SHOT_TIMES.in);
+    try {
+      await move;
+      if (await playVending(this, rig)) {
+        await this.runner.run(toActions(reaction).map((a) => (a.say?.startsWith('narrateur:') ? { ...a, say: undefined } : a)));
+      }
+      this.dialogueBox.close();
+      if (!this.sys.isActive()) return;
+      const back = this.room.release();
+      if (back) {
+        swoosh('out', Stage.SHOT_TIMES.out);
+        await back;
+      }
     } finally {
-      if (move && this.sys.isActive()) this.scenes.spots(true);
-      this.busy = false;
-      if (this.sys.isActive()) {
-        this.dialogueBox.close();
-        this.refresh();
-      }
+      if (this.sys.isActive()) this.scenes.spots(true);
     }
   }
 
@@ -279,6 +383,9 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const item = content.items.get(state.selectedItem)!;
     const reaction = h.useItem?.[item.id] ?? h.useItemDefault ?? this.pick(tl('room.wrongItem', { item: item.name, target: h.label }));
     state.select(null);
+    // mini-jeu 3D du manche ; sans rendu 3D, la réplique du YAML suffit
+    const rig = h.id === 'distributeur' && item.id === 'serpilliere' && !state.hasFlag('sandwich_tombe') ? this.room.rig<VendingRig>('vending') : null;
+    if (rig) return void this.locked(() => this.vending(rig, reaction));
     void this.act(reaction);
   }
 
@@ -461,7 +568,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   async goto(scene: string): Promise<void> {
     this.dialogueBox.close();
     const first = await this.scenes.goto(scene);
-    await this.runner.run(this.enterActions(first));
+    await this.enter(first);
   }
 
   async end(knot: string): Promise<void> {

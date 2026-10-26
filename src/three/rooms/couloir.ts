@@ -3,6 +3,7 @@ import { at, box, cyl, glow, label, mat, neon, plane, pool, sphere, starTexture,
 import { bob, fusible } from '../props';
 import type { RoomBuild } from './index';
 import { against, backDoor, pipe, shell, wallPanels } from './shell';
+import { VendingRig } from './vending';
 import { t as tr } from '../../i18n';
 
 const POWER_OFF = { flags: ['fusible_retire'] };
@@ -13,11 +14,16 @@ export const couloir: RoomBuild = {
   camera: { pos: [-1.2, 2.1, 8], look: [0.3, 1.85, 0], fov: 50 },
   shots: {
     distributeur: { fill: 1.05, orbit: -12, lift: -0.1 },
+    // plan d'arrivée : push-in en 3/4 sur la vitrine, le sandwich nargue Gary
+    [VendingRig.TEASE_SHOT]: { of: 'distributeur', px: [212, 258], fill: 1.55, orbit: -16, lift: 0.1 },
+    // mini-jeu du manche : vitrine + bandeau LED + bac
+    [VendingRig.GAME_SHOT]: { of: 'distributeur', px: [222, 310], fill: 1.22, orbit: -6, lift: -0.1 },
     fusibles: { fill: 0.6, orbit: 8 },
     hublot: { fill: 0.62, lift: 0.15 },
     compteur: { fill: 0.34 },
     lecteur: { fill: 0.26, aim: [-0.7, -0.1, 0], orbit: 15 },
   },
+  intro: VendingRig.TEASE_SHOT,
   build(s) {
     shell(s, {
       floor: { a: '#1c2131', b: '#232a3d', joint: '#0f121b', tile: 1 },
@@ -119,6 +125,17 @@ export const couloir: RoomBuild = {
     s.when(POWER_ON, header);
     vend.add(header);
     s.spot('distributeur', at(vend, ds.x, 0, against(ds.z, dd)));
+    s.expose(
+      'vending',
+      new VendingRig(s, {
+        vend,
+        sandwich,
+        size: sw,
+        ticker: { x: -dw * 0.02, y: ds.h * 0.255, z: dd / 2 + 0.03, w: dw * 0.86, h: ds.h * 0.1 },
+        binY: ds.h * 0.195,
+        binZ: dd / 2 + 0.06,
+      }),
+    );
 
     // ── boîte à fusibles ──
     const fb = s.fit(s.rect('fusibles'), 0.25);

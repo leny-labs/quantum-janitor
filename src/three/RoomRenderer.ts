@@ -84,13 +84,18 @@ export class RoomRenderer {
   }
 
   /** Travel d'examen vers le hotspot `id` de la vue courante (null s'il n'en a pas). */
-  examine(id: string, instant = false): Promise<void> | null {
-    return this.current?.examine(id, instant) ?? null;
+  examine(id: string, instant = false, dur?: number): Promise<void> | null {
+    return this.current?.examine(id, instant, dur) ?? null;
   }
 
-  /** Retour d'examen (null s'il n'y en a pas en cours). */
-  release(): Promise<void> | null {
-    return this.current?.release() ?? null;
+  /** Retour d'examen (null s'il n'y en a pas en cours) ; `instant` = coupe sèche. */
+  release(instant = false): Promise<void> | null {
+    return this.current?.release(instant) ?? null;
+  }
+
+  /** Mécanique exposée par le décor affiché (mini-jeu…), ou null. */
+  rig<T>(id: string): T | null {
+    return this.current?.rig<T>(id) ?? null;
   }
 
   get examining(): string | null {
@@ -166,12 +171,17 @@ export class RoomView {
     return this.room.travelTime(to);
   }
 
-  examine(id: string, instant = false): Promise<void> | null {
-    return this.image.visible ? this.room.examine(id, instant) : null;
+  examine(id: string, instant = false, dur?: number): Promise<void> | null {
+    return this.image.visible ? this.room.examine(id, instant, dur) : null;
   }
 
-  release(): Promise<void> | null {
-    return this.image.visible ? this.room.release() : null;
+  release(instant = false): Promise<void> | null {
+    return this.image.visible ? this.room.release(instant) : null;
+  }
+
+  /** Mécanique 3D du décor (null en rendu 2D : l'appelant retombe sur le comportement simple). */
+  rig<T>(id: string): T | null {
+    return this.image.visible ? this.room.rig<T>(id) : null;
   }
 
   /** Hotspot examiné (caméra rapprochée) ou null. */

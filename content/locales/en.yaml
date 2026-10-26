@@ -38,6 +38,7 @@ keys:
   scene.couloir.hotspot.bob.label: B.O.B.
   scene.couloir.exit.vers_placard.label: Broom closet
   scene.couloir.exit.vers_labo.label: Reactor laboratory
+  scene.couloir.onFirstEnter: "Tuna-Mayo-Mystery. We've been staring each other down since my first day. Someday, one of us is going to eat the other."
 
   # labo
   scene.labo.hotspot.reacteur.label: Mk IV Improbability Reactor

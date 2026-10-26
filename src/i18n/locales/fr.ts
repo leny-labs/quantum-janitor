@@ -180,6 +180,10 @@ export const fr = {
       counter: "KLEPSYDRA-9\n0098 JOURS SANS INCIDENT\nD'IMPROBABILITÉ",
       labDoor: 'LABO\nRÉACTEUR\n☢ ACCÈS\nRESTREINT',
       maintenance: 'ENTRETIEN',
+      /** Bandeau LED du mini-jeu du manche (distributeur). */
+      lcdStart: 'DÉCOINÇAGE ASSISTÉ · FRAPPEZ DANS LE VERT',
+      lcdMiss: ['COUP DE MANCHE FACTURÉ : 1 CRÉDIT', 'DEUXIÈME COUP : 2 CRÉDITS (TARIF FIDÉLITÉ)', 'SOLDE : −3 · VOTRE PROCHAIN CLONE PAIERA'],
+      lcdWin: 'ARTICLE DÉLIVRÉ · MERCI DE VOTRE VIOLENCE',
     },
     labo: {
       warning: "☢  ZONE D'IMPROBABILITÉ — PORT DU CASQUE CONSEILLÉ (CASQUE NON FOURNI)",

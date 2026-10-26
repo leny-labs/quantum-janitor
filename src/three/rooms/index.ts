@@ -15,6 +15,11 @@ export interface RoomBuild {
    * la caméra glisse vers l'objet le temps de la réplique puis revient.
    */
   shots?: Record<string, ShotSpec>;
+  /**
+   * Plan d'arrivée : id d'un travel de `shots` filmé pendant les répliques
+   * `onFirstEnter` de la pièce (push-in, réplique, retour ; sautable).
+   */
+  intro?: string;
 }
 
 export const ROOMS: Record<string, RoomBuild> = { placard, couloir, labo };

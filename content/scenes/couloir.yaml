@@ -4,6 +4,9 @@ sector: Pont C · Circulation
 icon: corridor
 background: "#22283a"
 
+# en 3D, filmé en push-in sur la vitrine (plan d'arrivée, voir src/three/rooms/couloir.ts)
+onFirstEnter: "Thon-Mayo-Mystère. On se toise depuis mon premier jour. Un jour, l'un de nous deux mangera l'autre."
+
 art:
   - { rect: [0, 470, 1280, 110], color: "#171b28" }                   # sol
   - { rect: [0, 462, 1280, 8], color: "#3a4260" }
