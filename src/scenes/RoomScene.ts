@@ -27,7 +27,7 @@ import { PressRing } from '../ui/PressRing';
 import { RoomPlaque } from '../ui/RoomPlaque';
 import { VerbCoin } from '../ui/VerbCoin';
 import { playVending } from './VendingGame';
-import { bobCue, fuseCue, lecteurCue } from './beats';
+import { bobCue, fuseCue, lecteurCue, splash } from './beats';
 import { FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
 
 /** La suite du YAML sans les lignes du narrateur (quand une animation les montre déjà). */
@@ -618,6 +618,15 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const reaction =
       resolveCombine(content, held, id) ??
       this.pick(tl('room.wrongCombine', { item: content.items.get(held)!.name, target: def.name }));
+    // serpillière trempée dans le seau : plouf et gerbe de gouttes sur la case du seau
+    const pair = [held, id];
+    if (pair.includes('serpilliere') && pair.includes('seau') && !state.hasFlag('serpilliere_mouillee')) {
+      const r = this.inventory.slotRect(state.items.indexOf('seau'));
+      return void this.locked(async () => {
+        await splash(this, r.x, r.y, r.size);
+        await this.runner.run(reaction);
+      });
+    }
     void this.act(reaction);
   }
 

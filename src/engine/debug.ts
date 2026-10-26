@@ -13,6 +13,7 @@
  *   ?scene=couloir&flags=lecteur_propre&items=badge             badge sur le lecteur : bip, LED verte, porte du labo qui s'escamote
  *   ?scene=placard&items=sandwich                               sandwich à B.O.B. : aspiré, puis recraché avec le badge (# shake)
  *   ?scene=couloir&flags=sait_fusible                           « Prendre le fusible » : étincelles, le néon du circuit 7B hoquette et meurt
+ *   ?scene=placard&items=seau,serpilliere                       serpillière sur le seau (inventaire) : plouf et gerbe de gouttes
  * `scene=fin` saute directement au cliffhanger ; `scene=panneau` ouvre le labo cadré sur la console.
  * En mode debug, la sauvegarde automatique est désactivée.
  */
