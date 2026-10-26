@@ -9,6 +9,8 @@
  *   ?scene=couloir&shot=distributeur                            caméra déjà rapprochée sur un hotspot (travel d'examen)
  *   ?scene=couloir&cine=1                                       rejoue le plan d'arrivée de la pièce (push-in sur le distributeur)
  *   ?scene=couloir&items=serpilliere                            mini-jeu du manche : utiliser la serpillière sur le distributeur
+ *   ?scene=couloir&flags=serpilliere_mouillee&items=serpilliere  frottage animé : serpillière sur le lecteur de badge
+ *   ?scene=couloir&flags=lecteur_propre&items=badge             badge sur le lecteur : bip, LED verte, porte du labo qui s'escamote
  * `scene=fin` saute directement au cliffhanger ; `scene=panneau` ouvre le labo cadré sur la console.
  * En mode debug, la sauvegarde automatique est désactivée.
  */

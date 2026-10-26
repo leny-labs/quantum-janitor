@@ -160,3 +160,27 @@ export function plouf(): void {
   tone(a, 'sine', 520, 90, a.currentTime, 0.32, 0.18);
   noise(a, a.currentTime + 0.02, 0.35, 0.08, 1200, 300);
 }
+
+/** Couinement caoutchouteux (serpillière sur du plastique, yaourt qui proteste). */
+export function squeak(): void {
+  const a = ctx();
+  if (!a) return;
+  const f = 900 + Math.random() * 500;
+  tone(a, 'sine', f, f * 1.6, a.currentTime, 0.09, 0.07);
+  tone(a, 'triangle', f * 1.5, f * 1.1, a.currentTime + 0.05, 0.07, 0.04);
+}
+
+/** « Splotch » : quelque chose de mou qui se décolle et tombe. */
+export function splat(): void {
+  const a = ctx();
+  if (!a) return;
+  tone(a, 'sine', 320, 70, a.currentTime, 0.22, 0.16);
+  noise(a, a.currentTime, 0.16, 0.09, 700, 200);
+}
+
+/** Bip de lecteur de badge. */
+export function beep(f = 1250): void {
+  const a = ctx();
+  if (!a) return;
+  tone(a, 'square', f, f, a.currentTime, 0.1, 0.035);
+}

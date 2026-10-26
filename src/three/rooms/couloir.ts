@@ -3,6 +3,7 @@ import { at, box, cyl, glow, label, mat, neon, plane, pool, sphere, starTexture,
 import { bob, fusible } from '../props';
 import type { RoomBuild } from './index';
 import { against, backDoor, pipe, shell, wallPanels } from './shell';
+import { LecteurRig } from './lecteur';
 import { VendingRig } from './vending';
 import { t as tr } from '../../i18n';
 
@@ -22,6 +23,8 @@ export const couloir: RoomBuild = {
     hublot: { fill: 0.62, lift: 0.15 },
     compteur: { fill: 0.34 },
     lecteur: { fill: 0.26, aim: [-0.7, -0.1, 0], orbit: 15 },
+    // serpillière sur le lecteur : serré sur le boîtier
+    [LecteurRig.SCRUB_SHOT]: { of: 'lecteur', fill: 0.62, orbit: 14, lift: -0.05 },
   },
   intro: VendingRig.TEASE_SHOT,
   build(s) {
@@ -192,13 +195,25 @@ export const couloir: RoomBuild = {
     closed.add(at(label(tr('props.couloir.labDoor'), lf.w * 0.8, lf.h * 0.4, { color: '#ffd166', bold: true }), 0, lf.h * 0.18, 0.01));
     closed.add(at(box(0.02, lf.h * 0.9, 0.02, '#1d2436', { edges: false }), 0, -lf.h * 0.04, 0.01));
     closed.position.set(lf.x, lf.y, 0.13);
+    // tablier (panneau + marquages) pendu au linteau : il s'y escamote à l'ouverture (LecteurRig)
+    const lintel = Math.min(lf.w, lf.h) * 0.08; // épaisseur du cadre, comme dans backDoor
+    const top = lf.h / 2 - lintel;
+    const shutter = new THREE.Group();
+    shutter.position.set(lf.x, lf.y + top, 0.12);
+    const panel = labDoor.children[3];
+    panel.position.y -= top;
+    closed.position.set(0, -top, 0.01);
+    shutter.add(panel, closed);
+    s.add(shutter);
+    // l'ouverture est derrière le tablier (z), qui la découvre en montant
     const open = new THREE.Group();
     open.add(at(plane(lf.w * 0.84, lf.h * 0.92, '#140c26', { glow: true }), 0, -lf.h * 0.04, 0.02));
-    open.add(at(glow('#b06cff', lf.w * 1.4, 0.45), 0, -lf.h * 0.1, 0.1));
-    open.position.set(lf.x, lf.y, 0.13);
+    const doorGlow = at(glow('#b06cff', lf.w * 1.4, 0.45), 0, -lf.h * 0.1, 0.03);
+    open.add(doorGlow);
+    open.position.set(lf.x, lf.y, 0.03);
     const spill = new THREE.PointLight('#b06cff', 20, 6, 1.5);
     spill.position.set(lf.x, 1.6, 1.2);
-    s.when({ notFlags: ['labo_ouvert'] }, closed).when({ flags: ['labo_ouvert'] }, open, spill);
+    s.when({ flags: ['labo_ouvert'] }, open, spill);
     s.add(labDoor);
     const lamp = at(cyl(0.12, 0.12, 0.08, '#ff5c7a', { glow: true }), lf.x, lf.y + lf.h / 2 + 0.2, 0.2);
     lamp.rotation.x = Math.PI / 2;
@@ -222,6 +237,7 @@ export const couloir: RoomBuild = {
     reader.add(slime, ledClean);
     s.when({ notFlags: ['lecteur_propre'] }, slime).when({ flags: ['lecteur_propre'] }, ledClean);
     s.spot('lecteur', at(reader, lc.x, lc.y, 0.12));
+    s.expose('lecteur', new LecteurRig(s, { reader, slime, led: ledClean, w: lc.w, h: lc.h, shutter, doorGlow, spill }));
 
     // ── porte vers le placard ──
     const { f: pf } = backDoor(s, s.rect('vers_placard'), 0.12, '#2a3148', '#3b4560');

@@ -10,6 +10,7 @@ import { hotspotVerbs, smartVerb, type HotspotVerb } from '../engine/verbs';
 import { getSession, type Session } from '../session';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { CLOSEUPS, ROOMS } from '../three/rooms';
+import { LecteurRig } from '../three/rooms/lecteur';
 import { VendingRig } from '../three/rooms/vending';
 import { makeButton } from '../ui/Button';
 import { DialogueBox } from '../ui/DialogueBox';
@@ -24,7 +25,13 @@ import { PressRing } from '../ui/PressRing';
 import { RoomPlaque } from '../ui/RoomPlaque';
 import { VerbCoin } from '../ui/VerbCoin';
 import { playVending } from './VendingGame';
+import { lecteurCue } from './beats';
 import { FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
+
+/** La suite du YAML sans les lignes du narrateur (quand une animation les montre déjà). */
+function withoutNarrator(i: Interaction): Action[] {
+  return toActions(i).map((a) => (a.say?.startsWith('narrateur:') ? { ...a, say: undefined } : a));
+}
 
 /** Durée (s) du push-in lent du plan d'arrivée. */
 const INTRO_PUSH = 2.1;
@@ -305,7 +312,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     try {
       await move;
       if (await playVending(this, rig)) {
-        await this.runner.run(toActions(reaction).map((a) => (a.say?.startsWith('narrateur:') ? { ...a, say: undefined } : a)));
+        await this.runner.run(withoutNarrator(reaction));
       }
       this.dialogueBox.close();
       if (!this.sys.isActive()) return;
@@ -314,6 +321,43 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     } finally {
       if (this.sys.isActive()) this.scenes.spots(true);
     }
+  }
+
+  /**
+   * Petite animation d'un moment clé (sans interaction) : travel silencieux
+   * vers `shot`, `play` (le geste en 3D), puis la suite du YAML — sans la
+   * ligne du narrateur si `skipNarrator` (l'animation la montre) — et retour.
+   * Sans rendu 3D, la réplique du YAML suffit.
+   */
+  private async beat(shot: string, play: () => Promise<void>, reaction: Interaction, skipNarrator: boolean, after?: () => Promise<void>): Promise<void> {
+    const move = this.room.examine(shot);
+    if (!move) return this.runner.run(reaction);
+    this.scenes.spots(false);
+    try {
+      await move;
+      await play();
+      await this.runner.run(skipNarrator ? withoutNarrator(reaction) : reaction);
+      this.dialogueBox.close();
+      await after?.();
+      if (!this.sys.isActive()) return;
+      const back = this.room.release();
+      if (back) await back;
+    } finally {
+      if (this.sys.isActive()) this.scenes.spots(true);
+    }
+  }
+
+  /** Serpillière mouillée / badge sur le lecteur du labo : frottage ou bip + porte. */
+  private lecteur(rig: LecteurRig, scrub: boolean, reaction: Interaction): Promise<void> {
+    rig.onCue = (c) => lecteurCue(this, c);
+    const done = () => {
+      rig.onCue = null;
+      rig.idle();
+    };
+    const run = scrub
+      ? this.beat(LecteurRig.SCRUB_SHOT, () => rig.scrub(), reaction, true)
+      : this.beat(LecteurRig.SWIPE_SHOT, () => rig.swipe(), reaction, false, () => rig.settled());
+    return run.finally(done);
   }
 
   private pick(list: string[]): string {
@@ -366,6 +410,14 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     // mini-jeu 3D du manche ; sans rendu 3D, la réplique du YAML suffit
     const rig = h.id === 'distributeur' && item.id === 'serpilliere' && !state.hasFlag('sandwich_tombe') ? this.room.rig<VendingRig>('vending') : null;
     if (rig) return void this.locked(() => this.vending(rig, reaction));
+    // petites animations des moments clés du lecteur de badge
+    const reader = h.id === 'lecteur' ? this.room.rig<LecteurRig>('lecteur') : null;
+    if (reader && item.id === 'serpilliere' && state.hasFlag('serpilliere_mouillee') && !state.hasFlag('lecteur_propre')) {
+      return void this.locked(() => this.lecteur(reader, true, reaction));
+    }
+    if (reader && item.id === 'badge' && state.hasFlag('lecteur_propre') && !state.hasFlag('labo_ouvert')) {
+      return void this.locked(() => this.lecteur(reader, false, reaction));
+    }
     void this.act(reaction);
   }
 
