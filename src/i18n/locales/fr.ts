@@ -195,7 +195,15 @@ export const fr = {
       maintenance: 'ENTRETIEN',
       /** Bandeau LED du mini-jeu du manche (distributeur). */
       lcdStart: 'DÉCOINÇAGE ASSISTÉ · FRAPPEZ DANS LE VERT',
-      lcdMiss: ['COUP DE MANCHE FACTURÉ : 1 CRÉDIT', 'DEUXIÈME COUP : 2 CRÉDITS (TARIF FIDÉLITÉ)', 'SOLDE : −3 · VOTRE PROCHAIN CLONE PAIERA'],
+      lcdMiss: [
+        'COUP DE MANCHE FACTURÉ : 1 CRÉDIT',
+        'DEUXIÈME COUP : 2 CRÉDITS (TARIF FIDÉLITÉ)',
+        'SOLDE : −3 · VOTRE PROCHAIN CLONE PAIERA',
+        'VIOLENCE NON CONTRACTUELLE · −5 CRÉDITS',
+        'DOSSIER TRANSMIS À LA DIRECTION DES SNACKS',
+      ],
+      lcdNotch: ['CRAN 1/3 · LA SPIRALE GRINCE', 'CRAN 2/3 · ÇA PENCHE… ÇA PENCHE…'],
+      lcdBack: 'LA SPIRALE SE REVISSE · CRAN PERDU',
       lcdWin: 'ARTICLE DÉLIVRÉ · MERCI DE VOTRE VIOLENCE',
     },
     labo: {

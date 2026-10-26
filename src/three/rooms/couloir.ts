@@ -106,9 +106,10 @@ export const couloir: RoomBuild = {
     const glassOn = at(plane(glassW * 0.96, glassH * 0.96, '#9fd8ff', { glow: true, opacity: 0.18 }), -dw * 0.05, glassY, G + 0.3);
     s.when(POWER_ON, glassOn);
     vend.add(glassOn);
-    // spirales
+    // spirales (celle du sandwich, au centre, est animée par le VendingRig)
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
+        if (row === 1 && col === 1) continue;
         const coil = at(torus(glassW * 0.1, 0.012, '#c9ced6'), -dw * 0.05 + (col - 1) * glassW * 0.3, glassY + glassH * 0.3 - row * glassH * 0.3 - glassH * 0.08, G + 0.12);
         vend.add(coil);
       }
@@ -139,6 +140,7 @@ export const couloir: RoomBuild = {
         ticker: { x: -dw * 0.02, y: ds.h * 0.255, z: dd / 2 + 0.03, w: dw * 0.86, h: ds.h * 0.1 },
         binY: ds.h * 0.195,
         binZ: dd / 2 + 0.06,
+        coil: { x: -dw * 0.05, y: glassY - glassH * 0.08, r: glassW * 0.1, z0: G + 0.04, z1: G + 0.26 },
       }),
     );
 

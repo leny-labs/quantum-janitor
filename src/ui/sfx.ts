@@ -216,3 +216,13 @@ export function crunch(): void {
   noise(a, a.currentTime, 0.09, 0.1, 2200 + Math.random() * 800, 900);
   tone(a, 'sine', 180 + Math.random() * 60, 90, a.currentTime, 0.12, 0.08);
 }
+
+/** Grincement de spirale métallique qui force d'un cran (`back` : elle se revisse). */
+export function creak(back = false): void {
+  const a = ctx();
+  if (!a) return;
+  const t = a.currentTime;
+  const [f0, f1] = back ? [420, 260] : [260, 420];
+  for (let i = 0; i < 3; i++) tone(a, 'sawtooth', f0 + i * 30, f1 + i * 30, t + i * 0.09, 0.08, 0.025);
+  noise(a, t, 0.3, 0.05, 2600, 1400);
+}

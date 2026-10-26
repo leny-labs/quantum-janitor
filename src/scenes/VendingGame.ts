@@ -2,20 +2,27 @@ import Phaser from 'phaser';
 import type { VendingRig } from '../three/rooms/vending';
 import { drawNavButton } from '../ui/chrome';
 import { uiPx } from '../ui/input';
-import { chime, glitch, thud, whoosh } from '../ui/sfx';
+import { chime, creak, glitch, splat, squeak, thud, whoosh } from '../ui/sfx';
 import { ROOM_H, W } from '../ui/theme';
 
-/** Ratés avant que le coup suivant réussisse d'office (jamais bloquant). */
+/** Ratés depuis le dernier cran gagné avant que le coup suivant passe d'office (jamais bloquant). */
 const MERCY = 3;
+/** Ratés d'affilée qui font revisser la spirale d'un cran. */
+const SLIP = 2;
 
 /**
  * Mini-jeu du manche (caméra déjà sur la vitrine) : clic / tap / Espace au
- * bout du balancement pour décoincer le sandwich. Échap, flèche bas ou le
- * bouton retour abandonnent proprement. Résout true si le sandwich est tombé.
+ * bout du balancement, un coup réussi par cran de spirale (fenêtre plus
+ * serrée et rythme plus vif à chaque cran ; deux ratés d'affilée font perdre
+ * un cran). Échap, flèche bas ou le bouton retour abandonnent proprement.
+ * Résout true si le sandwich est tombé.
  */
 export function playVending(scene: Phaser.Scene, rig: VendingRig): Promise<boolean> {
   return new Promise((resolve) => {
+    /** Ratés au total (facture du bandeau), depuis le dernier cran, d'affilée. */
     let misses = 0;
+    let since = 0;
+    let streak = 0;
     let swinging = false;
     let over = false;
     /** Coup gagnant parti : on laisse le sandwich arriver dans le bac. */
@@ -27,8 +34,15 @@ export function playVending(scene: Phaser.Scene, rig: VendingRig): Promise<boole
         thud();
         glitch();
         scene.cameras.main.shake(180, 0.004);
-      } else if (c === 'release') chime([660, 880, 1175]);
-      else thud();
+      } else if (c === 'back') creak(true);
+      else if (c === 'creak') creak();
+      else if (c === 'release') chime([660, 880, 1175]);
+      else if (c === 'tip') squeak();
+      else if (c === 'land') {
+        thud();
+        splat();
+        scene.cameras.main.shake(140, 0.003);
+      } else thud();
     };
     rig.start();
 
@@ -48,11 +62,19 @@ export function playVending(scene: Phaser.Scene, rig: VendingRig): Promise<boole
     const strike = async () => {
       if (swinging || over) return;
       swinging = true;
-      const hit = rig.inWindow || misses >= MERCY;
-      landing = hit;
-      await rig.strike(hit, misses + 1);
-      if (hit) return finish(true);
-      misses++;
+      if (rig.inWindow || since >= MERCY) {
+        since = streak = 0;
+        landing = rig.progress + 1 >= rig.steps;
+        await rig.strike('hit', 0);
+        if (landing) return finish(true);
+      } else {
+        misses++;
+        since++;
+        streak++;
+        const slip = streak >= SLIP && rig.progress > 0;
+        if (slip) streak = 0;
+        await rig.strike(slip ? 'back' : 'miss', misses);
+      }
       swinging = false;
     };
     const onDown = (p: Phaser.Input.Pointer, objs: Phaser.GameObjects.GameObject[]) => {
