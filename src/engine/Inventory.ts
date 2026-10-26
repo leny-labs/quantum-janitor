@@ -35,6 +35,12 @@ export class Inventory {
     this.render();
   }
 
+  /** Centre (coordonnées écran) de la case `i`. */
+  slotCenter(i: number): { x: number; y: number } {
+    const r = slotRect(i);
+    return { x: r.x, y: r.y };
+  }
+
   render(): void {
     const s = this.scene;
     const c = this.container;

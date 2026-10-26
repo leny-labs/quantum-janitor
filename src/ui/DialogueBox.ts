@@ -5,6 +5,7 @@ import type { DialogueView } from '../engine/DialogueRunner';
 import type { CharacterDef } from '../engine/types';
 import { SHEET, portraitKey, sheetKey } from '../three/Studio';
 import { drawHazard, drawPanel } from './chrome';
+import { cssToGame, isTouch } from './input';
 import { duckMusic } from './music';
 import { COLORS, FONT, H, W, hex, setCursor } from './theme';
 
@@ -16,6 +17,10 @@ const PORTRAIT = 176;
 const TEXT_X = PANEL_X + PORTRAIT + 48;
 /** Vitesse du typewriter (caractères/s), partagée avec la bouche. */
 const CPS = 32;
+/** Hauteur minimale d'une ligne de choix au doigt (px CSS, recommandation ≥ 44). */
+const CHOICE_TOUCH_CSS = 48;
+/** Marges haut + bas autour de la liste de choix dans le panneau. */
+const CHOICE_PAD = 50;
 
 /**
  * Repli quand un personnage n'a pas de planche de sprites : ancrages bouche /
@@ -55,6 +60,9 @@ const FACES: Record<string, { mouth: MouthOptions; blink?: BlinkOptions }> = {
 /** Boîte de dialogue : portrait 3D, cartouche de nom, texte, choix. */
 export class DialogueBox implements DialogueView {
   private root: Phaser.GameObjects.Container;
+  private panel: Phaser.GameObjects.Graphics;
+  /** Bord haut du panneau : remonte quand les choix tactiles ne tiennent pas dedans. */
+  private panelY = PANEL_Y;
   private blocker: Phaser.GameObjects.Rectangle;
   private portraitFrame: Phaser.GameObjects.Graphics;
   private face: TalkingPortrait;
@@ -72,8 +80,10 @@ export class DialogueBox implements DialogueView {
   private channel: Phaser.GameObjects.Text;
   private bodyText: Phaser.GameObjects.Text;
   private hint: Phaser.GameObjects.Text;
-  private choiceTexts: Phaser.GameObjects.Text[] = [];
+  /** Une zone par ligne de choix (toute la largeur), dans l'ordre. */
+  private choiceZones: Phaser.GameObjects.Zone[] = [];
   private choiceDecor: Phaser.GameObjects.GameObject[] = [];
+  private pickChoice: ((i: number) => void) | null = null;
   private advance: (() => void) | null = null;
   private shownAt = 0;
   private keyHandler: (e: KeyboardEvent) => void;
@@ -88,12 +98,7 @@ export class DialogueBox implements DialogueView {
     this.blocker.on('pointerdown', () => this.tryAdvance());
 
     this.root = scene.add.container(0, 0).setDepth(901).setVisible(false);
-    const panel = scene.add.graphics();
-    drawPanel(panel, PANEL_X, PANEL_Y, PANEL_W, PANEL_H, { fill: COLORS.panel, fillAlpha: 0.96, cut: 22, brackets: true });
-    // trame de scanlines discrète
-    panel.fillStyle(0xffffff, 0.025);
-    for (let y = PANEL_Y + 6; y < PANEL_Y + PANEL_H - 6; y += 4) panel.fillRect(PANEL_X + 6, y, PANEL_W - 12, 1);
-    drawHazard(panel, PANEL_X + PANEL_W - 190, PANEL_Y + PANEL_H - 10, 150, 4, 0.8);
+    const panel = (this.panel = scene.add.graphics());
 
     const px = PANEL_X + 22;
     const py = PANEL_Y + 22;
@@ -130,15 +135,31 @@ export class DialogueBox implements DialogueView {
       .setLetterSpacing(2);
     scene.tweens.add({ targets: this.hint, alpha: 0.35, duration: 650, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     this.root.add([panel, this.portraitFrame, this.portraitBg, this.face.container, this.portraitText, this.nameTab, this.nameText, this.channel, this.bodyText, this.hint]);
+    this.layoutPanel(PANEL_Y);
 
     this.keyHandler = (e: KeyboardEvent) => {
       if (!this.root.visible) return;
       if (e.key === ' ' || e.key === 'Enter') this.tryAdvance();
       const n = parseInt(e.key, 10);
-      if (n >= 1 && n <= this.choiceTexts.length) this.choiceTexts[n - 1].emit('pointerdown');
+      if (n >= 1 && n <= this.choiceZones.length) this.pickChoice?.(n - 1);
     };
     window.addEventListener('keydown', this.keyHandler);
     scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => window.removeEventListener('keydown', this.keyHandler));
+  }
+
+  /** Redessine le panneau avec son bord haut en `y` (le bas reste collé à l'écran). */
+  private layoutPanel(y: number): void {
+    this.panelY = y;
+    const h = H - 16 - y;
+    const g = this.panel;
+    g.clear();
+    drawPanel(g, PANEL_X, y, PANEL_W, h, { fill: COLORS.panel, fillAlpha: 0.96, cut: 22, brackets: true });
+    // trame de scanlines discrète
+    g.fillStyle(0xffffff, 0.025);
+    for (let sy = y + 6; sy < y + h - 6; sy += 4) g.fillRect(PANEL_X + 6, sy, PANEL_W - 12, 1);
+    drawHazard(g, PANEL_X + PANEL_W - 190, y + h - 10, 150, 4, 0.8);
+    this.channel.setY(y + 18);
+    this.nameText.setY(y - 2);
   }
 
   get isOpen(): boolean {
@@ -230,17 +251,21 @@ export class DialogueBox implements DialogueView {
     // couleurs sombres (narrateur, Reine) : liseré clair et texte clair
     const dark = Phaser.Display.Color.IntegerToColor(c).v < 0.55;
     g.fillStyle(c, 1);
-    g.fillPoints([new Phaser.Geom.Point(x, PANEL_Y - 16), new Phaser.Geom.Point(x + w, PANEL_Y - 16), new Phaser.Geom.Point(x + w + 14, PANEL_Y + 12), new Phaser.Geom.Point(x, PANEL_Y + 12)], true);
+    const y = this.panelY;
+    const tab = [new Phaser.Geom.Point(x, y - 16), new Phaser.Geom.Point(x + w, y - 16), new Phaser.Geom.Point(x + w + 14, y + 12), new Phaser.Geom.Point(x, y + 12)];
+    g.fillPoints(tab, true);
     g.lineStyle(1.5, dark ? 0xffffff : COLORS.ink, dark ? 0.6 : 0.8);
-    g.strokePoints([new Phaser.Geom.Point(x, PANEL_Y - 16), new Phaser.Geom.Point(x + w, PANEL_Y - 16), new Phaser.Geom.Point(x + w + 14, PANEL_Y + 12), new Phaser.Geom.Point(x, PANEL_Y + 12)], true);
+    g.strokePoints(tab, true);
     this.nameText.setColor(dark ? '#ffffff' : '#07050f');
   }
 
   private clearChoices(): void {
-    this.choiceTexts.forEach((t) => t.destroy());
+    this.choiceZones.forEach((t) => t.destroy());
     this.choiceDecor.forEach((t) => t.destroy());
-    this.choiceTexts = [];
+    this.choiceZones = [];
     this.choiceDecor = [];
+    this.pickChoice = null;
+    if (this.panelY !== PANEL_Y) this.layoutPanel(PANEL_Y);
   }
 
   /** Arrête la frappe en cours et ferme la bouche. */
@@ -272,48 +297,72 @@ export class DialogueBox implements DialogueView {
     this.stopTalking();
     this.setSpeaker(null);
     this.bodyText.setText('');
-    this.setName('Réponse — formulaire R-12', COLORS.hover);
     this.hint.setVisible(false);
+    // Au doigt, chaque ligne fait ≥ 48 px CSS ; si la liste ne tient pas, le
+    // panneau remonte (sans dépasser le haut de l'écran).
+    const touch = isTouch();
+    const want = touch ? Math.max(56, cssToGame(this.scene, CHOICE_TOUCH_CSS)) : 48;
+    const lineH = Math.min(want, (H - 40 - CHOICE_PAD) / choices.length);
+    const panelY = Math.min(PANEL_Y, H - 16 - CHOICE_PAD - lineH * choices.length);
+    if (panelY !== this.panelY) this.layoutPanel(panelY);
+    this.setName('Réponse — formulaire R-12', COLORS.hover);
     this.open();
+    const fontSize = touch ? Math.round(Math.min(28, lineH * 0.5)) : 22;
     return new Promise((resolve) => {
-      const top = PANEL_Y + 34;
-      const lineH = Math.min(48, (PANEL_H - 50) / choices.length);
+      // la sélection se fait au relâché sur la ligne où le doigt / clic s'est posé :
+      // l'appui qui a fait apparaître les choix ne peut pas en valider un
+      let armed = -1;
+      this.pickChoice = (i) => {
+        this.clearChoices();
+        resolve(i);
+      };
+      const top = panelY + 34;
       choices.forEach((c, i) => {
         const y = top + i * lineH;
         const bar = this.scene.add.graphics();
         const t = this.scene.add
-          .text(PANEL_X + 84, y + lineH / 2, c, { fontFamily: FONT, fontSize: '22px', fontStyle: '500', color: COLORS.text, wordWrap: { width: PANEL_W - 140 } })
-          .setOrigin(0, 0.5)
-          .setInteractive({ useHandCursor: true });
+          .text(PANEL_X + 84, y + lineH / 2, c, { fontFamily: FONT, fontSize: `${fontSize}px`, fontStyle: '500', color: COLORS.text, wordWrap: { width: PANEL_W - 140 } })
+          .setOrigin(0, 0.5);
+        const n = this.scene.add
+          .text(PANEL_X + 55, y + lineH / 2, String(i + 1), { fontFamily: FONT, fontSize: '15px', fontStyle: '700', color: COLORS.text })
+          .setOrigin(0.5);
         const paint = (on: boolean) => {
           bar.clear();
           if (on) {
             bar.fillStyle(hex(COLORS.hover), 0.12);
             bar.fillRect(PANEL_X + 30, y + 3, PANEL_W - 60, lineH - 6);
+          } else if (touch) {
+            // au doigt, chaque ligne est une touche visible
+            bar.fillStyle(0xffffff, 0.04);
+            bar.fillRect(PANEL_X + 30, y + 3, PANEL_W - 60, lineH - 6);
           }
           drawPanel(bar, PANEL_X + 40, y + lineH / 2 - 14, 30, 28, { fill: on ? hex(COLORS.hover) : COLORS.panelHi, edge: hex(on ? COLORS.hover : COLORS.accent), cut: 7, glow: false });
           t.setColor(on ? COLORS.hover : COLORS.text);
+          n.setColor(on ? '#07050f' : COLORS.text);
         };
-        const n = this.scene.add
-          .text(PANEL_X + 55, y + lineH / 2, String(i + 1), { fontFamily: FONT, fontSize: '15px', fontStyle: '700', color: COLORS.text })
-          .setOrigin(0.5);
         paint(false);
-        t.on('pointerover', () => {
-          paint(true);
-          n.setColor('#07050f');
-        });
-        t.on('pointerout', () => {
+        // zone de touche : toute la ligne (badge + texte + marges), pas seulement le texte
+        const zone = this.scene.add
+          .zone(PANEL_X + 30, y, PANEL_W - 60, lineH)
+          .setOrigin(0)
+          .setInteractive({ useHandCursor: true });
+        zone.on('pointerover', () => paint(true));
+        zone.on('pointerout', () => {
           paint(false);
-          n.setColor(COLORS.text);
+          if (armed === i) armed = -1;
         });
-        t.on('pointerdown', () => {
-          if (this.scene.time.now - this.shownAt < 180) return;
-          this.clearChoices();
-          resolve(i);
+        zone.on('pointerdown', (p: Phaser.Input.Pointer) => {
+          if (p.rightButtonDown()) return;
+          armed = i;
+          paint(true);
         });
-        this.root.add([bar, n, t]);
-        this.choiceDecor.push(bar, n);
-        this.choiceTexts.push(t);
+        zone.on('pointerup', () => {
+          if (armed !== i) return;
+          this.pickChoice?.(i);
+        });
+        this.root.add([bar, n, t, zone]);
+        this.choiceDecor.push(bar, n, t);
+        this.choiceZones.push(zone);
       });
     });
   }

@@ -47,6 +47,9 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   private dropButton: Phaser.GameObjects.Container | null = null;
   private runner!: ActionRunner;
   private titleText!: Phaser.GameObjects.Text;
+  /** Boutons du HUD (lus aussi par tools/tap-check.ts). */
+  menuButton!: Phaser.GameObjects.Container;
+  musicButton!: Phaser.GameObjects.Container;
   private debugText: Phaser.GameObjects.Text | null = null;
   private heldItem!: Phaser.GameObjects.Text;
   /** Flèche « retour » quand la caméra reste sur un travel d'examen (?shot=…). */
@@ -104,12 +107,12 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.titleText = this.add
       .text(14, 10, '', { fontFamily: FONT, fontSize: '18px', color: COLORS.dim, backgroundColor: '#00000088', padding: { x: 8, y: 4 } })
       .setDepth(700);
-    const menu = makeButton(this, W - 14, 10, 'Menu', () => !this.busy && this.scene.start('Title'), {
+    const menu = (this.menuButton = makeButton(this, W - 14, 10, 'Menu', () => !this.busy && this.scene.start('Title'), {
       size: 18,
       align: 'right',
       valign: 'top',
-    }).setDepth(700);
-    makeMusicToggle(this, menu.x - menu.width / 2 - 8 - menu.height / 2, menu.y, menu.height).setDepth(700);
+    }).setDepth(700));
+    this.musicButton = makeMusicToggle(this, menu.x - menu.width / 2 - 8 - menu.height / 2, menu.y, menu.height).setDepth(700);
     if (this.session.debug.overlay) {
       this.debugText = this.add
         .text(14, 44, '', { fontFamily: MONO, fontSize: '13px', color: '#ff99ff', backgroundColor: '#000000aa', wordWrap: { width: 700 } })
