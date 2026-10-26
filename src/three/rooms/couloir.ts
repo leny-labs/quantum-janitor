@@ -7,6 +7,7 @@ import { FuseRig } from './fusible';
 import { LecteurRig } from './lecteur';
 import { VendingRig } from './vending';
 import { t as tr } from '../../i18n';
+import { BobVoice } from './bobvoix';
 
 const POWER_OFF = { flags: ['fusible_retire'] };
 const POWER_ON = { notFlags: ['fusible_retire'] };
@@ -274,6 +275,7 @@ export const couloir: RoomBuild = {
     const bb = s.stand(s.rect('bob'));
     const robot = at(bob(bb.w * 0.75), bb.x, 0, bb.z, -0.3);
     s.spot('bob', robot);
+    s.expose('bobVoix', new BobVoice(s, robot));
     s.animate((time) => {
       robot.rotation.y = -0.3 + Math.sin(time * 0.7) * 0.15;
     });

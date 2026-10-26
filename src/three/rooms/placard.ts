@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { at, beam, box, cyl, glow, label, mat, neon, pool, sphere, stripeTexture } from '../kit';
 import { bob, bottle, momPhoto, postIt, reglementPlaque, seau, serpilliere, tapeLabel } from '../props';
 import { BobRig } from './bobrepas';
+import { BobVoice } from './bobvoix';
 import type { RoomBuild } from './index';
 import { against, pipe, shell, wallPanels } from './shell';
 import { t as tr } from '../../i18n';
@@ -123,6 +124,8 @@ export const placard: RoomBuild = {
     const bb = s.stand(s.rect('bob'));
     const robot = at(bob(bb.w * 0.8), bb.x, 0, bb.z, -0.15);
     s.spot('bob', robot);
+    // la voix d'abord : le repas (animé après elle) garde la main sur les yeux et l'échelle
+    s.expose('bobVoix', new BobVoice(s, robot));
     s.expose('bob', new BobRig(s, { robot, w: bb.w * 0.8 }));
     const sigh = at(label('…', 0.6, 0.4, { color: '#dddddd', bold: true, bg: '#2b3a32' }), bb.x, bb.h + 0.35, bb.z);
     s.when({ notFlags: ['bob_suit'] }, sigh);

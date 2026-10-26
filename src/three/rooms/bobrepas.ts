@@ -167,6 +167,8 @@ export class BobRig {
 
   private tick(dt: number): void {
     dt = Math.min(dt, 0.05);
+    // signale à BobVoice que l'échelle du robot est prise
+    this.parts.robot.userData.anim = this.mealT >= 0 || this.retchT >= 0;
     if (this.mealT >= 0) this.stepMeal(dt);
     if (this.retchT >= 0) this.stepRetch(dt);
     this.stepJunk(dt);

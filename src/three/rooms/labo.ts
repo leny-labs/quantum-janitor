@@ -7,6 +7,7 @@ import type { RoomBuild } from './index';
 import { consolePanel, PANNEAU_CAMERA } from './panneau';
 import { against, backDoor, pipe, shell, wallPanels } from './shell';
 import { t as tr } from '../../i18n';
+import { BobVoice } from './bobvoix';
 
 const FULL = { flags: ['refroidissement_verse'] };
 const POWERED = { flags: ['panneau_allume'] };
@@ -269,6 +270,7 @@ export const labo: RoomBuild = {
     const bb = s.stand(s.rect('bob'));
     const robot = at(bob(bb.w * 0.75), bb.x, 0, bb.z, 0.35);
     s.spot('bob', robot);
+    s.expose('bobVoix', new BobVoice(s, robot));
     s.animate((t) => {
       robot.position.y = Math.abs(Math.sin(t * 1.1)) * 0.015;
     });

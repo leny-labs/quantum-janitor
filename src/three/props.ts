@@ -82,6 +82,13 @@ export function bob(w: number): THREE.Group {
     eyes.forEach((e) => (e.scale.y = p.blink ? 0.2 : 1));
     tip.visible = !p.blink;
   };
+  // retour à l'apparence de salle (plaque B.O.B., écran éteint) après avoir parlé
+  g.userData.restFace = () => {
+    plate.visible = true;
+    mouthParts.forEach((m) => (m.visible = false));
+    eyes.forEach((e) => (e.scale.y = 1));
+    tip.visible = true;
+  };
   return g;
 }
 

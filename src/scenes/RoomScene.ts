@@ -6,12 +6,13 @@ import { resolveCombine } from '../engine/combine';
 import { repairState } from '../engine/repair';
 import { Inventory } from '../engine/Inventory';
 import { SceneManager } from '../engine/SceneManager';
-import type { Action, Exit, Hotspot, Interaction } from '../engine/types';
+import type { Action, CharacterDef, Exit, Hotspot, Interaction } from '../engine/types';
 import { hotspotVerbs, smartVerb, type HotspotVerb } from '../engine/verbs';
 import { getSession, type Session } from '../session';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { CLOSEUPS, ROOMS } from '../three/rooms';
 import { BobRig } from '../three/rooms/bobrepas';
+import { BobVoice } from '../three/rooms/bobvoix';
 import { FuseRig } from '../three/rooms/fusible';
 import { LecteurRig } from '../three/rooms/lecteur';
 import { VendingRig } from '../three/rooms/vending';
@@ -35,6 +36,9 @@ import { FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
 function withoutNarrator(i: Interaction): Action[] {
   return toActions(i).map((a) => (a.say?.startsWith('narrateur:') ? { ...a, say: undefined } : a));
 }
+
+/** Cadence de frappe des répliques (caractères / s, comme DialogueBox) : durée de parole de B.O.B. */
+const TYPE_CPS = 32;
 
 /** Durée (s) du push-in lent du plan d'arrivée. */
 const INTRO_PUSH = 2.1;
@@ -641,11 +645,25 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
 
   async say(text: string): Promise<void> {
     const line = this.session.dialogue.parseLine(text, 'gary');
-    await this.dialogueBox.showLine(line.speaker, line.text);
+    await this.spoken(line.speaker, line.text);
   }
 
   dialogue(knot: string): Promise<Action[]> {
-    return this.session.dialogue.run(knot, this.dialogueBox);
+    const box = this.dialogueBox;
+    return this.session.dialogue.run(knot, {
+      showLine: (speaker, text) => this.spoken(speaker, text),
+      showChoices: (choices) => box.showChoices(choices),
+      close: () => box.close(),
+    });
+  }
+
+  /** Affiche une réplique ; celles de B.O.B. le font parler en 3D (onde Bender, rebond). */
+  private spoken(speaker: CharacterDef | null, text: string): Promise<void> {
+    const shown = this.dialogueBox.showLine(speaker, text);
+    const voice = speaker?.id === 'bob' ? this.room.rig<BobVoice>('bobVoix') : null;
+    if (!voice) return shown;
+    voice.talk(text.length / TYPE_CPS + 0.15);
+    return shown.finally(() => voice.hush());
   }
 
   async goto(scene: string): Promise<void> {
