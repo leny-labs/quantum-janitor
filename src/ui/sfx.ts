@@ -13,6 +13,11 @@ function ctx(): AudioContext | null {
   }
 }
 
+/** Contexte audio partagé (la musique s'y branche avec son propre volume). */
+export function audioContext(): AudioContext | null {
+  return ctx();
+}
+
 function tone(a: AudioContext, type: OscillatorType, f0: number, f1: number, t: number, dur: number, vol: number): void {
   const osc = a.createOscillator();
   const gain = a.createGain();

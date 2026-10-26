@@ -11,6 +11,7 @@ import { makeButton } from '../ui/Button';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
 import { isTouch } from '../ui/input';
 import { PressRing } from '../ui/PressRing';
+import { playMusic } from '../ui/music';
 import { blip, glitch, plouf, thud, whoosh } from '../ui/sfx';
 import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
 
@@ -130,6 +131,7 @@ export class IntroScene extends Phaser.Scene {
 
   create(data: IntroData): void {
     this.next = data?.next ?? 'Room';
+    playMusic('title');
     this.plan = -1;
     this.ending = false;
     this.cues = [];

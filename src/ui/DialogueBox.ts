@@ -5,6 +5,7 @@ import type { DialogueView } from '../engine/DialogueRunner';
 import type { CharacterDef } from '../engine/types';
 import { SHEET, portraitKey, sheetKey } from '../three/Studio';
 import { drawHazard, drawPanel } from './chrome';
+import { duckMusic } from './music';
 import { COLORS, FONT, H, W, hex, setCursor } from './theme';
 
 const PANEL_Y = 462;
@@ -148,6 +149,7 @@ export class DialogueBox implements DialogueView {
     this.blocker.setVisible(true);
     this.root.setVisible(true);
     this.shownAt = this.scene.time.now;
+    duckMusic(true);
     setCursor(this.scene, 'default');
   }
 
@@ -322,5 +324,6 @@ export class DialogueBox implements DialogueView {
     this.advance = null;
     this.blocker.setVisible(false);
     this.root.setVisible(false);
+    duckMusic(false);
   }
 }

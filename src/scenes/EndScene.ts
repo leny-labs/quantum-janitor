@@ -6,6 +6,7 @@ import { endShot } from '../three/shots/end';
 import { bakeStudio } from '../three/Studio';
 import { drawHazard, drawPanel } from '../ui/chrome';
 import { DialogueBox } from '../ui/DialogueBox';
+import { playMusic } from '../ui/music';
 import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
 
 interface EndData {
@@ -25,6 +26,7 @@ export class EndScene extends Phaser.Scene {
     const session = getSession();
     session.activeScene = this;
     const { state } = session;
+    playMusic('fin');
     state.ended = true;
     state.setFlag('chapitre0_termine');
     state.emit();

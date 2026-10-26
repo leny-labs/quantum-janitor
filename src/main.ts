@@ -8,10 +8,12 @@ import { EndScene } from './scenes/EndScene';
 import { IntroScene } from './scenes/IntroScene';
 import { RoomScene } from './scenes/RoomScene';
 import { TitleScene } from './scenes/TitleScene';
+import { installMusic } from './ui/music';
 import { H, W, loadFonts } from './ui/theme';
 
 // Les polices doivent être prêtes avant le premier texte (Phaser les fige en texture).
 await loadFonts();
+installMusic();
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,

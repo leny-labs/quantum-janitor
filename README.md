@@ -65,6 +65,40 @@ npm run dev          # http://localhost:5173
   (localStorage) ; « Revoir l'intro » sur l'écran titre, ou `?intro=1`.
 - **Dialogues** : clic, Espace ou Entrée pour avancer ; touches 1–9 pour les choix.
 - Sauvegarde **automatique** (localStorage). « Menu » ramène à l'écran titre.
+- **Musique** : bouton ♪ en haut à droite (à côté de « Menu », et sur l'écran
+  titre) ou touche **M** pour couper / remettre ; réglage mémorisé
+  (localStorage). Les effets sonores ne sont pas concernés.
+
+## Musique
+
+Ambiance jazz cartoon de point & click (walking bass, vibraphone, Rhodes,
+cuivre bouché, clarinette, piano bastringue, balais) — **composition
+procédurale originale générée en Web Audio** (`src/ui/music.ts`) : aucun
+fichier audio, aucun sample, aucune mélodie ni œuvre tierce. Grilles,
+mélodies et arrangements sont écrits dans le module ; basse walking, comp
+et chorus sont générés à la volée (graine fixe). Poids : quelques Ko de code.
+
+| Thème | Où | Arrangement |
+|---|---|---|
+| `title` « Klepsydra Swing » | écran titre, intro | version pleine, 120 BPM : cuivre bouché, vibraphone, piano bastringue, ride |
+| `couloir` « Lounge du Secteur C » | couloir | walking lounge, 108 BPM, vibraphone + balais |
+| `placard` | placard | même grille feutrée, 92 BPM : Rhodes, clarinette, basse en blanches, passe-bas |
+| `labo` | labo **et ses gros plans** | même grille tendue, 100 BPM : basse pédale, clarinette grave, thérémine |
+| `fin` | cliffhanger | thème du titre au ralenti |
+
+Chaque thème boucle sur 64 mesures (thème → chorus improvisé →
+question/réponse → version dépouillée). Changement de pièce = fondu
+enchaîné ; entre deux variantes du même thème, la mesure en cours est
+conservée. Les gros plans et travels caméra ne coupent pas la musique ;
+pendant un dialogue elle est atténuée et assourdie (ducking). Elle démarre
+au premier clic / touche (politique autoplay des navigateurs) et se met en
+pause quand l'onglet est caché.
+
+- Couper : bouton ♪, touche **M**, ou `?music=0` dans l'URL (pour la
+  session, sans toucher au réglage mémorisé) ; `?music=1` force l'écoute.
+- Écouter un thème hors jeu (console du navigateur, `npm run dev`) :
+  `(await import('/src/ui/music.ts')).renderMusic('couloir', 30)` rend 30 s
+  dans un `AudioBuffer` (rendu hors ligne).
 
 ## Mode debug (URL)
 
@@ -73,6 +107,7 @@ npm run dev          # http://localhost:5173
 &debug=1                                                  # contours des hotspots + état affiché
 ?touch=1                                                  # force le mode tactile (tap / appui long)
 ?intro=1                                                  # rejoue l'intro animée à « Prendre son service »
+?music=0                                                  # coupe la musique (session) ; ?music=1 la force
 ?scene=fin                                                # saute au cliffhanger
 ?reset=1                                                  # efface la sauvegarde
 ```
@@ -103,7 +138,8 @@ quantum-janitor/
 │  │  ├─ Stage.ts            caméra fixe, projection rect écran → monde, états
 │  │  ├─ kit.ts / props.ts   matériaux toon, primitives, textes peints, objets
 │  │  └─ rooms/*.ts          une pièce par scène YAML (placard, couloir…)
-│  ├─ ui/            # boîte de dialogue, verb coin, appui long, label de survol, thème
+│  ├─ ui/            # boîte de dialogue, verb coin, appui long, label de survol, thème,
+│  │                 #   sfx.ts (bruitages) + music.ts (musique procédurale)
 │  ├─ scenes/        # scènes Phaser : Title, Intro (motion design), Room (jeu), End (cliffhanger)
 │  └─ main.ts
 ├─ content/
@@ -222,5 +258,5 @@ activer *Settings → Pages → Source : GitHub Actions* sur le dépôt.
 
 ## Hors périmètre du MVP
 
-Son, mobile, éditeur visuel, sauvegardes multiples, succès, personnage animé,
+Voix, bruitages d'ambiance par pièce, éditeur visuel, sauvegardes multiples, succès, personnage animé,
 art définitif (modèles Blender, lumière précalculée).

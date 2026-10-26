@@ -6,6 +6,8 @@ import { titleShot } from '../three/shots/title';
 import { bakeStudio, preloadPortraitSheets } from '../three/Studio';
 import { makeButton } from '../ui/Button';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
+import { playMusic } from '../ui/music';
+import { makeMusicToggle } from '../ui/MusicToggle';
 import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
 
 /** Slogans de la station, en défilement permanent (SYLVIE y tient). */
@@ -45,6 +47,7 @@ export class TitleScene extends Phaser.Scene {
     }
 
     this.hero = new HeroView(this, titleShot(W, H));
+    playMusic('title');
 
     // assombrit la colonne gauche (lisibilité) + vignette haut/bas
     const shade = this.add.graphics();
@@ -56,6 +59,7 @@ export class TitleScene extends Phaser.Scene {
     this.drawTicker();
     this.drawTitle();
     this.drawMenu();
+    makeMusicToggle(this, W - 34, 34).setDepth(1000);
 
     // pied de page : formulaire officiel
     const foot = this.add.graphics();

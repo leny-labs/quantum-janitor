@@ -16,6 +16,8 @@ import { HoverLabel } from '../ui/HoverLabel';
 import { ProgressCue } from '../ui/ProgressCue';
 import { verbCursor, verbIcon, type VerbIcon } from '../ui/chrome';
 import { isTouch } from '../ui/input';
+import { playMusic, themeForScene } from '../ui/music';
+import { makeMusicToggle } from '../ui/MusicToggle';
 import { PressRing } from '../ui/PressRing';
 import { VerbCoin } from '../ui/VerbCoin';
 import { COLORS, FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
@@ -94,11 +96,12 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.titleText = this.add
       .text(14, 10, '', { fontFamily: FONT, fontSize: '18px', color: COLORS.dim, backgroundColor: '#00000088', padding: { x: 8, y: 4 } })
       .setDepth(700);
-    makeButton(this, W - 14, 10, 'Menu', () => !this.busy && this.scene.start('Title'), {
+    const menu = makeButton(this, W - 14, 10, 'Menu', () => !this.busy && this.scene.start('Title'), {
       size: 18,
       align: 'right',
       valign: 'top',
     }).setDepth(700);
+    makeMusicToggle(this, menu.x - menu.width / 2 - 8 - menu.height / 2, menu.y, menu.height).setDepth(700);
     if (this.session.debug.overlay) {
       this.debugText = this.add
         .text(14, 44, '', { fontFamily: MONO, fontSize: '13px', color: '#ff99ff', backgroundColor: '#000000aa', wordWrap: { width: 700 } })
@@ -153,6 +156,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.inventory.render();
     const { state, content } = this.session;
     this.titleText.setText(this.scenes.current().title);
+    playMusic(themeForScene(state.scene));
     const held = state.selectedItem ? content.items.get(state.selectedItem) : null;
     this.heldItem.setVisible(!!held);
     if (held) this.heldItem.setText(held.icon.glyph).setBackgroundColor(held.icon.color);
