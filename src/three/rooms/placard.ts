@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { at, beam, box, cyl, glow, label, mat, neon, pool, sphere, stripeTexture } from '../kit';
-import { bob, bottle, reglementPlaque, seau, serpilliere } from '../props';
+import { bob, bottle, momPhoto, reglementPlaque, seau, serpilliere } from '../props';
 import type { RoomBuild } from './index';
 import { against, pipe, shell, wallPanels } from './shell';
 import { t as tr } from '../../i18n';
@@ -125,6 +125,11 @@ export const placard: RoomBuild = {
     const dent = at(sphere(0.18, '#4a5560', { seg: 8 }), -lw * 0.2, cs.h * 0.3, 0.42);
     dent.scale.z = 0.3;
     locker.add(dent);
+    // polaroid de la mère, aimanté de travers sous la plaque (Gary en « capitaine »)
+    const pw = lw * 0.46;
+    const photo = at(momPhoto(pw), -lw * 0.1, cs.h * 0.6 - 0.4 - pw * 0.6, 0.49);
+    photo.rotation.z = 0.07;
+    locker.add(photo);
     s.spot('casier', at(locker, cs.x, 0, against(cs.z, 0.9)));
 
     // plaque réglementaire émaillée

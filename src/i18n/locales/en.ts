@@ -162,6 +162,7 @@ export const en: PartialCatalog = {
       breeze: 'VOID\nBREEZE',
       degreaser: 'ABSOLUTE\nDEGREASER',
       locker: 'G. PLUNK\n(temp)',
+      momPhoto: 'My captain ♥',
     },
     couloir: {
       neon: 'HAPPINESS\nMANDATORY',

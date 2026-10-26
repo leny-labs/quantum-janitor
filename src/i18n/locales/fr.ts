@@ -172,6 +172,8 @@ export const fr = {
       antiflux: 'ANTI-\nFLUX',
       degreaser: 'DÉGRAISSANT\nABSOLU',
       locker: 'G. PLUNK\n(intérim)',
+      /** Légende manuscrite du polaroid de la mère, sur le casier. */
+      momPhoto: 'Mon capitaine ♥',
     },
     couloir: {
       neon: 'BONHEUR\nOBLIGATOIRE',

@@ -660,3 +660,202 @@ export function reglementPlaque(w: number, h: number): THREE.Group {
   halo.scale.y = 0.35;
   return group([frame, face, ...rivets, arm, tube, halo]);
 }
+
+/** Texture du polaroid de Mme Plunk : la mère, radieuse, et Gary déguisé en capitaine. */
+function momPhotoTexture(): THREE.CanvasTexture {
+  const W = 512;
+  const H = 620;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d')!;
+  const INK = '#1a1230';
+  const UI = '"Chakra Petch", "Trebuchet MS", sans-serif';
+  const shape = (fill: string, draw: () => void, line = 5) => {
+    g.beginPath();
+    draw();
+    g.fillStyle = fill;
+    g.fill();
+    g.lineWidth = line;
+    g.strokeStyle = INK;
+    g.stroke();
+  };
+  const ell = (x: number, y: number, rx: number, ry: number, rot = 0) => g.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2);
+  // papier du polaroid, légèrement jauni
+  g.fillStyle = '#f6f0e0';
+  g.fillRect(0, 0, W, H);
+  const m = 30;
+  const pw = W - m * 2;
+  const ph = 430;
+  g.save();
+  g.beginPath();
+  g.rect(m, m, pw, ph);
+  g.clip();
+  // fond de studio photo : ciel étoilé peint, planète à anneau
+  const bg = g.createLinearGradient(0, m, 0, m + ph);
+  bg.addColorStop(0, '#2b3f8f');
+  bg.addColorStop(1, '#8a6fc4');
+  g.fillStyle = bg;
+  g.fillRect(m, m, pw, ph);
+  g.fillStyle = '#fff4c8';
+  for (let i = 0; i < 26; i++) {
+    g.globalAlpha = 0.5 + (i % 3) * 0.2;
+    g.fillRect(m + ((i * 167) % pw), m + ((i * 89) % (ph * 0.6)), 4, 4);
+  }
+  g.globalAlpha = 1;
+  shape('#ffb347', () => ell(m + pw * 0.86, m + 70, 34, 34), 4);
+  g.beginPath();
+  ell(m + pw * 0.86, m + 70, 62, 14, -0.3);
+  g.lineWidth = 6;
+  g.strokeStyle = '#ffd166';
+  g.stroke();
+
+  // ── la mère (gauche) : cardigan rose, perles, brushing mauve, lunettes ──
+  const mx = m + pw * 0.3;
+  shape('#f27aa8', () => {
+    g.moveTo(mx - 120, m + ph + 10);
+    g.quadraticCurveTo(mx - 110, m + 300, mx, m + 290);
+    g.quadraticCurveTo(mx + 110, m + 300, mx + 120, m + ph + 10);
+  });
+  shape('#c95684', () => {
+    g.moveTo(mx - 24, m + 296);
+    g.lineTo(mx, m + ph + 10);
+    g.lineTo(mx + 24, m + 296);
+  }, 4);
+  // cheveux : nuage de boucles
+  for (const [dx, dy, r] of [[-62, -10, 38], [62, -10, 38], [-46, -62, 40], [46, -62, 40], [0, -84, 44], [-70, 40, 30], [70, 40, 30]]) {
+    shape('#b9a2e0', () => ell(mx + dx, m + 210 + dy, r, r), 4);
+  }
+  shape('#f0bf94', () => ell(mx, m + 222, 62, 70));
+  // perles
+  g.lineWidth = 3;
+  for (let i = -4; i <= 4; i++) shape('#fff8ee', () => ell(mx + i * 13, m + 302 + Math.abs(i) * -3 + 12, 7, 7), 3);
+  // lunettes rondes
+  g.lineWidth = 5;
+  g.strokeStyle = INK;
+  for (const sx of [-1, 1]) {
+    g.beginPath();
+    ell(mx + sx * 26, m + 212, 21, 19);
+    g.stroke();
+  }
+  g.beginPath();
+  g.moveTo(mx - 6, m + 210);
+  g.lineTo(mx + 6, m + 210);
+  g.stroke();
+  // yeux plissés de fierté
+  for (const sx of [-1, 1]) {
+    g.beginPath();
+    g.arc(mx + sx * 26, m + 216, 9, Math.PI * 1.15, Math.PI * 1.85);
+    g.stroke();
+  }
+  // joues + grand sourire
+  g.fillStyle = '#ff8fa3';
+  g.globalAlpha = 0.6;
+  for (const sx of [-1, 1]) {
+    g.beginPath();
+    ell(mx + sx * 40, m + 246, 13, 9);
+    g.fill();
+  }
+  g.globalAlpha = 1;
+  shape('#8c1f3a', () => {
+    g.moveTo(mx - 30, m + 248);
+    g.quadraticCurveTo(mx, m + 292, mx + 30, m + 248);
+    g.closePath();
+  }, 4);
+
+  // ── Gary (droite) en uniforme de capitaine : veste marine, épaulettes, casquette galonnée ──
+  const gx = m + pw * 0.72;
+  shape('#1f2d5c', () => {
+    g.moveTo(gx - 118, m + ph + 10);
+    g.quadraticCurveTo(gx - 112, m + 312, gx, m + 304);
+    g.quadraticCurveTo(gx + 112, m + 312, gx + 118, m + ph + 10);
+  });
+  shape('#f4efe6', () => {
+    g.moveTo(gx - 22, m + 306);
+    g.lineTo(gx, m + 360);
+    g.lineTo(gx + 22, m + 306);
+  }, 4);
+  for (const sx of [-1, 1]) {
+    shape('#ffd166', () => g.rect(gx + sx * 92 - 26, m + 318, 52, 16), 4);
+    g.fillStyle = '#ffd166';
+    for (let k = 0; k < 5; k++) g.fillRect(gx + sx * 92 - 22 + k * 10, m + 334, 4, 14);
+  }
+  for (const y of [376, 410]) shape('#ffd166', () => ell(gx - 32, m + y, 7, 7), 3);
+  shape('#f0bf94', () => ell(gx, m + 236, 58, 66));
+  // favoris bruns
+  for (const sx of [-1, 1]) shape('#5e3a1f', () => ell(gx + sx * 54, m + 218, 10, 24), 4);
+  // casquette : calotte blanche, bandeau marine galonné d'or, visière noire, insigne
+  shape('#f8f6f0', () => ell(gx, m + 160, 84, 30));
+  shape('#1f2d5c', () => g.rect(gx - 60, m + 162, 120, 30), 4);
+  g.fillStyle = '#ffd166';
+  g.fillRect(gx - 58, m + 172, 116, 7);
+  shape('#ffd166', () => {
+    g.moveTo(gx, m + 140);
+    g.lineTo(gx + 14, m + 162);
+    g.lineTo(gx, m + 184);
+    g.lineTo(gx - 14, m + 162);
+    g.closePath();
+  }, 3);
+  shape('#16161e', () => {
+    g.moveTo(gx - 62, m + 192);
+    g.quadraticCurveTo(gx, m + 222, gx + 62, m + 192);
+    g.closePath();
+  }, 4);
+  // yeux ronds de fierté + sourire niais
+  for (const sx of [-1, 1]) shape(INK, () => ell(gx + sx * 20, m + 232, 6, 8), 2);
+  g.lineWidth = 5;
+  g.strokeStyle = INK;
+  g.beginPath();
+  g.arc(gx, m + 248, 28, Math.PI * 0.15, Math.PI * 0.85);
+  g.stroke();
+  // la main de la mère sur l'épaule du capitaine
+  shape('#f0bf94', () => ell(gx - 86, m + 336, 20, 15, -0.4), 4);
+  // cœurs qui flottent
+  const heart = (x: number, y: number, s: number) =>
+    shape('#ff4f7b', () => {
+      g.moveTo(x, y + s * 0.9);
+      g.bezierCurveTo(x - s * 1.4, y - s * 0.1, x - s * 0.6, y - s * 1.1, x, y - s * 0.35);
+      g.bezierCurveTo(x + s * 0.6, y - s * 1.1, x + s * 1.4, y - s * 0.1, x, y + s * 0.9);
+    }, 3);
+  heart(mx - 92, m + 82, 18);
+  heart(mx + 70, m + 66, 13);
+  // virage chaud d'un vieux tirage
+  g.globalAlpha = 0.1;
+  g.fillStyle = '#ffb347';
+  g.fillRect(m, m, pw, ph);
+  g.globalAlpha = 1;
+  g.restore();
+  g.lineWidth = 3;
+  g.strokeStyle = '#cfc6b0';
+  g.strokeRect(m, m, pw, ph);
+  // légende au stylo bleu, de travers
+  g.save();
+  g.translate(W / 2, m + ph + (H - m - ph) / 2 + 4);
+  g.rotate(-0.04);
+  g.font = `italic 700 54px ${UI}`;
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillStyle = '#2440a8';
+  g.fillText(tr('props.placard.momPhoto'), 0, 0);
+  g.restore();
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+
+/**
+ * Polaroid de la mère de Gary, aimanté sur la porte du casier (aimant cœur
+ * rouge en haut). Face +Z, origine au centre du tirage.
+ */
+export function momPhoto(w: number): THREE.Group {
+  const h = w * (620 / 512);
+  const d = 0.012;
+  const paper = box(w, h, d, '#f6f0e0');
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat('#ffffff', { map: momPhotoTexture() }));
+  face.receiveShadow = true;
+  face.position.z = d / 2 + 0.002;
+  const magnet = at(sphere(w * 0.09, '#e0405a', { seg: 12 }), 0, h * 0.44, d / 2 + w * 0.02);
+  magnet.scale.z = 0.45;
+  return group([paper, face, magnet]);
+}
