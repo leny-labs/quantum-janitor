@@ -9,8 +9,10 @@ const FULL = { flags: ['refroidissement_verse'] };
 /**
  * Cadrage du gros plan, dans le repère local du pupitre : les rect du YAML
  * `panneau` sont pensés pour cette caméra (le labo la transporte avec la console).
+ * Légèrement de 3/4 (décalée à droite, vers le centre du labo) : le pupitre
+ * étant construit depuis cette caméra, les hotspots restent alignés.
  */
-export const PANNEAU_CAMERA: CameraSpec = { pos: [0, 2.7, 4.3], look: [0, 0.45, 0], fov: 50 };
+export const PANNEAU_CAMERA: CameraSpec = { pos: [0.75, 2.62, 4.22], look: [0.08, 0.45, 0], fov: 50 };
 
 export interface ConsolePanel {
   /** Repère local (à placer / mettre à l'échelle par la pièce hôte). */

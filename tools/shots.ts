@@ -30,6 +30,9 @@ const SHOTS: [name: string, query: string][] = [
   ['labo', '?scene=labo&flags=bob_suit,labo_ouvert'],
   ['labo-full', '?scene=labo&flags=bob_suit,labo_ouvert,panneau_allume,refroidissement_verse'],
   ['panneau', '?scene=panneau&flags=panneau_allume,fusible_pose'],
+  ['shot-distributeur', '?scene=couloir&flags=bob_suit&shot=distributeur'],
+  ['shot-casier', '?scene=placard&shot=casier'],
+  ['shot-reacteur', '?scene=labo&flags=bob_suit,labo_ouvert&shot=reacteur'],
   ['fin', '?scene=fin'],
 ];
 

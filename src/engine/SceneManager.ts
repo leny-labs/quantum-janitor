@@ -44,11 +44,11 @@ export class SceneManager {
     const move = this.travel(this.state.scene, id);
     if (move) {
       // gros plan ⇄ pièce : la caméra 3D voyage, les hotspots s'effacent le temps du trajet
-      this.layer.container.setVisible(false);
+      this.spots(false);
       await move;
       this.state.scene = id;
       const first = this.markVisited();
-      this.layer.container.setVisible(true);
+      this.spots(true);
       return first;
     }
     const cam = this.scene.cameras.main;
@@ -60,6 +60,25 @@ export class SceneManager {
     const first = this.markVisited();
     cam.fadeIn(FADE_MS, 0, 0, 0);
     return first;
+  }
+
+  /**
+   * Hotspots et flèches : fondu de sortie (pendant un travel caméra, ils ne
+   * sont plus alignés) ou d'entrée à l'arrivée — pas d'apparition sèche.
+   */
+  spots(show: boolean, instant = false): void {
+    const c = this.layer.container;
+    this.scene.tweens.killTweensOf(c);
+    if (instant) {
+      c.setVisible(show).setAlpha(1);
+      return;
+    }
+    if (show) {
+      if (!c.visible) c.setAlpha(0).setVisible(true);
+      this.scene.tweens.add({ targets: c, alpha: 1, duration: 260, ease: 'Quad.easeOut' });
+    } else {
+      this.scene.tweens.add({ targets: c, alpha: 0, duration: 140, ease: 'Quad.easeIn', onComplete: () => c.setVisible(false).setAlpha(1) });
+    }
   }
 
   private markVisited(): boolean {

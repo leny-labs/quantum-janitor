@@ -10,6 +10,13 @@ const POWER_ON = { notFlags: ['fusible_retire'] };
 /** Couloir de service C : bleu acier, néon au plafond, vue sur le vide. */
 export const couloir: RoomBuild = {
   camera: { pos: [-1.2, 2.1, 8], look: [0.3, 1.85, 0], fov: 50 },
+  shots: {
+    distributeur: { fill: 1.05, orbit: -12, lift: -0.1 },
+    fusibles: { fill: 0.6, orbit: 8 },
+    hublot: { fill: 0.62, lift: 0.15 },
+    compteur: { fill: 0.34 },
+    lecteur: { fill: 0.26, aim: [-0.7, -0.1, 0], orbit: 15 },
+  },
   build(s) {
     shell(s, {
       floor: { a: '#1c2131', b: '#232a3d', joint: '#0f121b', tile: 1 },

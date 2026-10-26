@@ -73,6 +73,35 @@ export function whoosh(): void {
   noise(a, a.currentTime, 0.45, 0.07, 300, 2400);
 }
 
+/**
+ * Travel caméra : souffle doux qui monte (aller) ou descend (retour),
+ * plus discret que `whoosh`.
+ */
+export function swoosh(dir: 'in' | 'out' = 'in', dur = 1.1): void {
+  const a = ctx();
+  if (!a) return;
+  const t = a.currentTime;
+  const [f0, f1] = dir === 'in' ? [380, 1500] : [1300, 340];
+  const len = Math.ceil(a.sampleRate * dur);
+  const buf = a.createBuffer(1, len, a.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+  const src = a.createBufferSource();
+  src.buffer = buf;
+  const filter = a.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.Q.value = 0.9;
+  filter.frequency.setValueAtTime(f0, t);
+  filter.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.8);
+  const gain = a.createGain();
+  // enveloppe en cloche : monte avec la caméra, retombe à l'arrivée
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.035, t + dur * 0.45);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(filter).connect(gain).connect(a.destination);
+  src.start(t);
+}
+
 /** Grésillement numérique. */
 export function glitch(): void {
   const a = ctx();

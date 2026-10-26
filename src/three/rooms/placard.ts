@@ -7,6 +7,13 @@ import { against, pipe, shell, wallPanels } from './shell';
 /** Placard à balais : exigu, vert-de-gris, une ampoule nue. */
 export const placard: RoomBuild = {
   camera: { pos: [0.6, 2.15, 7.5], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    produits: { fill: 0.7, orbit: -10 },
+    seau: { fill: 0.5, lift: 0.3 },
+    serpilliere: { px: [455, 440], fill: 0.95, aim: [0, 0.9, 0], orbit: -8 },
+    casier: { fill: 0.8, orbit: 10 },
+    affiche: { fill: 0.5 },
+  },
   build(s) {
     shell(s, {
       floor: { a: '#24302a', b: '#2b3a32', joint: '#151c18', tile: 0.9 },

@@ -6,6 +6,7 @@
  *   ?touch=1 / ?touch=0                                          force / interdit le mode tactile
  *   ?intro=1                                                     rejoue l'intro animée même si déjà vue
  *   ?music=0 / ?music=1                                          coupe / force la musique (lu par ui/music.ts)
+ *   ?scene=couloir&shot=distributeur                            caméra déjà rapprochée sur un hotspot (travel d'examen)
  * `scene=fin` saute directement au cliffhanger ; `scene=panneau` ouvre le labo cadré sur la console.
  * En mode debug, la sauvegarde automatique est désactivée.
  */
@@ -20,6 +21,8 @@ export interface DebugOptions {
   touch?: boolean;
   /** Rejouer l'intro animée même si déjà vue. */
   intro: boolean;
+  /** Travel d'examen à ouvrir d'emblée (id de hotspot de la scène de départ). */
+  shot?: string;
 }
 
 export function parseDebug(search: string): DebugOptions {
@@ -39,5 +42,6 @@ export function parseDebug(search: string): DebugOptions {
     reset: q.has('reset'),
     touch: q.get('touch') === '1' ? true : q.get('touch') === '0' ? false : undefined,
     intro: q.get('intro') === '1',
+    shot: q.get('shot')?.trim() || undefined,
   };
 }

@@ -10,14 +10,16 @@ import { hotspotVerbs, smartVerb, type HotspotVerb } from '../engine/verbs';
 import { getSession, type Session } from '../session';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { CLOSEUPS } from '../three/rooms';
+import { Stage } from '../three/Stage';
 import { makeButton } from '../ui/Button';
 import { DialogueBox } from '../ui/DialogueBox';
 import { HoverLabel } from '../ui/HoverLabel';
 import { ProgressCue } from '../ui/ProgressCue';
-import { verbCursor, verbIcon, type VerbIcon } from '../ui/chrome';
+import { drawNavButton, verbCursor, verbIcon, type VerbIcon } from '../ui/chrome';
 import { isTouch } from '../ui/input';
 import { playMusic, themeForScene } from '../ui/music';
 import { makeMusicToggle } from '../ui/MusicToggle';
+import { swoosh } from '../ui/sfx';
 import { PressRing } from '../ui/PressRing';
 import { VerbCoin } from '../ui/VerbCoin';
 import { COLORS, FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
@@ -47,6 +49,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   private titleText!: Phaser.GameObjects.Text;
   private debugText: Phaser.GameObjects.Text | null = null;
   private heldItem!: Phaser.GameObjects.Text;
+  /** Flèche « retour » quand la caméra reste sur un travel d'examen (?shot=…). */
+  private shotExit: Phaser.GameObjects.Container | null = null;
   private busy = false;
 
   constructor() {
@@ -80,7 +84,11 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       this.layer,
       { width: W, height: ROOM_H },
       (def) => this.room.show(def, (c) => state.check(c)),
-      (from, to) => this.room.travel(from, to),
+      (from, to) => {
+        const move = this.room.travel(from, to);
+        if (move) swoosh(CLOSEUPS[to] ? 'in' : 'out', this.room.travelTime(to));
+        return move;
+      },
     );
     this.inventory = new Inventory(this, content, state, {
       click: (id, p) => this.onClickItem(id, p),
@@ -114,6 +122,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.input.on('pointermove', (p: Phaser.Input.Pointer) => this.heldItem.setPosition(p.x + 14, p.y + 14));
     // clic dans le vide : reposer l'objet tenu ; en gros plan, sinon, reculer vers la pièce
     this.input.on('pointerdown', (p: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]) => {
+      // caméra rapprochée hors dialogue : n'importe quel clic dans la vue la ramène
+      if (this.room.examining && !this.busy && p.y < ROOM_H) return this.leaveShot();
       if (over.length > 0 || p.y >= ROOM_H) return;
       if (state.selectedItem) {
         if (p.rightButtonDown()) state.select(null);
@@ -122,12 +132,13 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       if (p.rightButtonDown() || !this.room.onSubject(p.x, p.y)) this.leaveCloseup();
     });
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') this.leaveCloseup();
+      if (e.key === 'Escape' || e.key === 'ArrowDown') this.leaveCloseup();
     };
     window.addEventListener('keydown', onKey);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => window.removeEventListener('keydown', onKey));
     this.dropButton = null;
     this.press = null;
+    this.shotExit = null;
 
     const off = state.onChange(() => {
       this.refresh();
@@ -142,6 +153,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
 
     this.cameras.main.fadeIn(400, 0, 0, 0);
     const first = this.scenes.show();
+    this.parkDebugShot();
     void this.act(this.enterActions(first));
   }
 
@@ -177,19 +189,38 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     return list;
   }
 
-  /** Exécute une interaction en bloquant les entrées. */
-  private async act(i: Interaction | undefined): Promise<void> {
+  /**
+   * Exécute une interaction en bloquant les entrées. Avec `shot` (verbe
+   * Regarder d'un hotspot qui a un travel d'examen), la caméra glisse vers
+   * l'objet pendant la réplique puis revient.
+   */
+  private async act(i: Interaction | undefined, shot?: string): Promise<void> {
     if (this.busy || !i || (Array.isArray(i) && i.length === 0)) return;
     this.busy = true;
     this.press?.cancel();
     this.coin.close();
     this.hover.set(null);
     setCursor(this, 'default');
+    const scene = this.session.state.scene;
+    const move = shot ? this.room.examine(shot) : null;
+    if (move) {
+      this.scenes.spots(false);
+      swoosh('in', Stage.SHOT_TIMES.in);
+    }
     try {
       await this.runner.run(i);
+      if (move && this.room.examining === shot && this.session.state.scene === scene && this.sys.isActive()) {
+        this.dialogueBox.close();
+        const back = this.room.release();
+        if (back) {
+          swoosh('out', Stage.SHOT_TIMES.out);
+          await back;
+        }
+      }
     } catch (e) {
       console.error(e);
     } finally {
+      if (move && this.sys.isActive()) this.scenes.spots(true);
       this.busy = false;
       if (this.sys.isActive()) {
         this.dialogueBox.close();
@@ -207,7 +238,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   }
 
   private get blocked(): boolean {
-    return this.busy || this.dialogueBox.isOpen || this.coin.isOpen;
+    return this.busy || this.dialogueBox.isOpen || this.coin.isOpen || !!this.room.examining;
   }
 
   /** Tactile : objet en main → bouton « Reposer » (pas de clic droit au doigt). */
@@ -230,7 +261,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
 
   /** Ouvre le verb coin d'un hotspot au point (x, y). */
   private openCoin(h: Hotspot, x: number, y: number, touch: boolean): void {
-    const verbs = hotspotVerbs(h).map((v) => ({ label: v.label, icon: this.verbIcon(v), run: () => void this.act(v.action) }));
+    const verbs = hotspotVerbs(h).map((v) => ({ label: v.label, icon: this.verbIcon(v), run: () => void this.act(v.action, v.kind === 'look' ? h.id : undefined) }));
     this.hover.set(null);
     setCursor(this, 'default');
     this.coin.open(x, y, h.label, verbs, { touch });
@@ -239,7 +270,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   /** Action du clic gauche / tap court. */
   private smartAction(h: Hotspot, p: Phaser.Input.Pointer, touch: boolean): void {
     const v = smartVerb(h);
-    if (v) void this.act(v.action);
+    if (v) void this.act(v.action, v.kind === 'look' ? h.id : undefined);
     else this.openCoin(h, p.x, p.y, touch);
   }
 
@@ -343,8 +374,47 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     void this.act([{ goto: e.to }]);
   }
 
-  /** En gros plan (console…) : retour en travel caméra vers la pièce hôte. */
+  /**
+   * Debug `?shot=<hotspot>` : la caméra démarre sur le travel d'examen de ce
+   * hotspot et y reste ; Échap, flèche bas, clic droit ou clic ramènent à la pièce.
+   */
+  private parkDebugShot(): void {
+    const shot = this.session.debug.shot;
+    if (!shot || this.registry.get('debugShotParked')) return;
+    this.registry.set('debugShotParked', true);
+    if (!this.room.examine(shot, true)) {
+      console.warn(`[debug] pas de travel d'examen « ${shot} » dans ${this.session.state.scene}`);
+      return;
+    }
+    this.scenes.spots(false, true);
+    const g = this.add.graphics();
+    drawNavButton(g, 28, 'down', 'idle');
+    this.shotExit = this.add.container(W / 2, ROOM_H - 44, [g]).setDepth(20).setSize(64, 64);
+    this.shotExit.setInteractive({ useHandCursor: true });
+    this.shotExit.on('pointerover', () => drawNavButton(g, 28, 'down', 'hover'));
+    this.shotExit.on('pointerout', () => drawNavButton(g, 28, 'down', 'idle'));
+  }
+
+  /** Caméra restée sur un travel d'examen : retour à la vue de la pièce. */
+  private leaveShot(): void {
+    if (!this.room.examining || this.busy) return;
+    const back = this.room.release();
+    this.shotExit?.destroy();
+    this.shotExit = null;
+    if (!back) return;
+    this.busy = true;
+    swoosh('out', Stage.SHOT_TIMES.out);
+    void back.then(() => {
+      this.busy = false;
+      if (!this.sys.isActive()) return;
+      this.scenes.spots(true);
+      this.refresh();
+    });
+  }
+
+  /** En gros plan (console…) ou caméra rapprochée : retour à la pièce. */
   private leaveCloseup(): void {
+    if (this.room.examining) return this.leaveShot();
     const host = CLOSEUPS[this.session.state.scene];
     if (!host || this.blocked) return;
     this.session.state.selectedItem = null;

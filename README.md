@@ -108,11 +108,17 @@ pause quand l'onglet est caché.
 ?touch=1                                                  # force le mode tactile (tap / appui long)
 ?intro=1                                                  # rejoue l'intro animée à « Prendre son service »
 ?music=0                                                  # coupe la musique (session) ; ?music=1 la force
+?scene=couloir&shot=distributeur                          # caméra déjà sur un travel d'examen (Échap / ↓ / clic pour revenir)
 ?scene=fin                                                # saute au cliffhanger
 ?reset=1                                                  # efface la sauvegarde
 ```
 
 Exemple : <http://localhost:5173/?scene=panneau&flags=bob_suit,labo_ouvert,sait_fusible&items=fusible,seau&debug=1>
+
+Gros plans : `?scene=panneau` (console, avec ses hotspots) ; travels
+d'examen : `?scene=<pièce>&shot=<hotspot>` avec les ids du tableau
+ci-dessous (« Rendu visuel »), ex.
+<http://localhost:5173/?scene=labo&flags=bob_suit,labo_ouvert&shot=reacteur>.
 
 En mode debug la sauvegarde est désactivée et l'intro de la scène de départ
 n'est pas rejouée. Ids de scènes, objets et flags : voir `content/` et
@@ -179,9 +185,41 @@ quantum-janitor/
   (`src/three/rooms/index.ts`, ex. `panneau: 'labo'`) n'a pas de décor à elle.
   La pièce hôte la construit via `stage.closeup(def, camera, build)` (le
   pupitre de `panneau.ts` est posé sur la console du labo) ; `goto` entre les
-  deux vues fait un travel caméra (~1 s, easing + léger arc, vignette serrée)
-  au lieu du fondu. En gros plan : flèche bas, Échap, clic droit ou clic à côté
-  de l'objet filmé ramènent à la pièce.
+  deux vues fait un travel caméra au lieu du fondu. En gros plan : flèche bas
+  (bouton ou touche ↓), Échap, clic droit ou clic à côté de l'objet filmé
+  ramènent à la pièce. Le pupitre est filmé légèrement de 3/4
+  (`PANNEAU_CAMERA`) ; les rect du YAML `panneau` restent alignés puisque le
+  pupitre est construit depuis cette caméra.
+- **Travels caméra** (`Stage.fly`) : position sur un arc (Bézier : dolly +
+  grue + petit panoramique du côté du 3/4), regard (`lookAt`) interpolé à part
+  et en avance (~20 %), focale qui s'ouvre légèrement à mi-course, easing
+  cubique doux, micro-dépassement / retour à l'arrivée, souffle discret
+  (`sfx.swoosh`). Aller ~1,3 s, retour ~1 s. Un travel lancé pendant un autre
+  repart de la position courante (départ lancé) : pas de saut. Les hotspots
+  s'effacent en fondu pendant le trajet et reviennent en fondu.
+- **Travels d'examen** (registre `shots` de chaque pièce, `src/three/rooms/*.ts`) :
+  sur **Regarder** (clic gauche quand c'est le verbe smart, ou verb coin), la
+  caméra glisse vers l'objet pendant la réplique puis revient. Le cadrage est
+  calculé depuis le `rect` du hotspot (rayon caméra → objet, recul pour qu'il
+  occupe `fill` de l'image, sans traverser le décor) ; options `orbit` (3/4),
+  `lift` (grue), `aim`, `px`, `fov`, ou `cam` explicite :
+
+  ```ts
+  // src/three/rooms/couloir.ts
+  shots: {
+    distributeur: { fill: 1.05, orbit: -12, lift: -0.1 },
+    lecteur: { fill: 0.26, aim: [-0.7, -0.1, 0], orbit: 15 },
+  },
+  ```
+
+  Ajouter un hotspot à cette liste suffit ; le gameplay (YAML, Ink, flags)
+  n'est pas touché.
+
+  | Pièce | Gros plans / travels |
+  |---|---|
+  | couloir | `distributeur`, `fusibles`, `hublot`, `compteur` (« Jours sans incident »), `lecteur` (porte ACCÈS RESTREINT) |
+  | placard | `produits` (étagère), `seau`, `serpilliere`, `casier`, `affiche` (plaque réglementaire) |
+  | labo | `reacteur` (contre-plongée), `trappe`, `tableau`, `bureau` ; gros plan « vue » `panneau` (console) |
 - **État** : `stage.spot(id, …objets)` lie des meshes à un hotspot — ils suivent
   son `if:` YAML et s'éclairent au survol. `stage.when(condition, …objets)`
   affiche/masque selon les flags (même syntaxe que le YAML : `flags`,

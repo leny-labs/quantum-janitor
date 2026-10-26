@@ -13,6 +13,12 @@ const POWERED = { flags: ['panneau_allume'] };
 /** Laboratoire du Réacteur : violet, halo d'improbabilité, plafond invisible. */
 export const labo: RoomBuild = {
   camera: { pos: [0, 2.0, 9], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    reacteur: { fill: 1, lift: -0.5, fov: 46 },
+    trappe: { fill: 0.55, lift: 0.3 },
+    tableau: { fill: 0.7 },
+    bureau: { px: [1060, 335], fill: 0.5, lift: 0.35, orbit: 8 },
+  },
   build(s, scene) {
     shell(s, {
       floor: { a: '#191127', b: '#21173a', joint: '#0c0815', tile: 1.1 },

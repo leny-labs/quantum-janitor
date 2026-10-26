@@ -48,6 +48,7 @@ export class RoomRenderer {
     if (!stage) {
       stage = new Stage(host, build.camera, this.width, this.height);
       build.build(stage, lookup);
+      if (build.shots) stage.shots(hostId, build.shots);
       this.stages.set(hostId, stage);
     }
     return stage.films(id) ? stage : null;
@@ -75,6 +76,25 @@ export class RoomRenderer {
     const stage = this.current;
     if (!stage || !stage.films(from) || !stage.films(to) || from === to) return null;
     return stage.travelTo(to);
+  }
+
+  /** Durée (s) du travel vers `to` (bruitage calé dessus). */
+  travelTime(to: string): number {
+    return this.current?.travelTime(to) ?? 1;
+  }
+
+  /** Travel d'examen vers le hotspot `id` de la vue courante (null s'il n'en a pas). */
+  examine(id: string, instant = false): Promise<void> | null {
+    return this.current?.examine(id, instant) ?? null;
+  }
+
+  /** Retour d'examen (null s'il n'y en a pas en cours). */
+  release(): Promise<void> | null {
+    return this.current?.release() ?? null;
+  }
+
+  get examining(): string | null {
+    return this.current?.examining ?? null;
   }
 
   highlight(id: string | null): void {
@@ -140,6 +160,23 @@ export class RoomView {
 
   travel(from: string, to: string): Promise<void> | null {
     return this.image.visible ? this.room.travel(from, to) : null;
+  }
+
+  travelTime(to: string): number {
+    return this.room.travelTime(to);
+  }
+
+  examine(id: string, instant = false): Promise<void> | null {
+    return this.image.visible ? this.room.examine(id, instant) : null;
+  }
+
+  release(): Promise<void> | null {
+    return this.image.visible ? this.room.release() : null;
+  }
+
+  /** Hotspot examiné (caméra rapprochée) ou null. */
+  get examining(): string | null {
+    return this.image.visible ? this.room.examining : null;
   }
 
   update(): void {

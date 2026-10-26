@@ -51,19 +51,44 @@ export interface Fitted {
 type Check = (c: Condition | undefined) => boolean;
 type Tick = (t: number, dt: number) => void;
 
-/** Cadrage caméra d'une vue (pièce ou gros plan filmé dans le même décor). */
+/** Cadrage caméra : position, point regardé, focale. */
 interface Pose {
   pos: THREE.Vector3;
-  quat: THREE.Quaternion;
+  look: THREE.Vector3;
   fov: number;
 }
 
-/** Travel caméra en cours entre deux vues. */
+/**
+ * Travel d'examen : la caméra glisse vers un objet de la pièce pendant sa
+ * réplique « Regarder », puis revient. Sans `cam`, le cadrage est calculé
+ * depuis le rect du hotspot (rayon caméra → objet, recul pour qu'il occupe
+ * `fill` de la hauteur de l'image).
+ */
+export interface ShotSpec {
+  /** Part de la hauteur d'image occupée par l'objet (défaut 0.6). */
+  fill?: number;
+  /** Rotation de la caméra autour de l'objet (degrés, axe vertical ; + = sens trigonométrique vu du dessus). */
+  orbit?: number;
+  /** Décalage vertical de la caméra (grue), en mètres. */
+  lift?: number;
+  /** Pixel visé dans la vue pièce (défaut : centre du rect) — pour viser un objet fin ou creux. */
+  px?: [x: number, y: number];
+  /** Décalage du point regardé (cadrage décentré, contexte). */
+  aim?: Vec3;
+  fov?: number;
+  /** Cadrage explicite (prioritaire sur le calcul automatique). */
+  cam?: CameraSpec;
+}
+
+/** Travel caméra en cours. */
 interface Travel {
   from: Pose;
   to: Pose;
-  /** Hauteur de l'arc (monde) au milieu du trajet. */
-  lift: number;
+  /** Point de contrôle de l'arc (Bézier quadratique : dolly + grue + léger panoramique). */
+  ctrl: THREE.Vector3;
+  /** Amplitude du petit dépassement / retour à l'arrivée (fraction du trajet). */
+  settle: number;
+  ease: (k: number) => number;
   /** Dose de vignette serrée au départ / à l'arrivée. */
   focus: readonly [number, number];
   k: number;
@@ -71,8 +96,22 @@ interface Travel {
   done: () => void;
 }
 
-const TRAVEL_S = 1.0;
+/** Durées (s) : gros plan aller / retour, examen aller / retour. */
+const CLOSEUP_IN = 1.3;
+const CLOSEUP_OUT = 1.0;
+const SHOT_IN = 1.15;
+const SHOT_OUT = 0.85;
+/** Vignette d'un travel d'examen (le gros plan « vue » est à 1). */
+const SHOT_FOCUS = 0.55;
+
 const easeInOut = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const easeOut = (k: number) => 1 - Math.pow(1 - k, 3);
+/** Bosse lisse en fin de course (0 → ~0.54 → 0, dérivées nulles aux bords) : dépassement puis retour. */
+const settleBump = (k: number) => {
+  const r = (k - 0.66) / 0.34;
+  return r <= 0 || r >= 1 ? 0 : Math.pow(Math.sin(Math.PI * r), 2) * (1 - r);
+};
+const UP = new THREE.Vector3(0, 1, 0);
 
 export class Stage {
   readonly scene = new THREE.Scene();
@@ -85,6 +124,13 @@ export class Stage {
   /** Scène YAML en cours de construction (rect / spot la consultent). */
   private building: SceneDef;
   private travel: Travel | null = null;
+  /** Point regardé par la caméra (interpolé séparément de la position pendant un travel). */
+  private looking = new THREE.Vector3();
+  /** Travels d'examen déclarés : `scène/hotspot` → cadrage. */
+  private shotSpecs = new Map<string, ShotSpec>();
+  private shotPoses = new Map<string, Pose>();
+  /** Examen en cours (`scène/hotspot`), sinon null. */
+  private shotKey: string | null = null;
   private spots = new Map<string, THREE.Object3D[]>();
   private ticks: Tick[] = [];
   private lit: { mat: THREE.MeshToonMaterial; base: THREE.Color }[] = [];
@@ -109,10 +155,8 @@ export class Stage {
     readonly height: number,
   ) {
     this.camera = new THREE.PerspectiveCamera(cam.fov ?? 50, width / height, 0.1, 100);
-    this.camera.position.set(...cam.pos);
-    this.camera.lookAt(...cam.look);
-    this.camera.updateMatrixWorld();
     this.building = def;
+    this.apply(this.place(cam));
     this.viewId = def.id;
     this.views.set(def.id, this.pose());
   }
@@ -120,18 +164,24 @@ export class Stage {
   // ── vues & travel caméra ─────────────────────────────────────────────
 
   private pose(): Pose {
-    return { pos: this.camera.position.clone(), quat: this.camera.quaternion.clone(), fov: this.camera.fov };
+    return { pos: this.camera.position.clone(), look: this.looking.clone(), fov: this.camera.fov };
   }
 
-  private apply(p: Pose): void {
-    this.camera.position.copy(p.pos);
-    this.camera.quaternion.copy(p.quat);
-    if (this.camera.fov !== p.fov) {
-      this.camera.fov = p.fov;
+  private aim(pos: THREE.Vector3, look: THREE.Vector3, fov: number): void {
+    this.camera.position.copy(pos);
+    this.looking.copy(look);
+    this.camera.up.copy(UP);
+    this.camera.lookAt(look);
+    if (this.camera.fov !== fov) {
+      this.camera.fov = fov;
       this.camera.updateProjectionMatrix();
     }
     this.camera.updateMatrixWorld();
     this.dirty = true;
+  }
+
+  private apply(p: Pose): void {
+    this.aim(p.pos, p.look, p.fov);
   }
 
   private place(cam: CameraSpec, frame?: THREE.Matrix4): Pose {
@@ -141,8 +191,7 @@ export class Stage {
       pos.applyMatrix4(frame);
       look.applyMatrix4(frame);
     }
-    const m = new THREE.Matrix4().lookAt(pos, look, new THREE.Vector3(0, 1, 0));
-    return { pos, quat: new THREE.Quaternion().setFromRotationMatrix(m), fov: cam.fov ?? 50 };
+    return { pos, look, fov: cam.fov ?? 50 };
   }
 
   /**
@@ -190,29 +239,169 @@ export class Stage {
     return this.views.has(id);
   }
 
-  /** Cadre la vue `id` sans transition (sauf si un travel y mène déjà). */
+  /** Cadre la vue `id` sans transition (sauf si un travel ou un examen y est déjà en cours). */
   view(id: string): void {
     const p = this.views.get(id);
-    if (!p || (id === this.viewId && (this.travel || this.camera.position.equals(p.pos)))) return;
+    if (!p) return;
+    if (id === this.viewId && (this.travel || this.shotKey || this.camera.position.equals(p.pos))) return;
     this.travel?.done();
     this.travel = null;
+    this.shotKey = null;
     this.highlight(null);
     this.viewId = id;
     this.focusAmount = this.closeups.has(id) ? 1 : 0;
     this.apply(p);
   }
 
-  /** Travel caméra (dolly + léger arc, easing) vers la vue `id`. */
-  travelTo(id: string, dur = TRAVEL_S): Promise<void> {
+  /** Travel caméra vers la vue `id` (pièce ⇄ gros plan). */
+  travelTo(id: string): Promise<void> {
     const to = this.views.get(id);
     if (!to) return Promise.resolve();
-    this.travel?.done();
-    this.highlight(null);
+    const inward = this.closeups.has(id);
     this.viewId = id;
+    this.shotKey = null;
+    return this.fly(to, inward ? 1 : 0, inward ? CLOSEUP_IN : CLOSEUP_OUT, inward ? 0.05 : 0.02);
+  }
+
+  /** Durée (s) d'un travel vers la vue `id` (pour caler un bruitage). */
+  travelTime(id: string): number {
+    return this.closeups.has(id) ? CLOSEUP_IN : CLOSEUP_OUT;
+  }
+
+  // ── travels d'examen ─────────────────────────────────────────────────
+
+  /** Déclare des travels d'examen sur des hotspots de la scène `sceneId`. */
+  shots(sceneId: string, specs: Record<string, ShotSpec>): void {
+    for (const [id, spec] of Object.entries(specs)) this.shotSpecs.set(`${sceneId}/${id}`, spec);
+  }
+
+  /** Vrai si le hotspot `id` de la vue courante a un travel d'examen. */
+  hasShot(id: string): boolean {
+    return this.shotSpecs.has(`${this.viewId}/${id}`);
+  }
+
+  /** Examen en cours (id du hotspot) ou null. */
+  get examining(): string | null {
+    return this.shotKey?.split('/')[1] ?? null;
+  }
+
+  /** La caméra glisse vers le hotspot `id` (instantané si `instant`). Null s'il n'a pas de travel. */
+  examine(id: string, instant = false): Promise<void> | null {
+    const key = `${this.viewId}/${id}`;
+    const spec = this.shotSpecs.get(key);
+    if (!spec) return null;
+    let to = this.shotPoses.get(key);
+    if (!to) {
+      to = this.frame(id, spec);
+      this.shotPoses.set(key, to);
+    }
+    this.shotKey = key;
+    if (instant) {
+      this.travel?.done();
+      this.travel = null;
+      this.focusAmount = SHOT_FOCUS;
+      this.apply(to);
+      return Promise.resolve();
+    }
+    return this.fly(to, SHOT_FOCUS, SHOT_IN, 0.045);
+  }
+
+  /** Fin d'examen : retour à la vue courante. Null s'il n'y avait pas d'examen. */
+  release(): Promise<void> | null {
+    const to = this.views.get(this.viewId);
+    if (!this.shotKey || !to) return null;
+    this.shotKey = null;
+    return this.fly(to, this.closeups.has(this.viewId) ? 1 : 0, SHOT_OUT, 0.02);
+  }
+
+  /** Durées (s) d'un travel d'examen aller / retour. */
+  static readonly SHOT_TIMES = { in: SHOT_IN, out: SHOT_OUT } as const;
+
+  /**
+   * Cadrage automatique d'un hotspot : rayon depuis la caméra de la pièce
+   * par le centre du rect → premier objet touché ; la caméra se rapproche
+   * sur cet axe (± orbite, grue) jusqu'à ce que l'objet occupe `fill` de
+   * l'image, sans traverser le décor.
+   */
+  private frame(id: string, spec: ShotSpec): Pose {
+    const room = this.views.get(this.viewId)!;
+    if (spec.cam) return this.place(spec.cam);
+    const def = this.viewId === this.def.id ? this.def : null;
+    const r = def?.hotspots?.find((h) => h.id === id)?.rect;
+    if (!r) throw new Error(`[3D] ${this.viewId} : hotspot « ${id} » introuvable pour le travel`);
+    const probe = new THREE.PerspectiveCamera(room.fov, this.width / this.height, 0.1, 100);
+    probe.position.copy(room.pos);
+    probe.lookAt(room.look);
+    probe.updateMatrixWorld();
+    const [x, y, w, h] = r;
+    const [vx, vy] = spec.px ?? [x + w / 2, y + h / 2];
+    this.raycaster.setFromCamera(new THREE.Vector2((vx / this.width) * 2 - 1, -(vy / this.height) * 2 + 1), probe);
+    const solid = (o: THREE.Object3D) => {
+      if (!(o instanceof THREE.Mesh)) return false;
+      const m = o.material as THREE.Material;
+      for (let p: THREE.Object3D | null = o; p; p = p.parent) if (!p.visible) return false;
+      return !m.transparent;
+    };
+    const hit = this.raycaster.intersectObject(this.scene, true).find((i) => solid(i.object));
+    const target = hit?.point.clone() ?? this.raycaster.ray.at(6, new THREE.Vector3());
+    const d0 = target.distanceTo(room.pos);
+    // taille monde du rect à la distance de l'objet, puis recul voulu
+    const px = (2 * d0 * Math.tan(THREE.MathUtils.degToRad(room.fov / 2))) / this.height;
+    const fov = spec.fov ?? room.fov - 8;
+    const needH = (Math.max(h, (w * this.height) / this.width) * px) / (spec.fill ?? 0.6);
+    const dist = THREE.MathUtils.clamp(needH / (2 * Math.tan(THREE.MathUtils.degToRad(fov / 2))), 1.1, d0 * 0.8);
+    const dir = room.pos.clone().sub(target).normalize().applyAxisAngle(UP, THREE.MathUtils.degToRad(spec.orbit ?? 0));
+    const look = target.clone().add(new THREE.Vector3(...(spec.aim ?? [0, 0, 0])));
+    const pos = target.clone().addScaledVector(dir, dist);
+    pos.y = THREE.MathUtils.clamp(pos.y + (spec.lift ?? 0), 0.5, 3.4);
+    // pas de décor entre l'objet et la caméra
+    const back = pos.clone().sub(look);
+    const len = back.length();
+    this.raycaster.set(look, back.normalize());
+    const block = this.raycaster.intersectObject(this.scene, true).find((i) => i.distance > 0.35 && solid(i.object));
+    if (block && block.distance < len) pos.copy(look).addScaledVector(back, Math.max(0.8, block.distance - 0.3));
+    return { pos, look, fov };
+  }
+
+  /**
+   * Vol de caméra vers `to` : position sur un arc (Bézier quadratique :
+   * dolly + grue + léger panoramique latéral), regard interpolé à part et
+   * en avance (il arrive ~20 % plus tôt), focale qui s'ouvre un peu à
+   * mi-course, petit dépassement / retour à l'arrivée. Un vol lancé pendant
+   * un autre repart de la position courante sans à-coup (départ lancé).
+   */
+  private fly(to: Pose, focusTo: number, dur: number, settle: number): Promise<void> {
+    const prev = this.travel;
+    prev?.done();
+    this.travel = null;
+    this.highlight(null);
+    const from = this.pose();
+    const dist = from.pos.distanceTo(to.pos);
+    if (dist < 1e-3 && from.look.distanceTo(to.look) < 1e-3) {
+      this.focusAmount = focusTo;
+      this.apply(to);
+      return Promise.resolve();
+    }
+    let ease = easeInOut;
+    if (prev) {
+      // on est déjà en mouvement : départ lancé, durée au prorata du chemin restant
+      const span = prev.from.pos.distanceTo(prev.to.pos) || dist;
+      dur *= THREE.MathUtils.clamp(dist / span, 0.45, 1);
+      ease = easeOut;
+    }
+    // arc : un peu de hauteur, et un panoramique du côté où la caméra rapprochée est décalée (3/4)
+    const close = focusTo >= this.focusAmount ? to : from;
+    const path = to.pos.clone().sub(from.pos);
+    const side = new THREE.Vector3(-path.z, 0, path.x);
+    const lat = close.pos.clone().sub(close.look).setY(0);
+    if (side.lengthSq() > 1e-6) side.normalize().multiplyScalar(Math.sign(side.dot(lat)) || 1);
+    const ctrl = from.pos
+      .clone()
+      .lerp(to.pos, 0.5)
+      .addScaledVector(UP, Math.min(0.45, dist * 0.07))
+      .addScaledVector(side, dist * 0.1);
     return new Promise((resolve) => {
-      const from = this.pose();
-      const focus = [this.focusAmount, this.closeups.has(id) ? 1 : 0] as const;
-      this.travel = { from, to, focus, lift: Math.min(0.6, from.pos.distanceTo(to.pos) * 0.06), k: 0, dur, done: resolve };
+      this.travel = { from, to, ctrl, settle, ease, focus: [this.focusAmount, focusTo], k: 0, dur, done: resolve };
       this.dirty = true;
     });
   }
@@ -221,19 +410,25 @@ export class Stage {
     const tr = this.travel;
     if (!tr) return;
     tr.k = Math.min(1, tr.k + dt / tr.dur);
-    const e = easeInOut(tr.k);
-    this.camera.position.lerpVectors(tr.from.pos, tr.to.pos, e);
-    this.camera.position.y += Math.sin(Math.PI * e) * tr.lift;
-    this.camera.quaternion.slerpQuaternions(tr.from.quat, tr.to.quat, e);
-    const fov = THREE.MathUtils.lerp(tr.from.fov, tr.to.fov, e);
-    if (fov !== this.camera.fov) {
-      this.camera.fov = fov;
-      this.camera.updateProjectionMatrix();
-    }
-    this.camera.updateMatrixWorld();
-    this.focusAmount = THREE.MathUtils.lerp(tr.focus[0], tr.focus[1], e);
+    const e = tr.ease(tr.k);
+    // position : arc + dépassement (la Bézier se prolonge naturellement au-delà de 1)
+    const s = e + tr.settle * settleBump(tr.k);
+    const a = (1 - s) * (1 - s);
+    const b = 2 * (1 - s) * s;
+    const c = s * s;
+    const pos = new THREE.Vector3()
+      .addScaledVector(tr.from.pos, a)
+      .addScaledVector(tr.ctrl, b)
+      .addScaledVector(tr.to.pos, c);
+    // regard : en avance sur la position
+    const look = new THREE.Vector3().lerpVectors(tr.from.look, tr.to.look, tr.ease(Math.min(1, tr.k / 0.8)));
+    // focale : interpolée + légère ouverture à mi-course (sensation de poussée, pas de « zoom tunnel »)
+    const fov = THREE.MathUtils.lerp(tr.from.fov, tr.to.fov, e) + Math.sin(Math.PI * Math.min(1, e)) * 3;
+    this.aim(pos, look, fov);
+    this.focusAmount = THREE.MathUtils.lerp(tr.focus[0], tr.focus[1], Math.min(1, e));
     if (tr.k >= 1) {
       this.travel = null;
+      this.apply(tr.to);
       tr.done();
     }
   }
