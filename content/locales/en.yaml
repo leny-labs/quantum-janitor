@@ -38,7 +38,7 @@ keys:
   scene.couloir.hotspot.bob.label: B.O.B.
   scene.couloir.exit.vers_placard.label: Broom closet
   scene.couloir.exit.vers_labo.label: Reactor laboratory
-  scene.couloir.onFirstEnter.0: "Tuna-Mayo-Mystery. We've been staring each other down since my first day. Someday, one of us is going to eat the other."
+  scene.couloir.onFirstEnter.0: "Corridor C. I mop it every single day, and it still finds a way to look dirty."
   # SYLVIE
   scene.couloir.onFirstEnter.1: "AGENT PLUNK, CORRIDOR C. REMINDER: HAPPINESS IS MANDATORY AND YOU ARE BEING FILMED. SMILE. NO. NOT LIKE THAT."
   scene.couloir.hotspot.distributeur.useItem.serpilliere.3: "UNPAID PRODUCT REMOVAL. VIOLATION RECORDED. 2 CREDITS, PLUS FORTY YEARS OF INTEREST. ENJOY YOUR MEAL!"

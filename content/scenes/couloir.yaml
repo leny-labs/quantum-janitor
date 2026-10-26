@@ -4,9 +4,9 @@ sector: Pont C · Circulation
 icon: corridor
 background: "#22283a"
 
-# en 3D, filmé en push-in sur la vitrine (plan d'arrivée, voir src/three/rooms/couloir.ts)
+# pas de plan d'arrivée filmé ici : on laisse le joueur trouver le distributeur seul
 onFirstEnter:
-  - say: "Thon-Mayo-Mystère. On se toise depuis mon premier jour. Un jour, l'un de nous deux mangera l'autre."
+  - say: "Couloir C. Je le serpille tous les jours, et il trouve encore le moyen d'avoir l'air sale."
   - say: "sylvie: AGENT PLUNK, COULOIR C. RAPPEL : LE BONHEUR EST OBLIGATOIRE ET VOUS ÊTES FILMÉ. SOURIEZ. NON. PAS COMME ÇA."
     mood: suspicious
 

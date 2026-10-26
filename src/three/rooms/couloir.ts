@@ -17,8 +17,6 @@ export const couloir: RoomBuild = {
   camera: { pos: [-1.2, 2.1, 8], look: [0.3, 1.85, 0], fov: 50 },
   shots: {
     distributeur: { fill: 1.05, orbit: -12, lift: -0.1 },
-    // plan d'arrivée : push-in en 3/4 sur la vitrine, le sandwich nargue Gary
-    [VendingRig.TEASE_SHOT]: { of: 'distributeur', px: [212, 258], fill: 1.55, orbit: -16, lift: 0.1 },
     // mini-jeu du manche : vitrine + bandeau LED + bac
     [VendingRig.GAME_SHOT]: { of: 'distributeur', px: [222, 310], fill: 1.22, orbit: -6, lift: -0.1 },
     fusibles: { fill: 0.6, orbit: 8 },
@@ -28,7 +26,6 @@ export const couloir: RoomBuild = {
     // serpillière sur le lecteur : serré sur le boîtier
     [LecteurRig.SCRUB_SHOT]: { of: 'lecteur', fill: 0.62, orbit: 14, lift: -0.05 },
   },
-  intro: VendingRig.TEASE_SHOT,
   build(s) {
     shell(s, {
       floor: { a: '#1c2131', b: '#232a3d', joint: '#0f121b', tile: 1 },
