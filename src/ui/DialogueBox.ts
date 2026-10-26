@@ -8,6 +8,7 @@ import { SHEET, portraitKey, sheetKey } from '../three/Studio';
 import { drawHazard, drawPanel } from './chrome';
 import { cssToGame, isTouch, uiPx } from './input';
 import { duckMusic } from './music';
+import { Blipper } from './voice';
 import { COLORS, FONT, H, W, hex, setCursor } from './theme';
 
 const PANEL_Y = 462;
@@ -295,7 +296,9 @@ export class DialogueBox implements DialogueView {
     this.hint.setVisible(false);
     this.fitBody(text);
     this.open();
-    const typing = typewrite(this.bodyText, text, { cps: CPS });
+    // blip « Nintendo » par lettre révélée, au timbre du personnage (tap = tout afficher, sans son)
+    const voice = new Blipper(speaker?.id ?? 'narrateur');
+    const typing = typewrite(this.bodyText, text, { cps: CPS, onChar: (ch) => voice.char(ch) });
     this.typing = typing;
     if (this.face.visible) void this.voice.speak(text);
     void typing.done.then(() => {

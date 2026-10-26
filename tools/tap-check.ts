@@ -138,9 +138,16 @@ try {
   await page.goto(`${url}?scene=placard&items=seau&music=0&touch=1`);
   await page.waitForFunction(() => (window as any).__game?.scene.getScene('Room')?.dialogueBox, null, { timeout: 30000 });
   await page.waitForTimeout(800);
+  // premier geste (débloque l'audio), sur la colonne de titre de l'inventaire, inerte
+  await tapAt(90, 700);
+  await page.waitForTimeout(200);
+  const blips = () => page.evaluate(`import('/src/ui/voice.ts').then((m) => m.voiceStats.blips)`) as Promise<number>;
+  const before = await blips();
   // réplique : un tap affiche tout, un autre ferme
   await page.evaluate(() => void (window as any).__game.scene.getScene('Room').act('Une réplique de test assez longue pour que la frappe dure un moment.'));
   await page.waitForTimeout(300);
+  await page.waitForTimeout(400);
+  check('blips de texte pendant la frappe', (await blips()) - before >= 3);
   await tapAt(640, 600);
   check('tap pendant la frappe → texte complet', await until(page, `${ROOM}.dialogueBox.typing?.finished`, 1500));
   await page.waitForTimeout(250);

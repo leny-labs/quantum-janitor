@@ -74,6 +74,11 @@ npm run dev          # http://localhost:5173
 - **Musique** : bouton ♪ en haut à droite (à côté de « Menu », et sur l'écran
   titre) ou touche **M** pour couper / remettre ; réglage mémorisé
   (localStorage). Les effets sonores ne sont pas concernés.
+- **Effets sonores** (dont les blips de texte) : touche **S** ou « Effets : OUI/NON »
+  sur l'écran titre, `?sfx=0` ; réglage séparé de la musique, mémorisé.
+- **Texte** : frappe progressive avec un petit blip par lettre, au timbre du
+  personnage (Gary, B.O.B., SYLVIE, la Reine, narrateur — `src/ui/voice.ts`,
+  Web Audio). Clic / tap pendant la frappe : tout le texte d'un coup ; suivant : réplique suivante.
 
 ## Musique
 

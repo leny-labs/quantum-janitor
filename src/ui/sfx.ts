@@ -1,7 +1,63 @@
 // Petits sons synthétisés (Web Audio) : pas de fichiers, pas de chargement.
 // Silencieux si l'audio est indisponible ou pas encore débloqué par un geste.
+// Tous les effets passent par un bus « SFX » (réglage séparé de la musique :
+// touche S, option de l'écran titre, ?sfx=0, mémorisé).
 
 let audio: AudioContext | null = null;
+let bus: GainNode | null = null;
+const SFX_KEY = 'qj.sfx';
+const SFX_LEVEL = 1;
+const listeners = new Set<(on: boolean) => void>();
+
+function readSfx(): boolean {
+  const q = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('sfx');
+  if (q === '0') return false;
+  if (q === '1') return true;
+  try {
+    return localStorage.getItem(SFX_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+
+let sfxOn = readSfx();
+
+/** Sortie des effets : bus partagé, coupé quand les effets sont désactivés. */
+export function sfxOut(a: AudioContext): AudioNode {
+  if (!bus || bus.context !== a) {
+    bus = a.createGain();
+    bus.gain.value = sfxOn ? SFX_LEVEL : 0;
+    bus.connect(a.destination);
+  }
+  return bus;
+}
+
+export function sfxEnabled(): boolean {
+  return sfxOn;
+}
+
+/** Coupe / remet les effets sonores (blips de texte compris). La musique n'est pas touchée. */
+export function toggleSfx(): void {
+  sfxOn = !sfxOn;
+  try {
+    localStorage.setItem(SFX_KEY, sfxOn ? '1' : '0');
+  } catch {
+    /* stockage indisponible : réglage pour la session seulement */
+  }
+  if (bus) bus.gain.setTargetAtTime(sfxOn ? SFX_LEVEL : 0, bus.context.currentTime, 0.05);
+  listeners.forEach((f) => f(sfxOn));
+}
+
+export function onSfxChange(fn: (on: boolean) => void): () => void {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('keydown', (e) => {
+    if ((e.key === 's' || e.key === 'S') && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) toggleSfx();
+  });
+}
 
 function ctx(): AudioContext | null {
   try {
@@ -18,6 +74,14 @@ export function audioContext(): AudioContext | null {
   return ctx();
 }
 
+/**
+ * Contexte audio seulement s'il tourne déjà (débloqué par un geste, onglet
+ * visible) : pour les sons très fréquents, qui ne doivent pas le réveiller.
+ */
+export function runningContext(): AudioContext | null {
+  return audio && audio.state === 'running' ? audio : null;
+}
+
 function tone(a: AudioContext, type: OscillatorType, f0: number, f1: number, t: number, dur: number, vol: number): void {
   const osc = a.createOscillator();
   const gain = a.createGain();
@@ -27,7 +91,7 @@ function tone(a: AudioContext, type: OscillatorType, f0: number, f1: number, t: 
   gain.gain.setValueAtTime(0, t);
   gain.gain.linearRampToValueAtTime(vol, t + 0.008);
   gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  osc.connect(gain).connect(a.destination);
+  osc.connect(gain).connect(sfxOut(a));
   osc.start(t);
   osc.stop(t + dur + 0.02);
 }
@@ -47,7 +111,7 @@ function noise(a: AudioContext, t: number, dur: number, vol: number, freq: numbe
   const gain = a.createGain();
   gain.gain.setValueAtTime(vol, t);
   gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  src.connect(filter).connect(gain).connect(a.destination);
+  src.connect(filter).connect(gain).connect(sfxOut(a));
   src.start(t);
 }
 
@@ -98,7 +162,7 @@ export function swoosh(dir: 'in' | 'out' = 'in', dur = 1.1): void {
   gain.gain.setValueAtTime(0.0001, t);
   gain.gain.exponentialRampToValueAtTime(0.035, t + dur * 0.45);
   gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  src.connect(filter).connect(gain).connect(a.destination);
+  src.connect(filter).connect(gain).connect(sfxOut(a));
   src.start(t);
 }
 

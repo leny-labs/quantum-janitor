@@ -50,6 +50,7 @@ export const en: PartialCatalog = {
   settings: {
     music: 'Music',
     sfx: 'Sound FX',
+    sfxValue: 'Sound FX: {state}',
     language: 'Language: {lang}',
     on: 'ON',
     off: 'OFF',

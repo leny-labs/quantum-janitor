@@ -8,8 +8,12 @@ import { bakeStudio, preloadPortraitSheets } from '../three/Studio';
 import { makeButton } from '../ui/Button';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
 import { playMusic } from '../ui/music';
+import { onSfxChange, sfxEnabled, toggleSfx } from '../ui/sfx';
 import { makeMusicToggle } from '../ui/MusicToggle';
 import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
+
+/** Ligne des réglages (♪, effets, langue), en haut à droite. */
+const SETTINGS_Y = 62;
 
 export class TitleScene extends Phaser.Scene {
   private hero: HeroView | null = null;
@@ -50,7 +54,8 @@ export class TitleScene extends Phaser.Scene {
     this.drawTicker();
     this.drawTitle();
     this.drawMenu();
-    const music = makeMusicToggle(this, W - 34, 34).setDepth(1000);
+    // sous le bandeau défilant (30 px + bande de danger)
+    const music = makeMusicToggle(this, W - 34, SETTINGS_Y).setDepth(1000);
     this.drawSettings(music.x - music.width / 2 - 12);
 
     // pied de page : formulaire officiel
@@ -80,9 +85,22 @@ export class TitleScene extends Phaser.Scene {
     }
   }
 
-  /** Réglages en haut à droite, à gauche du ♪ : langue (cycle, recharge la page). */
+  /**
+   * Réglages en haut à droite, à gauche du ♪ : langue (cycle, recharge la
+   * page) et effets sonores (blips de texte compris ; touche S).
+   */
   private drawSettings(right: number): void {
-    makeButton(this, right, 34, t('settings.language', { lang: langName(lang()) }), () => setLang(nextLang()), { size: 14, align: 'right' }).setDepth(1000);
+    const langBtn = makeButton(this, right, SETTINGS_Y, t('settings.language', { lang: langName(lang()) }), () => setLang(nextLang()), { size: 14, align: 'right' }).setDepth(1000);
+    const x = langBtn.x - langBtn.width / 2 - 10;
+    let sfxBtn: Phaser.GameObjects.Container | null = null;
+    const drawSfx = () => {
+      sfxBtn?.destroy();
+      const label = t('settings.sfxValue', { state: sfxEnabled() ? t('settings.on') : t('settings.off') });
+      sfxBtn = makeButton(this, x, SETTINGS_Y, label, () => toggleSfx(), { size: 14, align: 'right' }).setDepth(1000);
+    };
+    drawSfx();
+    const off = onSfxChange(() => drawSfx());
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, off);
   }
 
   private drawTicker(): void {

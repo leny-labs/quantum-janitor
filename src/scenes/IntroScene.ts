@@ -13,6 +13,7 @@ import { isTouch } from '../ui/input';
 import { PressRing } from '../ui/PressRing';
 import { playMusic } from '../ui/music';
 import { blip, glitch, plouf, thud, whoosh } from '../ui/sfx';
+import { Blipper } from '../ui/voice';
 import { t, tl, type TextKey } from '../i18n';
 import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
 
@@ -41,10 +42,11 @@ export interface IntroData {
 
 type Speaker = 'sylvie' | 'gary' | 'bob' | null;
 
-const VOICES: Record<Exclude<Speaker, null>, { name: TextKey; color: string; pitch: number }> = {
-  sylvie: { name: 'intro.names.sylvie', color: COLORS.accent, pitch: 1.35 },
-  gary: { name: 'intro.names.gary', color: COLORS.warm, pitch: 0.85 },
-  bob: { name: 'intro.names.bob', color: '#a9b8d0', pitch: 0.6 },
+/** Nom et couleur des sous-titres (le timbre des blips est dans ui/voice.ts). */
+const VOICES: Record<Exclude<Speaker, null>, { name: TextKey; color: string }> = {
+  sylvie: { name: 'intro.names.sylvie', color: COLORS.accent },
+  gary: { name: 'intro.names.gary', color: COLORS.warm },
+  bob: { name: 'intro.names.bob', color: '#a9b8d0' },
 };
 
 const BAR = 56;
@@ -353,13 +355,14 @@ export class IntroScene extends Phaser.Scene {
       root.setVisible(true).setAlpha(0);
       this.tw({ targets: root, alpha: 1, duration: 140 });
       this.typers = this.typers.filter((ty) => ty.t !== body);
+      const blipper = new Blipper(who ?? 'narrateur');
       this.typers.push({
         t: body,
         s: text,
         at: this.elapsed,
         cps: CPS,
         n: 0,
-        tick: (n) => voice && n % 3 === 0 && text[n - 1] !== ' ' && blip(voice.pitch),
+        tick: (n) => blipper.char(text[n - 1] ?? ''),
         done: () => this.at(this.elapsed + 250, () => face?.talk(false)),
       });
     });

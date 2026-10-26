@@ -52,6 +52,7 @@ export const fr = {
   settings: {
     music: 'Musique',
     sfx: 'Effets',
+    sfxValue: 'Effets : {state}',
     language: 'Langue : {lang}',
     on: 'OUI',
     off: 'NON',
