@@ -38,7 +38,11 @@ keys:
   scene.couloir.hotspot.bob.label: B.O.B.
   scene.couloir.exit.vers_placard.label: Broom closet
   scene.couloir.exit.vers_labo.label: Reactor laboratory
-  scene.couloir.onFirstEnter: "Tuna-Mayo-Mystery. We've been staring each other down since my first day. Someday, one of us is going to eat the other."
+  scene.couloir.onFirstEnter.0: "Tuna-Mayo-Mystery. We've been staring each other down since my first day. Someday, one of us is going to eat the other."
+  # SYLVIE
+  scene.couloir.onFirstEnter.1: "AGENT PLUNK, CORRIDOR C. REMINDER: HAPPINESS IS MANDATORY AND YOU ARE BEING FILMED. SMILE. NO. NOT LIKE THAT."
+  scene.couloir.hotspot.distributeur.useItem.serpilliere.3: "UNPAID PRODUCT REMOVAL. VIOLATION RECORDED. 2 CREDITS, PLUS FORTY YEARS OF INTEREST. ENJOY YOUR MEAL!"
+  scene.couloir.hotspot.lecteur.useItem.serpilliere.4: "READER CLEANED. WELL DONE, AGENT PLUNK, YOU ARE AN EXCELLENT CITIZEN. THIS COMPLIMENT WAS GENERATED AUTOMATICALLY."
 
   # labo
   scene.labo.hotspot.reacteur.label: Mk IV Improbability Reactor
@@ -92,3 +96,6 @@ ink:
   "« Merci, B.O.B. »": "“Thanks, B.O.B.”"
   "Merci, B.O.B.": "Thanks, B.O.B."
   "De rien. Rien, c'est ce que je fais de mieux.": "You're welcome. Nothing is what I do best."
+  # SYLVIE
+  "CORRECTION : JE VOUS TOLÈRE À 61 %. C'EST MON RECORD PERSONNEL. NE GÂCHEZ PAS TOUT.": "CORRECTION: I TOLERATE YOU AT 61%. IT IS MY PERSONAL BEST. DO NOT RUIN IT."
+  "BADGE DE L'AGENT PLUNK RÉAPPARU. TIÈDE. HUMIDE. ODEUR DE THON. INCIDENT CLASSÉ DANS « NE PAS OUVRIR ».": "AGENT PLUNK'S BADGE HAS REAPPEARED. WARM. MOIST. TUNA ODOUR. INCIDENT FILED UNDER “DO NOT OPEN”."

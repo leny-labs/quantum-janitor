@@ -5,7 +5,10 @@ icon: corridor
 background: "#22283a"
 
 # en 3D, filmé en push-in sur la vitrine (plan d'arrivée, voir src/three/rooms/couloir.ts)
-onFirstEnter: "Thon-Mayo-Mystère. On se toise depuis mon premier jour. Un jour, l'un de nous deux mangera l'autre."
+onFirstEnter:
+  - say: "Thon-Mayo-Mystère. On se toise depuis mon premier jour. Un jour, l'un de nous deux mangera l'autre."
+  - say: "sylvie: AGENT PLUNK, COULOIR C. RAPPEL : LE BONHEUR EST OBLIGATOIRE ET VOUS ÊTES FILMÉ. SOURIEZ. NON. PAS COMME ÇA."
+    mood: suspicious
 
 art:
   - { rect: [0, 470, 1280, 110], color: "#171b28" }                   # sol
@@ -51,6 +54,8 @@ hotspots:
           give: sandwich
           set: sandwich_tombe
         - say: "Il est à moi. Je ne sais pas si c'est une victoire."
+        - say: "sylvie: SORTIE DE PRODUIT NON PAYÉE. INFRACTION ENREGISTRÉE. 2 CRÉDITS, PLUS QUARANTE ANS D'INTÉRÊTS. BON APPÉTIT !"
+          mood: angry
       badge: "Ce n'est pas un lecteur de badge, c'est un distributeur. Même s'il me prend aussi pour un pigeon."
 
   - id: fusibles
@@ -123,10 +128,12 @@ hotspots:
           stop: true
         - if: { notFlags: [lecteur_propre] }
           say: "sylvie: LECTEUR ENCRASSÉ. VEUILLEZ CONTACTER UN AGENT D'ENTRETIEN."
+          mood: suspicious
         - if: { notFlags: [lecteur_propre] }
           say: "C'est moi, l'agent d'entretien."
         - if: { notFlags: [lecteur_propre] }
           say: "sylvie: VEUILLEZ CONTACTER UN AGENT D'ENTRETIEN COMPÉTENT."
+          mood: angry
           stop: true
         - dialogue: badge_porte
       serpilliere:
@@ -139,6 +146,8 @@ hotspots:
         - say: "narrateur: Gary frotte. Le yaourt résiste, couine, abandonne. Gary rince la serpillière dans son seau. Par professionnalisme."
           set: lecteur_propre
         - say: "Brillant. Le yaourt est dans mon seau, mais ça, c'est un problème pour Gary du futur."
+        - say: "sylvie: LECTEUR NETTOYÉ. BRAVO, AGENT PLUNK, VOUS ÊTES UN EXCELLENT CITOYEN. CE COMPLIMENT A ÉTÉ GÉNÉRÉ AUTOMATIQUEMENT."
+          mood: love
       seau: "Un seau d'eau sur de l'électronique ? Pas aujourd'hui. Peut-être plus tard, si la journée tourne mal."
 
   - id: bob

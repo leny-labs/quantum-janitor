@@ -71,6 +71,7 @@ gary: Bienvenue dans l'équipe, B.O.B. L'équipe, c'est nous deux. Et Josiane.
 bob: Qui est Josiane ?
 gary: La serpillière.
 bob: Évidemment.
+sylvie: BADGE DE L'AGENT PLUNK RÉAPPARU. TIÈDE. HUMIDE. ODEUR DE THON. INCIDENT CLASSÉ DANS « NE PAS OUVRIR ». # mood: suspicious
 -> END
 
 // B.O.B. en compagnon : indice contextuel + papotage déprimant.

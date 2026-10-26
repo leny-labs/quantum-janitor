@@ -76,6 +76,7 @@ hotspots:
         stop: true
       - if: { notFlags: [refroidissement_verse] }
         say: "sylvie: STABILISATION IMPOSSIBLE. RÉSERVOIR VIDE."
+        mood: suspicious
         stop: true
       - dialogue: catastrophe
 
