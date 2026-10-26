@@ -184,3 +184,11 @@ export function beep(f = 1250): void {
   if (!a) return;
   tone(a, 'square', f, f, a.currentTime, 0.1, 0.035);
 }
+
+/** Aspiration (B.O.B. avale) : souffle qui monte, petit sifflet. */
+export function slurp(): void {
+  const a = ctx();
+  if (!a) return;
+  noise(a, a.currentTime, 0.4, 0.09, 400, 3200);
+  tone(a, 'sine', 300, 900, a.currentTime + 0.05, 0.3, 0.05);
+}

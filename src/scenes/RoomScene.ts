@@ -10,6 +10,7 @@ import { hotspotVerbs, smartVerb, type HotspotVerb } from '../engine/verbs';
 import { getSession, type Session } from '../session';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { CLOSEUPS, ROOMS } from '../three/rooms';
+import { BobRig } from '../three/rooms/bobrepas';
 import { LecteurRig } from '../three/rooms/lecteur';
 import { VendingRig } from '../three/rooms/vending';
 import { makeButton } from '../ui/Button';
@@ -25,7 +26,7 @@ import { PressRing } from '../ui/PressRing';
 import { RoomPlaque } from '../ui/RoomPlaque';
 import { VerbCoin } from '../ui/VerbCoin';
 import { playVending } from './VendingGame';
-import { lecteurCue } from './beats';
+import { bobCue, lecteurCue } from './beats';
 import { FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
 
 /** La suite du YAML sans les lignes du narrateur (quand une animation les montre déjà). */
@@ -360,6 +361,19 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     return run.finally(done);
   }
 
+  /** Sandwich à B.O.B. : il l'aspire ; au `# shake` du dialogue, il recrache tout (dont le badge). */
+  private async bobMeal(rig: BobRig, reaction: Interaction): Promise<void> {
+    rig.onCue = (c) => bobCue(this, c);
+    const retch = () => rig.retch();
+    this.events.on('ink-shake', retch);
+    try {
+      await this.beat(BobRig.SHOT, () => rig.eat(), reaction, false, () => rig.clear());
+    } finally {
+      this.events.off('ink-shake', retch);
+      rig.onCue = null;
+    }
+  }
+
   private pick(list: string[]): string {
     return list[Math.floor(Math.random() * list.length)];
   }
@@ -418,6 +432,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     if (reader && item.id === 'badge' && state.hasFlag('lecteur_propre') && !state.hasFlag('labo_ouvert')) {
       return void this.locked(() => this.lecteur(reader, false, reaction));
     }
+    const bob = h.id === 'bob' && item.id === 'sandwich' ? this.room.rig<BobRig>('bob') : null;
+    if (bob) return void this.locked(() => this.bobMeal(bob, reaction));
     void this.act(reaction);
   }
 

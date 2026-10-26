@@ -59,7 +59,11 @@ export class Session {
     this.detachSave?.();
     this.state = state;
     this.dialogue = new DialogueRunner(this.content, state, {
-      shake: () => this.activeScene?.cameras.main.shake(450, 0.012),
+      shake: () => {
+        this.activeScene?.cameras.main.shake(450, 0.012);
+        // les petites animations des moments clés s'y accrochent (hoquet de B.O.B.)
+        this.activeScene?.events.emit('ink-shake');
+      },
     });
     this.detachSave = this.save.autoSave(state);
   }

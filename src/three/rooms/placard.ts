@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { at, beam, box, cyl, glow, label, mat, neon, pool, sphere, stripeTexture } from '../kit';
 import { bob, bottle, momPhoto, postIt, reglementPlaque, seau, serpilliere, tapeLabel } from '../props';
+import { BobRig } from './bobrepas';
 import type { RoomBuild } from './index';
 import { against, pipe, shell, wallPanels } from './shell';
 import { t as tr } from '../../i18n';
@@ -14,6 +15,8 @@ export const placard: RoomBuild = {
     serpilliere: { px: [455, 440], fill: 0.95, aim: [0, 0.9, 0], orbit: -8 },
     casier: { px: [1040, 330], fill: 2.5, orbit: 6, fov: 32 },
     affiche: { fill: 0.5 },
+    // B.O.B. mange le sandwich (et le rend) : le robot et le sol devant lui
+    [BobRig.SHOT]: { of: 'bob', fill: 0.36, lift: 0.3, aim: [0, -0.3, 0.3], orbit: -6 },
   },
   build(s) {
     shell(s, {
@@ -120,6 +123,7 @@ export const placard: RoomBuild = {
     const bb = s.stand(s.rect('bob'));
     const robot = at(bob(bb.w * 0.8), bb.x, 0, bb.z, -0.15);
     s.spot('bob', robot);
+    s.expose('bob', new BobRig(s, { robot, w: bb.w * 0.8 }));
     const sigh = at(label('…', 0.6, 0.4, { color: '#dddddd', bold: true, bg: '#2b3a32' }), bb.x, bb.h + 0.35, bb.z);
     s.when({ notFlags: ['bob_suit'] }, sigh);
     s.animate((t) => {
