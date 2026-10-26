@@ -481,7 +481,7 @@ export const PORTRAIT_BROWS: Readonly<Record<string, PortraitBrows>> = {
   bob: {
     cell: 256,
     l: { x: 61, y: 122, len: 44, thick: 10, eye: 18 },
-    r: { x: 166, y: 125, len: 48, thick: 11, eye: 20 },
+    r: { x: 164, y: 125, len: 48, thick: 11, eye: 20 },
     fill: 0x8f8595,
     top: 0xcfc2ca,
     edge: 0x2a2531,
@@ -491,7 +491,8 @@ export const PORTRAIT_BROWS: Readonly<Record<string, PortraitBrows>> = {
 /**
  * Bouche-onde procédurale (façon B.O.B.) dessinée par-dessus la planche
  * (contrat partagé avec docs/PORTRAIT_GENAI.md) : de `x0` à `x1`, centrée en
- * `y`, amplitude max `amp`, en px d'une cellule de `cell` px.
+ * `y`, amplitude max `amp`, en px d'une cellule de `cell` px, inclinée de
+ * `angle` degrés autour de son centre.
  */
 export interface PortraitWave {
   cell: number;
@@ -504,13 +505,15 @@ export interface PortraitWave {
   core?: number;
   /** Amplitude au repos, en fraction de `amp` (défaut 0.09 : ondule à peine). */
   rest?: number;
+  /** Inclinaison en degrés autour du centre de l'onde, positive = côté droit plus bas (défaut 0). */
+  angle?: number;
 }
 
 export const PORTRAIT_WAVES: Readonly<Record<string, PortraitWave>> = {
   sylvie: { cell: 256, x0: 62, x1: 188, y: 161, amp: 13 },
   // B.O.B. : écran-grille de la bouche (entre les deux barres), cyan Bender,
-  // ligne quasi plate au repos
-  bob: { cell: 256, x0: 60, x1: 158, y: 186, amp: 7, color: 0x5ff6ff, core: 0xe6feff, rest: 0.04 },
+  // ligne quasi plate au repos ; la grille penche de 3,2° (mesuré sur les barres)
+  bob: { cell: 256, x0: 60, x1: 158, y: 188, amp: 7, angle: 3.2, color: 0x5ff6ff, core: 0xe6feff, rest: 0.04 },
 };
 
 function shootSingle(renderer: THREE.WebGLRenderer, pose: Pose, size: number, bg?: [string, string]): HTMLCanvasElement {

@@ -161,9 +161,11 @@ Ne **pas** lancer de bake pour SYLVIE : elle est dans `GENAI_SHEETS`.
 
 ## B.O.B. — planche GenAI + onde Bender
 
-**Validée par Leny (2026-10-26)** : robot-aspirateur gris, sourcils-plaques blasés, LED
-d'antenne rose, plaque « B.O.B. » au-dessus d'un **écran-grille** en guise de bouche, fond
-navy. Source : `_briefs/bob/bob-genai-validated.png` (1024², non suivi).
+**Validée par Leny (2026-10-26)** : robot-aspirateur gris, LED d'antenne rose, plaque
+« B.O.B. » au-dessus d'un **écran-grille** en guise de bouche (bezel légèrement penché),
+fond navy. Source : `_briefs/bob/bob-genai-nobrows.jpg` (1024², non suivi) — même robot
+que la première version validée (`bob-genai-validated.png`) mais **sans sourcils peints**
+(front métallique lisse) : les sourcils sont ceux du jeu (voir « Sourcils expressifs »).
 
 Fichiers :
 - `public/portraits/bob-sheet.png` — 1024 × 512, 4 × 2 frames de 256 px, cadrage bust
@@ -184,10 +186,13 @@ les 8 frames, seules les paupières et la LED d'antenne changent :
 En talk, pas de paupières : à ~9 i/s, elles clignoteraient. La LED qui varie suit la voix.
 
 Onde (`PORTRAIT_WAVES.bob` dans `Studio.ts`, dessinée par `src/ui/WaveMouth.ts`) : de
-x 60 à 158, centrée en y 186, amplitude 7 (px de cellule 256), entre les deux barres de
-l'écran-grille. Cyan Bender `#5ff6ff` (cœur `#e6feff`), `rest: 0.04` : au repos une ligne
+x 60 à 158, centrée en y 188, amplitude 7 (px de cellule 256), entre les deux barres de
+l'écran-grille, **inclinée de 3,2°** (`angle`, positif = côté droit plus bas, rotation
+autour du centre de l'onde) : la grille est penchée, angle mesuré sur les deux barres
+horizontales de la source (ajustement linéaire : 3,1° et 3,4°). Cyan Bender `#5ff6ff` (cœur `#e6feff`), `rest: 0.04` : au repos une ligne
 quasi plate, en parole des amplitudes qui bougent sur les syllabes. Champs optionnels de
-`PortraitWave` : `color`, `core`, `rest` (SYLVIE garde ses valeurs par défaut). Même
+`PortraitWave` : `color`, `core`, `rest`, `angle` (SYLVIE garde ses valeurs par défaut,
+angle 0). Même
 logique que l'écran-bouche 3D en salle (`src/three/rooms/bobvoix.ts`, `setFace` de
 `props.bob`). Dialogue et intro : rien de spécifique, `showWave` / `SheetPortrait` prennent
 toute entrée de `PORTRAIT_WAVES`.
@@ -195,16 +200,16 @@ toute entrée de `PORTRAIT_WAVES`.
 Régénérer : script **hors repo** `_briefs/bob/build/build-sheet.py` (non suivi) :
 recadrage carré 920 px (x 52, y 22) → 256, effacement de la teinte cyan dans l'écran,
 paupières peintes (couleur du corps échantillonnée à côté de l'œil), halo additif de LED.
-`python3 -I build-sheet.py <bob-genai-validated.png> <dossier de sortie>`.
+`python3 -I build-sheet.py <bob-genai-nobrows.jpg> <dossier de sortie>`. Plus de passe
+d'effacement de sourcils : la source n'en a pas.
 Ne **pas** lancer de bake pour B.O.B. : il est dans `GENAI_SHEETS`.
 
 ### Sourcils expressifs (procéduraux, pas de sprites)
 
-Les sourcils-plaques **peints** sont effacés de `bob-sheet.png` par `build-sheet.py`
-(`unbrow` : gris du corps reconstruit par diffusion, haut des yeux et des pupilles
-redessiné en ellipse / cercle ; `bob-ref.png` garde les sourcils d'origine). Le jeu dessine
-à la place deux plaques gris acier (`src/ui/Brows.ts`, `PORTRAIT_BROWS.bob` dans
-`Studio.ts` : centre, longueur, épaisseur et rayon d'œil en px de cellule 256), orientées
+La source n'a **pas de sourcils peints** (`bob-sheet.png` et `bob-ref.png` ont un front
+lisse, sans artefact d'effacement). Le jeu dessine deux plaques gris acier (`src/ui/Brows.ts`, `PORTRAIT_BROWS.bob` dans
+`Studio.ts` : centre, longueur, épaisseur et rayon d'œil en px de cellule 256 ; centres
+posés sur le liseré du haut de chaque orbite, gauche x 61 y 122, droit x 164 y 125), orientées
 selon l'humeur de la réplique. Poses partagées avec le robot 3D : `BROW_POSES` dans
 `src/engine/brows.ts` (`y` en rayons d'œil, `rot` en degrés bout intérieur relevé,
 `bend` cambrure, `len` longueur).

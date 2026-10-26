@@ -61,6 +61,11 @@ export class WaveMouth {
 
   private draw(): void {
     const { x0, x1, y, amp } = this.def;
+    // inclinaison autour du centre de l'onde (grille-bouche penchée)
+    const rad = Phaser.Math.DegToRad(this.def.angle ?? 0);
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+    const cx = (x0 + x1) / 2;
     const f = FLAVOR[this.mood];
     const t = this.t * f.speed;
     // enveloppe de parole : syllabes (deux sinus décalés) + un peu de bruit
@@ -80,7 +85,9 @@ export class WaveMouth {
       const wave = sine * (1 - f.jag) + saw * f.jag;
       // relief qui voyage (une crête plus haute, comme le pic de la ref)
       const bump = 0.55 + 0.45 * Math.sin(u * Math.PI * 2 * 1.3 - t * 2.2);
-      pts.push(new Phaser.Math.Vector2(this.left + (x0 + (x1 - x0) * u) * this.k, this.top + (y - wave * bump * win * a) * this.k));
+      const dx = x0 + (x1 - x0) * u - cx;
+      const dy = -wave * bump * win * a;
+      pts.push(new Phaser.Math.Vector2(this.left + (cx + dx * cos - dy * sin) * this.k, this.top + (y + dx * sin + dy * cos) * this.k));
     }
     const g = this.g;
     const k = this.k;
