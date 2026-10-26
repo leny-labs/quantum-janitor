@@ -4,7 +4,7 @@
 // dérive au loin : clin d'œil, plus l'identité du menu.
 import * as THREE from 'three';
 import type { HeroShot } from '../Hero';
-import { at, box, glow, sphere, torus, Vignette } from '../kit';
+import { at, box, glow, torus, Vignette } from '../kit';
 import { seau } from '../props';
 import { skyPlane, skyTexture } from './backdrop';
 
@@ -81,14 +81,7 @@ export function titleShot(width: number, height: number): HeroShot {
     scene.add(m);
     motes.push({ m, base, ph: rnd() * 10 });
   }
-  // quelques astéroïdes en silhouette
-  const rocks: THREE.Mesh[] = [];
-  for (let i = 0; i < 6; i++) {
-    const r = sphere(0.15 + rnd() * 0.35, '#2a1d50', { seg: 5 });
-    r.position.set(-9 + rnd() * 20, -1 + rnd() * 7, -12 - rnd() * 8);
-    scene.add(r);
-    rocks.push(r);
-  }
+  // (les astéroïdes sont côté Phaser, derrière la vitre — voir TitleScene)
 
   const LOOK = new THREE.Vector3(1.2, 2.55, 0);
   const tick = (t: number) => {
@@ -98,7 +91,6 @@ export function titleShot(width: number, height: number): HeroShot {
     (core.material as THREE.SpriteMaterial).opacity = 0.45 + Math.sin(t * 1.7) * 0.08;
     drift.rotation.set(t * 0.21, t * 0.33, 0.4 + t * 0.12);
     drift.position.y = -2.2 + Math.sin(t * 0.4) * 0.2;
-    for (const [i, r] of rocks.entries()) r.rotation.set(t * (0.1 + i * 0.03), t * 0.07, 0);
     for (const d of motes) d.m.position.set(d.base.x + Math.sin(t * 0.3 + d.ph) * 0.4, d.base.y + Math.sin(t * 0.5 + d.ph * 2) * 0.3, d.base.z);
   };
   tick(0);

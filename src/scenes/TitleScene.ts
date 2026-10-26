@@ -11,7 +11,7 @@ import { playMusic } from '../ui/music';
 import { onSfxChange, sfxEnabled, toggleSfx } from '../ui/sfx';
 import { makeMusicToggle } from '../ui/MusicToggle';
 import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
-import { BAY, DECOR_KEY, PUDDLE_KEY, SHEEN_KEY, SOFT_KEY, VIGNETTE_KEY, bakeDecor, bayPoints } from './titleDecor';
+import { BAY, DECOR_KEY, MILKY_DUST_KEY, MILKY_KEY, MILKY_SHADE_KEY, PUDDLE_KEY, ROCK_BLUR_KEYS, ROCK_KEYS, SHEEN_KEY, SOFT_KEY, STREAK_KEY, VIGNETTE_KEY, bakeDecor, bandY, bayPoints } from './titleDecor';
 
 /** Ligne des réglages (♪, effets, langue), en haut à droite. */
 const SETTINGS_Y = 62;
@@ -24,6 +24,7 @@ export class TitleScene extends Phaser.Scene {
   private hero: HeroView | null = null;
   private ticker: Phaser.GameObjects.Container | null = null;
   private tickerWidth = 0;
+  private asteroids: { rock: Phaser.GameObjects.Image; a: { vx: number; vy: number; spin: number }; respawn: () => void }[] = [];
 
   constructor() {
     super('Title');
@@ -52,7 +53,6 @@ export class TitleScene extends Phaser.Scene {
     playMusic('menu');
     bakeDecor(this);
 
-    this.drawStars();
     this.drawBay();
     this.drawHero();
 
@@ -96,40 +96,66 @@ export class TitleScene extends Phaser.Scene {
       this.ticker.x -= dt * 0.05;
       if (this.ticker.x < -this.tickerWidth) this.ticker.x += this.tickerWidth;
     }
-  }
-
-  /** Étoiles scintillantes par-dessus le ciel 3D, visibles à travers la baie. */
-  private drawStars(): void {
-    let s = 17;
-    const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
-    const tints = [0xffffff, 0xcfc8ff, 0x7fffd4, 0xffd8a8];
-    for (let i = 0; i < 46; i++) {
-      const r = rnd() < 0.85 ? 0.8 + rnd() * 0.8 : 1.6 + rnd() * 1.2;
-      const star = this.add.circle(BAY.x0 + rnd() * (BAY.x1 - BAY.x0), BAY.y0 + rnd() * (BAY.y1 - BAY.y0), r, tints[i % tints.length], 1).setAlpha(0.15 + rnd() * 0.3);
-      this.tweens.add({
-        targets: star,
-        alpha: 0.6 + rnd() * 0.4,
-        duration: 900 + rnd() * 2200,
-        delay: rnd() * 3000,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-      });
+    const k = dt / 1000;
+    for (const { rock, a, respawn } of this.asteroids) {
+      rock.x += a.vx * k;
+      rock.y += a.vy * k;
+      rock.angle += a.spin * k;
+      if (rock.x < BAY.x0 - 60 || rock.y < BAY.y0 - 60 || rock.y > BAY.y1 + 60) respawn();
     }
   }
 
   /**
-   * La grande baie du pont d'observation : un reflet balaie la vitre de temps
-   * en temps, puis mur, cadre, vitre et sol peints (une seule texture), et
-   * quelques LED de service qui clignotent sur le cadre.
+   * La grande baie du pont d'observation. Derrière la vitre : voie lactée
+   * peinte (lueur additive + filaments sombres et étoiles denses), étoiles
+   * qui scintillent le long de la bande, astéroïdes cartoon en trois couches
+   * de parallaxe, rares étoiles filantes et un reflet qui balaie la vitre —
+   * le tout clippé à la baie. Puis mur, cadre, vitre et sol peints (une
+   * seule texture), et quelques LED de service qui clignotent sur le cadre.
    */
   private drawBay(): void {
-    const cy = (BAY.y0 + BAY.y1) / 2;
-    const sheen = this.add.image(BAY.x0 - 220, cy, SHEEN_KEY).setDisplaySize(170, 900).setAngle(24).setAlpha(0.16).setBlendMode(Phaser.BlendModes.ADD);
     const mask = this.make.graphics({}, false);
     mask.fillStyle(0xffffff);
     mask.fillPoints(bayPoints().map(([x, y]) => new Phaser.Geom.Point(x, y)), true);
-    sheen.setMask(mask.createGeometryMask());
+    const sky = this.add.container(0, 0).setMask(mask.createGeometryMask());
+
+    const milky = this.add.image(BAY.x0, BAY.y0, MILKY_KEY).setOrigin(0).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.85);
+    this.tweens.add({ targets: milky, alpha: 1, duration: 4200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    sky.add([this.add.image(BAY.x0, BAY.y0, MILKY_SHADE_KEY).setOrigin(0), milky, this.add.image(BAY.x0, BAY.y0, MILKY_DUST_KEY).setOrigin(0)]);
+
+    // étoiles scintillantes, serrées le long de la bande
+    const rnd = Phaser.Math.RND;
+    const tints = [0xffffff, 0xcfc8ff, 0x7fffd4, 0xffd8a8, 0xffaad2];
+    for (let i = 0; i < 70; i++) {
+      const x = rnd.between(BAY.x0, BAY.x1);
+      const y = i < 50 ? bandY(x) + (rnd.frac() + rnd.frac() - 1) * 90 : rnd.between(BAY.y0, BAY.y1);
+      const r = rnd.frac() < 0.85 ? 0.8 + rnd.frac() * 0.8 : 1.6 + rnd.frac() * 1.2;
+      const star = this.add.circle(x, y, r, tints[i % tints.length], 1).setAlpha(0.15 + rnd.frac() * 0.3);
+      this.tweens.add({ targets: star, alpha: 0.6 + rnd.frac() * 0.4, duration: 900 + rnd.frac() * 2200, delay: rnd.frac() * 3000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      sky.add(star);
+    }
+
+    this.drawAsteroids(sky);
+
+    // étoile filante, de temps en temps
+    const streak = this.add.image(0, 0, STREAK_KEY).setOrigin(1, 0.5).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0);
+    sky.add(streak);
+    const shoot = () => {
+      const x = rnd.between(BAY.x0 + 160, BAY.x1 - 40);
+      const y = rnd.between(BAY.y0 + 10, BAY.y0 + 160);
+      const angle = rnd.between(150, 165);
+      const len = rnd.between(160, 280);
+      const rad = Phaser.Math.DegToRad(angle);
+      streak.setPosition(x, y).setAngle(angle).setScale(0.3, 0.8).setAlpha(0);
+      this.tweens.add({ targets: streak, x: x + Math.cos(rad) * len, y: y + Math.sin(rad) * len, scaleX: { from: 0.3, to: 0.9 }, duration: 650, ease: 'Quad.easeIn' });
+      this.tweens.add({ targets: streak, alpha: 0.9, duration: 325, yoyo: true });
+      this.time.delayedCall(rnd.between(4000, 9000), shoot);
+    };
+    this.time.delayedCall(2400, shoot);
+
+    const cy = (BAY.y0 + BAY.y1) / 2;
+    const sheen = this.add.image(BAY.x0 - 220, cy, SHEEN_KEY).setDisplaySize(170, 900).setAngle(24).setAlpha(0.16).setBlendMode(Phaser.BlendModes.ADD);
+    sky.add(sheen);
     this.tweens.add({ targets: sheen, x: BAY.x1 + 220, duration: 2600, delay: 1800, repeatDelay: 7000, repeat: -1, ease: 'Sine.easeInOut' });
 
     this.add.image(0, 0, DECOR_KEY).setOrigin(0);
@@ -152,10 +178,43 @@ export class TitleScene extends Phaser.Scene {
   }
 
   /**
+   * Astéroïdes qui traversent lentement la baie en tournant, en trois
+   * couches : loin (petits, flous, sombres, lents), milieu, près (gros,
+   * nets, plus rapides). Ils réapparaissent au hasard une fois sortis.
+   */
+  private drawAsteroids(sky: Phaser.GameObjects.Container): void {
+    const rnd = Phaser.Math.RND;
+    const layers = [
+      { n: 6, size: [20, 32], speed: [6, 10], tint: 0x8a80b8, alpha: 0.75, blur: true },
+      { n: 4, size: [44, 62], speed: [12, 18], tint: 0xd0c8f0, alpha: 1, blur: false },
+      { n: 2, size: [96, 124], speed: [22, 30], tint: 0xffffff, alpha: 1, blur: false },
+    ];
+    this.asteroids = [];
+    for (const L of layers) {
+      for (let i = 0; i < L.n; i++) {
+        const k = rnd.between(0, ROCK_KEYS.length - 1);
+        const rock = this.add.image(0, 0, (L.blur ? ROCK_BLUR_KEYS : ROCK_KEYS)[k]).setTint(L.tint).setAlpha(L.alpha);
+        sky.add(rock);
+        const a = { vx: 0, vy: 0, spin: 0 };
+        const respawn = (first: boolean) => {
+          const s = rnd.between(L.size[0], L.size[1]);
+          rock.setDisplaySize(s, s).setAngle(rnd.angle());
+          a.vx = -rnd.realInRange(L.speed[0], L.speed[1]);
+          a.vy = rnd.realInRange(-0.25, 0.35) * -a.vx;
+          a.spin = rnd.realInRange(-14, 14);
+          rock.setPosition(first ? rnd.between(BAY.x0, BAY.x1) : BAY.x1 + 60 + rnd.between(0, 260), rnd.between(BAY.y0 + 10, BAY.y1 - 10));
+        };
+        respawn(true);
+        this.asteroids.push({ rock, a, respawn: () => respawn(false) });
+      }
+    }
+  }
+
+  /**
    * Le héros (key art GenAI) debout sur le sol du pont, devant la baie :
    * halo derrière lui, flaque de lumière et ombres de contact sous les
-   * bottes, poussière en suspension. Respiration légère (étirement depuis
-   * les pieds) + balancement très discret pour ne pas faire glisser les pieds.
+   * bottes, poussière en suspension. Le héros reste statique : seulement
+   * un fondu + glissement d'entrée.
    */
   private drawHero(): void {
     const add = Phaser.BlendModes.ADD;
@@ -190,7 +249,6 @@ export class TitleScene extends Phaser.Scene {
     ];
     const hero = this.add.image(W - 210, bottom, HERO_ART).setOrigin(0.5, 1);
     hero.setScale(height / hero.height);
-    const base = hero.scale;
     hero.setAlpha(0).setX(hero.x + 40);
     for (const sh of shadows) {
       const a = sh.alpha;
@@ -198,8 +256,6 @@ export class TitleScene extends Phaser.Scene {
       this.tweens.add({ targets: sh, alpha: a, x: sh.x - 40, duration: 1000, delay: 300, ease: 'Cubic.easeOut' });
     }
     this.tweens.add({ targets: hero, alpha: 1, x: hero.x - 40, duration: 1000, delay: 300, ease: 'Cubic.easeOut' });
-    this.tweens.add({ targets: hero, scaleY: base * 1.012, scaleX: base * 1.004, duration: 1900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    this.tweens.add({ targets: hero, angle: 0.3, duration: 3400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 
   /**
@@ -263,7 +319,7 @@ export class TitleScene extends Phaser.Scene {
   private drawTitle(): void {
     const x = 78;
     this.add
-      .text(x + 2, 104, t('title.station'), { fontFamily: FONT, fontSize: '15px', fontStyle: '600', color: COLORS.accent })
+      .text(x + 2, 92, t('title.station'), { fontFamily: FONT, fontSize: '15px', fontStyle: '600', color: COLORS.accent })
       .setLetterSpacing(4);
 
     const style = { fontFamily: DISPLAY, fontSize: '104px', color: '#ffffff', padding: { x: 4, y: 12 } };
@@ -291,7 +347,7 @@ export class TitleScene extends Phaser.Scene {
       t.preFX?.addShine(0.28, 0.35, 5);
       return { t, ghosts, glow };
     };
-    const words = [word(124, t('title.word1'), '#fff6e0', '#ffd166'), word(226, t('title.word2'), '#d9fff4', '#7fffd4')];
+    const words = [word(112, t('title.word1'), '#fff6e0', '#ffd166'), word(212, t('title.word2'), '#d9fff4', '#7fffd4')];
     for (const [i, { t, glow }] of words.entries()) {
       t.setAlpha(0).setX(x - 30);
       this.tweens.add({ targets: t, alpha: 1, x, duration: 900, delay: 200 + i * 120, ease: 'Cubic.easeOut' });
@@ -322,7 +378,7 @@ export class TitleScene extends Phaser.Scene {
 
     // étincelles quantiques autour du titre
     this.add.particles(0, 0, SOFT_KEY, {
-      emitZone: { type: 'random', source: new Phaser.Geom.Rectangle(x - 10, 136, 570, 200), quantity: 1 } as Phaser.Types.GameObjects.Particles.EmitZoneData,
+      emitZone: { type: 'random', source: new Phaser.Geom.Rectangle(x - 10, 130, 570, 180), quantity: 1 } as Phaser.Types.GameObjects.Particles.EmitZoneData,
       lifespan: { min: 700, max: 1500 },
       speedY: { min: -26, max: -6 },
       speedX: { min: -10, max: 10 },
@@ -334,7 +390,7 @@ export class TitleScene extends Phaser.Scene {
     });
 
     // cartouche « chapitre »
-    const y = 362;
+    const y = 386;
     const g = this.add.graphics();
     drawPanel(g, x + 4, y, 372, 46, { fill: COLORS.ink, fillAlpha: 0.7, edge: hex(COLORS.hover), cut: 12, glow: false });
     g.fillStyle(hex(COLORS.hover), 1);
@@ -403,7 +459,7 @@ export class TitleScene extends Phaser.Scene {
     const session = getSession();
     const hasSave = session.save.has() && !session.debug.active;
     const x = 82;
-    let y = 520;
+    let y = 540;
     const go = (fn: () => void) => () => {
       this.cameras.main.fadeOut(350, 7, 5, 15);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, fn);
