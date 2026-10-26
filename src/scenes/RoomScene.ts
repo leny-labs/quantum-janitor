@@ -3,6 +3,7 @@ import { ActionRunner, type ActionHost } from '../engine/ActionRunner';
 import { toActions } from '../engine/content';
 import { EXIT_CURSORS, HotspotLayer } from '../engine/HotspotLayer';
 import { resolveCombine } from '../engine/combine';
+import { repairState } from '../engine/repair';
 import { Inventory } from '../engine/Inventory';
 import { SceneManager } from '../engine/SceneManager';
 import type { Action, Exit, Hotspot, Interaction } from '../engine/types';
@@ -367,9 +368,15 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     rig.onCue = (c) => bobCue(this, c);
     const retch = () => rig.retch();
     this.events.on('ink-shake', retch);
+    // le badge ne se perd jamais : rendu avant que les débris fondent, et même si la séquence casse
+    const secure = () => repairState(this.session.state);
     try {
-      await this.beat(BobRig.SHOT, () => rig.eat(), reaction, false, () => rig.clear());
+      await this.beat(BobRig.SHOT, () => rig.eat(), reaction, false, () => {
+        secure();
+        return rig.clear();
+      });
     } finally {
+      secure();
       this.events.off('ink-shake', retch);
       rig.onCue = null;
     }

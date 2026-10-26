@@ -80,7 +80,6 @@ export class BobRig {
   private retchT = -1;
   /** Badge au sol, en attente de `give: badge` ; puis temps de son envol vers Gary. */
   private grabT = -1;
-  private hadBadge = false;
   private clearT = -1;
   private clearDone: (() => void) | null = null;
 
@@ -145,7 +144,6 @@ export class BobRig {
   eat(): Promise<void> {
     this.mealT = 0;
     this.sandwich.visible = true;
-    this.hadBadge = this.stage.is(HAS_BADGE);
     return new Promise((resolve) => (this.mealDone = resolve));
   }
 
@@ -156,9 +154,13 @@ export class BobRig {
     this.onCue?.('retch');
   }
 
-  /** Fin de la séquence : les débris restants fondent dans le décor. */
+  /**
+   * Fin de la séquence : les débris restants fondent dans le décor. Le badge,
+   * lui, ne fond jamais : s'il est dans l'inventaire il file vers Gary (on
+   * attend la fin de son envol), sinon il reste au sol.
+   */
   clear(): Promise<void> {
-    if (!this.junk.some((j) => j.obj.visible)) return Promise.resolve();
+    if (!this.junk.some((j) => j.obj.visible) && this.retchT < 0) return Promise.resolve();
     this.clearT = 0;
     return new Promise((resolve) => (this.clearDone = resolve));
   }
@@ -337,14 +339,14 @@ export class BobRig {
   private stepJunk(dt: number): void {
     const { w } = this.parts;
     const has = this.stage.is(HAS_BADGE);
-    // « Gary récupère son badge » : le badge saute vers la caméra et disparaît
-    if (has && !this.hadBadge && this.badge.obj.visible && this.grabT < 0) {
+    // « Gary récupère son badge » : dès qu'il est dans l'inventaire et a touché le sol,
+    // le badge saute vers la caméra et disparaît (même si le give a devancé le crachat)
+    if (has && this.badge.obj.visible && this.grabT < 0 && this.badge.bounces >= 1) {
       this.grabT = 0;
       this.onCue?.('grab');
       this.badge.vel.set(-w * 0.8, w * 4.5, w * 4);
       this.badge.bounces = 99;
     }
-    this.hadBadge = has;
     for (const j of this.junk) {
       if (!j.obj.visible) continue;
       if (j === this.badge && this.grabT >= 0) {
@@ -400,12 +402,15 @@ export class BobRig {
   }
 
   private stepClear(dt: number): void {
-    if (this.clearT < 0) return;
+    // dialogue fini avant le crachat : on laisse B.O.B. recracher d'abord
+    if (this.clearT < 0 || this.retchT >= 0) return;
     this.clearT += dt;
     const k = clamp01(this.clearT / 0.5);
-    for (const j of this.junk) if (j.obj.visible) j.obj.scale.setScalar(Math.max(0.01, 1 - k));
-    if (k >= 1) {
-      for (const j of this.junk) j.obj.visible = false;
+    for (const j of this.junk) if (j.obj.visible && j !== this.badge) j.obj.scale.setScalar(Math.max(0.01, 1 - k));
+    // le badge en vol vers Gary : on attend qu'il soit parti ; pas dans l'inventaire : il reste au sol
+    const badgeOut = !this.badge.obj.visible || !this.stage.is(HAS_BADGE);
+    if (k >= 1 && badgeOut) {
+      for (const j of this.junk) if (j !== this.badge) j.obj.visible = false;
       this.clearT = -1;
       const done = this.clearDone;
       this.clearDone = null;

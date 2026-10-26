@@ -3,6 +3,7 @@ import { loadContent } from './engine/contentBrowser';
 import { parseDebug, type DebugOptions } from './engine/debug';
 import { DialogueRunner } from './engine/DialogueRunner';
 import { GameState } from './engine/GameState';
+import { repairState } from './engine/repair';
 import { SaveSystem } from './engine/SaveSystem';
 import type { GameContent } from './engine/types';
 
@@ -66,6 +67,7 @@ export class Session {
       },
     });
     this.detachSave = this.save.autoSave(state);
+    repairState(state);
   }
 }
 
