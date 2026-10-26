@@ -10,6 +10,7 @@ import { SHEET, iconKey, sheetKey } from '../three/Studio';
 import { makeButton } from '../ui/Button';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
 import { isTouch } from '../ui/input';
+import { OverlayPlayer, overlayFor } from '../ui/PortraitOverlay';
 import { PressRing } from '../ui/PressRing';
 import { playMusic } from '../ui/music';
 import { blip, glitch, plouf, thud, whoosh } from '../ui/sfx';
@@ -53,9 +54,11 @@ const BAR = 56;
 const SUB_Y = H - BAR - 74;
 const CPS = 40;
 
-/** Portrait animé depuis une planche Studio (boucles idle / talk). */
+/** Portrait animé depuis une planche Studio (boucles idle / talk), + calque éventuel. */
 class SheetPortrait {
   readonly image: Phaser.GameObjects.Image;
+  /** Calque sur sa propre timeline (drone dorsal de Gary), au-dessus de `image`. */
+  readonly overlay: OverlayPlayer | null = null;
   private seq: readonly { frame: number; duration: number }[] = SHEET.idle;
   private i = 0;
   private left: number = SHEET.idle[0].duration;
@@ -71,6 +74,12 @@ class SheetPortrait {
       for (let i = 0; i < SHEET.cols * SHEET.rows; i++) tex.add(`f${i}`, 0, (i % SHEET.cols) * fw, Math.floor(i / SHEET.cols) * fh, fw, fh);
     }
     this.image = scene.add.image(x, y, key, 'f0').setDisplaySize(size, size);
+    if (overlayFor(scene, id)) this.overlay = new OverlayPlayer(scene, id).place(x - size / 2, y - size / 2, size);
+  }
+
+  /** Objets à empiler dans le cadre, de bas en haut. */
+  get layers(): Phaser.GameObjects.Image[] {
+    return this.overlay ? [this.image, this.overlay.image] : [this.image];
   }
 
   talk(on: boolean): void {
@@ -89,6 +98,8 @@ class SheetPortrait {
       this.left += this.seq[this.i].duration;
       this.image.setFrame(`f${this.seq[this.i].frame}`);
     }
+    this.overlay?.setTalking(this.talking);
+    this.overlay?.update(dt);
   }
 }
 
@@ -466,7 +477,7 @@ export class IntroScene extends Phaser.Scene {
     const lines = this.add.graphics();
     lines.fillStyle(0x07050f, 0.16);
     for (let sy = -size / 2; sy < size / 2; sy += 4) lines.fillRect(-size / 2, sy, size, 1);
-    const c = this.add.container(x, y, [g, face.image, lines]);
+    const c = this.add.container(x, y, [g, ...face.layers, lines]);
     this.layer.add(c);
     return c;
   }

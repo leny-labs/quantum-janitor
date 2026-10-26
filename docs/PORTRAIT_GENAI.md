@@ -20,11 +20,12 @@ dans `Studio.ts`) : ni `bake:portraits` ni le boot ne les régénèrent ou ne le
 uni `#071D40`. Seuls la bouche et les yeux changent.
 
 Fichiers :
-- `public/portraits/gary-sheet.png` — planche v2, 1024 × 512, 4 × 2 frames de 256 px.
-  **C'est la source de vérité suivie dans le repo** (copie exacte de la v2 validée,
-  sha256 `feea3813…a9334a`).
-- `public/portraits/gary-ref.png` — frame idle0 de la v2 seule (256 × 256), référence pour
-  les prochaines générations.
+- `public/portraits/gary-sheet.png` — planche de **base** v3, 1024 × 512, 4 × 2 frames de 256 px :
+  pixels de la v2 validée, **drone retiré** (fond navy rebouché). Le drone est un calque
+  séparé, voir « Gary : base + calque robot » ci-dessous.
+- `public/portraits/gary-robot.png` — calque du drone dorsal (8 poses).
+- `public/portraits/gary-ref.png` — frame idle0 de la v2 seule (256 × 256, drone compris),
+  référence pour les prochaines générations.
 
 Aucun bake ne l'écrase : `bake:portraits` et le bake runtime au boot sautent Gary
 (`GENAI_SHEETS` dans `Studio.ts`), et il n'y a pas de script `predev` / `prebuild`.
@@ -51,6 +52,48 @@ Régénérer :
 3. Copier `gary-sheet.png` et `gary-ref.png` (frame 0) dans `public/portraits/`.
 4. Ne **pas** lancer de bake pour Gary : il est exclu via `GENAI_SHEETS`.
 
+## Gary : base + calque robot
+
+Le mini-robot sur le dos de Gary (drone dorsal du design Janék — **pas** B.O.B.) est un
+sprite séparé, collé par-dessus le portrait et animé sur **sa propre timeline** : toutes
+les combinaisons pose de Gary × pose du drone sont possibles.
+
+Fichiers :
+- `public/portraits/gary-sheet.png` — base 1024 × 512, même layout que la v2 (4 × 2 @256),
+  pixels v2 identiques hors drone ; drone retiré, fond rebouché.
+- `public/portraits/gary-robot.png` — bande 640 × 112 RGBA, **8 frames de 80 × 112** en
+  ligne, fond transparent.
+
+Ancrage : le coin haut-gauche de chaque frame robot se pose en **(x = 160, y = 48)** d'une
+cellule de 256 px de la planche ; à l'écran, offset = (160/256, 48/256) et taille =
+(80/256, 112/256) de la taille affichée de la cellule. Base + robot r0 reproduit la v2
+(MAD 0,03).
+
+| r0 | r1 | r2 | r3 | r4 | r5 | r6 | r7 |
+|---|---|---|---|---|---|---|---|
+| neutre | flotte (−1 px) | haut de flottaison (tilt) | penche dehors | regarde Gary | regarde Gary + pulse de lueur | obturateur mi-clos | obturateur fermé (clignement) |
+
+Code :
+- `PORTRAIT_OVERLAYS` dans `src/three/Studio.ts` : géométrie (frames, taille, ancrage en px
+  de cellule 256) et timelines `idle` (~8,9 s, durées irrégulières, décalée de `SHEET.idle`)
+  / `talk` (plus de r4 / r5 : il regarde Gary pendant qu'il parle). Texture `overlayKey(id)`
+  = `portraitOverlay:gary`, chargée par `preloadPortraitSheets`.
+- `src/ui/PortraitOverlay.ts` (`OverlayPlayer`) : Image Phaser découpée en frames `r0..r7`,
+  départ à un rang aléatoire de la boucle. Passer en `talk` ne remet **pas** la boucle à
+  zéro (la pose en cours finit son temps, la suite reprend au même rang) : aucune synchro
+  avec le lip-flap.
+- Dialogue (`DialogueBox`) : le calque est enfant du conteneur interne de `TalkingPortrait`
+  (même transform, respiration et visibilité que la face), placé d'après le fit « cover »
+  de la planche. Visible seulement si le speaker a un calque et que sa planche est affichée.
+- Intro (`SheetPortrait` dans `IntroScene`) : même calque au-dessus de la planche, dans le
+  même cadre.
+
+Régénérer : script **hors repo** `v3-build.py` (copie dans `_briefs/gary-overlay/`, non
+suivi), qui part du master v2 (`v2-gary-master.png`) et du masque robot v2b
+(`v2b-robot-mask.png`) : détourage du drone, rebouchage du fond pour la base, puis rendu
+des 8 poses du calque. Garder la bande à 8 × (80 × 112) et l'ancrage 160/48, ou mettre à
+jour `PORTRAIT_OVERLAYS` en conséquence.
+
 ## Layout de la planche (`{id}-sheet.png`)
 
 Grille **4 colonnes × 2 lignes**, frames carrées, lues ligne par ligne.
@@ -67,7 +110,7 @@ talk = 4 5 6 5 7 4 6 7 à 9 i/s. Entre deux frames, **seuls la bouche, les yeux 
 micro-mouvement de tête** changent : même cadrage, même fond, même éclairage.
 
 - Gary (design « Janék », voir `docs/STORY.md`) : vraie bouche dans la barbe de trois jours ;
-  le drone sur l'épaule penche la tête (frame idle3) — garder son œil bleu dans le cadre.
+  le drone dorsal est un calque à part (voir « Gary : base + calque robot »).
 - B.O.B. : la « bouche » est un égaliseur LED cyan sur la plaque (barres plus ou moins hautes).
 - SYLVIE : visage-écran ; bouche = ovale lumineux qui grandit ; clignement = « —   — ».
 - Reine : mandibules qui s'écartent, gueule sombre qui s'ouvre.

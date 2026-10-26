@@ -17,6 +17,9 @@ export const portraitKey = (id: string) => `portrait3d:${id}`;
 export const sheetKey = (id: string) => `portraitSheet:${id}`;
 /** Chemin (relatif au site) de la planche de sprites d'un personnage. */
 export const sheetUrl = (id: string) => `portraits/${id}-sheet.png`;
+/** Calque animé collé par-dessus la planche (ex. drone dorsal de Gary). */
+export const overlayKey = (id: string) => `portraitOverlay:${id}`;
+export const overlayUrl = (id: string) => `portraits/${id}-robot.png`;
 
 /** Une frame de planche : expression + micro-mouvement du buste. */
 interface SheetFrame extends FacePose {
@@ -227,6 +230,78 @@ function canvas(w: number, h: number): [HTMLCanvasElement, CanvasRenderingContex
   return [c, c.getContext('2d')!];
 }
 
+/** Une frame de calque et sa durée (ms). */
+export interface OverlayStep {
+  frame: number;
+  duration: number;
+}
+
+/**
+ * Calque de portrait (contrat partagé avec docs/PORTRAIT_GENAI.md) : bande de
+ * `frames` frames `frameW × frameH` en ligne, dont le coin haut-gauche se pose
+ * en (`x`, `y`) d'une cellule de planche de `cell` px. Il joue SA PROPRE
+ * timeline, indépendante des boucles idle / talk du personnage ; `talk` est la
+ * variante lue pendant que le personnage parle (sans resynchronisation).
+ */
+export interface PortraitOverlay {
+  frames: number;
+  frameW: number;
+  frameH: number;
+  cell: number;
+  x: number;
+  y: number;
+  idle: readonly OverlayStep[];
+  talk: readonly OverlayStep[];
+}
+
+/**
+ * Gary : le drone dorsal est un sprite séparé (planche de base sans robot).
+ * Poses : r0 neutre · r1 flotte · r2 haut de flottaison · r3 penche dehors ·
+ * r4 regarde Gary · r5 regarde Gary + pulse · r6 obturateur mi-clos · r7 fermé.
+ */
+export const PORTRAIT_OVERLAYS: Readonly<Record<string, PortraitOverlay>> = {
+  gary: {
+    frames: 8,
+    frameW: 80,
+    frameH: 112,
+    cell: 256,
+    x: 160,
+    y: 48,
+    // ~8,9 s, volontairement décalée de SHEET.idle
+    idle: [
+      { frame: 0, duration: 900 },
+      { frame: 1, duration: 500 },
+      { frame: 2, duration: 700 },
+      { frame: 1, duration: 400 },
+      { frame: 0, duration: 600 },
+      { frame: 3, duration: 800 },
+      { frame: 4, duration: 700 },
+      { frame: 5, duration: 500 },
+      { frame: 4, duration: 400 },
+      { frame: 0, duration: 500 },
+      { frame: 6, duration: 70 },
+      { frame: 7, duration: 110 },
+      { frame: 6, duration: 70 },
+      { frame: 0, duration: 800 },
+    ],
+    // Gary parle : le drone le regarde davantage, à son rythme
+    talk: [
+      { frame: 4, duration: 800 },
+      { frame: 5, duration: 450 },
+      { frame: 4, duration: 600 },
+      { frame: 1, duration: 500 },
+      { frame: 2, duration: 600 },
+      { frame: 4, duration: 700 },
+      { frame: 5, duration: 400 },
+      { frame: 4, duration: 500 },
+      { frame: 6, duration: 70 },
+      { frame: 7, duration: 110 },
+      { frame: 6, duration: 70 },
+      { frame: 0, duration: 600 },
+    ],
+  },
+};
+
 function shootSingle(renderer: THREE.WebGLRenderer, pose: Pose, size: number, bg?: [string, string]): HTMLCanvasElement {
   const [c, g] = canvas(size, size);
   const s = studio(renderer, pose, bg);
@@ -257,6 +332,7 @@ export function renderPortraitSheets(): Record<string, HTMLCanvasElement> {
 /** Charge les planches de public/portraits/ (à appeler dans un `preload`). */
 export function preloadPortraitSheets(load: Phaser.Loader.LoaderPlugin): void {
   for (const id of PORTRAIT_IDS) if (!load.textureManager.exists(sheetKey(id))) load.image(sheetKey(id), sheetUrl(id));
+  for (const id of Object.keys(PORTRAIT_OVERLAYS)) if (!load.textureManager.exists(overlayKey(id))) load.image(overlayKey(id), overlayUrl(id));
 }
 
 /** Génère (une fois par jeu) toutes les textures d'icônes et de portraits. */

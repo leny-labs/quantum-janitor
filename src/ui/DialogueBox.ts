@@ -8,6 +8,7 @@ import { SHEET, portraitKey, sheetKey } from '../three/Studio';
 import { drawHazard, drawPanel } from './chrome';
 import { cssToGame, isTouch, uiPx } from './input';
 import { duckMusic } from './music';
+import { OverlayPlayer, overlayFor } from './PortraitOverlay';
 import { Blipper } from './voice';
 import { COLORS, FONT, H, W, hex, setCursor } from './theme';
 
@@ -80,6 +81,9 @@ export class DialogueBox implements DialogueView {
   private voice: TypewriterMouth | SpriteTalk;
   /** Planche actuellement montée sur `face` (évite de la remonter à chaque réplique). */
   private sheetOn: string | null = null;
+  /** Calques par-dessus la planche (drone de Gary), créés à la demande, par id. */
+  private overlays = new Map<string, OverlayPlayer>();
+  private overlayOn: OverlayPlayer | null = null;
   private typing: TypewriteHandle | null = null;
   private portraitBg: Phaser.GameObjects.Rectangle;
   private portraitText: Phaser.GameObjects.Text;
@@ -155,7 +159,18 @@ export class DialogueBox implements DialogueView {
       if (n >= 1 && n <= this.choiceZones.length) this.pickChoice?.(n - 1);
     };
     window.addEventListener('keydown', this.keyHandler);
-    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => window.removeEventListener('keydown', this.keyHandler));
+    // le calque vit sur sa propre horloge, indépendante des boucles idle / talk
+    const tick = (_t: number, dt: number) => {
+      if (this.root.visible && this.overlayOn) {
+        this.overlayOn.setTalking(this.face.talking);
+        this.overlayOn.update(dt);
+      }
+    };
+    scene.events.on(Phaser.Scenes.Events.UPDATE, tick);
+    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      window.removeEventListener('keydown', this.keyHandler);
+      scene.events.off(Phaser.Scenes.Events.UPDATE, tick);
+    });
   }
 
   /** Redessine le panneau avec son bord haut en `y` (le bas reste collé à l'écran). */
@@ -236,6 +251,7 @@ export class DialogueBox implements DialogueView {
         blink: f?.blink ?? { enabled: false },
       });
     }
+    this.showOverlay(hasSheet ? speaker!.id : null);
     const named = !!speaker && speaker.id !== 'narrateur' && !!speaker.name;
     this.setName(named ? speaker!.name : '', speaker?.color);
     if (speaker && !has3d) {
@@ -248,6 +264,33 @@ export class DialogueBox implements DialogueView {
     const narr = speaker?.id === 'narrateur';
     this.bodyText.setFontStyle(narr ? 'italic 500' : '500');
     this.bodyText.setColor(narr ? '#cfc6ee' : COLORS.text);
+  }
+
+  /**
+   * Calque animé du speaker (s'il en a un et que sa planche est affichée).
+   * Il est enfant du contenu de `face` : même transform, même respiration,
+   * même visibilité. Ancrage = fractions de la cellule de planche, ramenées à
+   * la taille affichée (fit « cover » de TalkingPortrait, cellule centrée sur
+   * le cadre).
+   */
+  private showOverlay(id: string | null): void {
+    const def = id ? overlayFor(this.scene, id) : null;
+    let o = def ? (this.overlays.get(id!) ?? null) : null;
+    if (def && !o) {
+      o = new OverlayPlayer(this.scene, id!);
+      this.overlays.set(id!, o);
+      // contenu interne de TalkingPortrait (celui qui respire), au-dessus de la planche
+      (this.face.container.list[0] as Phaser.GameObjects.Container).add(o.image);
+      const src = this.scene.textures.get(sheetKey(id!)).source[0];
+      const fw = src.width / SHEET.cols;
+      const fh = src.height / SHEET.rows;
+      const ps = PANEL_H - 44;
+      const k = Math.max(PORTRAIT / fw, ps / fh);
+      // repère du contenu : bas du cadre en y = 0, planche centrée en (0, -ps / 2)
+      o.place((-fw * k) / 2, -ps / 2 - (fh * k) / 2, fw * k);
+    }
+    for (const p of this.overlays.values()) p.image.setVisible(p === o);
+    this.overlayOn = o;
   }
 
   private setName(name: string, color?: string): void {
