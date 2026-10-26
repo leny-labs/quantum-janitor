@@ -12,6 +12,8 @@ const FLAVOR: Record<Mood, { freq: number; speed: number; jag: number }> = {
   suspicious: { freq: 8, speed: 0.6, jag: 0.4 },
   angry: { freq: 15, speed: 1.7, jag: 1 },
   love: { freq: 6, speed: 0.8, jag: 0 },
+  surprised: { freq: 9, speed: 1.3, jag: 0.3 },
+  sad: { freq: 5, speed: 0.5, jag: 0.1 },
 };
 
 const POINTS = 72;

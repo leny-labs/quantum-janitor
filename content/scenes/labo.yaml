@@ -106,7 +106,9 @@ hotspots:
     look: "B.O.B. tremble légèrement. Il dit que c'est le champ d'improbabilité. Je pense que c'est la peur."
     talk:
       - dialogue: bob_compagnon
-    useItemDefault: "bob: Gary, je ne suis pas une poubelle. Enfin, si. Mais j'ai des sentiments."
+    useItemDefault:
+      - say: "bob: Gary, je ne suis pas une poubelle. Enfin, si. Mais j'ai des sentiments."
+        mood: sad
 
 exits:
   - id: vers_couloir

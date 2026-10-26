@@ -3,9 +3,10 @@ import { SpriteTalk, TalkingPortrait, TypewriterMouth, typewrite } from 'talking
 import type { BlinkOptions, MouthOptions, TypewriteHandle } from 'talking-portrait';
 import type { DialogueView } from '../engine/DialogueRunner';
 import { t } from '../i18n';
-import { guessMood, isMood, type Mood } from '../engine/mood';
+import { lineMood, type Mood } from '../engine/mood';
 import type { CharacterDef } from '../engine/types';
-import { PORTRAIT_MOODS, SHEET, portraitKey, sheetKey, sheetLoops } from '../three/Studio';
+import { PORTRAIT_MOODS, SHEET, portraitKey, portraitMood, sheetKey, sheetLoops } from '../three/Studio';
+import { Brows, browsFor } from './Brows';
 import { drawHazard, drawPanel } from './chrome';
 import { cssToGame, isTouch, uiPx } from './input';
 import { duckMusic } from './music';
@@ -89,6 +90,9 @@ export class DialogueBox implements DialogueView {
   /** Bouches-ondes procédurales (SYLVIE), créées à la demande, par id. */
   private waves = new Map<string, WaveMouth>();
   private waveOn: WaveMouth | null = null;
+  /** Sourcils procéduraux (B.O.B.), créés à la demande, par id. */
+  private brows = new Map<string, Brows>();
+  private browsOn: Brows | null = null;
   private typing: TypewriteHandle | null = null;
   private portraitBg: Phaser.GameObjects.Rectangle;
   private portraitText: Phaser.GameObjects.Text;
@@ -171,6 +175,7 @@ export class DialogueBox implements DialogueView {
         this.overlayOn.update(dt);
       }
       if (this.root.visible && this.waveOn) this.waveOn.update(dt, this.face.talking);
+      if (this.root.visible && this.browsOn) this.browsOn.update(dt, this.face.talking);
     };
     scene.events.on(Phaser.Scenes.Events.UPDATE, tick);
     scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -228,7 +233,7 @@ export class DialogueBox implements DialogueView {
    */
   private moodOf(speaker: CharacterDef | null, text: string, tag?: string): Mood | undefined {
     if (!speaker || !PORTRAIT_MOODS[speaker.id]) return undefined;
-    return isMood(tag) ? tag : guessMood(text);
+    return lineMood(text, tag);
   }
 
   private setSpeaker(speaker: CharacterDef | null, mood?: Mood): void {
@@ -242,14 +247,16 @@ export class DialogueBox implements DialogueView {
     this.portraitText.setVisible(hasPortrait && !has3d);
     this.face.setVisible(has3d);
     this.voice = hasSheet ? this.sprite : this.mouth;
+    // la planche et l'onde jouent l'humeur qu'elles connaissent ; les sourcils, toutes
+    const sheetMood = speaker ? portraitMood(speaker.id, mood) : undefined;
     if (hasSheet) {
       // même planche (et même humeur) que la réplique précédente : on ne relance pas la boucle idle
-      const on = mood ? `${sheet}#${mood}` : sheet;
+      const on = sheetMood ? `${sheet}#${sheetMood}` : sheet;
       if (this.sheetOn !== on) {
         // boucles sprite idle / talk (chaque frame porte sa durée) ; la grille se
         // déduit de la taille de l'image (une planche GenAI en 2048×1024 marche aussi)
         const src = this.scene.textures.get(sheet).source[0];
-        const loops = sheetLoops(speaker!.id, mood);
+        const loops = sheetLoops(speaker!.id, sheetMood);
         this.face.setSpriteSheet({
           key: sheet,
           frameWidth: Math.floor(src.width / SHEET.cols),
@@ -269,7 +276,8 @@ export class DialogueBox implements DialogueView {
       });
     }
     this.showOverlay(hasSheet ? speaker!.id : null);
-    this.showWave(hasSheet ? speaker!.id : null, mood);
+    this.showWave(hasSheet ? speaker!.id : null, sheetMood);
+    this.showBrows(hasSheet ? speaker!.id : null, mood);
     const named = !!speaker && speaker.id !== 'narrateur' && !!speaker.name;
     this.setName(named ? speaker!.name : '', speaker?.color);
     if (speaker && !has3d) {
@@ -315,6 +323,24 @@ export class DialogueBox implements DialogueView {
     if (w && mood) w.setMood(mood);
     for (const x of this.waves.values()) x.g.setVisible(x === w);
     this.waveOn = w;
+  }
+
+  /**
+   * Sourcils du speaker (s'il en a), au-dessus de la planche et de l'onde. Pose
+   * de l'humeur sans transition quand il prend la parole, en ressort ensuite.
+   */
+  private showBrows(id: string | null, mood?: Mood): void {
+    const def = id ? browsFor(id) : null;
+    let b = def ? (this.brows.get(id!) ?? null) : null;
+    if (def && !b) {
+      b = new Brows(this.scene, def);
+      this.brows.set(id!, b);
+      (this.face.container.list[0] as Phaser.GameObjects.Container).add(b.g);
+      b.place(...this.cellRect(id!));
+    }
+    if (b) b.setMood(mood ?? 'calm', b !== this.browsOn || !this.root.visible);
+    for (const x of this.brows.values()) x.g.setVisible(x === b);
+    this.browsOn = b;
   }
 
   private showOverlay(id: string | null): void {
@@ -379,7 +405,14 @@ export class DialogueBox implements DialogueView {
     this.open();
     // blip « Nintendo » par lettre révélée, au timbre du personnage (tap = tout afficher, sans son)
     const voice = new Blipper(speaker?.id ?? 'narrateur');
-    const typing = typewrite(this.bodyText, text, { cps: CPS, onChar: (ch) => voice.char(ch) });
+    const brows = this.browsOn;
+    const typing = typewrite(this.bodyText, text, {
+      cps: CPS,
+      onChar: (ch) => {
+        voice.char(ch);
+        brows?.char(ch);
+      },
+    });
     this.typing = typing;
     if (this.face.visible) void this.voice.speak(text);
     void typing.done.then(() => {

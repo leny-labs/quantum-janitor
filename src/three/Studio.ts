@@ -315,9 +315,13 @@ export interface SheetLoops {
  * de SHEET. SYLVIE : ligne 1 = yeux calm · suspicious · angry · love, ligne 2 =
  * leur variante « accent » (clignement, plissement, tressaillement, cœurs qui
  * battent). Pas de bouche dans la planche : l'onde est procédurale (PORTRAIT_WAVES),
- * donc talk ne change que le rythme des yeux.
+ * donc talk ne change que le rythme des yeux. B.O.B. : sa planche par défaut
+ * (SHEET) en calm, paupières mi-closes plus présentes en sad / suspicious, LED
+ * qui s'affole en angry ; ses humeurs passent surtout par les sourcils
+ * (PORTRAIT_BROWS). Une humeur absente d'un personnage retombe sur `fallback`
+ * (planche, onde) : voir portraitMood.
  */
-export const PORTRAIT_MOODS: Readonly<Record<string, { fallback: Mood; loops: Readonly<Record<Mood, SheetLoops>> }>> = {
+export const PORTRAIT_MOODS: Readonly<Record<string, { fallback: Mood; loops: Readonly<Partial<Record<Mood, SheetLoops>>> }>> = {
   sylvie: {
     fallback: 'calm',
     loops: {
@@ -378,14 +382,111 @@ export const PORTRAIT_MOODS: Readonly<Record<string, { fallback: Mood; loops: Re
         ],
       },
     },
+  },  bob: {
+    fallback: 'calm',
+    loops: {
+      calm: SHEET,
+      // paupières mi-closes qui traînent
+      sad: {
+        idle: [
+          { frame: 3, duration: 2200 },
+          { frame: 1, duration: 120 },
+          { frame: 3, duration: 1700 },
+          { frame: 0, duration: 500 },
+        ],
+        talk: SHEET.talk,
+      },
+      suspicious: {
+        idle: [
+          { frame: 0, duration: 900 },
+          { frame: 3, duration: 1500 },
+          { frame: 0, duration: 400 },
+          { frame: 1, duration: 90 },
+          { frame: 3, duration: 1200 },
+        ],
+        talk: SHEET.talk,
+      },
+      // LED à fond, par saccades
+      angry: {
+        idle: [
+          { frame: 7, duration: 260 },
+          { frame: 2, duration: 220 },
+          { frame: 7, duration: 260 },
+          { frame: 0, duration: 900 },
+          { frame: 1, duration: 80 },
+        ],
+        talk: [
+          { frame: 7, duration: 110 },
+          { frame: 4, duration: 90 },
+          { frame: 7, duration: 120 },
+          { frame: 6, duration: 100 },
+          { frame: 7, duration: 130 },
+          { frame: 4, duration: 95 },
+        ],
+      },
+      // yeux grands ouverts : pas de paupières
+      surprised: {
+        idle: [
+          { frame: 0, duration: 2400 },
+          { frame: 1, duration: 70 },
+          { frame: 0, duration: 1300 },
+          { frame: 2, duration: 400 },
+        ],
+        talk: SHEET.talk,
+      },
+    },
   },
 };
+
+/** Humeur que la planche (et l'onde) de `id` sait jouer : `mood` si elle a ses boucles, sinon son repli. */
+export function portraitMood(id: string, mood?: Mood): Mood | undefined {
+  const m = PORTRAIT_MOODS[id];
+  if (!m) return undefined;
+  return mood && m.loops[mood] ? mood : m.fallback;
+}
 
 /** Boucles d'un personnage pour une humeur (planche à humeurs), sinon SHEET. */
 export function sheetLoops(id: string, mood?: Mood): SheetLoops {
   const m = PORTRAIT_MOODS[id];
-  return m ? m.loops[mood ?? m.fallback] : SHEET;
+  return m ? m.loops[portraitMood(id, mood)!]! : SHEET;
 }
+
+/**
+ * Sourcils procéduraux dessinés par-dessus la planche (contrat partagé avec
+ * docs/PORTRAIT_GENAI.md, poses dans engine/brows.ts) : plaque centrée en
+ * (`x`, `y`) au repos, longue de `len`, épaisse de `thick`, posée sur un œil
+ * de rayon `eye` ; px d'une cellule de `cell` px. Gauche = à gauche de l'image.
+ */
+export interface BrowSpot {
+  x: number;
+  y: number;
+  len: number;
+  thick: number;
+  eye: number;
+}
+
+export interface PortraitBrows {
+  cell: number;
+  l: BrowSpot;
+  r: BrowSpot;
+  /** Face de la plaque, biseau éclairé du haut, contour. */
+  fill: number;
+  top: number;
+  edge: number;
+}
+
+export const PORTRAIT_BROWS: Readonly<Record<string, PortraitBrows>> = {
+  // plaques gris acier sur le haut des yeux (planche sans sourcils peints) ;
+  // l'œil droit est plus près de la caméra : sourcil un peu plus grand
+  bob: {
+    cell: 256,
+    l: { x: 61, y: 122, len: 44, thick: 10, eye: 18 },
+    r: { x: 166, y: 125, len: 48, thick: 11, eye: 20 },
+    fill: 0x8f8595,
+    top: 0xcfc2ca,
+    edge: 0x2a2531,
+  },
+};
 
 /**
  * Bouche-onde procédurale (façon B.O.B.) dessinée par-dessus la planche

@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import { at, box, cyl, decal, glow, group, label, mat, mysteryTag, outline, shell, sphere, torus, type DecalMark } from './kit';
 import { t as tr, tl as trl } from '../i18n';
+import { BROW_POSES, type BrowPair } from '../engine/brows';
 
 /**
  * Expression d'un personnage pour le studio de portraits (frames de sprite).
@@ -37,11 +38,26 @@ export function bob(w: number): THREE.Group {
   const eyes = [-1, 1].map((sx) => {
     const eye = at(sphere(r * 0.16, '#ffffff', { seg: 10 }), sx * r * 0.36, h * 0.62, r * 0.9);
     const pupil = at(sphere(r * 0.07, '#11131a', { glow: true, seg: 8 }), sx * r * 0.36, h * 0.55, r * 1.04);
-    // paupières tombantes : la déprime, en low-poly
-    const lidBox = at(box(r * 0.38, r * 0.1, r * 0.2, '#8994a3', { edges: false }), sx * r * 0.36, h * 0.8, r * 0.92);
-    lidBox.rotation.z = sx * -0.25;
-    return group([eye, pupil, lidBox]);
+    return group([eye, pupil]);
   });
+  // sourcils-plaques tombants sur le haut des yeux (la déprime, en low-poly),
+  // orientés selon l'humeur (setBrows, poses de engine/brows.ts) ; hors des
+  // groupes `eyes` pour que clignements et mâchouillage ne les écrasent pas
+  const eyeR = r * 0.16;
+  const browY = h * 0.8;
+  const brows = [-1, 1].map((sx) => at(group([box(r * 0.38, r * 0.1, r * 0.2, '#4f5764', { edges: false })]), sx * r * 0.36, browY, r * 0.92));
+  /** Pose des sourcils ; `lift` = sursaut commun, en rayons d'œil (négatif = plus haut). */
+  const setBrows = (p: BrowPair, lift = 0) => {
+    brows.forEach((b, i) => {
+      const sx = i === 0 ? -1 : 1;
+      const s = sx < 0 ? p.l : p.r;
+      b.position.y = browY - (s.y + lift) * eyeR;
+      // bout intérieur relevé : rotation de sens opposé de chaque côté
+      b.rotation.z = -sx * THREE.MathUtils.degToRad(s.rot);
+      b.scale.x = s.len;
+    });
+  };
+  setBrows(BROW_POSES.calm);
   const antenna = at(cyl(r * 0.02, r * 0.02, r * 0.5, '#3f4652', { edges: false }), r * 0.4, h + r * 0.3, -r * 0.3);
   const tip = at(sphere(r * 0.06, '#ff5c7a', { glow: true }), r * 0.4, h + r * 0.56, -r * 0.3);
   const plate = at(label('B.O.B.', r * 0.7, r * 0.18, { color: '#1a1a1a', bold: true }), 0, h * 0.28, r * 1.05);
@@ -59,8 +75,9 @@ export function bob(w: number): THREE.Group {
   const bars = Array.from({ length: N }, (_, i) => at(box(r * 0.046, r * 0.17, r * 0.02, '#7fffd4', { glow: true, edges: false, shadow: false }), (i - (N - 1) / 2) * r * 0.06, sy, sz + r * 0.02));
   const mouthParts = [bezel, screen, ...grille, flat, ...bars];
   mouthParts.forEach((m) => (m.visible = false));
-  const g = group([body, bumper, lid, ...eyes, antenna, tip, plate, ...mouthParts]);
+  const g = group([body, bumper, lid, ...eyes, ...brows, antenna, tip, plate, ...mouthParts]);
   g.userData.tip = tip;
+  g.userData.setBrows = setBrows;
   g.userData.lid = lidHinge;
   g.userData.eyes = eyes;
   g.userData.setFace = (p: FacePose) => {

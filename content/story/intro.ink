@@ -10,6 +10,6 @@ sylvie: Par ailleurs, le Laboratoire du Réacteur d'Improbabilité est à nettoy
 gary: Le labo du réacteur ? Mais le règlement numéro un, c'est « ne jamais nettoyer le réacteur ».
 sylvie: Il s'agit de nettoyer AUTOUR du réacteur. Nuance. Bonne journée, agent Plunk. # mood: love
 gary: Étape un : retrouver mon badge. Il était sur l'étagère hier soir. Juste à côté de B.O.B.
-bob: ...
+bob: ... # mood: sad
 gary: B.O.B. a l'air encore plus déprimé que d'habitude. Ce qui est un exploit.
 -> END

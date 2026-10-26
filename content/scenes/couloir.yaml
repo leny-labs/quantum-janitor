@@ -161,7 +161,9 @@ hotspots:
     look: "B.O.B. me suit partout. Par loyauté, dit-il. Je pense surtout que je suis la seule source de miettes de la station."
     talk:
       - dialogue: bob_compagnon
-    useItemDefault: "bob: Non merci, Gary. Je suis encore en train de digérer le thon."
+    useItemDefault:
+      - say: "bob: Non merci, Gary. Je suis encore en train de digérer le thon."
+        mood: sad
 
 exits:
   - id: vers_placard

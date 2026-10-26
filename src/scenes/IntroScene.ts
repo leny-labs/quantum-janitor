@@ -7,7 +7,8 @@ import { HeroView } from '../three/Hero';
 import { introShot } from '../three/shots/intro';
 import { titleShot } from '../three/shots/title';
 import type { Mood } from '../engine/mood';
-import { SHEET, iconKey, sheetKey, sheetLoops, type SheetLoops } from '../three/Studio';
+import { SHEET, iconKey, portraitMood, sheetKey, sheetLoops, type SheetLoops } from '../three/Studio';
+import { Brows, browsFor } from '../ui/Brows';
 import { makeButton } from '../ui/Button';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
 import { isTouch } from '../ui/input';
@@ -63,6 +64,8 @@ class SheetPortrait {
   readonly overlay: OverlayPlayer | null = null;
   /** Bouche-onde procédurale (SYLVIE). */
   readonly wave: WaveMouth | null = null;
+  /** Sourcils procéduraux (B.O.B.). */
+  readonly brows: Brows | null = null;
   private loops: SheetLoops;
   private seq: readonly { frame: number; duration: number }[];
   private i = 0;
@@ -91,17 +94,21 @@ class SheetPortrait {
     if (overlayFor(scene, id)) this.overlay = new OverlayPlayer(scene, id).place(x - size / 2, y - size / 2, size);
     const wave = waveFor(id);
     if (wave) this.wave = new WaveMouth(scene, wave).place(x - size / 2, y - size / 2, size);
+    const brows = browsFor(id);
+    if (brows) this.brows = new Brows(scene, brows).place(x - size / 2, y - size / 2, size);
   }
 
   /** Objets à empiler dans le cadre, de bas en haut. */
   get layers(): Phaser.GameObjects.GameObject[] {
-    return [this.image, ...(this.overlay ? [this.overlay.image] : []), ...(this.wave ? [this.wave.g] : [])];
+    return [this.image, ...(this.overlay ? [this.overlay.image] : []), ...(this.wave ? [this.wave.g] : []), ...(this.brows ? [this.brows.g] : [])];
   }
 
-  /** Humeur (planche à humeurs) : change les yeux et le tracé de l'onde. */
+  /** Humeur (planche à humeurs) : change les yeux, le tracé de l'onde et les sourcils. */
   setMood(mood: Mood): void {
-    this.loops = sheetLoops(this.id, mood);
-    this.wave?.setMood(mood);
+    const sheetMood = portraitMood(this.id, mood);
+    this.loops = sheetLoops(this.id, sheetMood);
+    if (sheetMood) this.wave?.setMood(sheetMood);
+    this.brows?.setMood(mood);
     this.seq = this.talking ? this.loops.talk : this.loops.idle;
     this.i = 0;
     this.left = this.seq[0].duration;
@@ -127,6 +134,7 @@ class SheetPortrait {
     this.overlay?.setTalking(this.talking);
     this.overlay?.update(dt);
     this.wave?.update(dt, this.talking);
+    this.brows?.update(dt, this.talking);
   }
 }
 
@@ -401,7 +409,10 @@ export class IntroScene extends Phaser.Scene {
         at: this.elapsed,
         cps: CPS,
         n: 0,
-        tick: (n) => blipper.char(text[n - 1] ?? ''),
+        tick: (n) => {
+          blipper.char(text[n - 1] ?? '');
+          face?.brows?.char(text[n - 1] ?? '');
+        },
         done: () => this.at(this.elapsed + 250, () => face?.talk(false)),
       });
     });
@@ -690,7 +701,7 @@ export class IntroScene extends Phaser.Scene {
     this.layer.add([screen, wave]);
     this.reveal(screen, 900, 0, 20);
     this.wave = { g: wave, x: sx, y: sy, w: sw, h: sh };
-    this.say('bob', t('intro.bob.say'), 3300);
+    this.say('bob', t('intro.bob.say'), 3300, 'sad');
     return 9000;
   }
 

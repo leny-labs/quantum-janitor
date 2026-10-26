@@ -5,6 +5,7 @@ import { EXIT_CURSORS, HotspotLayer } from '../engine/HotspotLayer';
 import { resolveCombine } from '../engine/combine';
 import { repairState } from '../engine/repair';
 import { Inventory } from '../engine/Inventory';
+import { lineMood } from '../engine/mood';
 import { SceneManager } from '../engine/SceneManager';
 import type { Action, CharacterDef, Exit, Hotspot, Interaction } from '../engine/types';
 import { hotspotVerbs, smartVerb, type HotspotVerb } from '../engine/verbs';
@@ -662,7 +663,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const shown = this.dialogueBox.showLine(speaker, text, mood);
     const voice = speaker?.id === 'bob' ? this.room.rig<BobVoice>('bobVoix') : null;
     if (!voice) return shown;
-    voice.talk(text.length / TYPE_CPS + 0.15);
+    voice.talk(text.length / TYPE_CPS + 0.15, lineMood(text, mood));
     return shown.finally(() => voice.hush());
   }
 

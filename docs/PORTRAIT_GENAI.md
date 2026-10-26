@@ -173,7 +173,7 @@ Fichiers :
 - `public/portraits/bob-ref.png` — cellule neutre complète (onde peinte comprise),
   256 × 256, référence pour les prochaines générations.
 
-Mapping (boucles `SHEET` par défaut, pas d'humeurs) — le robot est **pixel-identique** sur
+Mapping (boucles `SHEET` en calm ; humeurs : voir « Sourcils expressifs ») — le robot est **pixel-identique** sur
 les 8 frames, seules les paupières et la LED d'antenne changent :
 
 | | col 0 | col 1 | col 2 | col 3 |
@@ -197,6 +197,43 @@ recadrage carré 920 px (x 52, y 22) → 256, effacement de la teinte cyan dans 
 paupières peintes (couleur du corps échantillonnée à côté de l'œil), halo additif de LED.
 `python3 -I build-sheet.py <bob-genai-validated.png> <dossier de sortie>`.
 Ne **pas** lancer de bake pour B.O.B. : il est dans `GENAI_SHEETS`.
+
+### Sourcils expressifs (procéduraux, pas de sprites)
+
+Les sourcils-plaques **peints** sont effacés de `bob-sheet.png` par `build-sheet.py`
+(`unbrow` : gris du corps reconstruit par diffusion, haut des yeux et des pupilles
+redessiné en ellipse / cercle ; `bob-ref.png` garde les sourcils d'origine). Le jeu dessine
+à la place deux plaques gris acier (`src/ui/Brows.ts`, `PORTRAIT_BROWS.bob` dans
+`Studio.ts` : centre, longueur, épaisseur et rayon d'œil en px de cellule 256), orientées
+selon l'humeur de la réplique. Poses partagées avec le robot 3D : `BROW_POSES` dans
+`src/engine/brows.ts` (`y` en rayons d'œil, `rot` en degrés bout intérieur relevé,
+`bend` cambrure, `len` longueur).
+
+| humeur | pose |
+|---|---|
+| `calm` | posés sur le haut des yeux, intérieurs un peu relevés (blasé, comme la peinture d'origine) |
+| `suspicious` | gauche haut et un peu arqué, droit bas et plissé (intérieur plongé) |
+| `angry` | en V : intérieurs plongés sur les yeux |
+| `love` (= happy) | relevés et arrondis |
+| `surprised` | très hauts, légèrement arqués |
+| `sad` | en ^ : intérieurs relevés, extérieurs tombants |
+
+Animation : ressorts un peu sous-amortis (le changement d'humeur « claque »), sursaut
+des deux sourcils sur les accents du typewriter (« ! », « ? » — gauche plus haut —, mot
+qui commence par une capitale), micro-sursauts aléatoires pendant la parole, retour à la
+pose de l'humeur dès qu'il se tait. Pose posée sans transition quand B.O.B. prend la parole.
+
+En salle : les plaques au-dessus des yeux de `props.bob` sont les sourcils (gris acier
+sombre, hors des groupes `eyes`), pilotés par `userData.setBrows` ; `BobVoice.talk(s, mood)`
+(RoomScene → `lineMood`) prend la pose de l'humeur, sursaute sur les syllabes, revient
+à `calm` au `hush`. `bend` est ignoré en 3D.
+
+Humeurs : `MOODS` gagne `surprised` et `sad` (heuristique : « ?! », oh non → surprised ;
+soupir, triste, seul → sad, testées après les autres). Une humeur que la planche d'un
+personnage ne connaît pas retombe sur son `fallback` pour la planche et l'onde
+(`portraitMood`) : SYLVIE ne change pas. `PORTRAIT_MOODS.bob` varie un peu la planche
+(paupières mi-closes en sad / suspicious, LED qui s'affole en angry). Toutes les
+répliques de B.O.B. (ink + YAML) portent un `# mood:` / `mood:`.
 
 ## Layout de la planche (`{id}-sheet.png`)
 

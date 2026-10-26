@@ -80,11 +80,21 @@ hotspots:
     useItem:
       sandwich:
         - dialogue: bob_sandwich
-      seau: "bob: Pas ton seau. Je suis étanche, mais pas émotionnellement."
-      serpilliere: "bob: Tu veux me serpiller ? Je ne suis pas sale, Gary. Je suis juste... terne. À l'intérieur."
-      badge: "bob: Oui, c'est ton badge. Je suis content pour toi. Enfin, moins triste."
-      fusible: "bob: Je fonctionne sur batterie, Gary. Et sur la résignation."
-    useItemDefault: "bob: Je ne peux pas aspirer ça. Je ne peux aspirer à rien. Même pas à une vie meilleure."
+      seau:
+        - say: "bob: Pas ton seau. Je suis étanche, mais pas émotionnellement."
+          mood: sad
+      serpilliere:
+        - say: "bob: Tu veux me serpiller ? Je ne suis pas sale, Gary. Je suis juste... terne. À l'intérieur."
+          mood: surprised
+      badge:
+        - say: "bob: Oui, c'est ton badge. Je suis content pour toi. Enfin, moins triste."
+          mood: love
+      fusible:
+        - say: "bob: Je fonctionne sur batterie, Gary. Et sur la résignation."
+          mood: sad
+    useItemDefault:
+      - say: "bob: Je ne peux pas aspirer ça. Je ne peux aspirer à rien. Même pas à une vie meilleure."
+        mood: sad
 
   - id: casier
     label: Casier de Gary
