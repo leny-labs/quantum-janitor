@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { GameState } from './GameState';
 import type { GameContent } from './types';
 import { t } from '../i18n';
-import { iconKey } from '../three/Studio';
+import { GENAI_ICONS, iconKey } from '../three/Studio';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
 import { cssToGame, isTouch, uiPx } from '../ui/input';
 import { COLORS, FONT, H, ROOM_H, W, hex } from '../ui/theme';
@@ -182,14 +182,14 @@ export class Inventory {
         g.clear();
         const edge = hex(selected ? COLORS.hover : hover ? COLORS.accent : '#6a5fa8');
         drawPanel(g, x, y, SLOT, SLOT, { fill: selected ? 0x3a2a40 : hover ? COLORS.panelHi : COLORS.panel, edge, cut: 12, glow: selected || hover, brackets: selected });
-        // pastille de couleur de l'objet
-        g.fillStyle(hex(def.icon.color), 0.9);
-        g.fillRect(x + SLOT - 22, y + 8, 12, 3);
       };
       draw(false);
       const key = iconKey(id);
       if (s.textures.exists(key)) {
-        strip.add(s.add.image(x + SLOT / 2, y + SLOT / 2 - 8, key).setDisplaySize(SLOT * 0.875, SLOT * 0.875));
+        // icône GenAI recadrée serré : plus petite que le bake 3D (qui a sa marge) pour laisser le libellé
+        const genai = GENAI_ICONS.has(id);
+        const size = SLOT * (genai ? 0.74 : 0.875);
+        strip.add(s.add.image(x + SLOT / 2, y + (genai ? SLOT * 0.42 : SLOT / 2 - 8), key).setDisplaySize(size, size));
       } else {
         strip.add(s.add.rectangle(x + SLOT / 2, y + 38, 56, 44, hex(def.icon.color)).setStrokeStyle(2, 0xffffff, 0.5));
         strip.add(

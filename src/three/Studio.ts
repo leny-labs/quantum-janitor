@@ -14,6 +14,9 @@ import type { Mood } from '../engine/mood';
 import { badge, bob, fusible, gary, roach, sandwich, seau, serpilliere, setFace, sylvie, type FacePose } from './props';
 
 export const iconKey = (id: string) => `icon3d:${id}`;
+/** Icônes d'inventaire GenAI (public/inventory/) : priment sur le bake 3D sous la même clé. */
+export const GENAI_ICONS = new Set(['seau', 'serpilliere', 'badge']);
+const genaiIconUrl = (id: string) => `${import.meta.env.BASE_URL}inventory/${id}.png`;
 export const portraitKey = (id: string) => `portrait3d:${id}`;
 export const sheetKey = (id: string) => `portraitSheet:${id}`;
 /** Chemin (relatif au site) de la planche de sprites d'un personnage. */
@@ -547,13 +550,15 @@ export function renderPortraitSheets(): Record<string, HTMLCanvasElement> {
 export function preloadPortraitSheets(load: Phaser.Loader.LoaderPlugin): void {
   for (const id of PORTRAIT_IDS) if (!load.textureManager.exists(sheetKey(id))) load.image(sheetKey(id), sheetUrl(id));
   for (const id of Object.keys(PORTRAIT_OVERLAYS)) if (!load.textureManager.exists(overlayKey(id))) load.image(overlayKey(id), overlayUrl(id));
+  for (const id of GENAI_ICONS) if (!load.textureManager.exists(iconKey(id))) load.image(iconKey(id), genaiIconUrl(id));
 }
 
 /** Génère (une fois par jeu) toutes les textures d'icônes et de portraits. */
 export function bakeStudio(textures: Phaser.Textures.TextureManager): void {
-  if (textures.exists(iconKey('seau'))) return;
+  if (textures.exists(portraitKey('gary'))) return;
   const renderer = makeRenderer();
-  for (const [id, pose] of Object.entries(ICONS)) textures.addCanvas(iconKey(id), shootSingle(renderer, pose, 160));
+  // icône GenAI préchargée : pas de bake (repli 3D si le PNG manque)
+  for (const [id, pose] of Object.entries(ICONS)) if (!textures.exists(iconKey(id))) textures.addCanvas(iconKey(id), shootSingle(renderer, pose, 160));
   for (const [id, pose] of Object.entries(PORTRAITS)) {
     textures.addCanvas(portraitKey(id), shootSingle(renderer, pose, 300, pose.bg));
     // planche absente de public/portraits/ (ou illisible) : bake runtime, même layout
