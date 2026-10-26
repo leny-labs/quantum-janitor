@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { GameState } from './GameState';
 import type { GameContent } from './types';
 import { t } from '../i18n';
-import { GENAI_ICONS, iconKey } from '../three/Studio';
+import { GENAI_ICONS, itemIconKey } from '../three/Studio';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
 import { cssToGame, isTouch, uiPx } from '../ui/input';
 import { COLORS, FONT, H, ROOM_H, W, hex } from '../ui/theme';
@@ -184,7 +184,7 @@ export class Inventory {
         drawPanel(g, x, y, SLOT, SLOT, { fill: selected ? 0x3a2a40 : hover ? COLORS.panelHi : COLORS.panel, edge, cut: 12, glow: selected || hover, brackets: selected });
       };
       draw(false);
-      const key = iconKey(id);
+      const key = itemIconKey(id, (f) => this.state.hasFlag(f));
       if (s.textures.exists(key)) {
         // icône GenAI recadrée serré : plus petite que le bake 3D (qui a sa marge) pour laisser le libellé
         const genai = GENAI_ICONS.has(id);

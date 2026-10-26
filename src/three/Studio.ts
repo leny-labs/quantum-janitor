@@ -17,6 +17,15 @@ export const iconKey = (id: string) => `icon3d:${id}`;
 /** Icônes d'inventaire GenAI (public/inventory/) : priment sur le bake 3D sous la même clé. */
 export const GENAI_ICONS = new Set(['seau', 'serpilliere', 'badge']);
 const genaiIconUrl = (id: string) => `${import.meta.env.BASE_URL}inventory/${id}.png`;
+/** Variantes d'icône GenAI selon un flag (serpillière trempée dans le seau). */
+const GENAI_VARIANTS: Record<string, { flag: string; icon: string }> = {
+  serpilliere: { flag: 'serpilliere_mouillee', icon: 'serpilliere-wet' },
+};
+/** Clé de texture de l'icône d'inventaire de `id`, variante selon les flags comprise. */
+export function itemIconKey(id: string, hasFlag: (f: string) => boolean): string {
+  const v = GENAI_VARIANTS[id];
+  return iconKey(v && hasFlag(v.flag) ? v.icon : id);
+}
 export const portraitKey = (id: string) => `portrait3d:${id}`;
 export const sheetKey = (id: string) => `portraitSheet:${id}`;
 /** Chemin (relatif au site) de la planche de sprites d'un personnage. */
@@ -551,6 +560,7 @@ export function preloadPortraitSheets(load: Phaser.Loader.LoaderPlugin): void {
   for (const id of PORTRAIT_IDS) if (!load.textureManager.exists(sheetKey(id))) load.image(sheetKey(id), sheetUrl(id));
   for (const id of Object.keys(PORTRAIT_OVERLAYS)) if (!load.textureManager.exists(overlayKey(id))) load.image(overlayKey(id), overlayUrl(id));
   for (const id of GENAI_ICONS) if (!load.textureManager.exists(iconKey(id))) load.image(iconKey(id), genaiIconUrl(id));
+  for (const { icon } of Object.values(GENAI_VARIANTS)) if (!load.textureManager.exists(iconKey(icon))) load.image(iconKey(icon), genaiIconUrl(icon));
 }
 
 /** Génère (une fois par jeu) toutes les textures d'icônes et de portraits. */
