@@ -2,7 +2,7 @@
 // une pièce). Chaque fonction renvoie un Group dont l'origine est au sol, au
 // centre de la base : il suffit de le poser avec `at(prop, x, 0, z)`.
 import * as THREE from 'three';
-import { at, box, cyl, decal, glow, group, label, mat, mysteryTag, outline, sphere, torus, type DecalMark } from './kit';
+import { at, box, cyl, decal, glow, group, label, mat, mysteryTag, outline, shell, sphere, torus, type DecalMark } from './kit';
 
 /**
  * Expression d'un personnage pour le studio de portraits (frames de sprite).
@@ -225,57 +225,232 @@ export function sandwich(w: number): THREE.Group {
   return g;
 }
 
-/** Buste de Gary Plunk : combinaison orange, casquette, moustache tombante. */
+/** Tige entre deux points (bras articulés, branches de lunettes…). */
+function rod(a: THREE.Vector3, b: THREE.Vector3, r: number, color: string, o: { edges?: boolean } = {}): THREE.Mesh {
+  const d = new THREE.Vector3().subVectors(b, a);
+  const m = cyl(r, r, d.length(), color, { seg: 8, edges: o.edges ?? false });
+  m.position.copy(a).addScaledVector(d, 0.5);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+  return m;
+}
+
+/**
+ * Drone porte-outils dorsal de Gary (design « Janék ») : tête blanche et orange,
+ * gros œil bleu, antenne. Un outil de service sans conscience — rien à voir
+ * avec B.O.B. (qui reste l'aspirateur du placard). `r` = rayon de la tête.
+ */
+function toolDrone(r: number): THREE.Group {
+  const head = sphere(r, '#f2eee6', { seg: 16 });
+  const band = at(torus(r * 0.98, r * 0.09, '#ff7a2a'), 0, 0, 0);
+  const ears = [-1, 1].map((sx) => {
+    const e = at(cyl(r * 0.42, r * 0.42, r * 0.22, '#ff7a2a', { seg: 14 }), sx * r * 0.95, 0, 0);
+    e.rotation.z = Math.PI / 2;
+    return e;
+  });
+  const bezel = at(cyl(r * 0.62, r * 0.66, r * 0.2, '#2a2f3a', { seg: 18 }), 0, 0, r * 0.86);
+  bezel.rotation.x = Math.PI / 2;
+  const iris = at(cyl(r * 0.5, r * 0.5, r * 0.04, '#3fa9ff', { seg: 18, glow: true }), 0, 0, r * 1.0);
+  iris.rotation.x = Math.PI / 2;
+  const pupil = at(cyl(r * 0.22, r * 0.22, r * 0.04, '#0b1a33', { seg: 14, glow: true }), 0, 0, r * 1.03);
+  pupil.rotation.x = Math.PI / 2;
+  const shine = at(sphere(r * 0.09, '#ffffff', { glow: true }), r * 0.2, r * 0.2, r * 1.06);
+  const antenna = at(cyl(r * 0.04, r * 0.04, r * 0.9, '#3f4652', { edges: false }), -r * 0.35, r * 1.25, -r * 0.1);
+  antenna.rotation.z = 0.25;
+  const tip = at(sphere(r * 0.13, '#ff7a2a', { glow: true }), -r * 0.46, r * 1.7, -r * 0.1);
+  const eye = group([iris, pupil, shine]);
+  const g = group([head, band, ...ears, bezel, eye, antenna, tip]);
+  g.userData.eye = eye;
+  return g;
+}
+
+/** Clé à molette argentée (mâchoire ouverte), couchée dans le plan XY, tête en +y. */
+function wrench(len: number): THREE.Group {
+  const handle = at(box(len * 0.12, len * 0.72, len * 0.05, '#c7ccd4'), 0, len * 0.36, 0);
+  const jaw = new THREE.Mesh(new THREE.TorusGeometry(len * 0.13, len * 0.06, 6, 14, Math.PI * 1.45), mat('#c7ccd4'));
+  outline(jaw);
+  jaw.position.set(0, len * 0.84, 0);
+  jaw.rotation.z = -Math.PI * 0.22;
+  return group([handle, jaw]);
+}
+
+/**
+ * Buste de Gary Plunk, design « Janék » (concierge-bricoleur) : casquette
+ * blanc/orange, grosses lunettes brunes, gros nez, barbe de trois jours,
+ * combinaison orange, harnais + communicateur, drone porte-outils sur l'épaule.
+ */
 export function gary(h: number): THREE.Group {
   const u = h / 2;
-  const torso = at(cyl(u * 0.52, u * 0.62, u * 0.7, '#ff8c42', { seg: 10 }), 0, u * 0.35, 0);
-  const collar = at(cyl(u * 0.3, u * 0.4, u * 0.12, '#d96a2a', { seg: 10 }), 0, u * 0.72, 0);
-  const strapL = at(box(u * 0.1, u * 0.6, u * 0.04, '#2b5fa8', { edges: false }), -u * 0.22, u * 0.38, u * 0.53);
-  const strapR = at(box(u * 0.1, u * 0.6, u * 0.04, '#2b5fa8', { edges: false }), u * 0.22, u * 0.38, u * 0.53);
-  strapL.rotation.x = strapR.rotation.x = -0.18;
-  const tag = at(box(u * 0.2, u * 0.12, u * 0.02, '#e8e4da', { edges: false }), u * 0.2, u * 0.5, u * 0.55);
-  const neck = at(cyl(u * 0.15, u * 0.17, u * 0.2, '#e9b48a', { seg: 8 }), 0, u * 0.85, 0);
-  const head = at(sphere(u * 0.42, '#f2c49b', { seg: 16 }), 0, u * 1.25, 0);
-  head.scale.set(0.95, 1.08, 0.95);
-  const nose = at(sphere(u * 0.13, '#e8987a', { seg: 10 }), 0, u * 1.2, u * 0.4);
+  const V = (x: number, y: number, z: number) => new THREE.Vector3(x * u, y * u, z * u);
+  const SKIN = '#f0bf94';
+  const SKIN_D = '#e2a57e';
+  const HAIR = '#5e3a1f';
+  const SUIT = '#f07828';
+  const SUIT_D = '#c85a1a';
+  const STRAP = '#4b5566';
+  const FRAME = '#7a4320';
+
+  // ── corps : combinaison orange, col, maillot blanc, ceinture à outils ──
+  const torso = at(cyl(u * 0.55, u * 0.62, u * 0.78, SUIT, { seg: 12 }), 0, u * 0.39, 0);
+  const shoulders = [-1, 1].map((sx) => {
+    const s = at(sphere(u * 0.25, SUIT, { seg: 12 }), sx * u * 0.5, u * 0.66, 0);
+    s.scale.set(1.1, 0.8, 1);
+    return s;
+  });
+  const tee = at(cyl(u * 0.19, u * 0.24, u * 0.08, '#f4efe6', { seg: 12 }), 0, u * 0.79, 0);
+  const collar = [-1, 1].map((sx) => {
+    const c = at(box(u * 0.22, u * 0.05, u * 0.16, SUIT_D), sx * u * 0.15, u * 0.78, u * 0.24);
+    c.rotation.set(-0.35, sx * -0.5, sx * 0.35);
+    return c;
+  });
+  const placket = at(box(u * 0.05, u * 0.62, u * 0.02, SUIT_D, { edges: false }), -u * 0.06, u * 0.38, u * 0.59);
+  placket.rotation.x = -0.09;
+  const belt = at(cyl(u * 0.625, u * 0.625, u * 0.1, '#5a3a22', { seg: 12 }), 0, u * 0.06, 0);
+  const buckle = at(box(u * 0.14, u * 0.1, u * 0.03, '#c7ccd4'), 0, u * 0.06, u * 0.63);
+  const pouches = [-0.35, 0.38].map((x) => at(box(u * 0.2, u * 0.18, u * 0.1, '#7a5230'), x * u, u * 0.02, u * 0.56));
+  // patch planète bleue sur l'épaule gauche (+x), tourné vers l'extérieur
+  const disc = cyl(u * 0.09, u * 0.09, u * 0.02, '#2f7fd8', { seg: 16 });
+  const ringP = torus(u * 0.11, u * 0.012, '#ffb347');
+  ringP.rotation.set(Math.PI / 2, 0.5, 0);
+  const patch = at(group([disc, ringP]), u * 0.68, u * 0.6, u * 0.22);
+  patch.rotation.set(0, -0.8, -Math.PI / 2 + 0.2);
+  // harnais du drone : bretelles gris-bleu, boucles, sac dorsal
+  const straps = [-1, 1].map((sx) => {
+    const st = at(box(u * 0.13, u * 0.64, u * 0.04, STRAP, { edges: false }), sx * u * 0.27, u * 0.4, u * 0.56);
+    st.rotation.x = -0.1;
+    return st;
+  });
+  const overs = [-1, 1].map((sx) => {
+    const o = at(box(u * 0.13, u * 0.04, u * 0.5, STRAP, { edges: false }), sx * u * 0.3, u * 0.81, u * 0.05);
+    o.rotation.x = 0.15;
+    return o;
+  });
+  const buckles = [-1, 1].map((sx) => at(box(u * 0.15, u * 0.06, u * 0.03, '#a9b4c2', { edges: false }), sx * u * 0.27, u * 0.22, u * 0.6));
+  const pack = at(box(u * 0.62, u * 0.52, u * 0.22, STRAP), 0, u * 0.42, -u * 0.66);
+  // communicateur / scanner à écran vert sur la bretelle gauche
+  const comm = at(box(u * 0.17, u * 0.25, u * 0.06, '#3a404c'), u * 0.27, u * 0.47, u * 0.62);
+  const commScreen = at(box(u * 0.12, u * 0.08, u * 0.01, '#5cff9d', { glow: true }), u * 0.27, u * 0.53, u * 0.655);
+  const commKeys = [-1, 0, 1].map((i) => at(box(u * 0.025, u * 0.025, u * 0.01, i === 0 ? '#5cff9d' : '#ff7a2a', { glow: true }), u * (0.27 + i * 0.04), u * 0.43, u * 0.655));
+  const commAnt = at(cyl(u * 0.01, u * 0.01, u * 0.12, '#2a2f3a', { edges: false }), u * 0.33, u * 0.65, u * 0.62);
+  // clé à molette glissée dans la bretelle droite
+  const key = at(wrench(u * 0.5), -u * 0.36, u * 0.3, u * 0.62);
+  key.rotation.z = -0.3;
+
+  // ── tête : long visage, gros nez, barbe de trois jours ──
+  const neck = at(cyl(u * 0.15, u * 0.17, u * 0.2, SKIN_D, { seg: 8 }), 0, u * 0.86, 0);
+  const head = at(sphere(u * 0.42, SKIN, { seg: 18 }), 0, u * 1.25, 0);
+  head.scale.set(0.92, 1.1, 0.95);
+  const beard = at(shell(u * 0.43, '#a37a5e', { seg: 18, phi: [Math.PI * 0.08, Math.PI * 0.84], theta: [Math.PI * 0.6, Math.PI * 0.4] }), 0, u * 1.25, 0);
+  beard.scale.set(0.92, 1.1, 0.95);
+  const nose = at(sphere(u * 0.14, '#ec9f7e', { seg: 12 }), 0, u * 1.19, u * 0.44);
+  nose.scale.set(0.85, 1, 1.45);
+  const ears = [-1, 1].map((sx) => {
+    const e = at(sphere(u * 0.11, SKIN_D, { seg: 8 }), sx * u * 0.39, u * 1.26, -u * 0.02);
+    e.scale.set(0.6, 1.1, 0.9);
+    return e;
+  });
   const eyes = [-1, 1].map((sx) => {
-    const white = at(sphere(u * 0.09, '#ffffff', { seg: 10 }), sx * u * 0.15, u * 1.36, u * 0.33);
-    const pupil = at(sphere(u * 0.045, '#14102a', { seg: 8, glow: true }), sx * u * 0.14, u * 1.35, u * 0.41);
-    const lid = at(box(u * 0.2, u * 0.05, u * 0.12, '#e9b48a', { edges: false }), sx * u * 0.15, u * 1.43, u * 0.35);
-    lid.rotation.z = sx * 0.2;
+    const white = at(sphere(u * 0.085, '#ffffff', { seg: 10 }), sx * u * 0.14, u * 1.33, u * 0.33);
+    const pupil = at(sphere(u * 0.042, '#4a2a12', { seg: 8, glow: true }), sx * u * 0.13, u * 1.32, u * 0.41);
+    const lid = at(box(u * 0.2, u * 0.05, u * 0.12, SKIN, { edges: false }), sx * u * 0.14, u * 1.42, u * 0.34);
+    lid.rotation.z = sx * 0.12;
     return group([white, pupil, lid]);
   });
-  const stache = [-1, 1].map((sx) => {
-    const m = at(cyl(u * 0.06, u * 0.03, u * 0.3, '#6b3a1a', { seg: 6, edges: false }), sx * u * 0.13, u * 1.06, u * 0.37);
-    m.rotation.z = sx * 1.1;
-    return m;
+  // sourcils épais, froncés (l'air sceptique de la planche « Neutre »)
+  const brows = [-1, 1].map((sx) => {
+    const b = at(box(u * 0.2, u * 0.06, u * 0.06, HAIR, { edges: false }), sx * u * 0.15, u * (sx < 0 ? 1.45 : 1.47), u * 0.44);
+    b.rotation.z = sx * (sx < 0 ? 0.2 : 0.08);
+    return b;
   });
-  const cap = at(cyl(u * 0.42, u * 0.44, u * 0.22, '#1f7f73', { seg: 16 }), 0, u * 1.6, 0);
-  const visor = at(box(u * 0.6, u * 0.04, u * 0.38, '#155f56'), 0, u * 1.51, u * 0.42);
-  visor.rotation.x = 0.15;
-  const logo = at(sphere(u * 0.07, '#7fffd4', { glow: true }), 0, u * 1.62, u * 0.42);
-  const ears = [-1, 1].map((sx) => at(sphere(u * 0.1, '#e9b48a', { seg: 8 }), sx * u * 0.4, u * 1.25, 0));
-  // bouche sous la moustache : fente sombre au repos, s'ouvre (mâchoire) en parlant
-  const mouthY = u * 0.97;
-  const inner = sphere(u * 0.12, '#3a0f1a', { seg: 12 });
-  const tongue = at(sphere(u * 0.075, '#d9606a', { seg: 10 }), 0, -u * 0.05, u * 0.03);
-  const teeth = at(box(u * 0.15, u * 0.035, u * 0.06, '#f4efe6', { edges: false }), 0, u * 0.075, u * 0.05);
-  const mouth = at(group([inner, tongue, teeth]), 0, mouthY, u * 0.32);
-  const g = group([torso, collar, strapL, strapR, tag, neck, head, nose, ...eyes, ...stache, mouth, cap, visor, logo, ...ears]);
+  // grosses lunettes rectangulaires brunes
+  const lens = (sx: number) => {
+    const cx = sx * u * 0.15;
+    const w = u * 0.24;
+    const hh = u * 0.17;
+    const t = u * 0.028;
+    const z = u * 0.47;
+    const bars = [
+      at(box(w, t, t, FRAME, { edges: false }), cx, u * 1.33 + hh / 2, z),
+      at(box(w, t, t, FRAME, { edges: false }), cx, u * 1.33 - hh / 2, z),
+      at(box(t, hh, t, FRAME, { edges: false }), cx - w / 2, u * 1.33, z),
+      at(box(t, hh, t, FRAME, { edges: false }), cx + w / 2, u * 1.33, z),
+    ];
+    const glass = at(box(w, hh, u * 0.005, '#cfe8ff', { opacity: 0.18, edges: false, shadow: false }), cx, u * 1.33, z);
+    const temple = rod(V(sx * 0.27, 1.37, 0.46), V(sx * 0.39, 1.33, 0.02), u * 0.014, FRAME);
+    return [...bars, glass, temple];
+  };
+  const bridge = at(box(u * 0.07, u * 0.025, u * 0.025, FRAME, { edges: false }), 0, u * 1.36, u * 0.48);
+  const glasses = group([...lens(-1), ...lens(1), bridge]);
+  // cheveux bruns en bataille qui dépassent de la casquette
+  const tufts = (
+    [
+      [-0.42, 1.44, 0.16, 1.1], [-0.45, 1.42, -0.04, 1.4], [-0.4, 1.4, -0.22, 1.7], [-0.28, 1.42, -0.38, 2.1],
+      [0.42, 1.44, 0.16, -1.1], [0.45, 1.42, -0.04, -1.4], [0.4, 1.4, -0.22, -1.7], [0.28, 1.42, -0.38, -2.1],
+      [0, 1.42, -0.45, 3.1],
+    ] as const
+  ).map(([x, y, z, rz]) => {
+    const t = at(cyl(0, u * 0.09, u * 0.2, HAIR, { seg: 5, edges: false }), x * u, y * u, z * u);
+    t.rotation.set(z < -0.3 ? -0.9 : 0, 0, rz);
+    return t;
+  });
+  const sideburns = [-1, 1].map((sx) => at(box(u * 0.05, u * 0.16, u * 0.12, HAIR, { edges: false }), sx * u * 0.37, u * 1.37, u * 0.1));
+
+  // ── casquette de baseball blanc / orange ──
+  const crown = at(shell(u * 0.45, '#f3eee4', { seg: 18, theta: [0, Math.PI / 2] }), 0, u * 1.44, 0);
+  crown.scale.y = 0.85;
+  outline(crown, 40);
+  const front = at(shell(u * 0.455, '#ff7a2a', { seg: 18, phi: [Math.PI * 0.32, Math.PI * 0.36], theta: [Math.PI * 0.08, Math.PI * 0.42] }), 0, u * 1.44, 0);
+  front.scale.y = 0.85;
+  const capBand = at(torus(u * 0.448, u * 0.02, '#ff7a2a'), 0, u * 1.45, 0);
+  capBand.rotation.x = Math.PI / 2;
+  const visor = new THREE.Mesh(new THREE.CylinderGeometry(u * 0.42, u * 0.42, u * 0.04, 16, 1, false, -Math.PI / 2, Math.PI), mat('#ff7a2a'));
+  outline(visor);
+  visor.position.set(0, u * 1.5, u * 0.26);
+  visor.scale.z = 1.15;
+  visor.rotation.x = 0.22;
+  const capButton = at(sphere(u * 0.05, '#ff7a2a'), 0, u * 1.82, 0);
+
+  // ── drone porte-outils sur bras articulé, au-dessus de l'épaule gauche ──
+  const droneAt = V(0.56, 1.5, -0.32);
+  const elbow = V(0.5, 0.95, -0.72);
+  const arm = [
+    rod(V(0.22, 0.66, -0.7), elbow, u * 0.045, '#8994a3'),
+    rod(elbow, droneAt, u * 0.04, '#8994a3'),
+    at(sphere(u * 0.07, '#ff7a2a'), elbow.x, elbow.y, elbow.z),
+  ];
+  const drone = toolDrone(u * 0.17);
+  drone.position.copy(droneAt);
+  drone.rotation.set(0.05, 0.55, 0.08);
+
+  // bouche dans la barbe : fente sombre au repos, s'ouvre (mâchoire) en parlant
+  const mouthY = u * 0.99;
+  const inner = sphere(u * 0.11, '#3a0f1a', { seg: 12 });
+  const tongue = at(sphere(u * 0.07, '#d9606a', { seg: 10 }), 0, -u * 0.05, u * 0.03);
+  const teeth = at(box(u * 0.14, u * 0.035, u * 0.06, '#f4efe6', { edges: false }), 0, u * 0.07, u * 0.05);
+  const mouth = at(group([inner, tongue, teeth]), 0, mouthY, u * 0.33);
+  const g = group([
+    torso, ...shoulders, tee, ...collar, placket, belt, buckle, ...pouches, patch,
+    ...straps, ...overs, ...buckles, pack, comm, commScreen, ...commKeys, commAnt, key,
+    neck, head, beard, nose, ...ears, ...eyes, ...brows, glasses, ...tufts, ...sideburns, mouth,
+    crown, front, capBand, visor, capButton, ...arm, drone,
+  ]);
   const openMouth = (v: number) => {
     mouth.scale.set(1 + v * 0.15, 0.14 + v * 0.95, 0.6);
     mouth.position.y = mouthY - v * u * 0.05;
     tongue.visible = teeth.visible = v > 0.2;
   };
   openMouth(0);
+  const droneEye = drone.userData.eye as THREE.Object3D;
   g.userData.setFace = (p: FacePose) => {
     openMouth(p.mouth);
     for (const e of eyes) {
       const [white, pupil, lid] = e.children;
       white.scale.y = p.blink ? 0.15 : 1;
       pupil.visible = !p.blink;
-      lid.position.y = p.blink ? u * 1.37 : u * 1.43;
+      lid.position.y = p.blink ? u * 1.36 : u * 1.42;
     }
+    // le drone vit sa vie : il penche la tête et cligne à contretemps
+    drone.rotation.z = 0.08 + Math.sin(p.phase * 1.3) * 0.07;
+    droneEye.scale.y = p.phase > 0.9 && p.phase < 1.2 ? 0.25 : 1;
   };
   return g;
 }

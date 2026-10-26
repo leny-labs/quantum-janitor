@@ -81,6 +81,18 @@ export function sphere(r: number, color: THREE.ColorRepresentation, o: ShapeOpts
   return finish(new THREE.SphereGeometry(r, s, Math.max(6, s / 2)), color, { edges: false, ...o });
 }
 
+/** Calotte / tranche de sphère (casquette, barbe…) : angles en radians, comme SphereGeometry. */
+export function shell(
+  r: number,
+  color: THREE.ColorRepresentation,
+  o: ShapeOpts & { seg?: number; phi?: [number, number]; theta?: [number, number] } = {},
+): THREE.Mesh {
+  const s = o.seg ?? 16;
+  const [ps, pl] = o.phi ?? [0, Math.PI * 2];
+  const [ts, tl] = o.theta ?? [0, Math.PI];
+  return finish(new THREE.SphereGeometry(r, s, Math.max(6, s / 2), ps, pl, ts, tl), color, { edges: false, side: THREE.DoubleSide, ...o });
+}
+
 export function torus(r: number, tube: number, color: THREE.ColorRepresentation, o: ShapeOpts = {}): THREE.Mesh {
   return finish(new THREE.TorusGeometry(r, tube, 6, 20), color, { edges: false, ...o });
 }
