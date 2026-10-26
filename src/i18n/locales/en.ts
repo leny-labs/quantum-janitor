@@ -92,7 +92,7 @@ export const en: PartialCatalog = {
       kicker: 'YEAR 2291 · LOW NEPTUNE ORBIT (ROUGHLY)',
       sub: 'Improbability research station.\nEverything is lukewarm. Especially the coffee.',
       tag: 'DAYS WITHOUT AN IMPROBABILITY INCIDENT: 98 · RECORD: 99',
-      say: 'Population: 212 scientists, 1 AI, 0 permanent janitors.',
+      say: 'Crew: 212 scientists (at a seminar on Mercury).\nOn board: 1 human, 1 AI, 0 permanent janitors.',
     },
     sylvie: {
       role: 'STATION INTELLIGENCE · YOUR FRIEND (MANDATORY)',

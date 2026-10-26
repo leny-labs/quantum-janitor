@@ -96,7 +96,7 @@ export const fr = {
       title: 'KLEPSYDRA-9',
       sub: 'Station de recherche en improbabilité.\nTout y est tiède. Surtout le café.',
       tag: 'JOURS SANS INCIDENT D’IMPROBABILITÉ : 98 · RECORD : 99',
-      say: 'Population : 212 scientifiques, 1 IA, 0 agent d’entretien titulaire.',
+      say: 'Effectif : 212 scientifiques (en séminaire sur Mercure).\nÀ bord : 1 humain, 1 IA, 0 agent d’entretien titulaire.',
     },
     sylvie: {
       name: 'SYLVIE',
