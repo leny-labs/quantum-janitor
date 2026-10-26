@@ -11,7 +11,6 @@ import { getSession, type Session } from '../session';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { CLOSEUPS, ROOMS } from '../three/rooms';
 import { VendingRig } from '../three/rooms/vending';
-import { Stage } from '../three/Stage';
 import { makeButton } from '../ui/Button';
 import { DialogueBox } from '../ui/DialogueBox';
 import { HoverLabel } from '../ui/HoverLabel';
@@ -21,7 +20,6 @@ import { t, tl } from '../i18n';
 import { isTouch, uiPx } from '../ui/input';
 import { playMusic, themeForScene } from '../ui/music';
 import { makeMusicToggle } from '../ui/MusicToggle';
-import { swoosh } from '../ui/sfx';
 import { PressRing } from '../ui/PressRing';
 import { RoomPlaque } from '../ui/RoomPlaque';
 import { VerbCoin } from '../ui/VerbCoin';
@@ -89,11 +87,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       this.layer,
       { width: W, height: ROOM_H },
       (def) => this.room.show(def, (c) => state.check(c)),
-      (from, to) => {
-        const move = this.room.travel(from, to);
-        if (move) swoosh(CLOSEUPS[to] ? 'in' : 'out', this.room.travelTime(to));
-        return move;
-      },
+      (from, to) => this.room.travel(from, to),
     );
     this.inventory = new Inventory(this, content, state, {
       click: (id, p) => this.onClickItem(id, p),
@@ -230,7 +224,6 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const move = this.room.examine(shot, false, INTRO_PUSH);
     if (!move) return this.runner.run(i);
     this.scenes.spots(false);
-    swoosh('in', INTRO_PUSH);
     let skipped = false;
     const skip = new Promise<void>((resolve) => {
       this.skipCine = () => {
@@ -246,10 +239,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       this.dialogueBox.close();
       if (!skipped && this.sys.isActive()) {
         const back = this.room.release();
-        if (back) {
-          swoosh('out', Stage.SHOT_TIMES.out);
-          await Promise.race([back, skip]);
-        }
+        if (back) await Promise.race([back, skip]);
       }
     } finally {
       this.skipCine = null;
@@ -288,19 +278,13 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     await this.locked(async () => {
       const scene = this.session.state.scene;
       const move = shot ? this.room.examine(shot) : null;
-      if (move) {
-        this.scenes.spots(false);
-        swoosh('in', Stage.SHOT_TIMES.in);
-      }
+      if (move) this.scenes.spots(false);
       try {
         await this.runner.run(i);
         if (move && this.room.examining === shot && this.session.state.scene === scene && this.sys.isActive()) {
           this.dialogueBox.close();
           const back = this.room.release();
-          if (back) {
-            swoosh('out', Stage.SHOT_TIMES.out);
-            await back;
-          }
+          if (back) await back;
         }
       } finally {
         if (move && this.sys.isActive()) this.scenes.spots(true);
@@ -318,7 +302,6 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const move = this.room.examine(VendingRig.GAME_SHOT);
     if (!move) return this.runner.run(reaction);
     this.scenes.spots(false);
-    swoosh('in', Stage.SHOT_TIMES.in);
     try {
       await move;
       if (await playVending(this, rig)) {
@@ -327,10 +310,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       this.dialogueBox.close();
       if (!this.sys.isActive()) return;
       const back = this.room.release();
-      if (back) {
-        swoosh('out', Stage.SHOT_TIMES.out);
-        await back;
-      }
+      if (back) await back;
     } finally {
       if (this.sys.isActive()) this.scenes.spots(true);
     }
@@ -509,7 +489,6 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.shotExit = null;
     if (!back) return;
     this.busy = true;
-    swoosh('out', Stage.SHOT_TIMES.out);
     void back.then(() => {
       this.busy = false;
       if (!this.sys.isActive()) return;
