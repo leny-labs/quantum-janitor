@@ -15,6 +15,10 @@ import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
 /** Ligne des réglages (♪, effets, langue), en haut à droite. */
 const SETTINGS_Y = 62;
 
+/** Key art GenAI du héros (détouré, fondu alpha) — validé tel quel. */
+const HERO_ART = 'menu-hero';
+const HERO_URL = `${import.meta.env.BASE_URL}menu/hero-keyart.png`;
+
 export class TitleScene extends Phaser.Scene {
   private hero: HeroView | null = null;
   private ticker: Phaser.GameObjects.Text | null = null;
@@ -26,6 +30,7 @@ export class TitleScene extends Phaser.Scene {
   preload(): void {
     // planches de portraits parlants (bake ou GenAI) ; absentes → bake runtime
     preloadPortraitSheets(this.load);
+    if (!this.textures.exists(HERO_ART)) this.load.image(HERO_ART, HERO_URL);
   }
 
   create(): void {
@@ -50,6 +55,9 @@ export class TitleScene extends Phaser.Scene {
     shade.fillRect(0, 0, W * 0.62, H);
     shade.fillGradientStyle(COLORS.ink, COLORS.ink, COLORS.ink, COLORS.ink, 0, 0, 0.75, 0.75);
     shade.fillRect(0, H - 170, W, 170);
+
+    this.drawStars();
+    this.drawHero();
 
     this.drawTicker();
     this.drawTitle();
@@ -83,6 +91,43 @@ export class TitleScene extends Phaser.Scene {
       this.ticker.x -= dt * 0.05;
       if (this.ticker.x < -this.ticker.width / 2) this.ticker.x += this.ticker.width / 2;
     }
+  }
+
+  /** Étoiles scintillantes par-dessus le ciel 3D (sous le héros et l'UI). */
+  private drawStars(): void {
+    let s = 17;
+    const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+    const tints = [0xffffff, 0xcfc8ff, 0x7fffd4, 0xffd8a8];
+    for (let i = 0; i < 70; i++) {
+      const r = rnd() < 0.85 ? 0.8 + rnd() * 0.8 : 1.6 + rnd() * 1.2;
+      const star = this.add.circle(rnd() * W, 40 + rnd() * (H - 120), r, tints[i % tints.length], 1).setAlpha(0.15 + rnd() * 0.3);
+      this.tweens.add({
+        targets: star,
+        alpha: 0.6 + rnd() * 0.4,
+        duration: 900 + rnd() * 2200,
+        delay: rnd() * 3000,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
+  }
+
+  /**
+   * Le héros (key art GenAI) à droite, pieds près du bas, tête sous les
+   * réglages ; respiration légère (étirement depuis les pieds) + balancement.
+   */
+  private drawHero(): void {
+    if (!this.textures.exists(HERO_ART)) return;
+    const bottom = H - 34;
+    const height = H - 104;
+    const hero = this.add.image(W - 210, bottom, HERO_ART).setOrigin(0.5, 1);
+    hero.setScale(height / hero.height);
+    const base = hero.scale;
+    hero.setAlpha(0).setX(hero.x + 40);
+    this.tweens.add({ targets: hero, alpha: 1, x: hero.x - 40, duration: 1000, delay: 300, ease: 'Cubic.easeOut' });
+    this.tweens.add({ targets: hero, scaleY: base * 1.012, scaleX: base * 1.004, duration: 1900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: hero, angle: 0.6, duration: 3400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 
   /**
