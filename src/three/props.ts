@@ -28,7 +28,12 @@ export function bob(w: number): THREE.Group {
   const h = w * 0.26;
   const body = at(cyl(r, r * 1.02, h, '#8994a3', { seg: 20 }), 0, h / 2 + r * 0.04, 0);
   const bumper = at(cyl(r * 1.04, r * 1.04, h * 0.28, '#3f4652', { seg: 20, edges: false }), 0, h * 0.3, 0);
-  const lid = at(cyl(r * 0.78, r * 0.82, h * 0.18, '#a9b4c2', { seg: 20 }), 0, h + r * 0.04, 0);
+  // couvercle sur charnière latérale (côté opposé à l'antenne) : fermé au repos,
+  // il s'ouvre pour les repas (rooms/bobrepas.ts) sur une gueule sombre
+  const lidHinge = at(new THREE.Group(), -r * 0.8, h + r * 0.04, 0);
+  lidHinge.add(at(cyl(r * 0.78, r * 0.82, h * 0.18, '#a9b4c2', { seg: 20 }), r * 0.8, 0, 0));
+  const maw = at(cyl(r * 0.66, r * 0.66, h * 0.02, '#1a1020', { glow: true, seg: 20 }), 0, h + r * 0.04, 0);
+  const lid = group([lidHinge, maw]);
   const eyes = [-1, 1].map((sx) => {
     const eye = at(sphere(r * 0.16, '#ffffff', { seg: 10 }), sx * r * 0.36, h * 0.62, r * 0.9);
     const pupil = at(sphere(r * 0.07, '#11131a', { glow: true, seg: 8 }), sx * r * 0.36, h * 0.55, r * 1.04);
@@ -56,6 +61,8 @@ export function bob(w: number): THREE.Group {
   mouthParts.forEach((m) => (m.visible = false));
   const g = group([body, bumper, lid, ...eyes, antenna, tip, plate, ...mouthParts]);
   g.userData.tip = tip;
+  g.userData.lid = lidHinge;
+  g.userData.eyes = eyes;
   g.userData.setFace = (p: FacePose) => {
     const on = p.mouth > 0.02;
     plate.visible = false;

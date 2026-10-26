@@ -4,7 +4,7 @@ import type Phaser from 'phaser';
 import type { BobCue } from '../three/rooms/bobrepas';
 import type { FuseCue } from '../three/rooms/fusible';
 import type { LecteurCue } from '../three/rooms/lecteur';
-import { beep, buzz, chime, glitch, plouf, powerDown, slurp, splat, squeak, thud, whoosh } from '../ui/sfx';
+import { beep, buzz, chime, crunch, glitch, plouf, powerDown, slurp, splat, squeak, thud, whoosh } from '../ui/sfx';
 
 export function lecteurCue(scene: Phaser.Scene, c: LecteurCue): void {
   switch (c) {
@@ -30,10 +30,15 @@ export function lecteurCue(scene: Phaser.Scene, c: LecteurCue): void {
 
 export function bobCue(scene: Phaser.Scene, c: BobCue): void {
   switch (c) {
+    case 'open':
+      return squeak();
     case 'slurp':
       return slurp();
     case 'gulp':
+    case 'shut':
       return thud();
+    case 'chew':
+      return crunch();
     case 'retch':
       return glitch();
     case 'burst':

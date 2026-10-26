@@ -208,3 +208,11 @@ export function powerDown(): void {
   tone(a, 'square', 520, 40, a.currentTime, 0.5, 0.04);
   tone(a, 'sine', 260, 30, a.currentTime, 0.55, 0.12);
 }
+
+/** Mâchouillage : croc humide, hauteur un peu au hasard. */
+export function crunch(): void {
+  const a = ctx();
+  if (!a) return;
+  noise(a, a.currentTime, 0.09, 0.1, 2200 + Math.random() * 800, 900);
+  tone(a, 'sine', 180 + Math.random() * 60, 90, a.currentTime, 0.12, 0.08);
+}
