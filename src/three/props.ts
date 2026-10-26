@@ -663,7 +663,7 @@ export function reglementPlaque(w: number, h: number): THREE.Group {
 }
 
 /** Image GenAI du polaroid (remplace le dessin si présente dans public/props/). */
-export const MOM_PHOTO_URL = `${import.meta.env.BASE_URL}props/mom-photo-genai.png`;
+export const MOM_PHOTO_URL = `${import.meta.env.BASE_URL}props/mom-photo-genai.jpg`;
 
 /** Scène dessinée du polaroid (repli sans image GenAI) : la mère et Gary « capitaine ». */
 function drawMomScene(g: CanvasRenderingContext2D, m: number, pw: number, ph: number): void {
@@ -833,7 +833,7 @@ function momPhotoTexture(): THREE.CanvasTexture {
   const UI = '"Chakra Petch", "Trebuchet MS", sans-serif';
   const m = 30;
   const pw = W - m * 2;
-  const ph = 430;
+  const ph = 400; // tirage 452×400 : ratio de public/props/mom-photo-genai.jpg
   const E = 78; // coin corné (bas droite)
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
@@ -1045,7 +1045,8 @@ export function momPhoto(w: number): THREE.Group {
   const face = new THREE.Mesh(new THREE.PlaneGeometry(w, h), paperMat(momPhotoTexture(), 0.15, { cutout: true }));
   face.receiveShadow = true;
   face.position.z = 0.004;
-  const magnet = at(rocketMagnet(w * 0.34), w * 0.05, h * 0.44, 0.004 + w * 0.05);
-  magnet.rotation.z = -0.9;
+  // aimant sur le coin haut gauche : ne masque ni les visages ni la casquette
+  const magnet = at(rocketMagnet(w * 0.3), -w * 0.4, h * 0.42, 0.004 + w * 0.05);
+  magnet.rotation.z = 0.7;
   return group([face, magnet]);
 }
