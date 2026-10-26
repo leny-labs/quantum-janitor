@@ -27,7 +27,9 @@ Boucles (voir `SHEET` dans `Studio.ts`) : idle = 0 0 1 0 2 0 3 2 avec temps de p
 talk = 4 5 6 5 7 4 6 7 à 9 i/s. Entre deux frames, **seuls la bouche, les yeux et un
 micro-mouvement de tête** changent : même cadrage, même fond, même éclairage.
 
-- Gary : vraie bouche sous la moustache (fente → mâchoire ouverte, dents, langue).
+- Gary (design « Janék », voir `docs/STORY.md`) : vraie bouche dans la barbe de trois jours
+  (fente → mâchoire ouverte, dents, langue) ; le drone sur l'épaule penche la tête et cligne
+  (frame idle3) — garder son œil bleu dans le cadre.
 - B.O.B. : la « bouche » est un égaliseur LED cyan sur la plaque (barres plus ou moins hautes).
 - SYLVIE : visage-écran ; bouche = ovale lumineux qui grandit ; clignement = « —   — ».
 - Reine : mandibules qui s'écartent, gueule sombre qui s'ouvre.
@@ -39,6 +41,9 @@ micro-mouvement de tête** changent : même cadrage, même fond, même éclairag
 
 À ajouter : le personnage et l'état de bouche de chaque frame, « same framing, same
 background gradient and scanlines as reference, 4×2 sprite sheet, no gaps, no borders ».
+
+Pour Gary, joindre aussi la concept sheet Janék (hors repo) comme référence de *design*
+— le *style* reste celui du bake toon ci-dessus.
 
 **Toujours attacher `public/portraits/{id}-ref.png`** (frame idle0 bakée) comme image de
 référence, et idéalement la planche bakée entière comme guide de layout.
@@ -52,3 +57,10 @@ lisses façon 3D PBR, changement de palette, de cadrage ou de fond d'une frame �
 2. `npm run dev`, ouvrir un dialogue du personnage : la boucle idle tourne au repos,
    talk pendant la frappe du texte, idle aux pauses (. ! ?) et au clic « passer ».
 3. Pas de saut de cadrage entre frames : sinon le portrait « tremble ».
+
+## Expressions (suite possible)
+
+La planche n'a que idle/talk : pas de mécanisme d'humeur dans le dialogue. La sheet
+Janék propose 6 expressions (neutre, surpris, sceptique, content, agacé, réfléchit).
+Pour les brancher : un tag Ink (`# mood: sceptique`), une ligne de planche par humeur
+(ou une planche par humeur), et des poses de sourcils / bouche dans `setFace` de `gary()`.

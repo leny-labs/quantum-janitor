@@ -18,9 +18,21 @@ Gary devra les nettoyer un par un. Avec une serpillière.
 |---|---|---|
 | **Gary Plunk** | Héros. Agent d'entretien intérimaire (contrat de 3 jours « renouvelable par pitié »). Dort dans le placard à balais, appelle sa serpillière Josiane. | Résigné, pince-sans-rire, fier de détails minuscules. Rappelle à tout le monde qu'il est intérimaire. |
 | **B.O.B.** | Compagnon. *Balayeur Organique Bienveillant*, aspirateur-robot de 2291. A acquis une conscience en aspirant le tome 2 d'un manuel de philosophie existentialiste (jamais trouvé le tome 1). | Dépressif, lucide, tendre. Il a toujours raison et personne ne l'écoute. Sert de système d'indices. |
+| *Le drone porte-outils* | Petit drone de service blanc et orange (gros œil bleu, antenne) fixé au harnais de Gary par un bras articulé. Fourni avec la combinaison, tient la lampe et les vis. **Pas de conscience, pas de dialogue** : ce n'est pas B.O.B. (l'aspirateur du placard, qui ne suit Gary qu'après `bob_suit`). | Muet. Penche la tête, cligne de l'œil. |
 | **SYLVIE** | IA de la station. Applique le règlement à la lettre, surtout quand c'est absurde. | MAJUSCULES, passive-agressive, secrètement attachée à Gary (« le niveau 4 s'appelle GARY »). |
 | **Dr Halvorsen** | Scientifique en chef, absente (Mercure). N'existe qu'à travers ses mots et post-it paniqués. | Dramatique, smileys qui pleurent. |
 | **Sa Majesté Blattaria XIV** | Reine des cafards de la dimension B-7. Voit en Gary « l'Homme au Seau » d'une prophétie. | MAJUSCULES royales. Appelle Gary « GARRY » (le badge fait foi). |
+
+## Look de Gary (design « Janék »)
+
+Référence : concept sheet « Janék — concierge et bricoleur de la station » (le
+prénom reste **Gary Plunk** en fiction ; seul le design change). Homme d'âge
+mûr, gros nez, grosses lunettes rectangulaires brunes, barbe de trois jours,
+cheveux bruns en bataille sous une casquette de baseball blanc / orange.
+Combinaison d'entretien orange, patch planète bleue à l'épaule, harnais gris-bleu
+avec communicateur à écran vert, ceinture à outils, clé à molette glissée dans la
+bretelle, drone porte-outils sur l'épaule gauche. Modèle 3D : `gary()` dans
+`src/three/props.ts` (buste des portraits et plan de fin).
 
 ## Univers et ton
 
