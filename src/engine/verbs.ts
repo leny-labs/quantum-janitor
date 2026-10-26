@@ -1,6 +1,7 @@
 // Verbes d'un hotspot et action « smart » (clic gauche / tap court).
 // Aucun import Phaser : partagé avec tools/.
-import type { Hotspot, Interaction } from './types';
+import { t } from '../i18n';
+import type { Hotspot, Interaction, UseIcon } from './types';
 
 export type VerbKind = 'look' | 'use' | 'talk';
 /** Valeurs admises pour `smart:` dans le YAML. `menu` = ouvrir le verb coin. */
@@ -13,14 +14,23 @@ export interface HotspotVerb {
   action: Interaction;
 }
 
-const FALLBACK_LOOK = 'Rien de particulier.';
-
 /** Verbes disponibles, dans l'ordre du verb coin (touches 1, 2, 3). */
 export function hotspotVerbs(h: Hotspot): HotspotVerb[] {
-  const list: HotspotVerb[] = [{ kind: 'look', label: 'Regarder', action: h.look ?? FALLBACK_LOOK }];
-  if (h.use) list.push({ kind: 'use', label: h.useLabel ?? 'Utiliser', action: h.use });
-  if (h.talk) list.push({ kind: 'talk', label: 'Parler', action: h.talk });
+  const list: HotspotVerb[] = [{ kind: 'look', label: t('verbs.look'), action: h.look ?? t('verbs.nothing') }];
+  if (h.use) list.push({ kind: 'use', label: h.useLabel ?? t('verbs.use'), action: h.use });
+  if (h.talk) list.push({ kind: 'talk', label: t('verbs.talk'), action: h.talk });
   return list;
+}
+
+/**
+ * Devine le picto du verbe « utiliser » d'après son libellé source (français) :
+ * « Prendre le fusible » → main qui saisit. Appelé au chargement, avant traduction.
+ */
+export function guessUseIcon(label: string | undefined): UseIcon {
+  const l = (label ?? '').toLowerCase();
+  if (/^(prend|ramass|saisi)/.test(l)) return 'take';
+  if (/^(appuy|press|activ)/.test(l)) return 'press';
+  return 'use';
 }
 
 /**

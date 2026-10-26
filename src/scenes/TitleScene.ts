@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { END_SCENE_ID, getSession } from '../session';
 import { introSeen } from './IntroScene';
+import { lang, langName, nextLang, setLang, t, tl } from '../i18n';
 import { HeroView } from '../three/Hero';
 import { titleShot } from '../three/shots/title';
 import { bakeStudio, preloadPortraitSheets } from '../three/Studio';
@@ -9,16 +10,6 @@ import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
 import { playMusic } from '../ui/music';
 import { makeMusicToggle } from '../ui/MusicToggle';
 import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
-
-/** Slogans de la station, en défilement permanent (SYLVIE y tient). */
-const SLOGANS = [
-  'LE BONHEUR EST OBLIGATOIRE',
-  'SYLVIE VOUS OBSERVE — AVEC AFFECTION',
-  'UNE SALETÉ NON SIGNALÉE EST UNE SALETÉ COMPLICE',
-  'VOTRE CLONE DE REMPLACEMENT EST DÉJÀ AU CHAUD',
-  'LE SEAU EST VOTRE AMI · LE SEAU EST LE PROTOCOLE',
-  "TOUTE QUESTION SUR L'IMPROBABILITÉ EST UNE QUESTION DE TROP",
-];
 
 export class TitleScene extends Phaser.Scene {
   private hero: HeroView | null = null;
@@ -59,13 +50,14 @@ export class TitleScene extends Phaser.Scene {
     this.drawTicker();
     this.drawTitle();
     this.drawMenu();
-    makeMusicToggle(this, W - 34, 34).setDepth(1000);
+    const music = makeMusicToggle(this, W - 34, 34).setDepth(1000);
+    this.drawSettings(music.x - music.width / 2 - 12);
 
     // pied de page : formulaire officiel
     const foot = this.add.graphics();
     drawLed(foot, 42, H - 26, hex(COLORS.accent), 3);
     this.add
-      .text(56, H - 26, "FORMULAIRE QJ-0 · ACCRÉDITATION : INFRAROUGE · LECTURE DE CET ÉCRAN DÉJÀ ENREGISTRÉE", {
+      .text(56, H - 26, t('title.footer'), {
         fontFamily: FONT,
         fontSize: '12px',
         color: COLORS.dim,
@@ -73,7 +65,7 @@ export class TitleScene extends Phaser.Scene {
       .setOrigin(0, 0.5)
       .setLetterSpacing(1.5);
     this.add
-      .text(W - 32, H - 26, 'Sauvegarde automatique · vos clones vous remercient · v0.1', { fontFamily: FONT, fontSize: '12px', color: COLORS.dim })
+      .text(W - 32, H - 26, t('title.footerRight'), { fontFamily: FONT, fontSize: '12px', color: COLORS.dim })
       .setOrigin(1, 0.5)
       .setLetterSpacing(1);
 
@@ -88,6 +80,11 @@ export class TitleScene extends Phaser.Scene {
     }
   }
 
+  /** Réglages en haut à droite, à gauche du ♪ : langue (cycle, recharge la page). */
+  private drawSettings(right: number): void {
+    makeButton(this, right, 34, t('settings.language', { lang: langName(lang()) }), () => setLang(nextLang()), { size: 14, align: 'right' }).setDepth(1000);
+  }
+
   private drawTicker(): void {
     const y = 0;
     const h = 30;
@@ -95,7 +92,7 @@ export class TitleScene extends Phaser.Scene {
     g.fillStyle(COLORS.ink, 0.82);
     g.fillRect(0, y, W, h);
     drawHazard(g, 0, y + h, W, 5, 0.9);
-    const line = SLOGANS.join('   ✦   ') + '   ✦   ';
+    const line = tl('title.slogans').join('   ✦   ') + '   ✦   ';
     this.ticker = this.add
       .text(0, y + h / 2, line + line, { fontFamily: FONT, fontSize: '13px', fontStyle: '600', color: COLORS.hover })
       .setOrigin(0, 0.5)
@@ -106,7 +103,7 @@ export class TitleScene extends Phaser.Scene {
     tag.fillRect(0, y, 196, h);
     tag.fillTriangle(196, y, 212, y, 196, y + h);
     this.add
-      .text(14, y + h / 2, '● SYLVIE · ANNONCE', { fontFamily: FONT, fontSize: '13px', fontStyle: '700', color: '#07050f' })
+      .text(14, y + h / 2, t('title.announce'), { fontFamily: FONT, fontSize: '13px', fontStyle: '700', color: '#07050f' })
       .setOrigin(0, 0.5)
       .setLetterSpacing(2);
   }
@@ -114,7 +111,7 @@ export class TitleScene extends Phaser.Scene {
   private drawTitle(): void {
     const x = 78;
     this.add
-      .text(x + 2, 104, 'STATION KLEPSYDRA-9  ·  SERVICE D’ENTRETIEN QUANTIQUE', { fontFamily: FONT, fontSize: '15px', fontStyle: '600', color: COLORS.accent })
+      .text(x + 2, 104, t('title.station'), { fontFamily: FONT, fontSize: '15px', fontStyle: '600', color: COLORS.accent })
       .setLetterSpacing(4);
 
     const word = (y: number, s: string, top: string, bottom: string) => {
@@ -129,8 +126,8 @@ export class TitleScene extends Phaser.Scene {
       t.setShadow(0, 10, 'rgba(255,79,154,0.55)', 26, true, true);
       return t;
     };
-    const q = word(124, 'QUANTUM', '#fff6e0', '#ffd166');
-    const j = word(226, 'JANITOR', '#d9fff4', '#7fffd4');
+    const q = word(124, t('title.word1'), '#fff6e0', '#ffd166');
+    const j = word(226, t('title.word2'), '#d9fff4', '#7fffd4');
     for (const [t, delay] of [[q, 0], [j, 120]] as const) {
       t.setAlpha(0).setX(x - 30);
       this.tweens.add({ targets: t, alpha: 1, x, duration: 900, delay: 200 + delay, ease: 'Cubic.easeOut' });
@@ -142,10 +139,10 @@ export class TitleScene extends Phaser.Scene {
     drawPanel(g, x + 4, y, 372, 46, { fill: COLORS.ink, fillAlpha: 0.7, edge: hex(COLORS.hover), cut: 12, glow: false });
     g.fillStyle(hex(COLORS.hover), 1);
     g.fillRect(x + 4, y + 8, 5, 30);
-    this.add.text(x + 26, y + 23, 'CHAPITRE 0', { fontFamily: FONT, fontSize: '15px', fontStyle: '700', color: COLORS.hover }).setOrigin(0, 0.5).setLetterSpacing(3);
-    this.add.text(x + 148, y + 23, '« Le Seau »', { fontFamily: FONT, fontSize: '24px', fontStyle: 'italic 500', color: COLORS.text }).setOrigin(0, 0.5);
+    const chapter = this.add.text(x + 26, y + 23, t('title.chapter'), { fontFamily: FONT, fontSize: '15px', fontStyle: '700', color: COLORS.hover }).setOrigin(0, 0.5).setLetterSpacing(3);
+    this.add.text(chapter.x + chapter.width + 16, y + 23, t('title.chapterName'), { fontFamily: FONT, fontSize: '24px', fontStyle: 'italic 500', color: COLORS.text }).setOrigin(0, 0.5);
     this.add
-      .text(x + 4, y + 62, 'Gary Plunk, agent d’entretien intérimaire. Un seau. Un réacteur.\nAucune formation. Formation obligatoire.', {
+      .text(x + 4, y + 62, t('title.pitch'), {
         fontFamily: FONT,
         fontSize: '16px',
         color: COLORS.dim,
@@ -167,13 +164,13 @@ export class TitleScene extends Phaser.Scene {
         this,
         x,
         y,
-        'Reprendre le service',
+        t('title.resume'),
         go(() => {
           if (!session.loadGame()) return this.scene.restart();
           if (session.state.ended) this.scene.start('End', { final: true });
           else this.scene.start('Room');
         }),
-        { align: 'left', primary: true, size: 22, minWidth: 360, kicker: 'VOTRE CLONE PRÉCÉDENT VOUS ATTEND' },
+        { align: 'left', primary: true, size: 22, minWidth: 360, kicker: t('title.resumeKicker') },
       );
       y += 84;
     }
@@ -183,7 +180,7 @@ export class TitleScene extends Phaser.Scene {
       this,
       x,
       y,
-      hasSave ? 'Nouveau clone' : 'Prendre son service',
+      hasSave ? t('title.newClone') : t('title.start'),
       go(() => {
         session.newGame();
         this.scene.start(playIntro ? 'Intro' : 'Room');
@@ -193,14 +190,14 @@ export class TitleScene extends Phaser.Scene {
         primary: !hasSave,
         size: hasSave ? 18 : 22,
         minWidth: hasSave ? 300 : 360,
-        kicker: hasSave ? 'EFFACE LA SAUVEGARDE · LE CLONE ACTUEL SERA RECYCLÉ' : 'LE BONHEUR COMMENCE MAINTENANT',
+        kicker: hasSave ? t('title.newCloneKicker') : t('title.startKicker'),
       },
     );
     if (introSeen()) {
-      makeButton(this, start.x + start.width / 2 + 20, y, 'Revoir l’intro', go(() => this.scene.start('Intro', { next: 'Title' })), {
+      makeButton(this, start.x + start.width / 2 + 20, y, t('title.replayIntro'), go(() => this.scene.start('Intro', { next: 'Title' })), {
         align: 'left',
         size: 15,
-        kicker: 'ARCHIVE SYLVIE · VISIONNAGE CONSIGNÉ',
+        kicker: t('title.replayIntroKicker'),
       });
     }
   }

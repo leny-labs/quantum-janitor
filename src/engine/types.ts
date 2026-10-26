@@ -55,6 +55,8 @@ export interface Hotspot {
   use?: Interaction;
   /** Libellé du verbe « utiliser » (ex. « Prendre », « Appuyer »). */
   useLabel?: string;
+  /** Picto du verbe « utiliser », déduit du libellé source au chargement (avant traduction). */
+  useIcon?: UseIcon;
   talk?: Interaction;
   /**
    * Verbe du clic gauche / tap court (voir engine/verbs.ts). Par défaut :
@@ -117,7 +119,12 @@ export interface CharacterDef {
   portrait?: string;
 }
 
+/** Picto du verbe « utiliser ». */
+export type UseIcon = 'use' | 'take' | 'press';
+
 export interface GameContent {
+  /** Traductions des textes Ink (texte source → texte affiché) ; absent = français. */
+  inkText?: Map<string, string>;
   scenes: Map<string, SceneDef>;
   items: Map<string, ItemDef>;
   characters: Map<string, CharacterDef>;

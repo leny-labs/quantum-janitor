@@ -13,6 +13,7 @@ import { isTouch } from '../ui/input';
 import { PressRing } from '../ui/PressRing';
 import { playMusic } from '../ui/music';
 import { blip, glitch, plouf, thud, whoosh } from '../ui/sfx';
+import { t, tl, type TextKey } from '../i18n';
 import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
 
 const SEEN_KEY = 'quantum-janitor.introSeen';
@@ -40,10 +41,10 @@ export interface IntroData {
 
 type Speaker = 'sylvie' | 'gary' | 'bob' | null;
 
-const VOICES: Record<Exclude<Speaker, null>, { name: string; color: string; pitch: number }> = {
-  sylvie: { name: 'SYLVIE', color: COLORS.accent, pitch: 1.35 },
-  gary: { name: 'GARY', color: COLORS.warm, pitch: 0.85 },
-  bob: { name: 'B.O.B.', color: '#a9b8d0', pitch: 0.6 },
+const VOICES: Record<Exclude<Speaker, null>, { name: TextKey; color: string; pitch: number }> = {
+  sylvie: { name: 'intro.names.sylvie', color: COLORS.accent, pitch: 1.35 },
+  gary: { name: 'intro.names.gary', color: COLORS.warm, pitch: 0.85 },
+  bob: { name: 'intro.names.bob', color: '#a9b8d0', pitch: 0.6 },
 };
 
 const BAR = 56;
@@ -277,15 +278,15 @@ export class IntroScene extends Phaser.Scene {
 
     this.progress = this.add.graphics().setDepth(70);
     this.add
-      .text(24 + this.plans.length * 52 + 8, BAR / 2, 'ARCHIVE SYLVIE · BRIEFING DE PRISE DE SERVICE', { fontFamily: FONT, fontSize: '12px', fontStyle: '700', color: COLORS.dim })
+      .text(24 + this.plans.length * 52 + 8, BAR / 2, t('intro.header'), { fontFamily: FONT, fontSize: '12px', fontStyle: '700', color: COLORS.dim })
       .setOrigin(0, 0.5)
       .setLetterSpacing(2)
       .setDepth(70);
-    this.skipButton = makeButton(this, W - 20, BAR / 2, 'Passer ▸▸', () => this.finish(), { size: 16, align: 'right' }).setDepth(70);
+    this.skipButton = makeButton(this, W - 20, BAR / 2, t('intro.skip'), () => this.finish(), { size: 16, align: 'right' }).setDepth(70);
 
     const touch = isTouch();
     this.add
-      .text(W / 2, H - BAR / 2 + 2, touch ? 'TAP : plan suivant  ·  APPUI LONG : passer l’intro' : 'CLIC : plan suivant  ·  MAINTENIR, ÉCHAP ou ESPACE : passer l’intro', {
+      .text(W / 2, H - BAR / 2 + 2, touch ? t('intro.helpTouch') : t('intro.helpMouse'), {
         fontFamily: FONT,
         fontSize: '13px',
         fontStyle: '600',
@@ -296,7 +297,7 @@ export class IntroScene extends Phaser.Scene {
       .setDepth(70);
     // téléphone en portrait : le jeu est en 16:9, on suggère de tourner
     this.rotateHint = this.add
-      .text(W / 2, BAR + 26, '↻  Tournez l’appareil : SYLVIE préfère le paysage', { fontFamily: FONT, fontSize: '22px', fontStyle: '700', color: COLORS.hover, backgroundColor: '#07050fcc', padding: { x: 12, y: 6 } })
+      .text(W / 2, BAR + 26, t('intro.rotate'), { fontFamily: FONT, fontSize: '22px', fontStyle: '700', color: COLORS.hover, backgroundColor: '#07050fcc', padding: { x: 12, y: 6 } })
       .setOrigin(0.5)
       .setDepth(70);
   }
@@ -344,7 +345,7 @@ export class IntroScene extends Phaser.Scene {
       drawPanel(plate, -w / 2, -h / 2, w, h, { fill: COLORS.ink, fillAlpha: 0.78, edge: hex(voice?.color ?? COLORS.dim), edgeAlpha: 0.6, cut: 12, glow: false });
       name.setVisible(!!voice);
       if (voice) {
-        name.setText(voice.name).setPosition(-w / 2 + 24 + name.width / 2, -h / 2);
+        name.setText(t(voice.name)).setPosition(-w / 2 + 24 + name.width / 2, -h / 2);
         plate.fillStyle(hex(voice.color), 1);
         plate.fillRect(-w / 2 + 14, -h / 2 - 11, name.width + 20, 22);
       }
@@ -523,14 +524,14 @@ export class IntroScene extends Phaser.Scene {
   private planStation(): number {
     this.setTint(0x000000, 0, 10);
     const kicker = this.text(80, 132, '', 16, COLORS.accent, { fontStyle: '700' }).setLetterSpacing(4);
-    this.type(kicker, 'AN 2291 · ORBITE BASSE DE NEPTUNE (À PEU PRÈS)', 700);
-    const title = this.display(72, 300, 'KLEPSYDRA-9', 104, '#d9fff4', '#7fffd4');
+    this.type(kicker, t('intro.station.kicker'), 700);
+    const title = this.display(72, 300, t('intro.station.title'), 104, '#d9fff4', '#7fffd4');
     this.wipe(title, 1700, 800);
-    const sub = this.text(82, 438, 'Station de recherche en improbabilité.\nTout y est tiède. Surtout le café.', 22, COLORS.text, { lineSpacing: 6 });
+    const sub = this.text(82, 438, t('intro.station.sub'), 22, COLORS.text, { lineSpacing: 6 });
     this.reveal(sub, 2700);
     const tag = this.text(82, 168, '', 13, COLORS.dim, { fontStyle: '600' }).setLetterSpacing(2);
-    this.type(tag, 'JOURS SANS INCIDENT D’IMPROBABILITÉ : 98 · RECORD : 99', 1300, 70);
-    this.say(null, 'Population : 212 scientifiques, 1 IA, 0 agent d’entretien titulaire.', 4300);
+    this.type(tag, t('intro.station.tag'), 1300, 70);
+    this.say(null, t('intro.station.say'), 4300);
     return 8500;
   }
 
@@ -547,15 +548,15 @@ export class IntroScene extends Phaser.Scene {
       this.layer.addAt(ring, 1);
       this.tw({ targets: ring, scale: 1.9, alpha: 0, duration: 2400, delay: i * 800, repeat: -1 });
     }
-    const name = this.display(150, 448, 'SYLVIE', 60, '#e8fffa', '#7fffd4', 'rgba(127,255,212,0.5)');
+    const name = this.display(150, 448, t('intro.sylvie.name'), 60, '#e8fffa', '#7fffd4', 'rgba(127,255,212,0.5)');
     this.reveal(name, 350, -30, 0);
-    const role = this.text(156, 532, 'INTELLIGENCE DE STATION · VOTRE AMIE (OBLIGATOIRE)', 14, COLORS.hover, { fontStyle: '700' }).setLetterSpacing(2);
+    const role = this.text(156, 532, t('intro.sylvie.role'), 14, COLORS.hover, { fontStyle: '700' }).setLetterSpacing(2);
     this.reveal(role, 600, -20, 0);
-    this.stamp(930, 150, 'LE BONHEUR EST OBLIGATOIRE', COLORS.hover, -4, 1500);
-    this.stamp(960, 260, 'SYLVIE VOUS AIME', COLORS.accent, 3, 3300, 30);
-    this.stamp(915, 380, 'LA CURIOSITÉ EST UN SYMPTÔME', COLORS.danger, -2, 5300);
-    this.say('sylvie', 'Bonjour, citoyens. Ici SYLVIE, votre Intelligence de Station.', 500);
-    this.say('sylvie', 'Le bonheur est obligatoire. Le malheur est retenu sur salaire.', 4100);
+    this.stamp(930, 150, t('intro.sylvie.stamp1'), COLORS.hover, -4, 1500);
+    this.stamp(960, 260, t('intro.sylvie.stamp2'), COLORS.accent, 3, 3300, 30);
+    this.stamp(915, 380, t('intro.sylvie.stamp3'), COLORS.danger, -2, 5300);
+    this.say('sylvie', t('intro.sylvie.say1'), 500);
+    this.say('sylvie', t('intro.sylvie.say2'), 4100);
     return 9000;
   }
 
@@ -581,15 +582,15 @@ export class IntroScene extends Phaser.Scene {
     drawLed(card, cx + 24, 130, hex(COLORS.warm), 3.5);
     this.layer.add(card);
     this.reveal(card, 250, 0, 30);
-    const head = this.text(cx + 40, 130, 'DOSSIER RH n° 4096-B · CONFIDENTIEL (MAIS PAS TROP)', 14, COLORS.warm, { fontStyle: '700' }).setOrigin(0, 0.5).setLetterSpacing(2);
+    const head = this.text(cx + 40, 130, t('intro.gary.head'), 14, COLORS.warm, { fontStyle: '700' }).setOrigin(0, 0.5).setLetterSpacing(2);
     this.reveal(head, 400, 0, 10);
-    const name = this.display(cx + 30, 158, 'GARY PLUNK', 54, '#fff6e0', '#ffd166');
+    const name = this.display(cx + 30, 158, t('intro.gary.name'), 54, '#fff6e0', '#ffd166');
     this.wipe(name, 700, 600);
     const rows: [string, string][] = [
-      ['BADGE', '« GARRY »'],
-      ['STATUT', 'intérimaire · 3 jours, renouvelable par pitié'],
-      ['DOMICILE', 'placard à balais (officieux)'],
-      ['ÉQUIPEMENT', '1 seau · 1 serpillière (Josiane)'],
+      [t('intro.gary.badgeKey'), t('intro.gary.badge')],
+      [t('intro.gary.statusKey'), t('intro.gary.status')],
+      [t('intro.gary.homeKey'), t('intro.gary.home')],
+      [t('intro.gary.gearKey'), t('intro.gary.gear')],
     ];
     rows.forEach(([k, v], i) => {
       const y = 258 + i * 52;
@@ -598,14 +599,14 @@ export class IntroScene extends Phaser.Scene {
       const val = this.text(cx + 180, y - 4, '', 22, COLORS.text);
       this.type(val, v, 1250 + i * 650);
     });
-    this.stamp(cx + 470, 262, 'ERREUR RH', COLORS.danger, -9, 2000, 18);
+    this.stamp(cx + 470, 262, t('intro.gary.stamp'), COLORS.danger, -9, 2000, 18);
     if (this.textures.exists(iconKey('seau'))) {
       const seau = this.add.image(cx + 590, 438, iconKey('seau')).setDisplaySize(120, 120).setAngle(-8).setScale(0);
       this.layer.add(seau);
       this.tw({ targets: seau, scale: 0.75, duration: 420, delay: 3300, ease: 'Back.easeOut', onStart: () => plouf() });
       this.tw({ targets: seau, angle: 8, duration: 900, delay: 3700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
-    this.say('gary', 'Je ne dors pas dans le placard. J’y médite. Horizontalement.', 4300);
+    this.say('gary', t('intro.gary.say'), 4300);
     return 9000;
   }
 
@@ -626,12 +627,12 @@ export class IntroScene extends Phaser.Scene {
 
     const p = this.portrait('bob', 940, 290, 320, '#a9b8d0');
     this.reveal(p, 0, -120, 0, 600);
-    const name = this.display(90, 98, 'B.O.B.', 88, '#eef3ff', '#a9b8d0', 'rgba(127,255,212,0.45)');
+    const name = this.display(90, 98, t('intro.bob.name'), 88, '#eef3ff', '#a9b8d0', 'rgba(127,255,212,0.45)');
     this.wipe(name, 300, 600);
-    const role = this.text(96, 226, 'BALAYEUR ORGANIQUE BIENVEILLANT · MODÈLE 2291', 15, COLORS.accent, { fontStyle: '700' }).setLetterSpacing(2);
+    const role = this.text(96, 226, t('intro.bob.role'), 15, COLORS.accent, { fontStyle: '700' }).setLetterSpacing(2);
     this.reveal(role, 700, -20, 0);
     const fact = this.text(96, 262, '', 20, COLORS.text, { wordWrap: { width: 560 }, lineSpacing: 4 });
-    this.type(fact, 'Conscience acquise en aspirant le tome 2 d’un manuel de philosophie existentialiste. Tome 1 : jamais trouvé.', 1100, 60);
+    this.type(fact, t('intro.bob.fact'), 1100, 60);
 
     // écran-grille : l'onde de sa voix
     const sx = 96;
@@ -647,7 +648,7 @@ export class IntroScene extends Phaser.Scene {
     this.layer.add([screen, wave]);
     this.reveal(screen, 900, 0, 20);
     this.wave = { g: wave, x: sx, y: sy, w: sw, h: sh };
-    this.say('bob', 'Salut, Gary. J’ai réfléchi au sens de la vie. Bonne nouvelle : ça ne prend pas longtemps.', 3300);
+    this.say('bob', t('intro.bob.say'), 3300);
     return 9000;
   }
 
@@ -665,23 +666,23 @@ export class IntroScene extends Phaser.Scene {
     drawPanel(card, cx, 90, 560, 210, { fill: COLORS.panel, fillAlpha: 0.9, cut: 16, brackets: true });
     this.layer.add(card);
     this.reveal(card, 100, 0, 20);
-    const head = this.text(cx + 24, 108, 'ORDRE DE MISSION n° 0', 16, COLORS.accent, { fontStyle: '700' }).setLetterSpacing(3);
+    const head = this.text(cx + 24, 108, t('intro.job.head'), 16, COLORS.accent, { fontStyle: '700' }).setLetterSpacing(3);
     this.reveal(head, 250, -10, 0);
-    const lines = ['Objet : nettoyer AUTOUR du Réacteur', 'd’Improbabilité Mk IV.', 'Personnel : 1 intérimaire, 1 seau.', 'Formation : facultative (absente).'];
+    const lines = tl('intro.job.lines');
     lines.forEach((l, i) => {
       const t = this.text(cx + 24, 146 + i * 34, '', 22, i < 2 ? COLORS.text : COLORS.dim);
       this.type(t, l, 500 + i * 650);
     });
-    this.stamp(360, 350, 'RÈGLEMENT N°1 : NE JAMAIS NETTOYER LE RÉACTEUR', COLORS.danger, -4, 3000, 20);
+    this.stamp(360, 350, t('intro.job.stamp'), COLORS.danger, -4, 3000, 20);
 
     // compteur d'incidents
-    const counterLabel = this.text(cx + 4, 410, 'JOURS SANS INCIDENT D’IMPROBABILITÉ', 13, COLORS.dim, { fontStyle: '700' }).setLetterSpacing(2);
+    const counterLabel = this.text(cx + 4, 410, t('intro.job.counter'), 13, COLORS.dim, { fontStyle: '700' }).setLetterSpacing(2);
     const digits = this.add.text(cx, 430, '98', { fontFamily: DISPLAY, fontSize: '64px', color: COLORS.hover }).setStroke('#07050f', 8);
-    const record = this.text(cx + 150, 466, 'RECORD : 99', 18, COLORS.text, { fontStyle: '700' });
+    const record = this.text(cx + 150, 466, t('intro.job.record'), 18, COLORS.text, { fontStyle: '700' });
     this.layer.add(digits);
     for (const o of [counterLabel, digits, record]) this.reveal(o, 4100, 0, 10, 350);
 
-    this.say('sylvie', 'Rien ne peut mal tourner. Toute pensée contraire sera consignée.', 1200);
+    this.say('sylvie', t('intro.job.say1'), 1200);
     // … et pourtant : glitch, fissures, l'enjeu
     this.at(6200, () => {
       this.glitchBurst(true);
@@ -703,15 +704,15 @@ export class IntroScene extends Phaser.Scene {
         crack.strokePath();
       }
       this.layer.add(crack);
-      const stake = this.display(W - 560, 300, '4 096 RÉALITÉS ?', 46, '#ffd9e6', '#ff4f9a');
+      const stake = this.display(W - 560, 300, t('intro.job.stake'), 46, '#ffd9e6', '#ff4f9a');
       this.tw({ targets: stake, alpha: 0.25, duration: 70, yoyo: true, repeat: 6 });
     });
-    this.say('gary', 'J’ai un mauvais pressentiment. Et un seau.', 7000);
+    this.say('gary', t('intro.job.say2'), 7000);
     this.at(8000, () => {
       const bar = this.add.rectangle(W / 2, 250, W, 70, 0x000000, 1).setScale(0, 1);
       this.layer.add(bar);
       this.tw({ targets: bar, scaleX: 1, duration: 160, ease: 'Cubic.easeOut' });
-      this.stamp(W / 2, 250, '▮▮▮  SPOILER CENSURÉ PAR SYLVIE  ▮▮▮', COLORS.hover, 0, 140, 26);
+      this.stamp(W / 2, 250, t('intro.job.spoiler'), COLORS.hover, 0, 140, 26);
     });
     return 10500;
   }
@@ -730,17 +731,17 @@ export class IntroScene extends Phaser.Scene {
     this.tw({ targets: hz2, x: 0, duration: 500, ease: 'Cubic.easeOut' });
 
     const kicker = this.text(W / 2, 214, '', 22, COLORS.hover, { fontStyle: '700' }).setOrigin(0.5).setLetterSpacing(8);
-    this.type(kicker, 'CHAPITRE 0', 400, 30);
-    const title = this.display(W / 2, 330, '« LE SEAU »', 116, '#fff6e0', '#ffd166').setOrigin(0.5);
+    this.type(kicker, t('intro.chapter.kicker'), 400, 30);
+    const title = this.display(W / 2, 330, t('intro.chapter.title'), 116, '#fff6e0', '#ffd166').setOrigin(0.5);
     this.wipe(title, 900, 800);
-    const tag = this.text(W / 2, 438, 'Un seau. Un réacteur. Aucune formation.', 24, COLORS.text, { fontStyle: 'italic 500' }).setOrigin(0.5);
+    const tag = this.text(W / 2, 438, t('intro.chapter.tag'), 24, COLORS.text, { fontStyle: 'italic 500' }).setOrigin(0.5);
     this.reveal(tag, 1900);
     if (this.textures.exists(iconKey('seau'))) {
       const seau = this.add.image(W / 2 + title.width / 2 + 70, 330, iconKey('seau')).setDisplaySize(110, 110).setAlpha(0).setAngle(-12);
       this.layer.add(seau);
       this.tw({ targets: seau, alpha: 1, y: 320, duration: 500, delay: 1700, ease: 'Back.easeOut' });
     }
-    const foot = this.text(W / 2, 560, 'FORMULAIRE QJ-0 · VOTRE VISIONNAGE A ÉTÉ CONSIGNÉ · MERCI', 12, COLORS.dim, { fontStyle: '600' }).setOrigin(0.5).setLetterSpacing(2);
+    const foot = this.text(W / 2, 560, t('intro.chapter.foot'), 12, COLORS.dim, { fontStyle: '600' }).setOrigin(0.5).setLetterSpacing(2);
     this.reveal(foot, 2500, 0, 0);
     return 5500;
   }

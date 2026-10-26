@@ -2,17 +2,24 @@
  * Partie scriptée sans navigateur : rejoue la solution complète du chapitre 0
  * avec le vrai moteur (ActionRunner + DialogueRunner) et vérifie qu'on atteint
  * le cliffhanger.   npm run playthrough   (ajouter -- -v pour voir les dialogues)
+ * `-- lang=en` applique d'abord le catalogue content/locales/en.yaml : même
+ * solution, mêmes flags, textes traduits (vérifie que l'i18n ne casse rien).
  */
 import { ActionRunner, type ActionHost } from '../src/engine/ActionRunner';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { parseContent, toActions } from '../src/engine/content';
+import { localizeContent, parseCatalog } from '../src/engine/localize';
 import { DialogueRunner, type DialogueView } from '../src/engine/DialogueRunner';
 import { GameState } from '../src/engine/GameState';
 import { resolveCombine } from '../src/engine/combine';
 import type { Interaction } from '../src/engine/types';
-import { readRawContent } from './readContent';
+import { ROOT, readRawContent } from './readContent';
 
 const verbose = process.argv.includes('-v');
 const content = parseContent(readRawContent());
+const lang = process.argv.find((a) => a.startsWith('lang='))?.slice(5);
+if (lang) localizeContent(content, parseCatalog(readFileSync(join(ROOT, 'content', 'locales', `${lang}.yaml`), 'utf8')));
 const state = new GameState(content.startScene);
 let ended: string | null = null;
 let choiceCursor = 0;

@@ -3,6 +3,7 @@ import { at, box, cyl, glow, label, mat, neon, plane, pool, sphere, starTexture,
 import { bob, fusible } from '../props';
 import type { RoomBuild } from './index';
 import { against, backDoor, pipe, shell, wallPanels } from './shell';
+import { t as tr } from '../../i18n';
 
 const POWER_OFF = { flags: ['fusible_retire'] };
 const POWER_ON = { notFlags: ['fusible_retire'] };
@@ -60,10 +61,10 @@ export const couloir: RoomBuild = {
 
     // enseigne néon sur le circuit 7B (« éclairage d'ambiance ») : s'éteint avec le fusible
     const bf = s.fit([470, 92, 200, 62], 0.06);
-    const motto = at(neon('BONHEUR\nOBLIGATOIRE', bf.w, bf.h, '#ff5c9a', { plate: '#120818' }), bf.x, bf.y, 0.06);
+    const motto = at(neon(tr('props.couloir.neon'), bf.w, bf.h, '#ff5c9a', { plate: '#120818' }), bf.x, bf.y, 0.06);
     const mottoGlow = at(pool('#ff5c9a', bf.w * 1.9, bf.h * 2.6, 0.15), bf.x, bf.y, 0.035);
     mottoGlow.rotation.x = 0;
-    const mottoDead = at(neon('BONHEUR\nOBLIGATOIRE', bf.w, bf.h, '#4a2a44', { plate: '#120818', off: true }), bf.x, bf.y, 0.06);
+    const mottoDead = at(neon(tr('props.couloir.neon'), bf.w, bf.h, '#4a2a44', { plate: '#120818', off: true }), bf.x, bf.y, 0.06);
     s.when(POWER_ON, motto, mottoGlow).when(POWER_OFF, mottoDead);
     s.animate((t) => {
       motto.material.opacity = Math.sin(t * 0.7 + 1) > 0.99 ? 0.4 : 0.95 + Math.sin(t * 27) * 0.04;
@@ -114,7 +115,7 @@ export const couloir: RoomBuild = {
     vend.add(at(box(dw * 0.18, ds.h * 0.32, 0.06, '#2a2a2a'), dw * 0.39, glassY, dd / 2));
     for (let i = 0; i < 6; i++) vend.add(at(sphere(0.035, i % 2 ? '#ffd166' : '#ffffff', { glow: true }), dw * 0.36 + (i % 2) * 0.07, glassY + 0.35 - Math.floor(i / 2) * 0.13, dd / 2 + 0.04));
     vend.add(at(box(dw * 0.5, ds.h * 0.07, 0.1, '#111111'), -dw * 0.05, ds.h * 0.16, dd / 2));
-    const header = at(label("DISTRIB'Ô-MATIC 3000", dw * 0.9, ds.h * 0.07, { color: '#ffffff', bold: true }), 0, ds.h * 0.25, dd / 2 + 0.01);
+    const header = at(label(tr('props.couloir.vending'), dw * 0.9, ds.h * 0.07, { color: '#ffffff', bold: true }), 0, ds.h * 0.25, dd / 2 + 0.01);
     s.when(POWER_ON, header);
     vend.add(header);
     s.spot('distributeur', at(vend, ds.x, 0, against(ds.z, dd)));
@@ -124,7 +125,7 @@ export const couloir: RoomBuild = {
     const fuseBox = new THREE.Group();
     fuseBox.add(at(box(fb.w * 0.9, fb.h * 0.9, 0.4, '#5b5f6b'), 0, 0, 0));
     fuseBox.add(at(box(fb.w * 0.92, 0.06, 0.42, '#ffd166', { edges: false }), 0, fb.h * 0.45, 0));
-    fuseBox.add(at(label("⚡ CIRCUIT 7B\nDistributeur & éclairage\nd'ambiance", fb.w * 0.8, fb.h * 0.4, { color: '#ffd166', bold: true }), 0, fb.h * 0.17, 0.21));
+    fuseBox.add(at(label(tr('props.couloir.fuse'), fb.w * 0.8, fb.h * 0.4, { color: '#ffd166', bold: true }), 0, fb.h * 0.17, 0.21));
     const socket = at(box(fb.w * 0.36, fb.h * 0.18, 0.05, '#111111', { edges: false }), 0, -fb.h * 0.22, 0.2);
     fuseBox.add(socket);
     const fuse = at(fusible(fb.w * 0.3), 0, -fb.h * 0.22, 0.28);
@@ -164,14 +165,14 @@ export const couloir: RoomBuild = {
     s.spot(
       'compteur',
       at(box(cp.w * 0.95, cp.h * 0.85, 0.12, '#111111'), cp.x, cp.y, 0.06),
-      at(label("KLEPSYDRA-9\n0098 JOURS SANS INCIDENT\nD'IMPROBABILITÉ", cp.w * 0.9, cp.h * 0.78, { color: '#7fffd4', bold: true, mono: true }), cp.x, cp.y, 0.13),
+      at(label(tr('props.couloir.counter'), cp.w * 0.9, cp.h * 0.78, { color: '#7fffd4', bold: true, mono: true }), cp.x, cp.y, 0.13),
     );
 
     // ── porte du labo ──
     const { door: labDoor, f: lf } = backDoor(s, [1000, 120, 170, 350], 0.12, '#2f3a55', '#3d4a6b');
     const closed = new THREE.Group();
     closed.add(at(new THREE.Mesh(new THREE.PlaneGeometry(lf.w * 0.84, lf.h * 0.12), mat('#ffffff', { map: stripeTexture('#ffd166', '#2a2a2a', 6) })), 0, -lf.h * 0.38, 0.01));
-    closed.add(at(label('LABO\nRÉACTEUR\n☢ ACCÈS\nRESTREINT', lf.w * 0.8, lf.h * 0.4, { color: '#ffd166', bold: true }), 0, lf.h * 0.18, 0.01));
+    closed.add(at(label(tr('props.couloir.labDoor'), lf.w * 0.8, lf.h * 0.4, { color: '#ffd166', bold: true }), 0, lf.h * 0.18, 0.01));
     closed.add(at(box(0.02, lf.h * 0.9, 0.02, '#1d2436', { edges: false }), 0, -lf.h * 0.04, 0.01));
     closed.position.set(lf.x, lf.y, 0.13);
     const open = new THREE.Group();
@@ -293,7 +294,8 @@ function serviceSign(w: number, h: number): THREE.Group {
   const title = (px: number) => `${px}px Bungee, "Chakra Petch", Impact, sans-serif`;
   let size = H * 0.6;
   g.font = title(size);
-  const tw = g.measureText('ENTRETIEN').width;
+  const word = tr('props.couloir.maintenance');
+  const tw = g.measureText(word).width;
   if (tw > maxW) size *= maxW / tw;
   g.font = title(size);
   g.textAlign = 'center';
@@ -301,12 +303,12 @@ function serviceSign(w: number, h: number): THREE.Group {
   const ty = H * 0.47;
   g.lineJoin = 'round';
   g.fillStyle = '#05080c';
-  g.fillText('ENTRETIEN', tx + size * 0.06, ty + size * 0.08);
+  g.fillText(word, tx + size * 0.06, ty + size * 0.08);
   g.strokeStyle = '#05080c';
   g.lineWidth = size * 0.14;
-  g.strokeText('ENTRETIEN', tx, ty);
+  g.strokeText(word, tx, ty);
   g.fillStyle = '#eafff8';
-  g.fillText('ENTRETIEN', tx, ty);
+  g.fillText(word, tx, ty);
 
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;

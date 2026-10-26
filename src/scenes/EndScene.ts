@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getSession } from '../session';
+import { t } from '../i18n';
 import { makeButton } from '../ui/Button';
 import { HeroView } from '../three/Hero';
 import { endShot } from '../three/shots/end';
@@ -54,13 +55,13 @@ export class EndScene extends Phaser.Scene {
     g.fillGradientStyle(COLORS.ink, COLORS.ink, COLORS.ink, COLORS.ink, 0.7, 0.7, 0, 0);
     g.fillRect(0, 0, W, 90);
     // cartouche de localisation
-    const label = 'DIMENSION B-7  ·  « BLATTARIA PRIME »';
-    const t = this.add.text(W / 2, 34, label, { fontFamily: FONT, fontSize: '17px', fontStyle: '700', color: COLORS.hover }).setOrigin(0.5).setLetterSpacing(4);
+    const label = t('end.location');
+    const tag = this.add.text(W / 2, 34, label, { fontFamily: FONT, fontSize: '17px', fontStyle: '700', color: COLORS.hover }).setOrigin(0.5).setLetterSpacing(4);
     const p = this.add.graphics();
-    drawPanel(p, W / 2 - t.width / 2 - 30, 16, t.width + 60, 36, { fill: COLORS.ink, fillAlpha: 0.75, edge: hex(COLORS.hover), cut: 10 });
-    t.setDepth(1);
+    drawPanel(p, W / 2 - tag.width / 2 - 30, 16, tag.width + 60, 36, { fill: COLORS.ink, fillAlpha: 0.75, edge: hex(COLORS.hover), cut: 10 });
+    tag.setDepth(1);
     this.add
-      .text(W / 2, 64, 'HORS JURIDICTION DE SYLVIE · VOTRE BONHEUR N’Y EST PLUS GARANTI', { fontFamily: FONT, fontSize: '11px', color: COLORS.dim })
+      .text(W / 2, 64, t('end.jurisdiction'), { fontFamily: FONT, fontSize: '11px', color: COLORS.dim })
       .setOrigin(0.5)
       .setLetterSpacing(2);
   }
@@ -73,7 +74,7 @@ export class EndScene extends Phaser.Scene {
     drawHazard(bands, 0, 196, W, 8);
     drawHazard(bands, 0, 470, W, 8);
     const title = this.add
-      .text(W / 2, 290, 'À SUIVRE…', { fontFamily: DISPLAY, fontSize: '110px', color: '#ffffff', padding: { x: 4, y: 8 } })
+      .text(W / 2, 290, t('end.toBeContinued'), { fontFamily: DISPLAY, fontSize: '110px', color: '#ffffff', padding: { x: 4, y: 8 } })
       .setOrigin(0.5)
       .setDepth(1001)
       .setAlpha(0);
@@ -84,13 +85,13 @@ export class EndScene extends Phaser.Scene {
     grad.addColorStop(1, '#ff4f9a');
     title.setFill(grad).setStroke('#07050f', 10).setShadow(0, 10, 'rgba(255,79,154,0.55)', 26, true, true);
     const sub = this.add
-      .text(W / 2, 385, 'PROCHAINEMENT — CHAPITRE 1 : « LA REINE DES CAFARDS »', { fontFamily: FONT, fontSize: '22px', fontStyle: '600', color: COLORS.hover })
+      .text(W / 2, 385, t('end.next'), { fontFamily: FONT, fontSize: '22px', fontStyle: '600', color: COLORS.hover })
       .setOrigin(0.5)
       .setLetterSpacing(3)
       .setDepth(1001)
       .setAlpha(0);
     const thanks = this.add
-      .text(W / 2, 425, "Merci d'avoir joué le chapitre 0. Votre satisfaction a été enregistrée d'office.", { fontFamily: FONT, fontSize: '17px', color: COLORS.dim })
+      .text(W / 2, 425, t('end.thanks'), { fontFamily: FONT, fontSize: '17px', color: COLORS.dim })
       .setOrigin(0.5)
       .setDepth(1001)
       .setAlpha(0);
@@ -99,17 +100,17 @@ export class EndScene extends Phaser.Scene {
 
     this.time.delayedCall(1800, () => {
       const session = getSession();
-      makeButton(this, W / 2 - 16, 560, 'Menu principal', () => this.scene.start('Title'), { align: 'right', size: 20, minWidth: 300 }).setDepth(1001);
+      makeButton(this, W / 2 - 16, 560, t('end.menu'), () => this.scene.start('Title'), { align: 'right', size: 20, minWidth: 300 }).setDepth(1001);
       makeButton(
         this,
         W / 2 + 16,
         560,
-        'Rejouer',
+        t('end.replay'),
         () => {
           session.newGame();
           this.scene.start('Room');
         },
-        { align: 'left', size: 20, primary: true, minWidth: 300, kicker: 'UN NOUVEAU CLONE EST PRÊT' },
+        { align: 'left', size: 20, primary: true, minWidth: 300, kicker: t('end.replayKicker') },
       ).setDepth(1001);
     });
   }

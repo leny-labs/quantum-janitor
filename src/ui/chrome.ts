@@ -172,16 +172,6 @@ const ICON_PATHS: Record<VerbIcon, string[]> = {
   talk: ['M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', 'M8 10h.01', 'M12 10h.01', 'M16 10h.01'],
 };
 
-/** Devine le picto d'un verbe d'après son libellé (« Prendre le fusible » → main qui saisit). */
-export function verbIcon(label: string): VerbIcon {
-  const l = label.toLowerCase();
-  if (l.startsWith('regard') || l.startsWith('examin') || l.startsWith('lire')) return 'look';
-  if (l.startsWith('parl') || l.startsWith('discut')) return 'talk';
-  if (l.startsWith('prend') || l.startsWith('ramass') || l.startsWith('saisi')) return 'take';
-  if (l.startsWith('appuy') || l.startsWith('press') || l.startsWith('activ')) return 'press';
-  return 'use';
-}
-
 const ICON_RES = 4;
 
 /** Clé de texture du picto (créée à la demande, blanche, à teinter). */
@@ -230,7 +220,7 @@ export function verbCursor(icon: VerbIcon): string {
       `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">` +
       `<circle cx="16" cy="16" r="14" fill="#14102a" fill-opacity="0.82" stroke="${COLORS.hover}" stroke-width="1.5"/>` +
       `<g transform="translate(6 6) scale(0.8333)" fill="none" stroke="${COLORS.hover}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</g></svg>`;
-    c = `url("data:image/svg+xml,${encodeURIComponent(svg)}") 16 16, pointer`;
+    c = `url("data:image/svg+xml,${encodeURIComponent(svg)}") 16 16, pointer`; // i18n-ignore
     cursors.set(icon, c);
   }
   return c;

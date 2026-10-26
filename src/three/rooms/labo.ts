@@ -6,6 +6,7 @@ import type { Stage, Standing } from '../Stage';
 import type { RoomBuild } from './index';
 import { consolePanel, PANNEAU_CAMERA } from './panneau';
 import { against, backDoor, pipe, shell, wallPanels } from './shell';
+import { t as tr } from '../../i18n';
 
 const FULL = { flags: ['refroidissement_verse'] };
 const POWERED = { flags: ['panneau_allume'] };
@@ -44,7 +45,7 @@ export const labo: RoomBuild = {
     const warn = s.fit([330, 18, 860, 28], 0.05);
     s.add(
       at(box(warn.w * 1.04, warn.h * 1.5, 0.06, '#2a1d4a', { edges: false }), warn.x, warn.y, 0.03),
-      at(label("☢  ZONE D'IMPROBABILITÉ — PORT DU CASQUE CONSEILLÉ (CASQUE NON FOURNI)", warn.w, warn.h, { color: '#ffd166', bold: true }), warn.x, warn.y, 0.07),
+      at(label(tr('props.labo.warning'), warn.w, warn.h, { color: '#ffd166', bold: true }), warn.x, warn.y, 0.07),
     );
 
     // ── réacteur ──
@@ -95,8 +96,8 @@ export const labo: RoomBuild = {
       reactor.add(led, halo);
       return { led, halo };
     });
-    reactor.add(at(label('Mk IV', w * 0.34, h * 0.04, { color: '#ffffff', bold: true, bg: '#2a1d4a' }), 0, h * 0.09, w * 0.46 + 0.01));
-    const glou = at(label('glou… glou…', w * 0.7, h * 0.06, { color: '#b6ff6a', bold: true, bg: '#120d20' }), 0, h * 0.55, w * 0.5);
+    reactor.add(at(label(tr('props.labo.model'), w * 0.34, h * 0.04, { color: '#ffffff', bold: true, bg: '#2a1d4a' }), 0, h * 0.09, w * 0.46 + 0.01));
+    const glou = at(label(tr('props.labo.gurgle'), w * 0.7, h * 0.06, { color: '#b6ff6a', bold: true, bg: '#120d20' }), 0, h * 0.55, w * 0.5);
     reactor.add(glou);
     s.when(FULL, glou);
     const aura = at(glow('#b06cff', w * 3.2, 0.35), 0, colY, -w * 0.6);
@@ -171,9 +172,9 @@ export const labo: RoomBuild = {
     });
 
     // ── trappe de refroidissement ──
-    const tr = s.stand(s.rect('trappe'));
-    const tw = tr.w * 0.9;
-    const th = tr.h * 0.75;
+    const trap = s.stand(s.rect('trappe'));
+    const tw = trap.w * 0.9;
+    const th = trap.h * 0.75;
     const hatch = new THREE.Group();
     hatch.add(at(box(tw, th, 0.9, '#3a3f55'), 0, th / 2, 0));
     hatch.add(at(cyl(tw * 0.32, tw * 0.18, th * 0.25, '#4a5070', { seg: 14 }), 0, th + th * 0.12, 0));
@@ -182,20 +183,20 @@ export const labo: RoomBuild = {
     lidOpen.rotation.z = 1.2;
     hatch.add(lidClosed, lidOpen);
     s.when({ notFlags: ['panneau_allume'] }, lidClosed).when(POWERED, lidOpen);
-    hatch.add(at(label('REFROIDISSEMENT\n(admission)', tw * 0.9, th * 0.32, { color: '#7fffd4', bold: true }), 0, th * 0.72, 0.46));
+    hatch.add(at(label(tr('props.labo.tank'), tw * 0.9, th * 0.32, { color: '#7fffd4', bold: true }), 0, th * 0.72, 0.46));
     const status: [Condition, string, string][] = [
-      [{ notFlags: ['panneau_allume'] }, 'VERROUILLÉ', '#ff5c7a'],
-      [{ flags: ['panneau_allume'], notFlags: ['refroidissement_verse'] }, 'OUVERT — VIDE 0 %', '#ffd166'],
-      [FULL, 'PLEIN 100 %', '#7fbf3f'],
+      [{ notFlags: ['panneau_allume'] }, tr('props.labo.tankLocked'), '#ff5c7a'],
+      [{ flags: ['panneau_allume'], notFlags: ['refroidissement_verse'] }, tr('props.labo.tankEmpty'), '#ffd166'],
+      [FULL, tr('props.labo.tankFull'), '#7fbf3f'],
     ];
     for (const [cond, text, color] of status) {
       const l = at(label(text, tw * 0.9, th * 0.18, { color, bold: true, bg: '#14161f' }), 0, th * 0.35, 0.46);
       hatch.add(l);
       s.when(cond, l);
     }
-    s.spot('trappe', at(hatch, tr.x, 0, against(tr.z, 0.9)));
+    s.spot('trappe', at(hatch, trap.x, 0, against(trap.z, 0.9)));
     // conduit trappe → réacteur
-    const duct = at(cyl(0.12, 0.12, Math.abs(tr.x - rs.x) - w * 0.3, '#4a5070'), (tr.x + rs.x) / 2 + w * 0.1, 0.5, tr.z - 0.6);
+    const duct = at(cyl(0.12, 0.12, Math.abs(trap.x - rs.x) - w * 0.3, '#4a5070'), (trap.x + rs.x) / 2 + w * 0.1, 0.5, trap.z - 0.6);
     duct.rotation.z = Math.PI / 2;
     s.add(duct);
 
@@ -205,7 +206,7 @@ export const labo: RoomBuild = {
       'tableau',
       at(box(tb.w, tb.h, 0.08, '#888888'), tb.x, tb.y, 0.04),
       at(
-        label("I = P⁻¹ × café\n\nNE JAMAIS VERSER\nDE LIQUIDE NON\nRÉGLEMENTAIRE !!!\n— Dr Halvorsen  :'(", tb.w * 0.94, tb.h * 0.9, { color: '#333366', bg: '#eeeeee', bold: true, lit: true }),
+        label(tr('props.labo.board'), tb.w * 0.94, tb.h * 0.9, { color: '#333366', bg: '#eeeeee', bold: true, lit: true }),
         tb.x,
         tb.y,
         0.09,
@@ -226,7 +227,7 @@ export const labo: RoomBuild = {
     // tablette de notes posée sur son pied (écran allumé)
     const noteMesh = new THREE.Group();
     noteMesh.add(box(note.w, note.h * 0.8, 0.04, '#2b2f3a'));
-    noteMesh.add(at(label('NOTE DE SERVICE\n— — — —\n— — —', note.w * 0.86, note.h * 0.66, { color: '#7fffd4', bg: '#0d1a24', bold: true }), 0, 0, 0.022));
+    noteMesh.add(at(label(tr('props.labo.memo'), note.w * 0.86, note.h * 0.66, { color: '#7fffd4', bg: '#0d1a24', bold: true }), 0, 0, 0.022));
     noteMesh.position.set(note.x, topY + note.h * 0.4, Math.min(note.z, deskZ + 0.35));
     noteMesh.rotation.x = -0.35;
     const cup = s.stand([1120, 340, 40, 40], topY);
@@ -247,7 +248,7 @@ export const labo: RoomBuild = {
 
     // ── néon motivationnel au-dessus de la console ──
     const nf = s.fit([165, 165, 290, 92], 0.05);
-    const motto = at(neon('SOURIEZ :\nC\'EST IMPROBABLE', nf.w, nf.h, '#7fffd4', { plate: '#0c0818' }), nf.x, nf.y, 0.05);
+    const motto = at(neon(tr('props.labo.neon'), nf.w, nf.h, '#7fffd4', { plate: '#0c0818' }), nf.x, nf.y, 0.05);
     const mottoGlow = at(pool('#7fffd4', nf.w * 1.8, nf.h * 2.4, 0.13), nf.x, nf.y, 0.03);
     mottoGlow.rotation.x = 0;
     s.add(motto, mottoGlow);
@@ -300,7 +301,7 @@ function consoleRig(s: Stage, cs: Standing): THREE.Group {
   base.add(at(box(bw, baseH, bd, '#2a3444'), 0, baseH / 2, 0));
   base.add(at(box(bw * 1.02, 0.08, bd * 1.02, '#141a24', { edges: false }), 0, 0.04, 0));
   base.add(at(box(bw * 0.86, 0.012, 0.012, '#4fbfa6', { glow: true, edges: false }), 0, baseH - 0.06, bd / 2 + 0.008));
-  base.add(at(label('CONSOLE', bw * 0.4, 0.14, { color: '#9aa5b1', bold: true }), 0, baseH * 0.4, bd / 2 + 0.012));
+  base.add(at(label(tr('props.labo.console'), bw * 0.4, 0.14, { color: '#9aa5b1', bold: true }), 0, baseH * 0.4, bd / 2 + 0.012));
   s.add(at(base, cs.x, 0, front - bd / 2));
   // halo cyan de l'écran sur le mur et le sol : on lit la console de loin
   s.add(at(pool('#7fffd4', bw * 2.2, bd * 2.4, 0.12), cs.x, 0.011, front + 0.2));

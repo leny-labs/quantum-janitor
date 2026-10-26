@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import type { HeroShot } from '../Hero';
 import { at, box, cyl, glow, neon, sphere, stripeTexture, torus, Vignette } from '../kit';
 import { skyPlane, skyTexture } from './backdrop';
+import { t as tr } from '../../i18n';
 
 const HULL = '#4a2f80';
 const RIB = '#2a1a4e';
@@ -107,7 +108,7 @@ export function introShot(width: number, height: number): HeroShot {
   const beacon = at(sphere(0.28, '#ff5c7a', { glow: true }), 3, 6, 0);
   const beaconGlow = at(glow('#ff5c7a', 2.2, 0.8), 3, 6, 0.1);
   station.add(beacon, beaconGlow);
-  const sign = at(neon('KLEPSYDRA-9', 7, 1.4, '#7fffd4', { plate: '#120a28' }), 3.4, 2.5, 1.6);
+  const sign = at(neon(tr('props.introStation'), 7, 1.4, '#7fffd4', { plate: '#120a28' }), 3.4, 2.5, 1.6);
   station.add(sign);
 
   station.rotation.set(0.18, -0.42, 0.08);

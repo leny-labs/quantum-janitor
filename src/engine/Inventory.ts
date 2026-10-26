@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { GameState } from './GameState';
 import type { GameContent } from './types';
+import { t } from '../i18n';
 import { iconKey } from '../three/Studio';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
 import { cssToGame, isTouch, uiPx } from '../ui/input';
@@ -138,16 +139,16 @@ export class Inventory {
     c.add(bg);
     if (touch) {
       // au doigt : titre et aide lisibles (≥ 11-12 px CSS), sans la note d'ambiance
-      c.add(s.add.text(34, 30, 'OBJETS', { fontFamily: FONT, fontSize: `${uiPx(s, 15, 13)}px`, fontStyle: '700', color: COLORS.accent }).setOrigin(0, 0.5).setLetterSpacing(2));
+      c.add(s.add.text(34, 30, t('inventory.titleShort'), { fontFamily: FONT, fontSize: `${uiPx(s, 15, 13)}px`, fontStyle: '700', color: COLORS.accent }).setOrigin(0, 0.5).setLetterSpacing(2));
       const help = s.add
-        .text(16, 58, 'TAP  prendre\nAPPUI LONG  examiner', { fontFamily: FONT, fontSize: `${uiPx(s, 11, 11)}px`, fontStyle: '600', color: COLORS.text, lineSpacing: 6 })
+        .text(16, 58, t('inventory.helpTouch'), { fontFamily: FONT, fontSize: `${uiPx(s, 11, 11)}px`, fontStyle: '600', color: COLORS.text, lineSpacing: 6 })
         .setAlpha(0.85);
       if (help.width > X0 - 30) help.setScale((X0 - 30) / help.width);
       c.add(help);
     } else {
-      c.add(s.add.text(34, 30, 'OBJETS AUTORISÉS', { fontFamily: FONT, fontSize: '15px', fontStyle: '700', color: COLORS.accent }).setOrigin(0, 0.5).setLetterSpacing(2));
+      c.add(s.add.text(34, 30, t('inventory.title'), { fontFamily: FONT, fontSize: '15px', fontStyle: '700', color: COLORS.accent }).setOrigin(0, 0.5).setLetterSpacing(2));
       c.add(
-        s.add.text(18, 48, 'Réf. QJ-INV/0 · Toute possession\nnon listée est une trahison.', {
+        s.add.text(18, 48, t('inventory.note'), {
           fontFamily: FONT,
           fontSize: '11px',
           fontStyle: 'italic 500',
@@ -155,7 +156,7 @@ export class Inventory {
           lineSpacing: 2,
         }),
       );
-      c.add(s.add.text(18, 92, 'CLIC  prendre en main\nCLIC DROIT  examiner', { fontFamily: FONT, fontSize: '11px', fontStyle: '600', color: COLORS.text, lineSpacing: 4 }).setAlpha(0.75));
+      c.add(s.add.text(18, 92, t('inventory.helpMouse'), { fontFamily: FONT, fontSize: '11px', fontStyle: '600', color: COLORS.text, lineSpacing: 4 }).setAlpha(0.75));
     }
 
     // cases dans une bande masquée (défilement horizontal si elles débordent)

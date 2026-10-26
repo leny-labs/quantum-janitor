@@ -1,0 +1,93 @@
+# Traduction anglaise du contenu (le français, dans content/, est la source).
+# Format et clés : docs/I18N.md. Ce qui manque ici s'affiche en français.
+#   npm run i18n                 couverture + contrôle des clés
+#   npm run i18n -- missing=en   textes encore à traduire, prêts à coller ici
+#
+# keys : clé stable dérivée des ids du YAML → traduction
+# ink  : texte source Ink (réplique sans « id: », ou choix) → traduction
+
+keys:
+  # pièces
+  scene.placard.title: Broom closet
+  scene.placard.sector: Maintenance Sector · Klepsydra-9
+  scene.couloir.title: Service corridor C
+  scene.couloir.sector: Deck C · Circulation
+  scene.labo.title: Reactor laboratory
+  scene.labo.sector: Improbability · Restricted access
+  scene.panneau.title: Reactor console
+  scene.panneau.sector: Laboratory · Close-up
+
+  # placard
+  scene.placard.hotspot.produits.label: Cleaning products
+  scene.placard.hotspot.seau.label: Bucket
+  scene.placard.hotspot.seau.useLabel: Take
+  scene.placard.hotspot.serpilliere.label: Mop
+  scene.placard.hotspot.serpilliere.useLabel: Take
+  scene.placard.hotspot.bob.label: B.O.B. (robot vacuum)
+  scene.placard.hotspot.casier.label: Gary's locker
+  scene.placard.hotspot.affiche.label: Regulation plaque
+  scene.placard.exit.vers_couloir.label: Service corridor
+
+  # couloir
+  scene.couloir.hotspot.distributeur.label: "“Distrib'Ô-Matic 3000” vending machine"
+  scene.couloir.hotspot.fusibles.label: Fuse box
+  scene.couloir.hotspot.fusibles.useLabel: Take the fuse
+  scene.couloir.hotspot.hublot.label: Porthole
+  scene.couloir.hotspot.compteur.label: “Days without incident” sign
+  scene.couloir.hotspot.lecteur.label: Badge reader
+  scene.couloir.hotspot.bob.label: B.O.B.
+  scene.couloir.exit.vers_placard.label: Broom closet
+  scene.couloir.exit.vers_labo.label: Reactor laboratory
+
+  # labo
+  scene.labo.hotspot.reacteur.label: Mk IV Improbability Reactor
+  scene.labo.hotspot.trappe.label: Coolant intake hatch
+  scene.labo.hotspot.tableau.label: Whiteboard
+  scene.labo.hotspot.bureau.label: Scientists' desk
+  scene.labo.hotspot.bob.label: B.O.B.
+  scene.labo.exit.vers_couloir.label: Service corridor
+  scene.labo.exit.vers_panneau.label: Control panel (close-up)
+
+  # panneau
+  scene.panneau.hotspot.ecran.label: Diagnostic screen
+  scene.panneau.hotspot.logement.label: Stabiliser fuse slot
+  scene.panneau.hotspot.cadran.label: Improbability dial
+  scene.panneau.hotspot.bouton.label: Big red “STABILISE” button
+  scene.panneau.hotspot.bouton.useLabel: Press
+  scene.panneau.exit.retour_labo.label: Back to the lab
+
+  # objets
+  item.seau.name: Bucket
+  item.seau.glyph: BUCKET
+  item.serpilliere.name: Mop
+  item.serpilliere.glyph: MOP
+  item.badge.name: “Garry” badge
+  item.sandwich.name: Dubious sandwich
+  item.sandwich.glyph: SAND
+  item.fusible.name: Fuse 7B
+
+  # personnages
+  character.gary.name: Gary Plunk
+  character.bob.name: B.O.B.
+  character.sylvie.name: SYLVIE — station AI
+  character.reine.name: Her Majesty Blattaria XIV
+
+ink:
+  # bob.ink — B.O.B. en compagnon (exemple de traduction de dialogue Ink)
+  "Le lecteur de badge du labo est couvert de yaourt. Il te faudrait une serpillière. Mouillée. Une serpillière sèche, c'est de la philosophie, pas du ménage.": "The lab's badge reader is covered in yoghurt. You'd need a mop. A wet one. A dry mop is philosophy, not cleaning."
+  "Ta serpillière dégouline sur mes capteurs. Le lecteur du labo attend, Gary.": "Your mop is dripping on my sensors. The lab reader is waiting, Gary."
+  "Le lecteur est propre. Il ne te reste plus qu'à badger, « Garry ».": "The reader is clean. All that's left is to badge in, “Garry”."
+  "Ce labo me met mal à l'aise. Regarde le panneau de contrôle de près. Moi je reste ici. À distance de tristesse.": "This lab makes me uneasy. Take a close look at the control panel. I'll stay here. At a sadness-safe distance."
+  "Tu as un fusible 7B dans la poche et un logement 7B vide sur le panneau. Je ne suis qu'un aspirateur, mais même moi, je vois le motif.": "You have a 7B fuse in your pocket and an empty 7B slot on the panel. I'm only a vacuum cleaner, but even I can see the pattern."
+  "Le fusible 7B... Le distributeur du couloir est sur le circuit 7B. Je dis ça, je ne dis rien. Je ne dis jamais rien. Personne n'écoute.": "The 7B fuse... The corridor vending machine is on circuit 7B. Just saying. I never say anything. Nobody listens."
+  "Le réservoir de refroidissement est vide. Et toi, tu as un seau plein d'un liquide. Techniquement, c'est un liquide. Techniquement.": "The coolant tank is empty. And you have a bucket full of a liquid. Technically, it's a liquid. Technically."
+  "Il ne reste que le gros bouton rouge sur le panneau. Tous les gros boutons rouges finissent par être pressés. C'est de la physique. Ou du destin. Ou de la bêtise.": "All that's left is the big red button on the panel. All big red buttons end up being pressed. It's physics. Or fate. Or stupidity."
+  "« Raconte-moi quelque chose de déprimant. »": "“Tell me something depressing.”"
+  "Raconte-moi quelque chose de déprimant, B.O.B.": "Tell me something depressing, B.O.B."
+  "L'univers se refroidit. Dans des milliards d'années, tout sera froid, immobile et silencieux. Comme mon bac à poussière le dimanche.": "The universe is cooling down. In billions of years, everything will be cold, still and silent. Like my dust bin on Sundays."
+  "J'ai calculé que je passe 94 % de ma vie à aspirer, et 6 % à me demander pourquoi. Le ratio s'aggrave.": "I've calculated that I spend 94% of my life vacuuming, and 6% wondering why. The ratio is getting worse."
+  "Un jour, quelqu'un m'a appelé « le petit robot mignon ». Puis il a vu ma tête. Il s'est excusé.": "Someone once called me “the cute little robot”. Then they saw my face. They apologised."
+  "Les miettes que j'aspire étaient des sandwichs. Ils avaient des rêves. Maintenant ils sont en moi.": "The crumbs I vacuum used to be sandwiches. They had dreams. Now they're inside me."
+  "« Merci, B.O.B. »": "“Thanks, B.O.B.”"
+  "Merci, B.O.B.": "Thanks, B.O.B."
+  "De rien. Rien, c'est ce que je fais de mieux.": "You're welcome. Nothing is what I do best."

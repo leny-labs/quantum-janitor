@@ -69,18 +69,23 @@ export class DialogueRunner {
         for (const t of story.currentTags ?? []) this.applyTag(t, deferred);
         if (text) {
           const line = this.parseLine(text, 'narrateur');
-          await view.showLine(line.speaker, line.text);
+          await view.showLine(line.speaker, this.tr(line.text));
         }
       }
       const choices = story.currentChoices;
       if (choices.length === 0) break;
-      const idx = await view.showChoices(choices.map((c) => c.text));
+      const idx = await view.showChoices(choices.map((c) => this.tr(c.text)));
       story.ChooseChoiceIndex(idx);
     }
     view.close();
     this.state.inkState = story.state.toJson();
     this.state.emit();
     return deferred;
+  }
+
+  /** Traduction d'un texte Ink (clé = texte source) ; sans catalogue : inchangé. */
+  private tr(text: string): string {
+    return this.content.inkText?.get(text.trim()) ?? text;
   }
 
   private applyTag(raw: string, deferred: Action[]): void {

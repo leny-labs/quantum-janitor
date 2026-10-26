@@ -3,6 +3,7 @@
 // centre de la base : il suffit de le poser avec `at(prop, x, 0, z)`.
 import * as THREE from 'three';
 import { at, box, cyl, decal, glow, group, label, mat, mysteryTag, outline, shell, sphere, torus, type DecalMark } from './kit';
+import { t as tr, tl as trl } from '../i18n';
 
 /**
  * Expression d'un personnage pour le studio de portraits (frames de sprite).
@@ -198,7 +199,7 @@ export function badge(w: number): THREE.Group {
   const photo = at(box(w * 0.42, w * 0.5, 0.01, '#ff8c42', { edges: false }), -w * 0.2, h * 0.46, w * 0.035);
   const head = at(sphere(w * 0.1, '#f2c49b', { seg: 10 }), -w * 0.2, h * 0.5, w * 0.045);
   head.scale.z = 0.3;
-  const name = at(label('GARRY', w * 0.42, w * 0.18, { color: '#14102a', bold: true }), w * 0.22, h * 0.52, w * 0.035);
+  const name = at(label(tr('props.badge'), w * 0.42, w * 0.18, { color: '#14102a', bold: true }), w * 0.22, h * 0.52, w * 0.035);
   const bar = at(box(w * 0.42, w * 0.05, 0.01, '#14102a', { edges: false }), w * 0.22, h * 0.36, w * 0.035);
   const clip = at(box(w * 0.3, w * 0.14, w * 0.1, '#c9ced6'), 0, h + w * 0.05, 0);
   return group([card, band, photo, head, name, bar, clip]);
@@ -576,7 +577,7 @@ function reglementTexture(aspect: number): THREE.CanvasTexture {
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   g.font = `${Math.round(bandH * 0.55)}px ${DISPLAY}`;
-  g.fillText('RÈGLEMENT N°1', W / 2, bandY + bandH / 2 + 2);
+  g.fillText(tr('props.rule.band'), W / 2, bandY + bandH / 2 + 2);
   // bande de danger
   const hzY = bandY + bandH + 10;
   g.save();
@@ -596,7 +597,7 @@ function reglementTexture(aspect: number): THREE.CanvasTexture {
   }
   g.restore();
   // consigne
-  const lines = ['NE JAMAIS NETTOYER', 'LE RÉACTEUR'];
+  const lines = trl('props.rule.lines');
   let size = H * 0.13;
   g.font = `${size}px ${DISPLAY}`;
   const widest = Math.max(...lines.map((l) => g.measureText(l).width));
@@ -611,7 +612,7 @@ function reglementTexture(aspect: number): THREE.CanvasTexture {
   // petits caractères
   g.font = `600 ${Math.round(H * 0.035)}px ${UI}`;
   g.fillStyle = '#a39cc4';
-  g.fillText("TOUTE INFRACTION SERA CÉLÉBRÉE · L'ORDINATEUR VOUS AIME", W / 2, textY + size * 1.15 + size * 0.9);
+  g.fillText(tr('props.rule.small'), W / 2, textY + size * 1.15 + size * 0.9);
   // ajout au marqueur, de travers
   g.save();
   g.translate(W * 0.6, H - m - H * 0.09);
@@ -619,7 +620,7 @@ function reglementTexture(aspect: number): THREE.CanvasTexture {
   g.font = `italic 600 ${Math.round(H * 0.05)}px ${UI}`;
   g.fillStyle = '#f6efe2';
   g.globalAlpha = 0.85;
-  g.fillText('n°2 : voir n°1. Sérieusement, Gary.', 0, 0);
+  g.fillText(tr('props.rule.note'), 0, 0);
   g.restore();
   // usure : rayures fines
   g.globalAlpha = 0.06;

@@ -1,6 +1,7 @@
 // Chargement / parsing du contenu. Pur TypeScript, partagé avec l'outil de validation.
 import { parse } from 'yaml';
 import type { Action, CharacterDef, GameContent, Interaction, ItemDef, SceneDef } from './types';
+import { guessUseIcon } from './verbs';
 
 export interface RawContent {
   /** chemin → texte YAML */
@@ -55,6 +56,7 @@ export function parseContent(raw: RawContent): GameContent {
     if (scenes.has(def.id)) throw new Error(`${path} : scène "${def.id}" définie deux fois`);
     def.hotspots ??= [];
     def.exits ??= [];
+    for (const h of def.hotspots) if (h.use) h.useIcon ??= guessUseIcon(h.useLabel);
     scenes.set(def.id, def);
   }
 

@@ -5,13 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run validate && tsc --noEmit && vite build",
+    "build": "npm run validate && npm run check:i18n && tsc --noEmit && vite build",
     "preview": "vite preview",
     "validate": "tsx tools/validate-content.ts",
     "typecheck": "tsc --noEmit",
     "playthrough": "tsx tools/playthrough.ts",
     "bake:portraits": "tsx tools/bake-portraits.ts",
-    "check:tap": "tsx tools/tap-check.ts"
+    "check:tap": "tsx tools/tap-check.ts",
+    "check:i18n": "tsx tools/i18n-hardcoded.ts && tsx tools/i18n-content.ts",
+    "i18n": "tsx tools/i18n-content.ts"
   },
   "dependencies": {
     "@fontsource/bungee": "^5.3.0",

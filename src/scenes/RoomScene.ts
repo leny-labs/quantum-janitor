@@ -15,7 +15,8 @@ import { makeButton } from '../ui/Button';
 import { DialogueBox } from '../ui/DialogueBox';
 import { HoverLabel } from '../ui/HoverLabel';
 import { ProgressCue } from '../ui/ProgressCue';
-import { drawNavButton, verbCursor, verbIcon, type VerbIcon } from '../ui/chrome';
+import { drawNavButton, verbCursor, type VerbIcon } from '../ui/chrome';
+import { t, tl } from '../i18n';
 import { isTouch, uiPx } from '../ui/input';
 import { playMusic, themeForScene } from '../ui/music';
 import { makeMusicToggle } from '../ui/MusicToggle';
@@ -24,14 +25,6 @@ import { PressRing } from '../ui/PressRing';
 import { RoomPlaque } from '../ui/RoomPlaque';
 import { VerbCoin } from '../ui/VerbCoin';
 import { FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
-
-const WRONG_ITEM = [
-  'Utiliser {item} sur {target} ? Même moi, je trouve ça bête.',
-  'Non. {item} et {target}, ça ne va pas ensemble. Comme moi et la promotion.',
-  "Rien ne se passe. L'univers reste stable. Pour l'instant.",
-  "J'ai essayé. Intérieurement. Ça n'a pas marché.",
-];
-const WRONG_COMBINE = ["Je ne vais pas combiner {item} avec {target}. J'ai des principes. Peu, mais j'en ai."];
 
 /** La scène Phaser principale : une vue fixe + inventaire + dialogues. */
 export class RoomScene extends Phaser.Scene implements ActionHost {
@@ -114,7 +107,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
 
     // HUD
     this.plaque = new RoomPlaque(this);
-    const menu = (this.menuButton = makeButton(this, W - 14, 10, 'Menu', () => !this.busy && this.scene.start('Title'), {
+    const menu = (this.menuButton = makeButton(this, W - 14, 10, t('hud.menu'), () => !this.busy && this.scene.start('Title'), {
       size: uiPx(this, 18, 14),
       align: 'right',
       valign: 'top',
@@ -187,7 +180,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.room.highlight(null);
     if (!this.busy) setCursor(this, held ? 'crosshair' : 'default');
     this.debugText?.setText(
-      `[debug] scène=${state.scene}\nflags=${[...state.flags].join(',') || '∅'}\nobjets=${state.items.join(',') || '∅'}`,
+      t('hud.debug', { scene: state.scene, flags: [...state.flags].join(',') || '∅', items: state.items.join(',') || '∅' }),
     );
   }
 
@@ -239,10 +232,6 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     }
   }
 
-  private fill(text: string, item: string, target: string): string {
-    return text.replace('{item}', item).replace('{target}', target);
-  }
-
   private pick(list: string[]): string {
     return list[Math.floor(Math.random() * list.length)];
   }
@@ -257,21 +246,21 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.dropButton = null;
     if (!heldName || !isTouch()) return;
     this.heldItem.setVisible(false);
-    this.dropButton = makeButton(this, 14, ROOM_H - 14, 'Reposer', () => this.session.state.select(null), {
+    this.dropButton = makeButton(this, 14, ROOM_H - 14, t('hud.drop'), () => this.session.state.select(null), {
       size: uiPx(this, 20, 15),
       align: 'left',
-      kicker: `EN MAIN : ${heldName.toUpperCase()}`,
+      kicker: t('hud.held', { item: heldName.toUpperCase() }),
     }).setDepth(700);
     this.dropButton.setY(this.dropButton.y - this.dropButton.height / 2);
   }
 
-  private verbIcon(v: HotspotVerb): VerbIcon {
-    return v.kind === 'talk' ? 'talk' : v.kind === 'look' ? 'look' : verbIcon(v.label);
+  private verbIcon(v: HotspotVerb, h: Hotspot): VerbIcon {
+    return v.kind === 'talk' ? 'talk' : v.kind === 'look' ? 'look' : (h.useIcon ?? 'use');
   }
 
   /** Ouvre le verb coin d'un hotspot au point (x, y). */
   private openCoin(h: Hotspot, x: number, y: number, touch: boolean): void {
-    const verbs = hotspotVerbs(h).map((v) => ({ label: v.label, icon: this.verbIcon(v), run: () => void this.act(v.action, v.kind === 'look' ? h.id : undefined) }));
+    const verbs = hotspotVerbs(h).map((v) => ({ label: v.label, icon: this.verbIcon(v, h), run: () => void this.act(v.action, v.kind === 'look' ? h.id : undefined) }));
     this.hover.set(null);
     setCursor(this, 'default');
     this.coin.open(x, y, h.label, verbs, { touch });
@@ -288,7 +277,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const { state, content } = this.session;
     if (!state.selectedItem) return;
     const item = content.items.get(state.selectedItem)!;
-    const reaction = h.useItem?.[item.id] ?? h.useItemDefault ?? this.fill(this.pick(WRONG_ITEM), item.name, h.label);
+    const reaction = h.useItem?.[item.id] ?? h.useItemDefault ?? this.pick(tl('room.wrongItem', { item: item.name, target: h.label }));
     state.select(null);
     void this.act(reaction);
   }
@@ -318,13 +307,13 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     }
     const held = state.selectedItem ? content.items.get(state.selectedItem) : null;
     if (held) {
-      this.hover.set(`Utiliser ${held.name} sur ${h.label}`);
+      this.hover.set(t('hud.useOn', { item: held.name, target: h.label }));
       setCursor(this, 'crosshair');
       return;
     }
     const v = smartVerb(h);
-    this.hover.set(v ? `${v.label} : ${h.label}` : `${h.label}  ⋯`);
-    setCursor(this, v ? verbCursor(this.verbIcon(v)) : 'context-menu');
+    this.hover.set(v ? t('hud.smart', { verb: v.label, target: h.label }) : t('hud.more', { target: h.label }));
+    setCursor(this, v ? verbCursor(this.verbIcon(v, h)) : 'context-menu');
   }
 
   private onHoverExit(e: Exit | null): void {
@@ -334,7 +323,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       setCursor(this, this.session.state.selectedItem ? 'crosshair' : 'default');
       return;
     }
-    this.hover.set(`→ ${e.label}`);
+    this.hover.set(t('hud.exit', { exit: e.label }));
     setCursor(this, EXIT_CURSORS[e.dir ?? 'right']);
   }
 
@@ -347,7 +336,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     }
     const def = content.items.get(id)!;
     const held = state.selectedItem && state.selectedItem !== id ? content.items.get(state.selectedItem) : null;
-    this.hover.set(held ? `Combiner ${held.name} avec ${def.name}` : def.name);
+    this.hover.set(held ? t('hud.combine', { item: held.name, target: def.name }) : def.name);
   }
 
   private onClickHotspot(h: Hotspot, p: Phaser.Input.Pointer): void {
@@ -378,7 +367,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const { state } = this.session;
     state.selectedItem = null;
     if (!state.check(e.requires)) {
-      void this.act(e.lockedText ?? "C'est fermé.");
+      void this.act(e.lockedText ?? t('room.locked'));
       return;
     }
     void this.act([{ goto: e.to }]);
@@ -454,7 +443,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     state.select(null);
     const reaction =
       resolveCombine(content, held, id) ??
-      this.fill(this.pick(WRONG_COMBINE), content.items.get(held)!.name, def.name);
+      this.pick(tl('room.wrongCombine', { item: content.items.get(held)!.name, target: def.name }));
     void this.act(reaction);
   }
 

@@ -3,6 +3,7 @@ import type { Condition, Rect } from '../../engine/types';
 import { at, box, cyl, glow, label, mat, plane, sphere, stripeTexture, torus } from '../kit';
 import { fusible } from '../props';
 import type { CameraSpec, Stage } from '../Stage';
+import { t as tr } from '../../i18n';
 
 const FULL = { flags: ['refroidissement_verse'] };
 
@@ -57,7 +58,7 @@ export function consolePanel(s: Stage): ConsolePanel {
   for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) desk.add(at(sphere(bevel * 0.7, '#9aa5b1'), fr.x + sx * (fr.w / 2 - bevel * 2), fr.y + sy * (fr.h / 2 - bevel * 2), 0.04));
 
   const hd = fitted([351, 110, 577, 16]);
-  on([351, 110, 577, 16], 0.01, label("CONSOLE DE STABILISATION — RÉACTEUR D'IMPROBABILITÉ Mk IV", hd.w, hd.h, { color: '#9aa5b1', bold: true }));
+  on([351, 110, 577, 16], 0.01, label(tr('props.panneau.header'), hd.w, hd.h, { color: '#9aa5b1', bold: true }));
 
   // ── écran de diagnostic ──
   const ec = fitted(s.rect('ecran'));
@@ -65,9 +66,9 @@ export function consolePanel(s: Stage): ConsolePanel {
   const scr = fitted([446, 146, 390, 144]);
   on([446, 146, 390, 144], 0.085, plane(scr.w, scr.h, '#050a08', { glow: true }), undefined, 'ecran');
   const screens: [Condition, string, string, number][] = [
-    [{ notFlags: ['panneau_allume'] }, '— HORS TENSION —\n\nfusible stabilisateur 7B absent', '#335544', 34],
-    [{ flags: ['panneau_allume'], notFlags: ['refroidissement_verse'] }, 'ALIMENTATION ....... OK\nREFROIDISSEMENT .... 0 %\nSTABILITÉ ...... CRITIQUE\n\n> REMPLIR LE RÉSERVOIR', '#7fffd4', 36],
-    [FULL, 'ALIMENTATION ....... OK\nREFROIDISSEMENT .. 100 %\nCOMPOSITION ...... ???\n\n> APPUYER SUR STABILISER', '#ffd166', 36],
+    [{ notFlags: ['panneau_allume'] }, tr('props.panneau.off'), '#335544', 34],
+    [{ flags: ['panneau_allume'], notFlags: ['refroidissement_verse'] }, tr('props.panneau.empty'), '#7fffd4', 36],
+    [FULL, tr('props.panneau.full'), '#ffd166', 36],
   ];
   for (const [cond, text, color, size] of screens) on([446, 146, 390, 144], 0.09, label(text, scr.w * 0.95, scr.h * 0.92, { color, mono: true, bold: true, size }), cond);
   const scan = plane(scr.w, scr.h * 0.04, '#7fffd4', { glow: true, opacity: 0.12 });
@@ -80,7 +81,7 @@ export function consolePanel(s: Stage): ConsolePanel {
   const lg = fitted(s.rect('logement'));
   on(s.rect('logement'), 0.02, plate(lg.w * 0.92, lg.h * 0.9, '#2a3444', '#ffd166'), undefined, 'logement');
   const lgl = fitted([269, 326, 122, 33]);
-  on([269, 326, 122, 33], 0.07, label('STABILISATEUR\n7B', lgl.w, lgl.h, { color: '#ffd166', bold: true }), undefined, 'logement');
+  on([269, 326, 122, 33], 0.07, label(tr('props.panneau.slot'), lgl.w, lgl.h, { color: '#ffd166', bold: true }), undefined, 'logement');
   const hole = fitted([312, 369, 36, 36]);
   on([312, 369, 36, 36], 0.07, box(hole.w, hole.h, 0.02, '#000000', { edges: false }), undefined, 'logement');
   const fuse = fusible(hole.w * 0.9);
@@ -91,7 +92,7 @@ export function consolePanel(s: Stage): ConsolePanel {
   const cd = fitted(s.rect('cadran'));
   on(s.rect('cadran'), 0.02, plate(cd.w * 0.95, cd.h * 0.88, '#222c3a', '#9aa5b1'), undefined, 'cadran');
   const cl = fitted([496, 337, 260, 22]);
-  on([496, 337, 260, 22], 0.07, label('PROBABLE   ·   IMPROBABLE   ·   GARY', cl.w, cl.h, { color: '#ffffff', bold: true }), undefined, 'cadran');
+  on([496, 337, 260, 22], 0.07, label(tr('props.panneau.dial'), cl.w, cl.h, { color: '#ffffff', bold: true }), undefined, 'cadran');
   const scale = fitted([503, 376, 246, 29]);
   const track = plane(scale.w, scale.h, '#ffffff', { map: scaleTexture() });
   on([503, 376, 246, 29], 0.07, track, undefined, 'cadran');
@@ -117,9 +118,9 @@ export function consolePanel(s: Stage): ConsolePanel {
   housing.add(ring);
   const cap = cyl(bt.h * 0.3, bt.h * 0.33, 0.18, '#d62839', { seg: 24 });
   cap.rotation.x = Math.PI / 2;
-  const btn = at(new THREE.Group().add(cap, at(label('STABILISER', bt.h * 0.5, bt.h * 0.13, { color: '#ffffff', bold: true }), 0, 0, 0.1)), 0, bt.h * 0.04, 0.14);
+  const btn = at(new THREE.Group().add(cap, at(label(tr('props.panneau.button'), bt.h * 0.5, bt.h * 0.13, { color: '#ffffff', bold: true }), 0, 0, 0.1)), 0, bt.h * 0.04, 0.14);
   housing.add(btn, at(torus(bt.h * 0.33, 0.02, '#ffffff'), 0, bt.h * 0.04, 0.08));
-  housing.add(at(label('(ne pas appuyer sans raison)', bt.w * 0.8, bt.h * 0.1, { color: '#ff99aa' }), 0, -bt.h * 0.38, 0.06));
+  housing.add(at(label(tr('props.panneau.buttonNote'), bt.w * 0.8, bt.h * 0.1, { color: '#ff99aa' }), 0, -bt.h * 0.38, 0.06));
   on(s.rect('bouton'), 0.02, housing, undefined, 'bouton');
   const ready = glow('#ff5c7a', bt.h * 1.3, 0.4);
   on(s.rect('bouton'), 0.3, ready, FULL);

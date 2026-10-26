@@ -36,5 +36,6 @@ export function setCursor(scene: Phaser.Scene, cursor: string): void {
 /** Polices embarquées : à charger avant le premier texte Phaser / canvas. */
 export async function loadFonts(): Promise<void> {
   const specs = ['400 20px Bungee', '500 20px "Chakra Petch"', '600 20px "Chakra Petch"', '700 20px "Chakra Petch"', 'italic 500 20px "Chakra Petch"'];
-  await Promise.all(specs.map((s) => document.fonts.load(s, 'AÀÉé«»…').catch(() => [])));
+  const sample = 'AÀÉé«»…'; // i18n-ignore : échantillon de glyphes
+  await Promise.all(specs.map((s) => document.fonts.load(s, sample).catch(() => [])));
 }

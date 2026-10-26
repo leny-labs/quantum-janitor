@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { SpriteTalk, TalkingPortrait, TypewriterMouth, typewrite } from 'talking-portrait';
 import type { BlinkOptions, MouthOptions, TypewriteHandle } from 'talking-portrait';
 import type { DialogueView } from '../engine/DialogueRunner';
+import { t } from '../i18n';
 import type { CharacterDef } from '../engine/types';
 import { SHEET, portraitKey, sheetKey } from '../three/Studio';
 import { drawHazard, drawPanel } from './chrome';
@@ -125,7 +126,7 @@ export class DialogueBox implements DialogueView {
     this.nameTab = scene.add.graphics();
     this.nameText = scene.add.text(TEXT_X + 14, PANEL_Y - 2, '', { fontFamily: FONT, fontSize: `${uiPx(scene, 17, 13)}px`, fontStyle: '700', color: '#07050f' }).setOrigin(0, 0.5).setLetterSpacing(2);
     this.channel = scene.add
-      .text(PANEL_X + PANEL_W - 28, PANEL_Y + 18, 'CANAL 7 · CONVERSATION ENREGISTRÉE POUR VOTRE SÉCURITÉ', { fontFamily: FONT, fontSize: '10px', fontStyle: '600', color: COLORS.dim })
+      .text(PANEL_X + PANEL_W - 28, PANEL_Y + 18, t('dialogue.channel'), { fontFamily: FONT, fontSize: '10px', fontStyle: '600', color: COLORS.dim })
       .setOrigin(1, 0.5)
       .setLetterSpacing(1.5)
       // mention décorative, illisible au doigt : masquée
@@ -139,7 +140,7 @@ export class DialogueBox implements DialogueView {
       lineSpacing: 7,
     });
     this.hint = scene.add
-      .text(PANEL_X + PANEL_W - 30, PANEL_Y + PANEL_H - 26, 'CONTINUER  ▼', { fontFamily: FONT, fontSize: `${uiPx(scene, 12, 12)}px`, fontStyle: '700', color: COLORS.accent })
+      .text(PANEL_X + PANEL_W - 30, PANEL_Y + PANEL_H - 26, t('dialogue.continue'), { fontFamily: FONT, fontSize: `${uiPx(scene, 12, 12)}px`, fontStyle: '700', color: COLORS.accent })
       .setOrigin(1, 0.5)
       .setLetterSpacing(2);
     scene.tweens.add({ targets: this.hint, alpha: 0.35, duration: 650, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
@@ -341,7 +342,7 @@ export class DialogueBox implements DialogueView {
     const lineH = Math.min(want, (H - 40 - CHOICE_PAD) / choices.length);
     const panelY = Math.min(PANEL_Y, H - 16 - CHOICE_PAD - lineH * choices.length);
     if (panelY !== this.panelY) this.layoutPanel(panelY);
-    this.setName('Réponse — formulaire R-12', COLORS.hover);
+    this.setName(t('dialogue.choices'), COLORS.hover);
     this.open();
     const fontSize = touch ? Math.round(Math.min(28, lineH * 0.5)) : 22;
     return new Promise((resolve) => {

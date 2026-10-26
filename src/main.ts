@@ -8,8 +8,12 @@ import { EndScene } from './scenes/EndScene';
 import { IntroScene } from './scenes/IntroScene';
 import { RoomScene } from './scenes/RoomScene';
 import { TitleScene } from './scenes/TitleScene';
+import { lang, t } from './i18n';
 import { installMusic } from './ui/music';
 import { H, W, loadFonts } from './ui/theme';
+
+document.documentElement.lang = lang();
+document.title = t('meta.docTitle');
 
 // Les polices doivent être prêtes avant le premier texte (Phaser les fige en texture).
 await loadFonts();

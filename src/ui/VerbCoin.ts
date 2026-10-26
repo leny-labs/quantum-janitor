@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { t } from '../i18n';
 import { verbIconScale, verbIconTexture, type VerbIcon } from './chrome';
 import { cssToGame, uiPx } from './input';
 import { COLORS, FONT, H, ROOM_H, W, hex } from './theme';
@@ -114,7 +115,7 @@ export class VerbCoin {
       .setOrigin(0.5)
       .setLetterSpacing(1.5);
     const note = s.add
-      .text(0, 14 + chipH - 3, 'Usage autorisé par SYLVIE · consigné', { fontFamily: FONT, fontSize: `${noteSize}px`, fontStyle: 'italic 500', color: COLORS.dim })
+      .text(0, 14 + chipH - 3, t('verbs.coinNote'), { fontFamily: FONT, fontSize: `${noteSize}px`, fontStyle: 'italic 500', color: COLORS.dim })
       .setOrigin(0.5, 0)
       .setAlpha(0.9);
     const paintChip = (text: string, on: boolean) => {

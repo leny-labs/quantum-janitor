@@ -33,7 +33,10 @@ npm run dev          # http://localhost:5173
 | `npm run build` | validation du contenu + typecheck + build dans `dist/` |
 | `npm run preview` | sert le build localement |
 | `npm run validate` | vérifie les références croisées du contenu |
-| `npm run playthrough` | rejoue la solution complète sans navigateur (`-- -v` pour lire les dialogues) |
+| `npm run playthrough` | rejoue la solution complète sans navigateur (`-- -v` pour lire les dialogues, `-- lang=en` avec la traduction) |
+| `npm run check:tap` | Playwright tactile (844×390, 390×844) + souris : choix de dialogue, inventaire, verb coin, flèches, ♪, MENU |
+| `npm run check:i18n` | aucune chaîne affichable en dur dans `src/` + cohérence des catalogues de traduction |
+| `npm run i18n` | couverture des traductions du contenu (`-- missing=en` : textes à traduire) |
 
 ## Comment jouer
 
@@ -65,6 +68,9 @@ npm run dev          # http://localhost:5173
   (localStorage) ; « Revoir l'intro » sur l'écran titre, ou `?intro=1`.
 - **Dialogues** : clic, Espace ou Entrée pour avancer ; touches 1–9 pour les choix.
 - Sauvegarde **automatique** (localStorage). « Menu » ramène à l'écran titre.
+- **Langue** : bouton « Langue : Français » sur l'écran titre, ou `?lang=en` /
+  `?lang=fr` (mémorisé). Interface complète en anglais ; dialogues pas encore
+  traduits (repli en français). Voir [docs/I18N.md](docs/I18N.md).
 - **Musique** : bouton ♪ en haut à droite (à côté de « Menu », et sur l'écran
   titre) ou touche **M** pour couper / remettre ; réglage mémorisé
   (localStorage). Les effets sonores ne sont pas concernés.

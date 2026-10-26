@@ -4,7 +4,7 @@ import { getSession } from '../session';
 /** Durée de l'appui long (tactile) qui ouvre le verb coin. */
 export const LONG_PRESS_MS = 400;
 
-const coarse = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+const coarse = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches; // i18n-ignore
 
 /**
  * Mode tactile : `?touch=1|0` force, sinon le pointeur de l'événement

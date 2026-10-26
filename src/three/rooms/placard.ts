@@ -3,6 +3,7 @@ import { at, beam, box, cyl, glow, label, mat, neon, pool, sphere, stripeTexture
 import { bob, bottle, reglementPlaque, seau, serpilliere } from '../props';
 import type { RoomBuild } from './index';
 import { against, pipe, shell, wallPanels } from './shell';
+import { t as tr } from '../../i18n';
 
 /** Placard à balais : exigu, vert-de-gris, une ampoule nue. */
 export const placard: RoomBuild = {
@@ -56,7 +57,7 @@ export const placard: RoomBuild = {
 
     // néon de propagande : Sylvie veille (avec amour)
     const nf = s.fit([775, 205, 150, 72], 0.05);
-    const sylvie = at(neon('SYLVIE\nVEILLE ♥', nf.w, nf.h, '#ff7ab8', { plate: '#160a14' }), nf.x, nf.y, 0.05);
+    const sylvie = at(neon(tr('props.placard.neon'), nf.w, nf.h, '#ff7ab8', { plate: '#160a14' }), nf.x, nf.y, 0.05);
     const sylvieGlow = at(pool('#ff7ab8', nf.w * 2.2, nf.h * 2.4, 0.16), nf.x, nf.y, 0.03);
     sylvieGlow.rotation.x = 0;
     s.add(sylvie, sylvieGlow);
@@ -67,7 +68,7 @@ export const placard: RoomBuild = {
 
     // inscription pochoir
     const sign = s.fit([440, 110, 400, 60], 0.01);
-    s.add(at(label('PLACARD À BALAIS\nSecteur Entretien — Klepsydra-9', sign.w, sign.h, { color: '#7fa08d', bold: true }), sign.x, sign.y, 0.01));
+    s.add(at(label(tr('props.placard.sign'), sign.w, sign.h, { color: '#7fa08d', bold: true }), sign.x, sign.y, 0.01));
 
     // étagères
     const SHELF_Z = 0.35;
@@ -83,10 +84,10 @@ export const placard: RoomBuild = {
     // Étiquettes papier collées : nom en gras + pictogramme ; fiole « ??? ».
     type Kind = Parameters<typeof bottle>[4];
     const products: [rect: [number, number, number, number], color: string, tag: Parameters<typeof bottle>[3], kind: Kind, shelf: number][] = [
-      [[70, 40, 50, 50], '#b33a3a', { mark: 'drop', name: 'JAVEL\nQ.' }, 'square', 0],
-      [[140, 30, 40, 60], '#3a8fb3', { mark: 'swirl', name: 'BRISE\nDU VIDE' }, 'round', 0],
-      [[200, 50, 70, 40], '#8f3ab3', { mark: 'atom', name: 'ANTI-\nFLUX' }, 'jar', 0],
-      [[80, 170, 90, 60], '#c9a13a', { mark: 'flame', name: 'DÉGRAISSANT\nABSOLU' }, 'square', 1],
+      [[70, 40, 50, 50], '#b33a3a', { mark: 'drop', name: tr('props.placard.bleach') }, 'square', 0],
+      [[140, 30, 40, 60], '#3a8fb3', { mark: 'swirl', name: tr('props.placard.breeze') }, 'round', 0],
+      [[200, 50, 70, 40], '#8f3ab3', { mark: 'atom', name: tr('props.placard.antiflux') }, 'jar', 0],
+      [[80, 170, 90, 60], '#c9a13a', { mark: 'flame', name: tr('props.placard.degreaser') }, 'square', 1],
       [[200, 180, 60, 50], '#3ab36b', null, 'flask', 1],
     ];
     for (const [rect, color, tag, kind, shelf] of products) {
@@ -120,7 +121,7 @@ export const placard: RoomBuild = {
     locker.add(at(box(lw, cs.h, 0.9, '#55626e'), 0, cs.h / 2, 0));
     for (let i = 0; i < 4; i++) locker.add(at(box(lw * 0.7, 0.06, 0.02, '#2e353c', { edges: false }), 0, cs.h * 0.86 - i * 0.14, 0.46));
     locker.add(at(box(0.06, 0.4, 0.06, '#c9ced6'), lw * 0.36, cs.h * 0.5, 0.48));
-    locker.add(at(label('G. PLUNK\n(intérim)', lw * 0.8, 0.55, { color: '#1a1a1a', bg: '#e8e1c8', bold: true, lit: true }), 0, cs.h * 0.6, 0.455));
+    locker.add(at(label(tr('props.placard.locker'), lw * 0.8, 0.55, { color: '#1a1a1a', bg: '#e8e1c8', bold: true, lit: true }), 0, cs.h * 0.6, 0.455));
     const dent = at(sphere(0.18, '#4a5560', { seg: 8 }), -lw * 0.2, cs.h * 0.3, 0.42);
     dent.scale.z = 0.3;
     locker.add(dent);
