@@ -2,8 +2,9 @@
 // Les travels caméra restent silencieux : seuls les gestes font du bruit.
 import type Phaser from 'phaser';
 import type { BobCue } from '../three/rooms/bobrepas';
+import type { FuseCue } from '../three/rooms/fusible';
 import type { LecteurCue } from '../three/rooms/lecteur';
-import { beep, chime, glitch, slurp, splat, squeak, thud, whoosh } from '../ui/sfx';
+import { beep, buzz, chime, glitch, powerDown, slurp, splat, squeak, thud, whoosh } from '../ui/sfx';
 
 export function lecteurCue(scene: Phaser.Scene, c: LecteurCue): void {
   switch (c) {
@@ -44,5 +45,18 @@ export function bobCue(scene: Phaser.Scene, c: BobCue): void {
       return splat();
     case 'grab':
       return chime([784, 1046]);
+  }
+}
+
+export function fuseCue(scene: Phaser.Scene, c: FuseCue): void {
+  switch (c) {
+    case 'zap':
+      buzz();
+      scene.cameras.main.shake(140, 0.004);
+      return;
+    case 'flicker':
+      return glitch();
+    case 'die':
+      return powerDown();
   }
 }

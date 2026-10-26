@@ -11,6 +11,7 @@ import { getSession, type Session } from '../session';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { CLOSEUPS, ROOMS } from '../three/rooms';
 import { BobRig } from '../three/rooms/bobrepas';
+import { FuseRig } from '../three/rooms/fusible';
 import { LecteurRig } from '../three/rooms/lecteur';
 import { VendingRig } from '../three/rooms/vending';
 import { makeButton } from '../ui/Button';
@@ -26,7 +27,7 @@ import { PressRing } from '../ui/PressRing';
 import { RoomPlaque } from '../ui/RoomPlaque';
 import { VerbCoin } from '../ui/VerbCoin';
 import { playVending } from './VendingGame';
-import { bobCue, lecteurCue } from './beats';
+import { bobCue, fuseCue, lecteurCue } from './beats';
 import { FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
 
 /** La suite du YAML sans les lignes du narrateur (quand une animation les montre déjà). */
@@ -374,6 +375,25 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     }
   }
 
+  /** Fusible 7B arraché : étincelles, la lumière du circuit hoquette et meurt. */
+  private async fuse(rig: FuseRig, reaction: Interaction): Promise<void> {
+    rig.onCue = (c) => fuseCue(this, c);
+    try {
+      await this.beat(FuseRig.SHOT, () => rig.pull(), reaction, true);
+    } finally {
+      rig.onCue = null;
+    }
+  }
+
+  /** Verbe d'un hotspot ; certains gestes clés ont leur petite animation. */
+  private runVerb(h: Hotspot, v: HotspotVerb): void {
+    const { state } = this.session;
+    const fuse =
+      h.id === 'fusibles' && v.kind === 'use' && state.hasFlag('sait_fusible') && !state.hasFlag('fusible_retire') ? this.room.rig<FuseRig>('fusible') : null;
+    if (fuse) return void this.locked(() => this.fuse(fuse, v.action));
+    void this.act(v.action, v.kind === 'look' ? h.id : undefined);
+  }
+
   private pick(list: string[]): string {
     return list[Math.floor(Math.random() * list.length)];
   }
@@ -402,7 +422,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
 
   /** Ouvre le verb coin d'un hotspot au point (x, y). */
   private openCoin(h: Hotspot, x: number, y: number, touch: boolean): void {
-    const verbs = hotspotVerbs(h).map((v) => ({ label: v.label, icon: this.verbIcon(v, h), run: () => void this.act(v.action, v.kind === 'look' ? h.id : undefined) }));
+    const verbs = hotspotVerbs(h).map((v) => ({ label: v.label, icon: this.verbIcon(v, h), run: () => this.runVerb(h, v) }));
     this.hover.set(null);
     setCursor(this, 'default');
     this.coin.open(x, y, h.label, verbs, { touch });
@@ -411,7 +431,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   /** Action du clic gauche / tap court. */
   private smartAction(h: Hotspot, p: Phaser.Input.Pointer, touch: boolean): void {
     const v = smartVerb(h);
-    if (v) void this.act(v.action, v.kind === 'look' ? h.id : undefined);
+    if (v) this.runVerb(h, v);
     else this.openCoin(h, p.x, p.y, touch);
   }
 

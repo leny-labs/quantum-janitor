@@ -3,6 +3,7 @@ import { at, box, cyl, glow, label, mat, neon, plane, pool, sphere, starTexture,
 import { bob, fusible } from '../props';
 import type { RoomBuild } from './index';
 import { against, backDoor, pipe, shell, wallPanels } from './shell';
+import { FuseRig } from './fusible';
 import { LecteurRig } from './lecteur';
 import { VendingRig } from './vending';
 import { t as tr } from '../../i18n';
@@ -158,6 +159,7 @@ export const couloir: RoomBuild = {
     lid.position.z = 0.2 + Math.sin(1.25) * fb.w * 0.45;
     fuseBox.add(lid);
     s.spot('fusibles', at(fuseBox, fb.x, fb.y, 0.25));
+    s.expose('fusible', new FuseRig(s, { box: fuseBox, fuse, w: fb.w, lit: [neonOn, shineOn, motto, mottoGlow, glassOn, header], light: lightOn }));
 
     // ── hublot ──
     const hb = s.fit(s.rect('hublot'), 0.05);

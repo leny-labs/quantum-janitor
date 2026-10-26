@@ -192,3 +192,19 @@ export function slurp(): void {
   noise(a, a.currentTime, 0.4, 0.09, 400, 3200);
   tone(a, 'sine', 300, 900, a.currentTime + 0.05, 0.3, 0.05);
 }
+
+/** Arc électrique : bzz grave et grésillement. */
+export function buzz(): void {
+  const a = ctx();
+  if (!a) return;
+  tone(a, 'sawtooth', 110, 90, a.currentTime, 0.32, 0.06);
+  noise(a, a.currentTime, 0.25, 0.1, 4000, 1500);
+}
+
+/** Extinction : « bzzouiiip » qui s'effondre. */
+export function powerDown(): void {
+  const a = ctx();
+  if (!a) return;
+  tone(a, 'square', 520, 40, a.currentTime, 0.5, 0.04);
+  tone(a, 'sine', 260, 30, a.currentTime, 0.55, 0.12);
+}
