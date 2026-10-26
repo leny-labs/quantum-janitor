@@ -28,7 +28,7 @@ export function titleShot(width: number, height: number): HeroShot {
       { x: 0.9, y: 0.3, r: 0.3, color: '#ff4f9a22' },
       { x: 0.42, y: 0.75, r: 0.3, color: '#7fffd414' },
     ],
-    planet: { x: 0.6, y: 0.97, r: 0.24, color: '#6a5ae0', band: '#5646c4', shade: '#1c1450', ring: '#b8a8ff55' },
+    planet: { x: 0.6, y: 0.87, r: 0.24, color: '#6a5ae0', band: '#5646c4', shade: '#1c1450', ring: '#b8a8ff55' },
     stars: 420,
     seed: 7,
   });
@@ -46,7 +46,7 @@ export function titleShot(width: number, height: number): HeroShot {
   scene.add(rimCyan, rimPink);
 
   // ── l'anneau du réacteur d'improbabilité (derrière le héros) ──
-  const RING = new THREE.Vector3(6.4, 3, -10);
+  const RING = new THREE.Vector3(5.6, 3.6, -10);
   const reactor = new THREE.Group();
   reactor.add(torus(3.3, 0.42, '#5b2fb0'));
   reactor.add(at(torus(2.78, 0.08, '#7fffd4', { glow: true }), 0, 0, 0.12));
@@ -58,10 +58,11 @@ export function titleShot(width: number, height: number): HeroShot {
     reactor.add(clamp);
   }
   reactor.position.copy(RING);
+  reactor.scale.setScalar(0.6);
   reactor.rotation.set(0.12, -0.42, 0);
   scene.add(reactor);
-  const core = at(glow('#8a5cff', 10, 0.5), RING.x, RING.y, RING.z - 0.8);
-  const core2 = at(glow('#7fffd4', 5, 0.3), RING.x, RING.y, RING.z - 0.5);
+  const core = at(glow('#8a5cff', 6, 0.5), RING.x, RING.y, RING.z - 0.8);
+  const core2 = at(glow('#7fffd4', 3, 0.3), RING.x, RING.y, RING.z - 0.5);
   scene.add(core, core2);
 
   // ── clin d'œil : un petit seau à la dérive, très loin ──
