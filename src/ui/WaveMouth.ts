@@ -1,4 +1,4 @@
-// Bouche-onde procédurale d'un portrait-planche (SYLVIE) : une polyligne cyan
+// Bouche-onde procédurale d'un portrait-planche (SYLVIE, B.O.B.) : une polyligne cyan
 // lumineuse dessinée par-dessus la planche (PORTRAIT_WAVES dans Studio.ts),
 // façon B.O.B. / Bender. Au repos, un signal plat qui ondule à peine ; quand
 // le personnage parle, des amplitudes qui bougent. L'humeur change le tracé.
@@ -63,7 +63,8 @@ export class WaveMouth {
     const t = this.t * f.speed;
     // enveloppe de parole : syllabes (deux sinus décalés) + un peu de bruit
     const speech = this.level * (0.35 + 0.65 * Math.abs(Math.sin(t * 7.3) * Math.sin(t * 3.1 + 1.3))) * (0.85 + Math.random() * 0.15);
-    const rest = 0.09 + 0.04 * Math.sin(t * 1.7);
+    const r0 = this.def.rest ?? 0.09;
+    const rest = r0 * (1 + (4 / 9) * Math.sin(t * 1.7));
     const a = Math.max(rest, speech) * amp;
     const pts: Phaser.Math.Vector2[] = [];
     for (let i = 0; i <= POINTS; i++) {
@@ -81,15 +82,17 @@ export class WaveMouth {
     }
     const g = this.g;
     const k = this.k;
+    const glow = this.def.color ?? CYAN;
+    const core = this.def.core ?? CORE;
     g.clear();
     // halo, lueur, cœur
-    g.lineStyle(9 * k, CYAN, 0.12);
+    g.lineStyle(9 * k, glow, 0.12);
     g.strokePoints(pts);
-    g.lineStyle(5 * k, CYAN, 0.3);
+    g.lineStyle(5 * k, glow, 0.3);
     g.strokePoints(pts);
-    g.lineStyle(2.4 * k, CYAN, 0.95);
+    g.lineStyle(2.4 * k, glow, 0.95);
     g.strokePoints(pts);
-    g.lineStyle(1 * k, CORE, 0.9);
+    g.lineStyle(1 * k, core, 0.9);
     g.strokePoints(pts);
   }
 }

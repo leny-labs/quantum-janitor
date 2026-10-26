@@ -7,7 +7,8 @@ Deux sources selon le personnage :
 |---|---|---|
 | `gary` | **GenAI v2** (planche stabilisée validée par Leny, design « Janék ») — plus de bake | à la main, voir ci-dessous |
 | `sylvie` | **GenAI** (moniteur teal validé par Leny) — planche à **humeurs** + bouche-onde procédurale | à la main, voir « SYLVIE » |
-| `bob`, `reine` | bake du Studio 3D (`src/three/Studio.ts`) | `npm run bake:portraits` |
+| `bob` | **GenAI** (robot-aspirateur à écran-bouche validé par Leny) — planche + bouche-onde cyan procédurale | à la main, voir « B.O.B. » |
+| `reine` | bake du Studio 3D (`src/three/Studio.ts`) | `npm run bake:portraits` |
 
 Pas de GenAI au runtime. Un PNG présent dans `public/portraits/` prime ; s'il manque,
 le jeu bake la planche au démarrage — **sauf pour les planches GenAI** (`GENAI_SHEETS`
@@ -158,6 +159,45 @@ avec yeux + onde effacés, yeux de chaque humeur collés en additif, variantes �
 par redimensionnement des yeux. `python3 -I build-sheet.py <grille.jpg> <dossier de sortie>`.
 Ne **pas** lancer de bake pour SYLVIE : elle est dans `GENAI_SHEETS`.
 
+## B.O.B. — planche GenAI + onde Bender
+
+**Validée par Leny (2026-10-26)** : robot-aspirateur gris, sourcils-plaques blasés, LED
+d'antenne rose, plaque « B.O.B. » au-dessus d'un **écran-grille** en guise de bouche, fond
+navy. Source : `_briefs/bob/bob-genai-validated.png` (1024², non suivi).
+
+Fichiers :
+- `public/portraits/bob-sheet.png` — 1024 × 512, 4 × 2 frames de 256 px, cadrage bust
+  comme SYLVIE (le robot remplit la cellule), **écran-bouche vide** (onde peinte effacée,
+  fond d'écran sombre, barres et montants conservés) : la bouche est dessinée par le jeu.
+  Pas de bouche humaine.
+- `public/portraits/bob-ref.png` — cellule neutre complète (onde peinte comprise),
+  256 × 256, référence pour les prochaines générations.
+
+Mapping (boucles `SHEET` par défaut, pas d'humeurs) — le robot est **pixel-identique** sur
+les 8 frames, seules les paupières et la LED d'antenne changent :
+
+| | col 0 | col 1 | col 2 | col 3 |
+|---|---|---|---|---|
+| **idle** | 0 · neutre | 1 · clignement (paupières grises fermées) | 2 · LED qui pulse | 3 · paupières mi-closes (blasé) |
+| **talk** | 4 · LED moyenne | 5 · neutre | 6 · LED faible | 7 · LED à fond |
+
+En talk, pas de paupières : à ~9 i/s, elles clignoteraient. La LED qui varie suit la voix.
+
+Onde (`PORTRAIT_WAVES.bob` dans `Studio.ts`, dessinée par `src/ui/WaveMouth.ts`) : de
+x 60 à 158, centrée en y 186, amplitude 7 (px de cellule 256), entre les deux barres de
+l'écran-grille. Cyan Bender `#5ff6ff` (cœur `#e6feff`), `rest: 0.04` : au repos une ligne
+quasi plate, en parole des amplitudes qui bougent sur les syllabes. Champs optionnels de
+`PortraitWave` : `color`, `core`, `rest` (SYLVIE garde ses valeurs par défaut). Même
+logique que l'écran-bouche 3D en salle (`src/three/rooms/bobvoix.ts`, `setFace` de
+`props.bob`). Dialogue et intro : rien de spécifique, `showWave` / `SheetPortrait` prennent
+toute entrée de `PORTRAIT_WAVES`.
+
+Régénérer : script **hors repo** `_briefs/bob/build/build-sheet.py` (non suivi) :
+recadrage carré 920 px (x 52, y 22) → 256, effacement de la teinte cyan dans l'écran,
+paupières peintes (couleur du corps échantillonnée à côté de l'œil), halo additif de LED.
+`python3 -I build-sheet.py <bob-genai-validated.png> <dossier de sortie>`.
+Ne **pas** lancer de bake pour B.O.B. : il est dans `GENAI_SHEETS`.
+
 ## Layout de la planche (`{id}-sheet.png`)
 
 Grille **4 colonnes × 2 lignes**, frames carrées, lues ligne par ligne.
@@ -175,7 +215,7 @@ micro-mouvement de tête** changent : même cadrage, même fond, même éclairag
 
 - Gary (design « Janék », voir `docs/STORY.md`) : vraie bouche dans la barbe de trois jours ;
   le drone dorsal est un calque à part (voir « Gary : base + calque robot »).
-- B.O.B. : la « bouche » est un égaliseur LED cyan sur la plaque (barres plus ou moins hautes).
+- B.O.B. : planche GenAI (voir « B.O.B. ») ; bouche = onde cyan procédurale sur l'écran-grille.
 - SYLVIE : planche GenAI à humeurs, layout propre (voir « SYLVIE ») ; bouche = onde procédurale.
 - Reine : mandibules qui s'écartent, gueule sombre qui s'ouvre.
 
@@ -187,7 +227,7 @@ micro-mouvement de tête** changent : même cadrage, même fond, même éclairag
 À ajouter : le personnage et l'état de bouche de chaque frame, « same framing, same
 background gradient and scanlines as reference, 4×2 sprite sheet, no gaps, no borders ».
 
-Ce style lock vaut pour les personnages bakés (B.O.B., Reine). Gary a quitté le
+Ce style lock vaut pour les personnages bakés (Reine). Gary a quitté le
 bake : son style est celui de la planche v2 de Leny (cartoon encré, fond bleu nuit
 `#071D40`) — joindre `public/portraits/gary-ref.png` et `gary-sheet.png`.
 

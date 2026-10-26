@@ -149,7 +149,7 @@ export const PORTRAIT_IDS = Object.keys(PORTRAITS);
  * Planches GenAI (docs/PORTRAIT_GENAI.md) : jamais rebakées, ni par
  * `bake:portraits` ni au runtime — le 3D suit l'image, pas l'inverse.
  */
-export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie']);
+export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob']);
 
 function makeRenderer(): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
@@ -398,10 +398,18 @@ export interface PortraitWave {
   x1: number;
   y: number;
   amp: number;
+  /** Teinte de la lueur et du cœur (défaut : aquamarine SYLVIE). */
+  color?: number;
+  core?: number;
+  /** Amplitude au repos, en fraction de `amp` (défaut 0.09 : ondule à peine). */
+  rest?: number;
 }
 
 export const PORTRAIT_WAVES: Readonly<Record<string, PortraitWave>> = {
   sylvie: { cell: 256, x0: 62, x1: 188, y: 161, amp: 13 },
+  // B.O.B. : écran-grille de la bouche (entre les deux barres), cyan Bender,
+  // ligne quasi plate au repos
+  bob: { cell: 256, x0: 60, x1: 158, y: 186, amp: 7, color: 0x5ff6ff, core: 0xe6feff, rest: 0.04 },
 };
 
 function shootSingle(renderer: THREE.WebGLRenderer, pose: Pose, size: number, bg?: [string, string]): HTMLCanvasElement {
