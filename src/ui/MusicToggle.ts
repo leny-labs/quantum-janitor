@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { drawPanel } from './chrome';
+import { cssToGame, isTouch, TOUCH_TARGET_CSS } from './input';
 import { musicEnabled, onMusicChange, toggleMusic } from './music';
 import { COLORS, hex } from './theme';
 
@@ -28,7 +29,8 @@ export function makeMusicToggle(scene: Phaser.Scene, x: number, y: number, size 
   };
   draw();
   const c = scene.add.container(x, y, [g]).setSize(size, size);
-  c.setInteractive({ useHandCursor: true });
+  const pad = Math.max(0, ((isTouch() ? cssToGame(scene, TOUCH_TARGET_CSS) : 0) - size) / 2);
+  c.setInteractive({ hitArea: new Phaser.Geom.Rectangle(-pad, -pad, size + pad * 2, size + pad * 2), hitAreaCallback: Phaser.Geom.Rectangle.Contains, useHandCursor: true });
   c.on('pointerover', () => {
     hover = true;
     draw();

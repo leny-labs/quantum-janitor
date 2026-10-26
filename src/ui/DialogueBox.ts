@@ -5,7 +5,7 @@ import type { DialogueView } from '../engine/DialogueRunner';
 import type { CharacterDef } from '../engine/types';
 import { SHEET, portraitKey, sheetKey } from '../three/Studio';
 import { drawHazard, drawPanel } from './chrome';
-import { cssToGame, isTouch } from './input';
+import { cssToGame, isTouch, uiPx } from './input';
 import { duckMusic } from './music';
 import { COLORS, FONT, H, W, hex, setCursor } from './theme';
 
@@ -21,6 +21,12 @@ const CPS = 32;
 const CHOICE_TOUCH_CSS = 48;
 /** Marges haut + bas autour de la liste de choix dans le panneau. */
 const CHOICE_PAD = 50;
+/** Taille du texte des répliques (px de jeu) ; au doigt, au moins BODY_CSS px CSS. */
+const BODY_PX = 23;
+const BODY_CSS = 16;
+/** Marges haut (nom) + bas (« continuer ») autour du texte d'une réplique. */
+const BODY_PAD_TOP = 40;
+const BODY_PAD_BOTTOM = 44;
 
 /**
  * Repli quand un personnage n'a pas de planche de sprites : ancrages bouche /
@@ -84,6 +90,7 @@ export class DialogueBox implements DialogueView {
   private choiceZones: Phaser.GameObjects.Zone[] = [];
   private choiceDecor: Phaser.GameObjects.GameObject[] = [];
   private pickChoice: ((i: number) => void) | null = null;
+  private nameColor: string | undefined;
   private advance: (() => void) | null = null;
   private shownAt = 0;
   private keyHandler: (e: KeyboardEvent) => void;
@@ -116,11 +123,13 @@ export class DialogueBox implements DialogueView {
       .setOrigin(0.5);
 
     this.nameTab = scene.add.graphics();
-    this.nameText = scene.add.text(TEXT_X + 14, PANEL_Y - 2, '', { fontFamily: FONT, fontSize: '17px', fontStyle: '700', color: '#07050f' }).setOrigin(0, 0.5).setLetterSpacing(2);
+    this.nameText = scene.add.text(TEXT_X + 14, PANEL_Y - 2, '', { fontFamily: FONT, fontSize: `${uiPx(scene, 17, 13)}px`, fontStyle: '700', color: '#07050f' }).setOrigin(0, 0.5).setLetterSpacing(2);
     this.channel = scene.add
       .text(PANEL_X + PANEL_W - 28, PANEL_Y + 18, 'CANAL 7 · CONVERSATION ENREGISTRÉE POUR VOTRE SÉCURITÉ', { fontFamily: FONT, fontSize: '10px', fontStyle: '600', color: COLORS.dim })
       .setOrigin(1, 0.5)
-      .setLetterSpacing(1.5);
+      .setLetterSpacing(1.5)
+      // mention décorative, illisible au doigt : masquée
+      .setVisible(!isTouch());
     this.bodyText = scene.add.text(TEXT_X, PANEL_Y + 40, '', {
       fontFamily: FONT,
       fontSize: '23px',
@@ -130,7 +139,7 @@ export class DialogueBox implements DialogueView {
       lineSpacing: 7,
     });
     this.hint = scene.add
-      .text(PANEL_X + PANEL_W - 30, PANEL_Y + PANEL_H - 26, 'CONTINUER  ▼', { fontFamily: FONT, fontSize: '12px', fontStyle: '700', color: COLORS.accent })
+      .text(PANEL_X + PANEL_W - 30, PANEL_Y + PANEL_H - 26, 'CONTINUER  ▼', { fontFamily: FONT, fontSize: `${uiPx(scene, 12, 12)}px`, fontStyle: '700', color: COLORS.accent })
       .setOrigin(1, 0.5)
       .setLetterSpacing(2);
     scene.tweens.add({ targets: this.hint, alpha: 0.35, duration: 650, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
@@ -240,6 +249,7 @@ export class DialogueBox implements DialogueView {
   }
 
   private setName(name: string, color?: string): void {
+    this.nameColor = color;
     const g = this.nameTab;
     g.clear();
     this.nameText.setText(name.toUpperCase());
@@ -252,7 +262,9 @@ export class DialogueBox implements DialogueView {
     const dark = Phaser.Display.Color.IntegerToColor(c).v < 0.55;
     g.fillStyle(c, 1);
     const y = this.panelY;
-    const tab = [new Phaser.Geom.Point(x, y - 16), new Phaser.Geom.Point(x + w, y - 16), new Phaser.Geom.Point(x + w + 14, y + 12), new Phaser.Geom.Point(x, y + 12)];
+    const top = y - 2 - Math.max(14, this.nameText.height / 2 + 2);
+    const bot = y - 2 + Math.max(14, this.nameText.height / 2 + 2);
+    const tab = [new Phaser.Geom.Point(x, top), new Phaser.Geom.Point(x + w, top), new Phaser.Geom.Point(x + w + 14, bot), new Phaser.Geom.Point(x, bot)];
     g.fillPoints(tab, true);
     g.lineStyle(1.5, dark ? 0xffffff : COLORS.ink, dark ? 0.6 : 0.8);
     g.strokePoints(tab, true);
@@ -280,6 +292,7 @@ export class DialogueBox implements DialogueView {
     this.stopTalking();
     this.setSpeaker(speaker);
     this.hint.setVisible(false);
+    this.fitBody(text);
     this.open();
     const typing = typewrite(this.bodyText, text, { cps: CPS });
     this.typing = typing;
@@ -290,6 +303,29 @@ export class DialogueBox implements DialogueView {
       this.hint.setVisible(true);
     });
     return new Promise((resolve) => (this.advance = resolve));
+  }
+
+  /**
+   * Taille du texte et hauteur du panneau pour une réplique : à la souris,
+   * 23 px dans le panneau standard ; au doigt, ≥ 16 px CSS, le panneau
+   * remontant si besoin (le texte rétrécit seulement s'il ne tient plus à l'écran).
+   */
+  private fitBody(text: string): void {
+    const touch = isTouch();
+    const body = this.bodyText;
+    let size = touch ? uiPx(this.scene, BODY_PX, BODY_CSS) : BODY_PX;
+    const maxH = H - 16 - 24 - BODY_PAD_TOP - BODY_PAD_BOTTOM;
+    for (;;) {
+      body.setFontSize(size).setLineSpacing(Math.round(size * 0.3)).setText(text);
+      if (body.height <= maxH || size <= BODY_PX) break;
+      size -= 2;
+    }
+    const need = BODY_PAD_TOP + body.height + BODY_PAD_BOTTOM;
+    const y = Math.min(PANEL_Y, Math.round(H - 16 - need));
+    if (y !== this.panelY) this.layoutPanel(y);
+    // le nom suit le bord du panneau : on redessine son cartouche
+    this.setName(this.nameText.text, this.nameColor);
+    body.setY(y + BODY_PAD_TOP).setText('');
   }
 
   showChoices(choices: string[]): Promise<number> {

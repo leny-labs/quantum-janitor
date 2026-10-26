@@ -16,7 +16,7 @@ import { DialogueBox } from '../ui/DialogueBox';
 import { HoverLabel } from '../ui/HoverLabel';
 import { ProgressCue } from '../ui/ProgressCue';
 import { drawNavButton, verbCursor, verbIcon, type VerbIcon } from '../ui/chrome';
-import { isTouch } from '../ui/input';
+import { isTouch, uiPx } from '../ui/input';
 import { playMusic, themeForScene } from '../ui/music';
 import { makeMusicToggle } from '../ui/MusicToggle';
 import { swoosh } from '../ui/sfx';
@@ -101,14 +101,22 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.dialogueBox = new DialogueBox(this);
     this.hover = new HoverLabel(this);
     this.coin = new VerbCoin(this);
-    this.cue = new ProgressCue(this, state, () => this.dialogueBox.isOpen);
+    this.cue = new ProgressCue(
+      this,
+      state,
+      () => this.dialogueBox.isOpen,
+      (i) => {
+        this.inventory.reveal(i);
+        return this.inventory.slotRect(i);
+      },
+    );
 
     // HUD
     this.titleText = this.add
       .text(14, 10, '', { fontFamily: FONT, fontSize: '18px', color: COLORS.dim, backgroundColor: '#00000088', padding: { x: 8, y: 4 } })
       .setDepth(700);
     const menu = (this.menuButton = makeButton(this, W - 14, 10, 'Menu', () => !this.busy && this.scene.start('Title'), {
-      size: 18,
+      size: uiPx(this, 18, 14),
       align: 'right',
       valign: 'top',
     }).setDepth(700));
@@ -251,7 +259,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     if (!heldName || !isTouch()) return;
     this.heldItem.setVisible(false);
     this.dropButton = makeButton(this, 14, ROOM_H - 14, 'Reposer', () => this.session.state.select(null), {
-      size: 20,
+      size: uiPx(this, 20, 15),
       align: 'left',
       kicker: `EN MAIN : ${heldName.toUpperCase()}`,
     }).setDepth(700);

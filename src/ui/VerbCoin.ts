@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { verbIconScale, verbIconTexture, type VerbIcon } from './chrome';
-import { cssToGame } from './input';
+import { cssToGame, uiPx } from './input';
 import { COLORS, FONT, H, ROOM_H, W, hex } from './theme';
 
 export interface CoinVerb {
@@ -75,8 +75,10 @@ export class VerbCoin {
     const d = touch ? Math.max(68, cssToGame(s, 52)) : 60;
     const r = d / 2;
     const R = d + 12;
-    const chipH = touch ? 34 : 28;
-    const noteH = 15;
+    const nameSize = touch ? uiPx(s, 17, 14) : 14;
+    const noteSize = touch ? uiPx(s, 10, 10) : 10;
+    const chipH = touch ? nameSize + 17 : 28;
+    const noteH = noteSize + 5;
     // espace nécessaire autour du moyeu : arc au-dessus, cartouche en dessous
     const up = R + r + 8;
     const down = chipH + noteH + 20;
@@ -108,11 +110,11 @@ export class VerbCoin {
     root.add(hub);
     const chip = s.add.graphics();
     const name = s.add
-      .text(0, 12 + chipH / 2, title.toUpperCase(), { fontFamily: FONT, fontSize: touch ? '17px' : '14px', fontStyle: '700', color: COLORS.accent })
+      .text(0, 12 + chipH / 2, title.toUpperCase(), { fontFamily: FONT, fontSize: `${nameSize}px`, fontStyle: '700', color: COLORS.accent })
       .setOrigin(0.5)
       .setLetterSpacing(1.5);
     const note = s.add
-      .text(0, 14 + chipH - 3, 'Usage autorisé par SYLVIE · consigné', { fontFamily: FONT, fontSize: '10px', fontStyle: 'italic 500', color: COLORS.dim })
+      .text(0, 14 + chipH - 3, 'Usage autorisé par SYLVIE · consigné', { fontFamily: FONT, fontSize: `${noteSize}px`, fontStyle: 'italic 500', color: COLORS.dim })
       .setOrigin(0.5, 0)
       .setAlpha(0.9);
     const paintChip = (text: string, on: boolean) => {
@@ -133,7 +135,7 @@ export class VerbCoin {
     paintChip(title, false);
     root.add([chip, name, note]);
 
-    const iconPx = touch ? 28 : 24;
+    const iconPx = touch ? Math.round(d * 0.34) : 24;
     ARCS[n].forEach((deg, i) => {
       const v = verbs[i];
       const a = Phaser.Math.DegToRad(deg);
@@ -144,7 +146,7 @@ export class VerbCoin {
       const icon = s.add.image(0, -5, verbIconTexture(s, v.icon, iconPx)).setScale(verbIconScale());
       const short = v.label.split(' ')[0];
       const label = s.add
-        .text(0, r * 0.5, short.toUpperCase(), { fontFamily: FONT, fontSize: touch ? '12px' : '10px', fontStyle: '700', color: COLORS.text })
+        .text(0, r * 0.5, short.toUpperCase(), { fontFamily: FONT, fontSize: `${touch ? uiPx(s, 12, 10) : 10}px`, fontStyle: '700', color: COLORS.text })
         .setOrigin(0.5)
         .setLetterSpacing(1);
       if (label.width > d - 14) label.setScale((d - 14) / label.width);

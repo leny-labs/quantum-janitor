@@ -4,7 +4,6 @@
 // bloquant (≤ 400 ms), une seule fois par flag / objet, pas de spam.
 import Phaser from 'phaser';
 import type { GameState } from '../engine/GameState';
-import { slotRect } from '../engine/Inventory';
 import { COLORS, ROOM_H, hex } from './theme';
 import { chime } from './sfx';
 
@@ -26,6 +25,8 @@ export class ProgressCue {
     private scene: Phaser.Scene,
     private state: GameState,
     private blocked: () => boolean = () => false,
+    /** Case d'inventaire de l'objet n° `i` (coordonnées écran), rendue visible si la barre défile. */
+    private slotRect: (i: number) => { x: number; y: number; size: number } = () => ({ x: 640, y: ROOM_H + 70, size: 96 }),
   ) {
     this.seenFlags = new Set(state.flags);
     this.seenItems = new Set(state.items);
@@ -60,7 +61,7 @@ export class ProgressCue {
           // nouvel objet : la case qui le reçoit s'illumine (si l'objet n'a pas déjà été consommé)
           const i = this.state.items.indexOf(item);
           if (i < 0) return;
-          const slot = slotRect(i);
+          const slot = this.slotRect(i);
           this.pulse(slot.x, slot.y, slot.size);
           this.burst(slot.x, slot.y, hex(COLORS.hover), 7);
           chime([988, 1319]);

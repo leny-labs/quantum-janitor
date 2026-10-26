@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { GameState } from './GameState';
 import type { ArtShape, Exit, ExitDirection, Hotspot, SceneDef } from './types';
 import { drawNavButton } from '../ui/chrome';
+import { TOUCH_TARGET_CSS, uiPx } from '../ui/input';
 import { COLORS, FONT, hex } from '../ui/theme';
 
 export interface HotspotCallbacks {
@@ -54,14 +55,17 @@ export class HotspotLayer {
       const cx = x + w / 2;
       const cy = y + h / 2;
       if (!art3d) this.container.add(s.add.rectangle(x, y, w, h, 0x000000, 0.18).setOrigin(0).setStrokeStyle(2, hex(COLORS.accent), 0.45));
+      // au doigt : bouton ≥ 40 px CSS de diamètre, zone ≥ 48 px CSS
+      const r = uiPx(s, NAV_R, 20);
+      const hit = Math.max(NAV_HIT * 2, uiPx(s, 0, TOUCH_TARGET_CSS));
       const g = s.add.graphics({ x: cx, y: cy }).setAlpha(locked ? 0.55 : 0.92);
-      drawNavButton(g, NAV_R, dir, locked ? 'locked' : 'idle');
-      // zone tactile : le rect du YAML, élargi à 64 × 64 px minimum
-      const zw = Math.max(w, NAV_HIT * 2);
-      const zh = Math.max(h, NAV_HIT * 2);
+      drawNavButton(g, r, dir, locked ? 'locked' : 'idle');
+      // zone tactile : le rect du YAML, élargi à 64 × 64 px de jeu minimum
+      const zw = Math.max(w, hit);
+      const zh = Math.max(h, hit);
       const zone = s.add.zone(cx - zw / 2, cy - zh / 2, zw, zh).setOrigin(0).setInteractive();
       const hover = (on: boolean) => {
-        drawNavButton(g, NAV_R, dir, locked ? 'locked' : on ? 'hover' : 'idle');
+        drawNavButton(g, r, dir, locked ? 'locked' : on ? 'hover' : 'idle');
         s.tweens.killTweensOf(g);
         s.tweens.add({ targets: g, scale: on ? 1.12 : 1, alpha: on ? 1 : locked ? 0.55 : 0.92, duration: 120, ease: 'Quad.easeOut' });
       };

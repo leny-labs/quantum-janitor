@@ -2,13 +2,21 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" type="image/svg+xml" href="/assets/placeholders/bucket.svg" />
     <title>Quantum Janitor — Chapitre 0 : Le Seau</title>
     <style>
       html, body { margin: 0; height: 100%; background: #0b0b12; }
       body { display: flex; align-items: center; justify-content: center; }
-      #game { width: 100vw; height: 100vh; }
+      /* zone de jeu hors encoches / barre d'accueil (viewport-fit=cover) */
+      #game {
+        position: fixed;
+        top: env(safe-area-inset-top, 0px);
+        right: env(safe-area-inset-right, 0px);
+        bottom: env(safe-area-inset-bottom, 0px);
+        left: env(safe-area-inset-left, 0px);
+        touch-action: none;
+      }
     </style>
   </head>
   <body>

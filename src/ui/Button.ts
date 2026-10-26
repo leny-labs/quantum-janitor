@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { drawLed, drawPanel } from './chrome';
+import { cssToGame, isTouch, TOUCH_TARGET_CSS, uiPx } from './input';
 import { COLORS, FONT, hex } from './theme';
 
 export interface ButtonOpts {
@@ -31,7 +32,7 @@ export function makeButton(
     .setOrigin(0.5);
   text.setLetterSpacing?.(size * 0.08);
   const kicker = opts.kicker
-    ? scene.add.text(0, 0, opts.kicker, { fontFamily: FONT, fontSize: `${Math.round(size * 0.42)}px`, color: primary ? '#07050f' : COLORS.dim }).setOrigin(0.5).setAlpha(0.8)
+    ? scene.add.text(0, 0, opts.kicker, { fontFamily: FONT, fontSize: `${uiPx(scene, Math.round(size * 0.42), 9)}px`, color: primary ? '#07050f' : COLORS.dim }).setOrigin(0.5).setAlpha(0.8)
     : null;
   const padX = size * 1.2;
   const padY = size * (kicker ? 0.55 : 0.45);
@@ -61,7 +62,11 @@ export function makeButton(
   const ox = opts.align === 'left' ? w / 2 : opts.align === 'right' ? -w / 2 : 0;
   const oy = opts.valign === 'top' ? h / 2 : 0;
   const c = scene.add.container(x + ox, y + oy, parts).setSize(w, h);
-  c.setInteractive({ useHandCursor: true });
+  // au doigt, la zone de tap déborde du dessin jusqu'à ≥ 48 px CSS
+  const min = isTouch() ? cssToGame(scene, TOUCH_TARGET_CSS) : 0;
+  const px = Math.max(0, (min - w) / 2);
+  const py = Math.max(0, (min - h) / 2);
+  c.setInteractive({ hitArea: new Phaser.Geom.Rectangle(-px, -py, w + px * 2, h + py * 2), hitAreaCallback: Phaser.Geom.Rectangle.Contains, useHandCursor: true });
   c.on('pointerover', () => {
     draw(true);
     scene.tweens.add({ targets: c, scale: 1.04, duration: 120, ease: 'Quad.easeOut' });
