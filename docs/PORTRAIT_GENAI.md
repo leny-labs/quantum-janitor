@@ -5,7 +5,7 @@ Deux sources selon le personnage :
 
 | Id | Source | Régénération |
 |---|---|---|
-| `gary` | **GenAI** depuis la planche de ref de Leny (design « Janék ») — plus de bake | à la main, voir ci-dessous |
+| `gary` | **GenAI v2** (planche stabilisée validée par Leny, design « Janék ») — plus de bake | à la main, voir ci-dessous |
 | `bob`, `sylvie`, `reine` | bake du Studio 3D (`src/three/Studio.ts`) | `npm run bake:portraits` |
 
 Pas de GenAI au runtime. Un PNG présent dans `public/portraits/` prime ; s'il manque,
@@ -13,26 +13,37 @@ le jeu bake la planche au démarrage — **sauf pour les planches GenAI** (`GENA
 dans `Studio.ts`) : ni `bake:portraits` ni le boot ne les régénèrent ou ne les écrasent
 (si le PNG manque, repli sur le portrait 3D fixe). Le 3D suit l'image, pas l'inverse.
 
-## Gary — planche GenAI
+## Gary — planche GenAI (v2 stabilisée)
+
+**v2 validée par Leny (2026-10-26)** : Gary et son drone sont verrouillés sur les 8 frames
+(même cadrage, même casquette / lunettes / harnais, drone à la même place), fond bleu nuit
+uni `#071D40`. Seuls la bouche et les yeux changent.
 
 Fichiers :
-- `public/portraits/gary-sheet.png` — planche 1024 × 512, 4 × 2 frames de 256 px.
-- `public/portraits/gary-ref.png` — frame idle0 seule (256 × 256), référence pour les
-  prochaines générations.
+- `public/portraits/gary-sheet.png` — planche v2, 1024 × 512, 4 × 2 frames de 256 px.
+  **C'est la source de vérité suivie dans le repo** (copie exacte de la v2 validée,
+  sha256 `feea3813…a9334a`).
+- `public/portraits/gary-ref.png` — frame idle0 de la v2 seule (256 × 256), référence pour
+  les prochaines générations.
 
-Source hors repo : `../qj-janek-genai/` (planche de ref `master.jpg`, frames
-`frame-{0..7}-*.png`, `gary-sheet-preview.png` en 2048 × 1024, `gary-anim.gif` de contrôle).
+Aucun bake ne l'écrase : `bake:portraits` et le bake runtime au boot sautent Gary
+(`GENAI_SHEETS` dans `Studio.ts`), et il n'y a pas de script `predev` / `prebuild`.
+Vérifié : hash de `gary-sheet.png` / `gary-ref.png` identiques avant et après
+`npm run bake:portraits`.
 
-Mapping de la planche actuelle :
+Sources de la v1 (historique, hors repo) : `../qj-janek-genai/` (planche de ref `master.jpg`,
+frames `frame-{0..7}-*.png`, `gary-anim.gif`).
+
+Mapping de la planche v2 :
 
 | | col 0 | col 1 | col 2 | col 3 |
 |---|---|---|---|---|
-| **idle** | 0 · neutre, sourire fermé | 1 · clin d'œil (paupière gauche) | 2 · neutre, regard de côté | 3 · drone penché, œil bleu vers le joueur |
-| **talk** | 4 · bouche mi-ouverte | 5 · grand sourire ouvert | 6 · lèvres entrouvertes | 7 · ouvert, sourire (≈ ¾) |
+| **idle** | 0 · neutre, sourire fermé | 1 · paupières mi-closes | 2 · yeux fermés (clignement) | 3 · neutre, petit sourire |
+| **talk** | 4 · bouche mi-ouverte | 5 · grand sourire ouvert | 6 · lèvres entrouvertes | 7 · bouche en « o » |
 
 Régénérer :
 1. Générer les 8 frames 256 × 256 en image-to-image depuis la planche de ref de Leny
-   (+ `gary-ref.png` comme ancre de cadrage), même fond bleu à scanlines, même cadrage,
+   (+ `gary-ref.png` comme ancre de cadrage), même fond bleu nuit uni `#071D40`, même cadrage,
    seuls bouche / yeux / drone changent (ordre : tableau ci-dessus).
 2. Assembler en 4 × 2 sans marge, par ex. :
    `magick montage frame-{0..7}-*.png -tile 4x2 -geometry +0+0 gary-sheet.png`
@@ -70,8 +81,8 @@ micro-mouvement de tête** changent : même cadrage, même fond, même éclairag
 background gradient and scanlines as reference, 4×2 sprite sheet, no gaps, no borders ».
 
 Ce style lock vaut pour les personnages bakés (B.O.B., SYLVIE, Reine). Gary a quitté le
-bake : son style est celui de la planche de ref de Leny (cartoon encré, fond bleu à
-scanlines) — joindre `public/portraits/gary-ref.png` et la planche de ref.
+bake : son style est celui de la planche v2 de Leny (cartoon encré, fond bleu nuit
+`#071D40`) — joindre `public/portraits/gary-ref.png` et `gary-sheet.png`.
 
 **Toujours attacher `public/portraits/{id}-ref.png`** (frame idle0) comme image de
 référence, et idéalement la planche entière comme guide de layout.
