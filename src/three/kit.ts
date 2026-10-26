@@ -133,7 +133,9 @@ export function textTexture(text: string, w: number, h: number, o: LabelOpts = {
   lines.forEach((l, i) => g.fillText(l, x, c.height / 2 + (i - (lines.length - 1) / 2) * lh));
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 4;
+  // filtrage trilinéaire + anisotropie (bridée par le GPU) : net de biais et à distance
+  t.minFilter = THREE.LinearMipmapLinearFilter;
+  t.anisotropy = 8;
   return t;
 }
 

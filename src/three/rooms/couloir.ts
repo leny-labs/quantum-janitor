@@ -200,7 +200,32 @@ export const couloir: RoomBuild = {
 
     // ── porte vers le placard ──
     const { f: pf } = backDoor(s, s.rect('vers_placard'), 0.12, '#2a3148', '#3b4560');
-    s.add(at(label('ENTRETIEN', pf.w * 0.8, pf.h * 0.1, { color: '#7fffd4', bold: true }), pf.x, pf.y + pf.h * 0.25, 0.14));
+    // hublot teal, bande de service, poignée et plaque de propreté
+    const port = at(cyl(pf.w * 0.17, pf.w * 0.17, 0.05, '#9aa5b1', { seg: 20, edges: false }), pf.x, pf.y + pf.h * 0.2, 0.12);
+    port.rotation.x = Math.PI / 2;
+    const portGlass = at(cyl(pf.w * 0.13, pf.w * 0.13, 0.02, '#2f8f84', { glow: true, seg: 20 }), pf.x, pf.y + pf.h * 0.2, 0.135);
+    portGlass.rotation.x = Math.PI / 2;
+    const portSheen = at(plane(pf.w * 0.05, pf.w * 0.2, '#ffffff', { glow: true, opacity: 0.18 }), pf.x - pf.w * 0.04, pf.y + pf.h * 0.21, 0.15);
+    portSheen.rotation.z = -0.5;
+    s.add(
+      port,
+      portGlass,
+      portSheen,
+      at(box(pf.w * 0.84, pf.h * 0.035, 0.03, '#2fbfa0', { edges: false }), pf.x, pf.y - pf.h * 0.02, 0.105),
+      at(box(pf.w * 0.06, pf.h * 0.14, 0.06, '#c9d2dc'), pf.x + pf.w * 0.3, pf.y - pf.h * 0.1, 0.13),
+      at(box(pf.w * 0.8, pf.h * 0.1, 0.02, '#4a5470'), pf.x, pf.y - pf.h * 0.4, 0.1),
+    );
+    // enseigne « ENTRETIEN » en haut du mur (au-dessus du distributeur) + lampe témoin verte sur le linteau
+    const sf = s.fit([4, 50, 196, 46], 0.2);
+    s.add(at(serviceSign(sf.w, sf.h), sf.x, sf.y, 0.2));
+    const lampY = pf.y + pf.h / 2 + 0.16;
+    const okLamp = at(cyl(0.07, 0.07, 0.06, '#7fffd4', { glow: true, seg: 16 }), pf.x, lampY, 0.22);
+    okLamp.rotation.x = Math.PI / 2;
+    const okHalo = at(glow('#7fffd4', 0.55, 0.45), pf.x, lampY, 0.25);
+    s.add(okLamp, okHalo, at(box(0.2, 0.05, 0.1, '#1d2436'), pf.x, lampY - 0.07, 0.2));
+    s.animate((time) => {
+      okHalo.material.opacity = 0.32 + Math.sin(time * 1.6) * 0.12;
+    });
 
     // ── B.O.B. (s'il suit Gary) ──
     const bb = s.stand(s.rect('bob'));
@@ -211,3 +236,108 @@ export const couloir: RoomBuild = {
     });
   },
 };
+
+/**
+ * Enseigne de service 3D : châssis biseauté sombre, liseré teal, rivets et
+ * face peinte en haute résolution (pictogramme seau + balai, « ENTRETIEN »
+ * en Bungee avec contour et ombre portée).
+ */
+function serviceSign(w: number, h: number): THREE.Group {
+  const sign = new THREE.Group();
+  const bevel = Math.min(w, h) * 0.08;
+  sign.add(
+    at(box(w, h, 0.08, '#151a28'), 0, 0, 0),
+    at(box(w - bevel, h - bevel, 0.04, '#2fbfa0', { edges: false }), 0, 0, 0.045),
+  );
+  // patte de fixation au mur
+  sign.add(at(box(w * 0.5, h * 0.12, 0.12, '#151a28'), 0, h / 2 + h * 0.02, -0.03));
+  for (const [rx, ry] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const rivet = at(sphere(bevel * 0.32, '#c9d2dc', { seg: 10 }), rx * (w / 2 - bevel * 0.55), ry * (h / 2 - bevel * 0.55), 0.06);
+    rivet.scale.z = 0.5;
+    sign.add(rivet);
+  }
+
+  const fw = w - bevel * 2.2;
+  const fh = h - bevel * 2.2;
+  // résolution fixe élevée, indépendante de la taille monde
+  const W = 1024;
+  const H = Math.round((W * fh) / fw);
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d')!;
+  const bg = g.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#16303a');
+  bg.addColorStop(1, '#0c1a24');
+  g.fillStyle = bg;
+  g.fillRect(0, 0, W, H);
+  // bande « service » à gauche, pictogramme dedans
+  const band = H * 1.1;
+  g.fillStyle = '#7fffd4';
+  g.fillRect(0, 0, band, H);
+  g.fillStyle = '#0c1a24';
+  pictoBucket(g, band / 2, H * 0.48, H * 0.36);
+  // liseré bas
+  g.fillStyle = '#2fbfa0';
+  g.fillRect(band, H - H * 0.06, W - band, H * 0.06);
+
+  const tx = band + (W - band) / 2;
+  const maxW = (W - band) * 0.88;
+  const title = (px: number) => `${px}px Bungee, "Chakra Petch", Impact, sans-serif`;
+  let size = H * 0.6;
+  g.font = title(size);
+  const tw = g.measureText('ENTRETIEN').width;
+  if (tw > maxW) size *= maxW / tw;
+  g.font = title(size);
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  const ty = H * 0.47;
+  g.lineJoin = 'round';
+  g.fillStyle = '#05080c';
+  g.fillText('ENTRETIEN', tx + size * 0.06, ty + size * 0.08);
+  g.strokeStyle = '#05080c';
+  g.lineWidth = size * 0.14;
+  g.strokeText('ENTRETIEN', tx, ty);
+  g.fillStyle = '#eafff8';
+  g.fillText('ENTRETIEN', tx, ty);
+
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.minFilter = THREE.LinearMipmapLinearFilter;
+  t.anisotropy = 16;
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), new THREE.MeshBasicMaterial({ map: t, toneMapped: false, fog: false }));
+  sign.add(at(face, 0, 0, 0.07));
+  return sign;
+}
+
+/** Pictogramme seau + balai, centré en (x, y), taille ~ s. */
+function pictoBucket(g: CanvasRenderingContext2D, x: number, y: number, s: number): void {
+  g.save();
+  g.translate(x, y);
+  // manche du balai, en biais derrière le seau
+  g.save();
+  g.rotate(0.38);
+  g.fillRect(-s * 0.06, -s * 1.15, s * 0.12, s * 1.5);
+  g.beginPath();
+  g.moveTo(-s * 0.32, s * 0.25);
+  g.lineTo(s * 0.32, s * 0.25);
+  g.lineTo(s * 0.42, s * 0.62);
+  g.lineTo(-s * 0.42, s * 0.62);
+  g.closePath();
+  g.fill();
+  g.restore();
+  // seau (trapèze) + anse
+  g.beginPath();
+  g.moveTo(-s * 0.62, -s * 0.05);
+  g.lineTo(s * 0.42, -s * 0.05);
+  g.lineTo(s * 0.32, s * 0.85);
+  g.lineTo(-s * 0.52, s * 0.85);
+  g.closePath();
+  g.fill();
+  g.lineWidth = s * 0.1;
+  g.strokeStyle = g.fillStyle;
+  g.beginPath();
+  g.arc(-s * 0.1, -s * 0.05, s * 0.42, Math.PI, 0);
+  g.stroke();
+  g.restore();
+}
