@@ -159,7 +159,7 @@ exits:
   - id: vers_labo
     label: Laboratoire du Réacteur
     to: labo
-    dir: right
+    dir: up
     rect: [1010, 130, 150, 335]
     requires: { flags: [labo_ouvert] }
     lockedText:
