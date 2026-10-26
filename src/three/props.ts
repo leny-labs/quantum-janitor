@@ -148,7 +148,7 @@ export function fusible(len: number): THREE.Group {
  * (nom du produit en gras + pictogramme). `tag` à null : pas d'étiquette ;
  * la fiole (`flask`) porte une étiquette volante « ??? ».
  */
-export function bottle(w: number, h: number, color: string, tag: { mark: DecalMark; name: string } | null, kind: 'round' | 'square' | 'jar' | 'flask' = 'round'): THREE.Group {
+export function bottle(w: number, h: number, color: string, tag: { mark: DecalMark; name: string; fine?: string } | null, kind: 'round' | 'square' | 'jar' | 'flask' = 'round'): THREE.Group {
   const parts: THREE.Object3D[] = [];
   const bodyH = kind === 'jar' ? h * 0.85 : h * 0.72;
   if (kind === 'square') parts.push(at(box(w, bodyH, w * 0.6, color), 0, bodyH / 2, 0));
@@ -173,12 +173,13 @@ export function bottle(w: number, h: number, color: string, tag: { mark: DecalMa
     parts.push(t, string);
   } else if (tag) {
     const band = new THREE.Color(color).multiplyScalar(0.8).getStyle();
-    // plaque large : ~70 % de la hauteur du corps, presque toute la face
-    const dh = bodyH * 0.7;
-    const dw = Math.min(dh * 2.4, w * (kind === 'square' ? 0.9 : 0.95));
+    // plaque large : ~70 % de la hauteur du corps (84 % avec petits caractères), presque toute la face
+    const dh = bodyH * (tag.fine ? 0.84 : 0.7);
+    // petits caractères : bande moins enroulée sur un flacon rond (texte lisible jusqu'aux bords)
+    const dw = Math.min(dh * 2.4, w * (kind === 'square' ? 0.9 : tag.fine ? 0.82 : 0.95));
     const y = bodyH * 0.5;
-    if (kind === 'square') parts.push(at(decal(dw, dh, band, tag.mark, tag.name), 0, y, w * 0.3 + 0.004));
-    else parts.push(at(decal(dw, dh, band, tag.mark, tag.name, w / 2 + 0.004), 0, y, 0));
+    if (kind === 'square') parts.push(at(decal(dw, dh, band, tag.mark, tag.name, undefined, tag.fine), 0, y, w * 0.3 + 0.004));
+    else parts.push(at(decal(dw, dh, band, tag.mark, tag.name, w / 2 + 0.004, tag.fine), 0, y, 0));
   }
   return group(parts);
 }
@@ -661,16 +662,12 @@ export function reglementPlaque(w: number, h: number): THREE.Group {
   return group([frame, face, ...rivets, arm, tube, halo]);
 }
 
-/** Texture du polaroid de Mme Plunk : la mère, radieuse, et Gary déguisé en capitaine. */
-function momPhotoTexture(): THREE.CanvasTexture {
-  const W = 512;
-  const H = 620;
-  const c = document.createElement('canvas');
-  c.width = W;
-  c.height = H;
-  const g = c.getContext('2d')!;
+/** Image GenAI du polaroid (remplace le dessin si présente dans public/props/). */
+export const MOM_PHOTO_URL = `${import.meta.env.BASE_URL}props/mom-photo-genai.png`;
+
+/** Scène dessinée du polaroid (repli sans image GenAI) : la mère et Gary « capitaine ». */
+function drawMomScene(g: CanvasRenderingContext2D, m: number, pw: number, ph: number): void {
   const INK = '#1a1230';
-  const UI = '"Chakra Petch", "Trebuchet MS", sans-serif';
   const shape = (fill: string, draw: () => void, line = 5) => {
     g.beginPath();
     draw();
@@ -681,16 +678,6 @@ function momPhotoTexture(): THREE.CanvasTexture {
     g.stroke();
   };
   const ell = (x: number, y: number, rx: number, ry: number, rot = 0) => g.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2);
-  // papier du polaroid, légèrement jauni
-  g.fillStyle = '#f6f0e0';
-  g.fillRect(0, 0, W, H);
-  const m = 30;
-  const pw = W - m * 2;
-  const ph = 430;
-  g.save();
-  g.beginPath();
-  g.rect(m, m, pw, ph);
-  g.clip();
   // fond de studio photo : ciel étoilé peint, planète à anneau
   const bg = g.createLinearGradient(0, m, 0, m + ph);
   bg.addColorStop(0, '#2b3f8f');
@@ -819,25 +806,180 @@ function momPhotoTexture(): THREE.CanvasTexture {
     }, 3);
   heart(mx - 92, m + 82, 18);
   heart(mx + 70, m + 66, 13);
-  // virage chaud d'un vieux tirage
-  g.globalAlpha = 0.1;
-  g.fillStyle = '#ffb347';
-  g.fillRect(m, m, pw, ph);
-  g.globalAlpha = 1;
-  g.restore();
-  g.lineWidth = 3;
-  g.strokeStyle = '#cfc6b0';
-  g.strokeRect(m, m, pw, ph);
-  // légende au stylo bleu, de travers
-  g.save();
-  g.translate(W / 2, m + ph + (H - m - ph) / 2 + 4);
-  g.rotate(-0.04);
-  g.font = `italic 700 54px ${UI}`;
+}
+
+/** Cœur (chemin seul), pointe en bas, centré sur (x, y). */
+function heartPath(g: CanvasRenderingContext2D, x: number, y: number, s: number): void {
+  g.beginPath();
+  g.moveTo(x, y + s * 0.9);
+  g.bezierCurveTo(x - s * 1.4, y - s * 0.1, x - s * 0.6, y - s * 1.1, x, y - s * 0.35);
+  g.bezierCurveTo(x + s * 0.6, y - s * 1.1, x + s * 1.4, y - s * 0.1, x, y + s * 0.9);
+}
+
+/**
+ * Texture du polaroid de Mme Plunk : tirage (image GenAI si fournie, sinon
+ * la scène dessinée), légende au stylo, cœur au feutre, baiser au rouge à
+ * lèvres et coin corné. Le coin replié est transparent (le casier se voit
+ * dessous). Haute définition : la caméra vient le lire de près.
+ */
+function momPhotoTexture(): THREE.CanvasTexture {
+  const W = 512;
+  const H = 620;
+  const S = 2;
+  const c = document.createElement('canvas');
+  c.width = W * S;
+  c.height = H * S;
+  const g = c.getContext('2d')!;
+  const UI = '"Chakra Petch", "Trebuchet MS", sans-serif';
+  const m = 30;
+  const pw = W - m * 2;
+  const ph = 430;
+  const E = 78; // coin corné (bas droite)
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  const paint = (img?: HTMLImageElement) => {
+    g.setTransform(S, 0, 0, S, 0, 0);
+    g.clearRect(0, 0, W, H);
+    // papier du polaroid, légèrement jauni, amputé du coin replié
+    g.beginPath();
+    g.moveTo(0, 0);
+    g.lineTo(W, 0);
+    g.lineTo(W, H - E);
+    g.lineTo(W - E, H);
+    g.lineTo(0, H);
+    g.closePath();
+    g.fillStyle = '#f6f0e0';
+    g.fill();
+    g.save();
+    g.beginPath();
+    g.rect(m, m, pw, ph);
+    g.clip();
+    if (img) {
+      // recadrage « cover » de l'image GenAI dans la fenêtre du tirage
+      const k = Math.max(pw / img.naturalWidth, ph / img.naturalHeight);
+      const iw = img.naturalWidth * k;
+      const ih = img.naturalHeight * k;
+      g.drawImage(img, m + (pw - iw) / 2, m + (ph - ih) / 2, iw, ih);
+    } else {
+      drawMomScene(g, m, pw, ph);
+    }
+    // virage chaud d'un vieux tirage
+    g.globalAlpha = 0.1;
+    g.fillStyle = '#ffb347';
+    g.fillRect(m, m, pw, ph);
+    g.globalAlpha = 1;
+    // baiser au rouge à lèvres sur la veste du capitaine
+    g.save();
+    g.translate(m + pw - 70, m + ph - 46);
+    g.rotate(-0.3);
+    g.globalAlpha = 0.78;
+    g.fillStyle = '#d81e4a';
+    for (const sy of [-1, 1]) {
+      g.beginPath();
+      g.moveTo(-36, 0);
+      g.bezierCurveTo(-24, sy * 22, -8, sy * 20, 0, sy * (sy < 0 ? 8 : 18));
+      g.bezierCurveTo(8, sy * 20, 24, sy * 22, 36, 0);
+      g.quadraticCurveTo(0, sy * 4, -36, 0);
+      g.fill();
+    }
+    g.globalAlpha = 1;
+    g.restore();
+    g.restore();
+    g.lineWidth = 3;
+    g.strokeStyle = '#cfc6b0';
+    g.strokeRect(m, m, pw, ph);
+    // légende au stylo bleu, de travers
+    g.save();
+    g.translate(W / 2 - 14, m + ph + (H - m - ph) / 2 + 2);
+    g.rotate(-0.04);
+    g.font = `italic 700 50px ${UI}`;
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillStyle = '#2440a8';
+    g.fillText(tr('props.placard.momPhoto'), 0, 0, W - E - 40);
+    g.restore();
+    // petit cœur au feutre rouge, repassé deux fois
+    g.lineWidth = 5;
+    g.lineJoin = 'round';
+    g.strokeStyle = '#e0304f';
+    heartPath(g, 46, m + ph + 28, 16);
+    g.stroke();
+    heartPath(g, 48, m + ph + 29, 15);
+    g.stroke();
+    // coin corné : ombre portée puis rabat (verso du papier, plus terne)
+    g.fillStyle = 'rgba(20,12,40,0.28)';
+    g.beginPath();
+    g.moveTo(W, H - E);
+    g.lineTo(W - E - 6, H - E + 4);
+    g.lineTo(W - E, H);
+    g.closePath();
+    g.fill();
+    g.beginPath();
+    g.moveTo(W, H - E);
+    g.lineTo(W - E, H - E);
+    g.lineTo(W - E, H);
+    g.closePath();
+    g.fillStyle = '#ddd2b6';
+    g.fill();
+    g.lineWidth = 2;
+    g.strokeStyle = '#b9ad90';
+    g.stroke();
+    t.needsUpdate = true;
+  };
+  paint();
+  const img = new Image();
+  img.onload = () => paint(img);
+  // pas d'image GenAI déposée : on garde le dessin
+  img.onerror = () => {};
+  img.src = MOM_PHOTO_URL;
+  return t;
+}
+
+/** Texture de papier manuscrit (post-it, scotch de masquage) : texte au feutre, découpé en lignes. */
+function noteTexture(text: string, aspect: number, o: { paper: string; ink: string; tape?: boolean; torn?: boolean }): THREE.CanvasTexture {
+  const H = 512;
+  const W = Math.round(H * aspect);
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d')!;
+  const UI = '"Chakra Petch", "Trebuchet MS", sans-serif';
+  g.fillStyle = o.paper;
+  if (o.torn) {
+    // bords déchirés du ruban adhésif
+    g.beginPath();
+    g.moveTo(0, 0);
+    for (let x = 0; x <= W; x += 24) g.lineTo(x, (x / 24) % 2 ? 10 : 0);
+    g.lineTo(W, H);
+    for (let x = W; x >= 0; x -= 24) g.lineTo(x, H - ((x / 24) % 2 ? 10 : 0));
+    g.closePath();
+    g.fill();
+  } else {
+    g.fillRect(0, 0, W, H);
+    // bande adhésive plus sombre en haut, ombre du coin décollé en bas
+    g.fillStyle = 'rgba(0,0,0,0.06)';
+    g.fillRect(0, 0, W, H * 0.16);
+    const curl = g.createLinearGradient(W * 0.7, H * 0.7, W, H);
+    curl.addColorStop(0, 'rgba(0,0,0,0)');
+    curl.addColorStop(1, 'rgba(0,0,0,0.18)');
+    g.fillStyle = curl;
+    g.fillRect(0, 0, W, H);
+  }
+  const lines = text.split('\n');
+  const pad = W * 0.08;
+  const top = o.torn ? H * 0.12 : H * 0.2;
+  const boxH = H - top - H * 0.08;
+  let size = Math.min(110, boxH / (lines.length * 1.15));
+  g.font = `italic 700 ${size}px ${UI}`;
+  const widest = Math.max(...lines.map((l) => g.measureText(l).width));
+  if (widest > W - pad * 2) size *= (W - pad * 2) / widest;
+  g.font = `italic 700 ${size}px ${UI}`;
+  g.fillStyle = o.ink;
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.fillStyle = '#2440a8';
-  g.fillText(tr('props.placard.momPhoto'), 0, 0);
-  g.restore();
+  const lh = size * 1.15;
+  lines.forEach((l, i) => g.fillText(l, W / 2, top + boxH / 2 + (i - (lines.length - 1) / 2) * lh));
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 8;
@@ -845,17 +987,65 @@ function momPhotoTexture(): THREE.CanvasTexture {
 }
 
 /**
- * Polaroid de la mère de Gary, aimanté sur la porte du casier (aimant cœur
- * rouge en haut). Face +Z, origine au centre du tirage.
+ * Post-it manuscrit collé (face +Z, origine au centre), légèrement
+ * auto-éclairé pour rester lisible dans les coins sombres.
+ */
+export function postIt(w: number, h: number, text: string, paper = '#ffe873', ink = '#1d2a7a'): THREE.Mesh {
+  const map = noteTexture(text, w / h, { paper, ink });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), paperMat(map, 0.35));
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+/** Bout de scotch de masquage annoté au feutre (étiquette « faite main »). */
+export function tapeLabel(w: number, h: number, text: string): THREE.Mesh {
+  const map = noteTexture(text, w / h, { paper: '#e9dcb4', ink: '#1a1a1a', torn: true });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), paperMat(map, 0.3, { cutout: true }));
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+/** Matériau toon d'un papier peint en canvas, avec une pointe d'auto-illumination (lisible dans l'ombre). */
+function paperMat(map: THREE.Texture, glow: number, o: { cutout?: boolean } = {}): THREE.MeshToonMaterial {
+  const m = mat('#ffffff', { map }) as THREE.MeshToonMaterial;
+  m.emissive.set('#ffffff');
+  m.emissiveMap = map;
+  m.emissiveIntensity = glow;
+  m.polygonOffset = true;
+  m.polygonOffsetFactor = -2;
+  if (o.cutout) m.alphaTest = 0.5;
+  return m;
+}
+
+/** Aimant de frigo en forme de fusée cartoon (corps rouge, hublot, ailerons), couché sur +Z. */
+function rocketMagnet(l: number): THREE.Group {
+  const r = l * 0.2;
+  const body = at(cyl(r, r, l * 0.6, '#e0405a', { seg: 14 }), 0, 0, 0);
+  const nose = at(cyl(0, r, l * 0.32, '#f8f6f0', { seg: 14 }), 0, l * 0.46, 0);
+  const port = at(sphere(r * 0.42, '#7fe8ff', { seg: 10 }), 0, l * 0.08, r * 0.8);
+  port.scale.z = 0.4;
+  const fins = [-1, 1].map((sx) => {
+    const f = at(box(r * 0.9, l * 0.24, r * 0.35, '#ffd166'), sx * r * 1.15, -l * 0.24, 0);
+    f.rotation.z = sx * -0.35;
+    return f;
+  });
+  const flame = at(cyl(r * 0.7, 0, l * 0.2, '#ff9f1c', { seg: 10, edges: false }), 0, -l * 0.4, 0);
+  const g = group([body, nose, port, ...fins, flame]);
+  // aplati contre la tôle : c'est un aimant, pas une maquette
+  g.scale.z = 0.55;
+  return g;
+}
+
+/**
+ * Polaroid de la mère de Gary, tenu par un aimant fusée sur la porte du
+ * casier ; coin bas droit corné. Face +Z, origine au centre du tirage.
  */
 export function momPhoto(w: number): THREE.Group {
   const h = w * (620 / 512);
-  const d = 0.012;
-  const paper = box(w, h, d, '#f6f0e0');
-  const face = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat('#ffffff', { map: momPhotoTexture() }));
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(w, h), paperMat(momPhotoTexture(), 0.15, { cutout: true }));
   face.receiveShadow = true;
-  face.position.z = d / 2 + 0.002;
-  const magnet = at(sphere(w * 0.09, '#e0405a', { seg: 12 }), 0, h * 0.44, d / 2 + w * 0.02);
-  magnet.scale.z = 0.45;
-  return group([paper, face, magnet]);
+  face.position.z = 0.004;
+  const magnet = at(rocketMagnet(w * 0.34), w * 0.05, h * 0.44, 0.004 + w * 0.05);
+  magnet.rotation.z = -0.9;
+  return group([face, magnet]);
 }

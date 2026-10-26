@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { at, beam, box, cyl, glow, label, mat, neon, pool, sphere, stripeTexture } from '../kit';
-import { bob, bottle, momPhoto, reglementPlaque, seau, serpilliere } from '../props';
+import { bob, bottle, momPhoto, postIt, reglementPlaque, seau, serpilliere, tapeLabel } from '../props';
 import type { RoomBuild } from './index';
 import { against, pipe, shell, wallPanels } from './shell';
 import { t as tr } from '../../i18n';
@@ -9,10 +9,10 @@ import { t as tr } from '../../i18n';
 export const placard: RoomBuild = {
   camera: { pos: [0.6, 2.15, 7.5], look: [0, 1.85, 0], fov: 50 },
   shots: {
-    produits: { fill: 0.7, orbit: -10 },
+    produits: { px: [205, 130], fill: 0.96, orbit: -5, fov: 36 },
     seau: { fill: 0.5, lift: 0.3 },
     serpilliere: { px: [455, 440], fill: 0.95, aim: [0, 0.9, 0], orbit: -8 },
-    casier: { fill: 0.8, orbit: 10 },
+    casier: { px: [1040, 330], fill: 2.5, orbit: 6, fov: 32 },
     affiche: { fill: 0.5 },
   },
   build(s) {
@@ -81,19 +81,32 @@ export const placard: RoomBuild = {
     }
 
     // produits ménagers (hotspot « produits »)
-    // Étiquettes papier collées : nom en gras + pictogramme ; fiole « ??? ».
+    // Étiquettes papier collées : nom en gras + pictogramme absurde + petits
+    // caractères (lisibles au zoom) ; fiole « ??? ».
     type Kind = Parameters<typeof bottle>[4];
     const products: [rect: [number, number, number, number], color: string, tag: Parameters<typeof bottle>[3], kind: Kind, shelf: number][] = [
-      [[70, 40, 50, 50], '#b33a3a', { mark: 'drop', name: tr('props.placard.bleach') }, 'square', 0],
-      [[140, 30, 40, 60], '#3a8fb3', { mark: 'swirl', name: tr('props.placard.breeze') }, 'round', 0],
-      [[200, 50, 70, 40], '#8f3ab3', { mark: 'atom', name: tr('props.placard.antiflux') }, 'jar', 0],
-      [[80, 170, 90, 60], '#c9a13a', { mark: 'flame', name: tr('props.placard.degreaser') }, 'square', 1],
-      [[200, 180, 60, 50], '#3ab36b', null, 'flask', 1],
+      [[40, 26, 78, 64], '#b33a3a', { mark: 'grin', name: tr('props.placard.bleach'), fine: tr('props.placard.bleachFine') }, 'square', 0],
+      [[136, 18, 60, 72], '#3a8fb3', { mark: 'swirl', name: tr('props.placard.breeze'), fine: tr('props.placard.breezeFine') }, 'round', 0],
+      [[202, 40, 100, 50], '#8f3ab3', { mark: 'mustache', name: tr('props.placard.antiflux'), fine: tr('props.placard.antifluxFine') }, 'jar', 0],
+      [[52, 150, 136, 80], '#c9a13a', { mark: 'duck', name: tr('props.placard.degreaser'), fine: tr('props.placard.degreaserFine') }, 'square', 1],
+      [[214, 172, 62, 58], '#3ab36b', null, 'flask', 1],
     ];
     for (const [rect, color, tag, kind, shelf] of products) {
       const p = s.stand(rect, shelfY[shelf]);
-      s.spot('produits', at(bottle(p.w, p.h, color, tag, kind), p.x, shelfY[shelf], p.z));
+      // flacon rond tourné vers la caméra : l'étiquette enroulée reste lisible
+      s.spot('produits', at(bottle(p.w, p.h, color, tag, kind), p.x, shelfY[shelf], p.z, kind === 'round' ? 0.45 : 0));
     }
+    // post-it rose de Sylvie, collé au mur entre les étagères
+    const sn = s.fit([292, 116, 64, 58], 0.012);
+    const note = at(postIt(sn.h * 1.1, sn.h, tr('props.placard.sylvieNote'), '#ff9fd0', '#5a0f3a'), sn.x, sn.y, 0.012);
+    note.rotation.z = 0.07;
+    // scotch de masquage annoté, sur le chant de l'étagère haute
+    const tp = s.fit([270, 88, 100, 20], SHELF_Z * 2);
+    const th = tp.w / 3.8;
+    const tape = at(tapeLabel(tp.w, th, tr('props.placard.shelfTape')), tp.x, shelfY[0] - th / 2 + 0.03, SHELF_Z * 2 + 0.004);
+    tape.rotation.z = -0.015;
+    s.spot('produits', note);
+    s.spot('produits', tape);
 
     // seau
     const sb = s.stand(s.rect('seau'));
@@ -127,9 +140,13 @@ export const placard: RoomBuild = {
     locker.add(dent);
     // polaroid de la mère, aimanté de travers sous la plaque (Gary en « capitaine »)
     const pw = lw * 0.46;
-    const photo = at(momPhoto(pw), -lw * 0.1, cs.h * 0.6 - 0.4 - pw * 0.6, 0.49);
+    const photo = at(momPhoto(pw), -lw * 0.15, cs.h * 0.6 - 0.4 - pw * 0.6, 0.49);
     photo.rotation.z = 0.07;
     locker.add(photo);
+    // post-it de la mère, collé à côté du polaroid
+    const mn = at(postIt(lw * 0.27, lw * 0.27, tr('props.placard.momNote')), lw * 0.2, photo.position.y + pw * 0.22, 0.47);
+    mn.rotation.z = -0.09;
+    locker.add(mn);
     s.spot('casier', at(locker, cs.x, 0, against(cs.z, 0.9)));
 
     // plaque réglementaire émaillée

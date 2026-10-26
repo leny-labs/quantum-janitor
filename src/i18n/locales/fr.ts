@@ -167,13 +167,24 @@ export const fr = {
     placard: {
       neon: 'SYLVIE\nVEILLE ♥',
       sign: 'PLACARD À BALAIS\nSecteur Entretien — Klepsydra-9',
-      bleach: 'JAVEL\nQ.',
+      bleach: 'JAVEL\nΔ-7',
       breeze: 'BRISE\nDU VIDE',
       antiflux: 'ANTI-\nFLUX',
-      degreaser: 'DÉGRAISSANT\nABSOLU',
+      degreaser: 'DÉGRAISSANT\nQUANTIQUE',
+      /** Petits caractères des étiquettes (lisibles au zoom sur les produits). */
+      bleachFine: 'Blanchit aussi\nles souvenirs.\nPérimé depuis : demain',
+      breezeFine: 'Parfum : rien.\nIntensément.\nÀ consommer avant\nle Big Crunch',
+      antifluxFine: "Détachant d'anomalies.\n⚠ Peut faire pousser\ndes moustaches",
+      degreaserFine: 'NE PAS BOIRE (encore).\n⚠ Risque de devenir\nun canard',
+      /** Post-it de Sylvie collé entre les étagères. */
+      sylvieNote: 'Gary, arrête de\nsentir les flacons.\n— SYLVIE ♥',
+      /** Scotch annoté au feutre sur le chant de l'étagère. */
+      shelfTape: 'RANGÉ PAR ORDRE DE DANGER\n(croissant ? décroissant ?)',
       locker: 'G. PLUNK\n(intérim)',
       /** Légende manuscrite du polaroid de la mère, sur le casier. */
       momPhoto: 'Mon capitaine ♥',
+      /** Post-it de la mère, à côté du polaroid. */
+      momNote: 'Mon grand,\nmange tes légumes\nspatiaux !\nBisous, Maman ♥',
     },
     couloir: {
       neon: 'BONHEUR\nOBLIGATOIRE',

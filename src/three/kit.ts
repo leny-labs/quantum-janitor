@@ -332,7 +332,7 @@ export function glow(color: string, size: number, opacity = 0.6): THREE.Sprite {
 // ── décalcomanies (étiquettes de produits) ────────────────────────────
 
 /** Pictogramme imprimé sur une étiquette de produit. */
-export type DecalMark = 'drop' | 'swirl' | 'atom' | 'flame' | 'skull';
+export type DecalMark = 'drop' | 'swirl' | 'atom' | 'flame' | 'skull' | 'grin' | 'duck' | 'mustache';
 
 const decalTextures = new Map<string, THREE.CanvasTexture>();
 const DECAL_PAPER = '#efe7d4';
@@ -397,6 +397,58 @@ function drawDecalMark(g: CanvasRenderingContext2D, mark: DecalMark, cx: number,
       g.arc(5, -4, 4, 0, Math.PI * 2);
       g.fill();
       break;
+    case 'grin':
+      // tête de mort hilare : le danger, mais sympa
+      g.arc(0, -6, 16, 0, Math.PI * 2);
+      g.fill();
+      g.fillRect(-10, 6, 20, 10);
+      g.fillStyle = DECAL_PAPER;
+      g.beginPath();
+      g.arc(-6, -9, 4, Math.PI, 0);
+      g.arc(6, -9, 4, Math.PI, 0);
+      g.fill();
+      g.strokeStyle = DECAL_PAPER;
+      g.lineWidth = 3.5;
+      g.beginPath();
+      g.arc(0, 0, 9, Math.PI * 0.15, Math.PI * 0.85);
+      g.stroke();
+      for (const x of [-4, 0, 4]) {
+        g.beginPath();
+        g.moveTo(x, 7);
+        g.lineTo(x, 15);
+        g.stroke();
+      }
+      break;
+    case 'duck':
+      // risque de devenir un canard
+      g.ellipse(-2, 9, 18, 10, 0, 0, Math.PI * 2);
+      g.fill();
+      g.beginPath();
+      g.arc(7, -9, 9, 0, Math.PI * 2);
+      g.fill();
+      g.beginPath();
+      g.moveTo(14, -11);
+      g.lineTo(26, -7);
+      g.lineTo(14, -4);
+      g.closePath();
+      g.fill();
+      g.fillStyle = DECAL_PAPER;
+      g.beginPath();
+      g.arc(9, -11, 2.6, 0, Math.PI * 2);
+      g.fill();
+      break;
+    case 'mustache':
+      // fait pousser des moustaches
+      for (const sx of [-1, 1]) {
+        g.moveTo(0, -2);
+        g.bezierCurveTo(sx * 8, -12, sx * 20, -6, sx * 22, 2);
+        g.bezierCurveTo(sx * 26, 8, sx * 30, 2, sx * 28, -4);
+        g.bezierCurveTo(sx * 30, 10, sx * 18, 14, sx * 10, 6);
+        g.bezierCurveTo(sx * 6, 4, sx * 2, 4, 0, 6);
+        g.closePath();
+      }
+      g.fill();
+      break;
   }
   g.restore();
 }
@@ -423,22 +475,40 @@ function fitText(g: CanvasRenderingContext2D, text: string, x: number, y: number
   });
 }
 
+/** Petits caractères centrés (mentions légales), réduits pour tenir dans la boîte. */
+function fineText(g: CanvasRenderingContext2D, text: string, x: number, y: number, w: number, h: number): void {
+  const lines = text.split('\n');
+  let size = Math.min(36, h / (lines.length * 1.1));
+  g.font = `600 ${size}px ${FONT}`;
+  const widest = Math.max(...lines.map((l) => g.measureText(l).width));
+  if (widest > w) size *= w / widest;
+  g.font = `600 ${size}px ${FONT}`;
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  const lh = size * 1.12;
+  lines.forEach((l, i) => g.fillText(l, x + w / 2, y + h / 2 + (i - (lines.length - 1) / 2) * lh));
+}
+
 /**
  * Étiquette de flacon : papier crème liseré d'encre, bandeau de la couleur
  * du produit, pictogramme de danger à gauche et nom en gras à l'encre
  * (lisible à distance de jeu). `name` : lignes séparées par « \n » ;
- * `aspect` : largeur / hauteur de la plaque.
+ * `aspect` : largeur / hauteur de la plaque ; `fine` : petits caractères
+ * (mentions absurdes) sous le nom, texture doublée pour le gros plan.
  */
-export function decalTexture(band: string, mark: DecalMark, name: string, aspect = 1.25): THREE.CanvasTexture {
+export function decalTexture(band: string, mark: DecalMark, name: string, aspect = 1.25, fine?: string): THREE.CanvasTexture {
   const H = 256;
   const W = Math.round(H * Math.min(3, Math.max(1, aspect)));
-  const id = `${band}|${mark}|${name}|${W}`;
+  const id = `${band}|${mark}|${name}|${W}|${fine ?? ''}`;
   const cached = decalTextures.get(id);
   if (cached) return cached;
+  // petits caractères : texture doublée, lisible en gros plan
+  const S = fine ? 2 : 1;
   const c = document.createElement('canvas');
-  c.width = W;
-  c.height = H;
+  c.width = W * S;
+  c.height = H * S;
   const g = c.getContext('2d')!;
+  g.scale(S, S);
   g.fillStyle = DECAL_PAPER;
   g.beginPath();
   g.roundRect(4, 4, W - 8, H - 8, 20);
@@ -459,11 +529,16 @@ export function decalTexture(band: string, mark: DecalMark, name: string, aspect
   g.roundRect(7, 7, W - 14, H - 14, 18);
   g.stroke();
   // picto à gauche, nom sur tout le reste
-  const r = 34;
-  drawDecalMark(g, mark, 18 + r, 133, r);
+  const r = fine ? 24 : 34;
+  drawDecalMark(g, mark, 18 + r, fine ? 74 : 133, r);
   g.fillStyle = DECAL_INK;
   const nx = 18 + r * 2 + 8;
-  fitText(g, name, nx, 46, W - nx - 16, 174, 96);
+  fitText(g, name, nx, 44, W - nx - 16, fine ? 64 : 174, 96);
+  if (fine) {
+    // mentions légales absurdes, sous un filet, sur toute la largeur
+    g.fillRect(18, 108, W - 36, 3);
+    fineText(g, fine, 16, 112, W - 32, 112);
+  }
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 8;
@@ -514,9 +589,9 @@ export function mysteryTag(w: number, h: number): THREE.Mesh {
  * d'auto-illumination). Sans `radius` : plan
  * face +Z ; avec : portion de cylindre qui épouse le corps (centrée sur +Z).
  */
-export function decal(w: number, h: number, band: string, mark: DecalMark, name: string, radius?: number): THREE.Mesh {
+export function decal(w: number, h: number, band: string, mark: DecalMark, name: string, radius?: number, fine?: string): THREE.Mesh {
   const geo = radius ? new THREE.CylinderGeometry(radius, radius, h, 20, 1, true, -w / radius / 2, w / radius) : new THREE.PlaneGeometry(w, h);
-  const map = decalTexture(band, mark, name, w / h);
+  const map = decalTexture(band, mark, name, w / h, fine);
   // légère auto-illumination : le papier reste lisible dans les coins sombres
   const m = new THREE.MeshToonMaterial({
     map,
