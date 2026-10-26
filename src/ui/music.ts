@@ -1,121 +1,103 @@
-// Musique d'ambiance : jazz cartoon de point & click, 100 % synthétisé en Web
-// Audio (aucun fichier, aucun sample). Composition originale : grilles,
-// mélodies et arrangements écrits ici ; basse walking, comp et chorus
-// improvisés sont générés à la volée (graine fixe → mêmes variations à
-// chaque partie).
+// Musique d'ambiance : jazz modal « cosmique » (spiritual jazz), 100 %
+// synthétisé en Web Audio (aucun fichier, aucun sample). Composition
+// originale : chaque pièce a sa forme modale (plages de modes sur une pédale
+// de bourdon), son ostinato de contrebasse et son orchestration ; nappes,
+// glissandos de harpe, percussions et solos de flûte / sax / synthé sont
+// improvisés à la volée (graine fixe par mesure → mêmes variations à chaque
+// partie, mais aucun motif ne revient à l'identique avant plusieurs minutes).
 //
 // Un petit séquenceur planifie une mesure d'avance sur AudioContext.currentTime.
-// Chaque thème est joué par une « platine » (gain propre) : changer de thème
-// fait un fondu enchaîné. Démarre au premier geste (politique autoplay),
-// coupure persistante (localStorage), touche M, `?music=0`.
+// Chaque thème est joué par une « platine » (gain, bourdon, phaser/chorus et
+// écho propres) : changer de thème fait un fondu enchaîné. Démarre au premier
+// geste (politique autoplay), coupure persistante (localStorage), touche M,
+// `?music=0`.
 import { audioContext } from './sfx';
 
 // ── écriture ─────────────────────────────────────────────────────────────
 
-/** Note de mélodie : [croche de départ 0-7, note, durée en croches]. */
-type Mel = [e: number, note: string, len: number];
-
-interface Tune {
-  /** Une chaîne par mesure : un accord, ou deux (une demi-mesure chacun). */
-  bars: string[];
-  melody: Mel[][];
-  /** Tonique grave (MIDI) pour la basse pédale. */
-  tonic: number;
-}
-
-/**
- * Thème d'exploration « Lounge du Secteur C » (ré mineur, 16 mesures AB).
- * Un walking lounge un peu bancal : demi-tons de travers, #11 et b9 partout.
- */
-const LOUNGE: Tune = {
-  tonic: 38,
-  bars: [
-    'Dm9', 'Ebmaj7#11', 'Dm9', 'E7#9 A7b13', 'Gm9', 'C13', 'Fmaj9 Bb7', 'E7 A7',
-    'Bbmaj7', 'A7alt', 'Dm9', 'Db7#11', 'Cm9 F13', 'Bbmaj9', 'Em7b5 A7b9', 'Dm6',
-  ],
-  melody: [
-    [[1, 'A4', 1], [2, 'C5', 1], [3, 'E5', 3], [7, 'D5', 1]],
-    [[0, 'D5', 2], [2, 'Bb4', 1], [3, 'A4', 3]],
-    [[1, 'F4', 1], [2, 'A4', 1], [3, 'C5', 1], [4, 'E5', 1], [5, 'F5', 2]],
-    [[0, 'G5', 1], [1, 'E5', 1], [2, 'D5', 1], [3, 'B4', 1], [4, 'C#5', 2], [6, 'Bb4', 2]],
-    [[0, 'A4', 3], [3, 'Bb4', 1], [4, 'D5', 1], [5, 'F5', 3]],
-    [[0, 'E5', 2], [2, 'D5', 1], [3, 'A4', 1], [4, 'Bb4', 4]],
-    [[1, 'G4', 1], [2, 'A4', 1], [3, 'C5', 1], [4, 'Ab4', 2], [6, 'F4', 1], [7, 'D4', 1]],
-    [[0, 'E4', 1], [1, 'G#4', 1], [2, 'B4', 1], [3, 'D5', 1], [4, 'C#5', 3]],
-    [[0, 'D5', 3], [3, 'C5', 1], [4, 'A4', 2], [6, 'F4', 2]],
-    [[0, 'G4', 1], [1, 'Bb4', 1], [2, 'C#5', 1], [3, 'F5', 3]],
-    [[0, 'E5', 4], [5, 'D5', 1], [6, 'A4', 2]],
-    [[1, 'F4', 1], [2, 'Ab4', 1], [3, 'B4', 1], [4, 'G5', 2], [6, 'F5', 2]],
-    [[0, 'Eb5', 2], [2, 'D5', 1], [3, 'Bb4', 1], [4, 'D5', 2], [6, 'C5', 2]],
-    [[0, 'A4', 6]],
-    [[0, 'G4', 1], [1, 'Bb4', 1], [2, 'D5', 2], [4, 'C#5', 1], [5, 'E5', 1], [6, 'G5', 2]],
-    [[0, 'F5', 1], [1, 'E5', 1], [2, 'D5', 3]],
-  ],
+/** Modes (demi-tons depuis la tonique). */
+const MODES = {
+  dorian: [0, 2, 3, 5, 7, 9, 10],
+  aeolian: [0, 2, 3, 5, 7, 8, 10],
+  phrygian: [0, 1, 3, 5, 7, 8, 10],
+  lydian: [0, 2, 4, 6, 7, 9, 11],
+  mixolydian: [0, 2, 4, 5, 7, 9, 10],
+  /** Phrygien dominant : la couleur « orientale » des ostinatos spirituels. */
+  phrygdom: [0, 1, 4, 5, 7, 8, 10],
 };
+type Mode = keyof typeof MODES;
 
-/** Thème de titre « Klepsydra Swing » (fa majeur) : fanfare de poche, cuivre bouché. */
-const TITLE: Tune = {
-  tonic: 41,
-  bars: [
-    'Fmaj7 D7', 'Gm7 C7', 'Am7 D7b9', 'Gm7 C7', 'F7', 'Bb7', 'Bdim7', 'F6 D7',
-    'Gm7', 'C7', 'Am7 Abdim7', 'Gm7 C7', 'F6 D7', 'Gm7 C7#5', 'Fmaj7 Db7', 'C7 F6',
-  ],
-  melody: [
-    [[0, 'C5', 1], [1, 'A4', 1], [2, 'C5', 1], [3, 'F5', 1], [4, 'F#5', 2], [6, 'D5', 1], [7, 'C5', 1]],
-    [[0, 'Bb4', 2], [2, 'D5', 1], [3, 'G4', 1], [4, 'E5', 3]],
-    [[0, 'C5', 1], [1, 'E5', 1], [2, 'G5', 2], [4, 'F#5', 1], [5, 'Eb5', 1], [6, 'C5', 2]],
-    [[0, 'D5', 3], [4, 'Bb4', 1], [5, 'G4', 1], [6, 'E4', 2]],
-    [[1, 'A4', 1], [2, 'C5', 1], [3, 'Eb5', 3], [6, 'D5', 1], [7, 'C5', 1]],
-    [[0, 'D5', 2], [2, 'Ab4', 2], [4, 'F4', 4]],
-    [[0, 'B4', 1], [1, 'D5', 1], [2, 'F5', 1], [3, 'Ab5', 3], [6, 'G5', 2]],
-    [[0, 'F5', 2], [2, 'C5', 2], [4, 'A4', 1], [5, 'F#4', 3]],
-    [[0, 'G4', 1], [1, 'Bb4', 1], [2, 'D5', 1], [3, 'F5', 3], [6, 'E5', 2]],
-    [[0, 'E5', 3], [3, 'Db5', 1], [4, 'C5', 2], [6, 'Bb4', 2]],
-    [[0, 'C5', 2], [2, 'E5', 2], [4, 'D5', 2], [6, 'B4', 2]],
-    [[0, 'Bb4', 1], [1, 'A4', 1], [2, 'G4', 2], [4, 'E4', 2], [6, 'G4', 2]],
-    [[0, 'A4', 3], [3, 'F4', 1], [4, 'F#4', 1], [5, 'A4', 1], [6, 'C5', 2]],
-    [[0, 'Bb4', 2], [2, 'D5', 2], [4, 'E5', 1], [5, 'G#5', 3]],
-    [[0, 'A5', 3], [4, 'Ab5', 2], [6, 'F5', 2]],
-    [[0, 'G5', 1], [1, 'E5', 1], [2, 'C5', 1], [3, 'Bb4', 1], [4, 'A4', 4]],
-  ],
-};
+/** Plage modale : tonique, mode, durée en mesures. */
+type Section = [root: string, mode: Mode, bars: number];
 
-type Inst = 'bass' | 'vibes' | 'rhodes' | 'horn' | 'clari' | 'piano' | 'theremin' | 'ride' | 'brush' | 'hat' | 'kick' | 'rim';
+/** Note d'ostinato : [temps, degré du mode (0 = tonique, 7 = octave, négatif = dessous), durée en temps]. */
+type Ost = [beat: number, degree: number, len: number];
+
+type Inst = 'bass' | 'drone' | 'rhodes' | 'organ' | 'harp' | 'flute' | 'sax' | 'moog' | 'sweep' | 'bell' | 'gong' | 'shaker' | 'ride' | 'hat' | 'swell' | 'tom';
 
 interface Arrangement {
-  tune: Tune;
+  /** Plages modales jouées en boucle au-dessus du bourdon (tonique de la première). */
+  form: Section[];
   bpm: number;
+  /** Temps par mesure (4, 5 ou 6). */
+  beats: number;
   /** Place de la croche « swinguée » dans le temps (0.5 = droit, 0.66 = ternaire). */
   swing: number;
-  lead: Inst;
-  leadOct: number;
-  /** Second soliste : chorus improvisé, puis réponse au thème. */
-  counter: Inst;
-  counterOct: number;
-  comp: Inst;
-  compStyle: 'charleston' | 'pads' | 'stabs';
-  drums: 'ride' | 'brushes' | 'soft' | 'sparse';
-  bass: 'walk' | 'two' | 'pedal';
+  ostinato: Ost[];
+  pad: 'rhodes' | 'organ';
+  lead: 'flute' | 'sax' | 'moog';
+  /** Bavardage du soliste (0-1) : plus haut = silences plus courts. */
+  talk: number;
+  /** Probabilité d'un glissando / arpège de harpe par mesure. */
+  harp: number;
+  drums: 'ride' | 'hands' | 'rubato';
+  /** Probabilité d'une nappe de synthé balayée par plage modale. */
+  space: number;
   /** Coupure du passe-bas général (Hz) : plus bas = plus feutré. */
   tone: number;
   level: number;
 }
 
 /**
- * Thèmes : un thème de titre, un thème d'exploration décliné par pièce
- * (même grille, autre orchestration). Un gros plan garde le thème de sa pièce.
+ * Thèmes : un par pièce, plus titre et fin. Un gros plan garde le thème de
+ * sa pièce.
  */
 const THEMES = {
-  /** Écran titre / intro : version pleine, cuivre bouché + vibraphone + piano bastringue. */
-  title: { tune: TITLE, bpm: 120, swing: 0.62, lead: 'horn', leadOct: 0, counter: 'vibes', counterOct: 0, comp: 'piano', compStyle: 'stabs', drums: 'ride', bass: 'walk', tone: 9000, level: 1 },
-  /** Couloir : walking lounge, vibraphone devant, balais. */
-  couloir: { tune: LOUNGE, bpm: 108, swing: 0.66, lead: 'vibes', leadOct: 0, counter: 'horn', counterOct: 0, comp: 'rhodes', compStyle: 'charleston', drums: 'brushes', bass: 'walk', tone: 6500, level: 0.9 },
-  /** Placard : version feutrée, Rhodes et clarinette, basse en blanches. */
-  placard: { tune: LOUNGE, bpm: 92, swing: 0.66, lead: 'rhodes', leadOct: 0, counter: 'clari', counterOct: -12, comp: 'rhodes', compStyle: 'pads', drums: 'soft', bass: 'two', tone: 2600, level: 0.85 },
-  /** Labo : même grille, tendue — basse pédale, clarinette grave, thérémine. */
-  labo: { tune: LOUNGE, bpm: 100, swing: 0.64, lead: 'clari', leadOct: -12, counter: 'theremin', counterOct: 0, comp: 'vibes', compStyle: 'pads', drums: 'sparse', bass: 'pedal', tone: 4500, level: 0.85 },
-  /** Cliffhanger : le thème du titre au ralenti, vibraphone seul devant. */
-  fin: { tune: TITLE, bpm: 92, swing: 0.66, lead: 'vibes', leadOct: 0, counter: 'rhodes', counterOct: 0, comp: 'rhodes', compStyle: 'charleston', drums: 'brushes', bass: 'two', tone: 3800, level: 0.8 },
+  /** Écran titre / intro : 6/4 en ré dorien, orgue, harpe et flûte, ride léger. */
+  title: {
+    form: [['D', 'dorian', 8], ['Bb', 'lydian', 4], ['D', 'dorian', 4], ['G', 'mixolydian', 2], ['A', 'phrygdom', 2]],
+    bpm: 74, beats: 6, swing: 0.62,
+    ostinato: [[0, 0, 2], [2, 4, 1], [3, 6, 0.5], [3.5, 7, 1], [4.5, 4, 0.5], [5, 3, 1]],
+    pad: 'organ', lead: 'flute', talk: 0.6, harp: 0.45, drums: 'ride', space: 0.5, tone: 6000, level: 1,
+  },
+  /** Couloir : vamp dorien en 4/4 lent, Rhodes en chorus, sax ténor rêveur, ride en swing. */
+  couloir: {
+    form: [['D', 'dorian', 8], ['Eb', 'lydian', 4], ['D', 'dorian', 4], ['C', 'mixolydian', 4]],
+    bpm: 72, beats: 4, swing: 0.64,
+    ostinato: [[0, 0, 1.5], [1.5, 4, 0.5], [2, 6, 1], [3, 4, 0.5], [3.5, 3, 0.5]],
+    pad: 'rhodes', lead: 'sax', talk: 0.55, harp: 0.22, drums: 'ride', space: 0.35, tone: 5200, level: 0.9,
+  },
+  /** Placard : fa lydien en apesanteur, orgue, harpe très présente, percussions rubato. */
+  placard: {
+    form: [['F', 'lydian', 8], ['D', 'aeolian', 4], ['Bb', 'lydian', 4]],
+    bpm: 60, beats: 4, swing: 0.6,
+    ostinato: [[0, 0, 2], [2, 4, 1], [3, 7, 1]],
+    pad: 'organ', lead: 'flute', talk: 0.45, harp: 0.55, drums: 'rubato', space: 0.4, tone: 3400, level: 0.85,
+  },
+  /** Labo : 5/4 phrygien, synthé analogique en solo, nappes balayées, tambours à main. */
+  labo: {
+    form: [['E', 'phrygian', 8], ['F', 'lydian', 4], ['E', 'phrygdom', 4], ['C#', 'phrygian', 2], ['E', 'phrygian', 2]],
+    bpm: 82, beats: 5, swing: 0.58,
+    ostinato: [[0, 0, 1], [1, 0, 0.5], [1.5, 1, 1], [2.5, 4, 1], [3.5, 3, 0.5], [4, -1, 1]],
+    pad: 'organ', lead: 'moog', talk: 0.5, harp: 0.15, drums: 'hands', space: 0.8, tone: 4400, level: 0.85,
+  },
+  /** Cliffhanger : 6/4 très lent, orgue, flûte et harpe, sans pulsation. */
+  fin: {
+    form: [['D', 'dorian', 8], ['Bb', 'lydian', 4], ['A', 'phrygdom', 2], ['D', 'dorian', 2]],
+    bpm: 58, beats: 6, swing: 0.6,
+    ostinato: [[0, 0, 3], [3, 4, 1.5], [4.5, 7, 1.5]],
+    pad: 'organ', lead: 'flute', talk: 0.4, harp: 0.5, drums: 'rubato', space: 0.45, tone: 3800, level: 0.8,
+  },
 } satisfies Record<string, Arrangement>;
 
 export type ThemeId = keyof typeof THEMES;
@@ -129,61 +111,19 @@ export function themeForScene(id: string): ThemeId {
 // ── solfège ──────────────────────────────────────────────────────────────
 
 const PC: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-const acc = (s: string) => (s === '#' ? 1 : s === 'b' ? -1 : 0);
 
-function midi(note: string): number {
-  const m = /^([A-G])([b#]?)(-?\d)$/.exec(note);
-  if (!m) throw new Error(`[music] note illisible « ${note} »`);
-  return 12 * (Number(m[3]) + 1) + PC[m[1]] + acc(m[2]);
+function pitchClass(name: string): number {
+  const m = /^([A-G])([b#]?)$/.exec(name);
+  if (!m) throw new Error(`[music] tonique illisible « ${name} »`);
+  return (PC[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) + 12) % 12;
 }
 
 const hz = (m: number) => 440 * Math.pow(2, (m - 69) / 12);
 
-/** Qualités d'accord : voicing sans fondamentale (comp) et notes de l'accord (basse, chorus). */
-const QUAL: Record<string, { v: number[]; t: number[] }> = {
-  m9: { v: [3, 7, 10, 14], t: [3, 7, 10] },
-  m7: { v: [3, 7, 10, 14], t: [3, 7, 10] },
-  m6: { v: [3, 7, 9, 14], t: [3, 7, 9] },
-  m7b5: { v: [3, 6, 10, 15], t: [3, 6, 10] },
-  maj7: { v: [4, 7, 11, 14], t: [4, 7, 11] },
-  maj9: { v: [4, 7, 11, 14], t: [4, 7, 11] },
-  'maj7#11': { v: [4, 6, 11, 14], t: [4, 7, 11] },
-  '6': { v: [4, 7, 9, 14], t: [4, 7, 9] },
-  '7': { v: [4, 7, 10, 14], t: [4, 7, 10] },
-  '13': { v: [4, 10, 14, 21], t: [4, 7, 10] },
-  '7b9': { v: [4, 10, 13, 19], t: [4, 7, 10] },
-  '7#9': { v: [4, 10, 15, 19], t: [4, 7, 10] },
-  '7alt': { v: [4, 10, 13, 20], t: [4, 8, 10] },
-  '7#11': { v: [4, 10, 14, 18], t: [4, 7, 10] },
-  '7b13': { v: [4, 10, 14, 20], t: [4, 7, 10] },
-  '7#5': { v: [4, 8, 10, 14], t: [4, 8, 10] },
-  dim7: { v: [3, 6, 9, 12], t: [3, 6, 9] },
-};
-
-interface Chord {
-  root: number;
-  v: number[];
-  t: number[];
-}
-
-const chordCache = new Map<string, Chord>();
-function chord(name: string): Chord {
-  let c = chordCache.get(name);
-  if (!c) {
-    const m = /^([A-G])([b#]?)(.*)$/.exec(name);
-    const q = m && QUAL[m[3]];
-    if (!m || !q) throw new Error(`[music] accord inconnu « ${name} »`);
-    c = { root: (PC[m[1]] + acc(m[2]) + 12) % 12, ...q };
-    chordCache.set(name, c);
-  }
-  return c;
-}
-
-/** Accords d'une mesure avec leur temps de départ (en noires). */
-function barChords(tune: Tune, bar: number): { c: Chord; at: number; len: number }[] {
-  const names = tune.bars[((bar % tune.bars.length) + tune.bars.length) % tune.bars.length].split(' ');
-  const len = 4 / names.length;
-  return names.map((n, i) => ({ c: chord(n), at: i * len, len }));
+/** Demi-tons du degré `d` d'un mode (degrés hors octave : octave au-dessus / dessous). */
+function degree(scale: number[], d: number): number {
+  const o = Math.floor(d / scale.length);
+  return scale[d - o * scale.length] + 12 * o;
 }
 
 /** Hauteur de classe `pc` la plus proche de `near` dans [lo, hi]. */
@@ -205,175 +145,206 @@ function rng(seed: number): () => number {
   };
 }
 
+interface Place {
+  root: number;
+  scale: number[];
+  /** Première / dernière mesure de la plage modale. */
+  first: boolean;
+  last: boolean;
+  /** Mesure dans la forme complète. */
+  pos: number;
+  length: number;
+}
+
+function placeOf(form: Section[], bar: number): Place {
+  const length = form.reduce((n, s) => n + s[2], 0);
+  const pos = ((bar % length) + length) % length;
+  let at = 0;
+  for (const [root, mode, bars] of form) {
+    if (pos < at + bars) return { root: pitchClass(root), scale: MODES[mode], first: pos === at, last: pos === at + bars - 1, pos, length };
+    at += bars;
+  }
+  throw new Error('[music] forme vide');
+}
+
 // ── génération d'une mesure ──────────────────────────────────────────────
 
 interface Ev {
-  /** Départ en noires depuis le début de la mesure. */
+  /** Départ en temps depuis le début de la mesure. */
   t: number;
-  /** Durée en noires. */
+  /** Durée en temps. */
   d: number;
   inst: Inst;
   m: number;
   v: number;
 }
 
-const RHYTHMS = [[0, 1, 2, 3], [1, 2, 4, 5, 6], [0, 3, 4], [2, 3, 5, 6, 7], [0, 2, 3], [4, 5, 6, 7], [1, 3, 5], [], [0, 1, 2, 3, 4, 5]];
-const COMP_RHYTHMS = [[0, 3], [0, 3], [0, 5], [1, 4], [0, 3, 6], [3, 7]];
+/** État du soliste d'une platine (ses phrases enjambent les mesures). */
+interface Soloist {
+  /** Mesures restantes de la phrase en cours / de silence. */
+  phrase: number;
+  rest: number;
+  /** Position dans le mode (degré), conservée d'une plage à l'autre. */
+  deg: number;
+}
+
+const REST_DEGREES = [-3, 0, 2, 4, 7, 9, 11];
+const LEAD_CENTER: Record<Arrangement['lead'], number> = { flute: 74, sax: 62, moog: 67 };
 
 /**
- * Forme sur 4 passages de 16 mesures (64 mesures avant de boucler) :
- *   0 = thème, 1 = chorus improvisé du second soliste,
- *   2 = thème en question/réponse, 3 = version dépouillée (fragments + relances).
+ * Compose une mesure. Pas de grille à boucler : une forme modale, un ostinato
+ * légèrement varié, et des couches (harpe, solo, synthé, cloches) dont la
+ * densité suit un arc lent de 23 mesures, incommensurable avec la forme.
  */
-function barEvents(arr: Arrangement, bar: number, prevBass: number): { evs: Ev[]; lastBass: number } {
-  const tune = arr.tune;
-  const n = tune.bars.length;
-  const form = bar % n;
-  const pass = Math.floor(bar / n) % 4;
+function barEvents(arr: Arrangement, bar: number, solo: Soloist): Ev[] {
+  const B = arr.beats;
   const r = rng(bar * 7919 + 13);
-  const e2b = (e: number) => Math.floor(e / 2) + (e % 2 ? arr.swing : 0);
+  const p = placeOf(arr.form, bar);
+  const arc = 0.5 - 0.5 * Math.cos((2 * Math.PI * bar) / 23);
+  const sw = (b: number) => (Math.abs(b % 1 - 0.5) < 1e-6 ? Math.floor(b) + arr.swing : b);
+  const at = (deg: number, center: number) => nearest(p.root, center, center - 6, center + 5) + degree(p.scale, deg);
   const evs: Ev[] = [];
-  const chords = barChords(tune, bar);
-  const nextRoot = barChords(tune, bar + 1)[0].c.root;
+  const push = (t: number, d: number, inst: Inst, m: number, v: number) => evs.push({ t, d, inst, m, v });
 
-  // ── basse ──
-  let last = prevBass;
-  const bass = (t: number, d: number, pc: number, v: number) => {
-    last = nearest(pc, last, 33, 52);
-    evs.push({ t, d, inst: 'bass', m: last, v });
-  };
-  if (arr.bass === 'pedal') {
-    const tonic = tune.tonic % 12;
-    bass(0, 1.5, tonic, 0.9);
-    bass(e2b(3), 0.3, tonic + 1, 0.5);
-    bass(2, 1, tonic, 0.8);
-    bass(3, 1, chords[chords.length - 1].c.root, 0.7);
-  } else if (arr.bass === 'two') {
-    for (const { c, at, len } of chords) {
-      bass(at, Math.min(2, len) * 0.95, c.root, 0.9);
-      if (len > 2) bass(at + 2, 1.9, (c.root + (r() < 0.6 ? 7 : c.t[0])) % 12, 0.75);
-    }
-  } else {
-    chords.forEach(({ c, at, len }, i) => {
-      const target = i + 1 < chords.length ? chords[i + 1].c.root : nextRoot;
-      for (let k = 0; k < len; k++) {
-        let pc: number;
-        if (k === 0) pc = c.root;
-        else if (k === len - 1) pc = target + (r() < 0.5 ? 1 : -1) + (r() < 0.2 ? 6 : 0);
-        else pc = c.root + c.t[Math.floor(r() * c.t.length)];
-        bass(at + k, 0.92, (pc + 24) % 12, k % 2 ? 0.72 : 0.9);
-        // croche fantôme swinguée de temps en temps
-        if (k === len - 2 && r() < 0.18) evs.push({ t: at + k + arr.swing, d: 0.25, inst: 'bass', m: last, v: 0.4 });
-      }
-    });
+  // ── contrebasse : ostinato modal, une note qui bouge de temps en temps ──
+  for (const [b, d, len] of arr.ostinato) {
+    const deg = b > 0 && r() < 0.12 ? d + (r() < 0.5 ? 1 : -1) : d;
+    push(sw(b), len * 0.94, 'bass', at(deg, 38), b === 0 ? 0.95 : 0.72);
   }
+  if (p.last && r() < 0.5) push(sw(B - 0.5), 0.45, 'bass', at(-1, 38), 0.5);
 
-  // ── comp ──
-  const voicing = (c: Chord) => {
-    let root = 48 + c.root;
-    if (root > 55) root -= 12;
-    return c.v.map((i) => root + i);
-  };
-  const hit = (t: number, d: number, c: Chord, v: number) => voicing(c).forEach((m, i) => evs.push({ t: t + i * 0.012, d, inst: arr.comp, m, v: v * (i === 3 ? 0.85 : 1) }));
-  if (arr.compStyle === 'pads') {
-    for (const { c, at, len } of chords) hit(at, len * 0.96, c, 0.55);
-  } else if (arr.compStyle === 'stabs') {
-    for (const { c, at, len } of chords) {
-      const es = len > 2 ? (r() < 0.5 ? [0, 3, 7] : [0, 3, 5]) : [0, r() < 0.5 ? 3 : 1];
-      for (const e of es) if (e2b(e) < len) hit(at + e2b(e), 0.3, c, e ? 0.6 : 0.8);
-      evs.push({ t: at, d: 0.4, inst: arr.comp, m: 36 + c.root, v: 0.5 });
-    }
+  // ── nappes : voicings en quartes tirés du mode ──
+  const shift = bar % 4 === 3 ? (r() < 0.5 ? 1 : -1) : bar % 8 === 5 && r() < 0.5 ? 2 : 0;
+  const voicing = [0, 3, 6, 9].map((k) => at(shift + k, 54));
+  if (arr.pad === 'organ') {
+    voicing.forEach((m, i) => push(i * 0.02, B, 'organ', m, i === 3 ? 0.7 : 0.9));
   } else {
-    if (chords.length === 1) {
-      const pat = COMP_RHYTHMS[Math.floor(r() * COMP_RHYTHMS.length)];
-      for (const e of pat) hit(e2b(e), e === 0 ? 0.8 : 0.45, chords[0].c, e === 0 ? 0.7 : 0.55);
-    } else {
-      hit(0, 0.8, chords[0].c, 0.7);
-      hit(2, 0.7, chords[1].c, 0.65);
-      if (r() < 0.4) hit(e2b(7), 0.3, chords[1].c, 0.45);
+    voicing.forEach((m, i) => push(i * 0.03, B * 0.6, 'rhodes', m, 0.7));
+    if (r() < 0.55) {
+      const t = sw(r() < 0.5 ? B - 1.5 : 1.5);
+      voicing.forEach((m, i) => push(t + i * 0.025, B - t, 'rhodes', m, 0.45));
     }
   }
 
-  // ── batterie ──
-  const drum = (inst: Inst, e: number, v: number) => evs.push({ t: e2b(e), d: 0.2, inst, m: 0, v });
-  if (arr.drums === 'ride' || arr.drums === 'brushes') {
-    const soft = arr.drums === 'brushes' ? 0.55 : 1;
-    for (const e of [0, 2, 3, 4, 6, 7]) if (e % 2 === 0 || r() < 0.85) drum('ride', e, (e === 2 || e === 6 ? 0.9 : 0.6) * soft);
-    drum('hat', 2, 0.7);
-    drum('hat', 6, 0.7);
-    if (arr.drums === 'brushes') for (let b = 0; b < 4; b++) drum('brush', b * 2, b % 2 ? 0.9 : 0.6);
+  // ── harpe : glissandos dans le mode, ou arpège lent ──
+  if (bar > 0 && r() < arr.harp * (0.5 + arc)) {
+    const n = 7 + Math.floor(r() * 9);
+    const start = Math.floor(r() * Math.max(1, B - 2));
+    const d0 = r() < 0.5 ? 0 : 2;
+    const back = r() < 0.4;
+    for (let i = 0; i < n; i++) {
+      const k = back && i > n / 2 ? n - i : i;
+      push(start + i * 0.085, 1.6, 'harp', at(d0 + k, 60), 0.4 + 0.5 * Math.sin((Math.PI * (i + 1)) / (n + 1)));
+    }
+  } else if (r() < arr.harp * 0.6) {
+    const shape = [0, 4, 7, 9, 11, 9, 7, 4];
+    for (let e = 0; e < B * 2; e++) push(sw(e / 2), 1.2, 'harp', at(shape[e % shape.length] + shift, 55), e % 2 ? 0.35 : 0.5);
+  }
+
+  // ── soliste : phrases improvisées dans le mode, silences entre deux ──
+  if (bar >= 4) {
+    if (solo.rest > 0) solo.rest--;
     else {
-      drum('kick', 0, 0.45);
-      drum('kick', 4, 0.35);
+      if (solo.phrase === 0) solo.phrase = 1 + Math.floor(r() * 3);
+      const last = solo.phrase === 1;
+      const slots: number[] = [];
+      for (let e = Math.floor(r() * 3); e < B * 2 - (last ? 3 : 0); ) {
+        slots.push(e);
+        e += r() < 0.45 ? 1 : r() < 0.7 ? 2 : 3;
+      }
+      const center = LEAD_CENTER[arr.lead];
+      slots.forEach((e, i) => {
+        let step = Math.round((r() - 0.5) * 3.2 + (3 - solo.deg) * 0.15);
+        if (step === 0) step = r() < 0.5 ? 1 : -1;
+        if (r() < 0.1) step *= 3;
+        solo.deg = Math.max(-3, Math.min(11, solo.deg + step));
+        const final = last && i === slots.length - 1;
+        // fin de phrase posée sur une note de l'accord modal (1, 3, 5)
+        if (final) solo.deg = REST_DEGREES.reduce((b, x) => (Math.abs(x - solo.deg) < Math.abs(b - solo.deg) ? x : b));
+        const t = sw(e / 2);
+        const next = final ? B + 1 : sw((slots[i + 1] ?? B * 2) / 2);
+        const m = at(solo.deg, center);
+        if (arr.lead !== 'moog' && r() < 0.12 && t > 0.1) push(t - 0.08, 0.08, arr.lead, m + 2, 0.5);
+        push(t, Math.max(0.3, (next - t) * 0.94), arr.lead, m, (i === 0 ? 0.7 : 0.85) * (0.8 + r() * 0.2));
+      });
+      solo.phrase--;
+      if (solo.phrase === 0) solo.rest = 1 + Math.floor((r() * 3) / Math.max(0.2, arr.talk));
     }
-    if (form % 8 === 7) for (const t of [3, 3 + 1 / 3, 3 + 2 / 3]) evs.push({ t, d: 0.1, inst: 'rim', m: 0, v: 0.6 + (t - 3) * 0.5 });
-    else if (r() < 0.25) drum('rim', 7, 0.45);
-  } else if (arr.drums === 'soft') {
-    drum('brush', 2, 0.7);
-    drum('brush', 6, 0.7);
-    drum('hat', 2, 0.4);
-    drum('hat', 6, 0.4);
-    if (r() < 0.5) drum('ride', 0, 0.35);
-  } else {
-    // labo : battement de cœur + charleston étouffé
-    drum('kick', 0, 0.55);
-    drum('kick', 1, 0.3);
-    drum('hat', 2, 0.35);
-    drum('hat', 6, 0.35);
-    if (form % 2 === 0) drum('ride', 0, 0.4);
-    if (r() < 0.2) drum('rim', 5, 0.35);
   }
 
-  // ── mélodie ──
-  const play = (inst: Inst, oct: number, v: number) => {
-    for (const [e, note, len] of tune.melody[form]) {
-      const t = e2b(e);
-      evs.push({ t, d: Math.max(0.3, e2b(e + len) - t) * 0.95, inst, m: midi(note) + oct, v: v * (len >= 3 ? 1 : 0.85) });
+  // ── synthé spatial : nappe balayée en début de plage ──
+  if (p.first && bar > 0 && r() < arr.space) {
+    push(0, B * 2, 'sweep', at(4, 62), 0.8);
+    push(0.3, B * 2, 'sweep', at(0, 50), 0.6);
+  } else if (arr.lead === 'moog' && r() < arr.space * 0.15) {
+    push(sw(B - 1.5), 1.5, 'sweep', at(7, 74), 0.5);
+  }
+
+  // ── percussions ──
+  if (bar % p.length === 0 || (p.first && r() < 0.35)) push(0, 4, 'gong', at(0, 40), bar === 0 ? 0.6 : 0.8);
+  if (p.last) push(B - 2, 2, 'swell', 0, 0.7);
+  const bell = () => push(r() * (B - 0.5), 2, 'bell', at([0, 4, 7, 9][Math.floor(r() * 4)], 84), 0.4 + r() * 0.4);
+  if (arr.drums === 'ride') {
+    for (let b = 0; b < B; b++) {
+      push(b, 0.2, 'ride', 0, b % 2 ? 0.75 : 0.5);
+      if (b % 2 === 0 && r() < 0.75) push(b + arr.swing, 0.2, 'ride', 0, 0.35);
+      if (b % 2) push(b, 0.1, 'hat', 0, 0.55);
     }
-  };
-  const solo = (inst: Inst, center: number, v: number) => {
-    const pat = RHYTHMS[Math.floor(r() * RHYTHMS.length)];
-    let pitch = center + Math.round((r() - 0.5) * 6);
-    pat.forEach((e, i) => {
-      const t = e2b(e);
-      const { c } = chords.find((ch) => t >= ch.at && t < ch.at + ch.len) ?? chords[0];
-      const pcs = new Set([0, ...c.t, ...c.v].map((x) => (c.root + x) % 12));
-      // marche aléatoire dans les notes de l'accord, rappelée vers le centre
-      const step = Math.round((r() - 0.5 + (center - pitch) * 0.04) * 6);
-      let m = pitch + step;
-      for (let k = 0; k < 12 && !pcs.has(((m % 12) + 12) % 12); k++) m += step >= 0 ? 1 : -1;
-      pitch = m;
-      const next = pat[i + 1] ?? 8;
-      evs.push({ t, d: Math.max(0.25, e2b(next) - t) * 0.9, inst, m, v: v * (0.75 + r() * 0.25) });
-    });
-  };
-  if (pass === 0) play(arr.lead, arr.leadOct, 0.9);
-  else if (pass === 1) solo(arr.counter, 72 + arr.counterOct, 0.8);
-  else if (pass === 2) {
-    if (form < 8) play(arr.counter, arr.counterOct, 0.8);
-    else play(arr.lead, arr.leadOct, 0.9);
-  } else if (form % 4 < 2) play(arr.lead, arr.leadOct, 0.75);
-  else if (form % 4 === 3) solo(arr.comp, 70, 0.5);
-  return { evs, lastBass: last };
+    if (arc > 0.35) for (let e = 0; e < B * 2; e++) push(sw(e / 2), 0.1, 'shaker', 0, e % 2 ? 0.35 : 0.2);
+    if (r() < 0.2) bell();
+  } else if (arr.drums === 'hands') {
+    push(0, 0.5, 'tom', 0, 0.8);
+    push(sw(1.5), 0.5, 'tom', 0, 0.45);
+    push(3, 0.5, 'tom', 0, 0.6);
+    if (r() < 0.5) push(sw(B - 0.5), 0.5, 'tom', 0, 0.35);
+    for (let e = 0; e < B * 2; e++) push(sw(e / 2), 0.1, 'shaker', 0, e % 2 ? 0.4 : 0.22);
+    if (bar % 2 === 0) push(0, 0.2, 'ride', 0, 0.45);
+    if (r() < 0.25) bell();
+  } else {
+    // rubato : pas de pulsation, des événements dispersés
+    if (r() < 0.55) bell();
+    if (r() < 0.3) bell();
+    if (!p.last && r() < 0.3) push(r() * (B - 2), 2, 'swell', 0, 0.45);
+    if (r() < 0.3) {
+      const t = r() * (B - 1);
+      for (let i = 0; i < 4; i++) push(t + i * (0.22 - i * 0.03), 0.1, 'shaker', 0, 0.3 + i * 0.1);
+    }
+    if (r() < 0.4) push(0, 0.2, 'ride', 0, 0.35);
+  }
+  return evs;
 }
 
 // ── instruments ──────────────────────────────────────────────────────────
 
 /** Volume relatif de chaque instrument dans le mélange. */
 const MIX: Record<Inst, number> = {
-  bass: 0.5,
-  vibes: 0.2,
-  rhodes: 0.13,
-  horn: 0.11,
-  clari: 0.1,
-  piano: 0.1,
-  theremin: 0.07,
-  ride: 0.035,
-  brush: 0.05,
-  hat: 0.05,
-  kick: 0.3,
-  rim: 0.05,
+  bass: 0.55,
+  drone: 0.05,
+  rhodes: 0.1,
+  organ: 0.035,
+  harp: 0.11,
+  flute: 0.1,
+  sax: 0.075,
+  moog: 0.05,
+  sweep: 0.035,
+  bell: 0.03,
+  gong: 0.06,
+  shaker: 0.03,
+  ride: 0.03,
+  hat: 0.035,
+  swell: 0.04,
+  tom: 0.3,
 };
+
+/** Envoi vers l'écho de la platine (en plus de la grande réverbe commune). */
+const ECHO: Partial<Record<Inst, number>> = { harp: 0.35, flute: 0.4, sax: 0.3, moog: 0.55, bell: 0.45, sweep: 0.5, rhodes: 0.2 };
+
+/** Sorties d'une platine : sec, nappes (phaser + chorus), écho. */
+interface Outs {
+  dry: AudioNode;
+  pad: AudioNode;
+  echo: AudioNode;
+}
 
 let noiseBuf: AudioBuffer | null = null;
 
@@ -422,8 +393,8 @@ function vibrato(a: BaseAudioContext, target: AudioParam, t: number, stop: numbe
   lfo.connect(depth).connect(target);
 }
 
-function noiseHit(a: BaseAudioContext, out: AudioNode, t: number, v: number, type: BiquadFilterType, f: number, q: number, attack: number, decay: number): void {
-  if (!noiseBuf) return;
+function noiseHit(a: BaseAudioContext, out: AudioNode, t: number, v: number, type: BiquadFilterType, f: number, q: number, attack: number, decay: number): number {
+  if (!noiseBuf) return t;
   const src = a.createBufferSource();
   src.buffer = noiseBuf;
   const g = gain(a, 0);
@@ -431,125 +402,186 @@ function noiseHit(a: BaseAudioContext, out: AudioNode, t: number, v: number, typ
   const stop = env(g.gain, t, v, attack, decay, 0.01, t + attack + decay, 0.02);
   src.start(t, Math.random() * 1.5);
   src.stop(stop);
+  return stop;
 }
 
 /** Joue une note d'un instrument synthétisé. `t`, `d` en secondes. */
-function voice(a: BaseAudioContext, out: AudioNode, inst: Inst, t: number, d: number, m: number, vel: number): void {
+function voice(a: BaseAudioContext, outs: Outs, inst: Inst, t: number, d: number, m: number, vel: number): void {
   const v = vel * MIX[inst];
   const f = hz(m);
+  const g = gain(a, 0);
+  g.connect(inst === 'rhodes' || inst === 'organ' || inst === 'sweep' ? outs.pad : outs.dry);
+  const send = ECHO[inst];
+  if (send) g.connect(gain(a, send)).connect(outs.echo);
   switch (inst) {
     case 'bass': {
-      const g = gain(a, 0);
-      const lp = filter(a, 'lowpass', Math.min(1400, f * 7 + 150), 1.2);
-      const stop = env(g.gain, t, v, 0.006, 0.22, 0.5, t + d * 0.9, 0.07);
+      // contrebasse pincée : attaque sourde, filtre qui se referme
+      const stop = env(g.gain, t, v, 0.008, 0.4, 0.4, t + d * 0.9, 0.2);
+      const lp = filter(a, 'lowpass', Math.min(1600, f * 9), 0.9);
+      lp.frequency.setValueAtTime(Math.min(1600, f * 9), t);
+      lp.frequency.exponentialRampToValueAtTime(f * 3 + 80, t + 0.35);
       osc(a, 'triangle', f, t, stop).connect(lp);
-      osc(a, 'sine', f * 2, t, stop).connect(gain(a, 0.25)).connect(lp);
-      lp.connect(g).connect(out);
-      return;
-    }
-    case 'vibes': {
-      const g = gain(a, 0);
-      const trem = gain(a, 0.75);
-      const stop = env(g.gain, t, v, 0.003, 0.5, 0.35, t + d, 0.9);
-      osc(a, 'sine', f, t, stop).connect(g);
-      const bell = gain(a, 0);
-      env(bell.gain, t, 0.35, 0.002, 0.07, 0.01, t + 0.08, 0.02);
-      osc(a, 'sine', f * 3.98, t, stop).connect(bell).connect(g);
-      // moteur du vibraphone : trémolo d'amplitude
-      osc(a, 'sine', 5.4, t, stop).connect(gain(a, 0.25)).connect(trem.gain);
-      g.connect(trem).connect(out);
+      osc(a, 'sine', f, t, stop).connect(gain(a, 0.6)).connect(lp);
+      lp.connect(g);
       return;
     }
     case 'rhodes': {
-      const g = gain(a, 0);
-      const stop = env(g.gain, t, v, 0.005, 0.6, 0.45, t + d, 0.3);
+      const stop = env(g.gain, t, v, 0.005, 0.9, 0.4, t + d, 0.7);
       const car = osc(a, 'sine', f, t, stop);
       const mod = osc(a, 'sine', f, t, stop);
       const idx = a.createGain();
-      idx.gain.setValueAtTime(f * 1.4, t);
-      idx.gain.exponentialRampToValueAtTime(f * 0.15, t + 0.45);
+      idx.gain.setValueAtTime(f * 1.2, t);
+      idx.gain.exponentialRampToValueAtTime(f * 0.12, t + 0.5);
       mod.connect(idx).connect(car.frequency);
-      car.connect(g).connect(out);
+      car.connect(g);
       return;
     }
-    case 'horn': {
-      // cuivre bouché : dent de scie filtrée, petit glissé d'attaque, « wah » de sourdine
-      const g = gain(a, 0);
-      const stop = env(g.gain, t, v, 0.03, 0.2, 0.7, t + d * 0.95, 0.09);
+    case 'organ': {
+      // orgue à tirettes doux : 8' + 4' + 2⅔', gonflé lentement
+      const stop = env(g.gain, t, v, 0.35, 0.3, 0.85, t + d, 0.9);
+      osc(a, 'sine', f, t, stop).connect(g);
+      osc(a, 'sine', f * 2, t, stop).connect(gain(a, 0.45)).connect(g);
+      osc(a, 'sine', f * 3, t, stop).connect(gain(a, 0.18)).connect(g);
+      return;
+    }
+    case 'harp': {
+      const stop = env(g.gain, t, v, 0.002, 1.6, 0.01, t + 0.2, 0.3);
+      osc(a, 'sine', f, t, stop).connect(g);
+      const pluck = gain(a, 0);
+      env(pluck.gain, t, 0.3, 0.001, 0.12, 0.01, t + 0.13, 0.02);
+      osc(a, 'triangle', f * 2, t, stop).connect(pluck).connect(g);
+      return;
+    }
+    case 'flute': {
+      // sinus + souffle filtré, vibrato tardif, petit glissé d'attaque
+      const stop = env(g.gain, t, v, 0.07, 0.15, 0.8, t + d * 0.95, 0.15);
+      const o = osc(a, 'sine', f, t, stop);
+      o.detune.setValueAtTime(-25, t);
+      o.detune.linearRampToValueAtTime(0, t + 0.06);
+      vibrato(a, o.detune, t, stop, 5.1, 14, 0.25);
+      o.connect(g);
+      osc(a, 'triangle', f, t, stop).connect(gain(a, 0.12)).connect(g);
+      noiseHit(a, g, t, 0.35, 'bandpass', f * 2, 3, 0.04, Math.max(0.1, d * 0.6));
+      return;
+    }
+    case 'sax': {
+      // ténor feutré : dent de scie, formant, filtre qui s'ouvre avec le souffle
+      const stop = env(g.gain, t, v, 0.05, 0.2, 0.75, t + d * 0.95, 0.14);
       const o = osc(a, 'sawtooth', f, t, stop);
-      o.detune.setValueAtTime(-40, t);
-      o.detune.linearRampToValueAtTime(0, t + 0.07);
-      vibrato(a, o.detune, t, stop, 5.3, 10, 0.3);
-      const lp = filter(a, 'lowpass', 600, 2);
-      lp.frequency.setValueAtTime(600, t);
-      lp.frequency.exponentialRampToValueAtTime(2600, t + 0.08);
-      lp.frequency.exponentialRampToValueAtTime(1500, t + 0.4);
-      o.connect(filter(a, 'bandpass', 1200, 0.9)).connect(lp).connect(g).connect(out);
+      o.detune.setValueAtTime(-30, t);
+      o.detune.linearRampToValueAtTime(0, t + 0.08);
+      vibrato(a, o.detune, t, stop, 4.6, 12, 0.3);
+      const lp = filter(a, 'lowpass', 700, 1);
+      lp.frequency.setValueAtTime(700, t);
+      lp.frequency.exponentialRampToValueAtTime(1900, t + 0.12);
+      lp.frequency.exponentialRampToValueAtTime(1200, t + 0.6);
+      o.connect(filter(a, 'peaking', 1100, 1)).connect(lp).connect(g);
+      noiseHit(a, g, t, 0.15, 'bandpass', 2500, 1.5, 0.03, 0.1);
       return;
     }
-    case 'clari': {
-      const g = gain(a, 0);
-      const stop = env(g.gain, t, v, 0.04, 0.15, 0.8, t + d * 0.95, 0.1);
-      const o = osc(a, 'square', f, t, stop);
-      vibrato(a, o.detune, t, stop, 4.8, 7, 0.35);
-      o.connect(filter(a, 'lowpass', 1500, 0.5)).connect(g).connect(out);
-      osc(a, 'sine', f, t, stop).connect(gain(a, 0.6)).connect(g);
+    case 'moog': {
+      // synthé analogique : deux dents de scie désaccordées, filtre résonant, portamento
+      const stop = env(g.gain, t, v, 0.02, 0.3, 0.7, t + d * 0.95, 0.25);
+      const lp = filter(a, 'lowpass', f * 1.5, 7);
+      lp.frequency.setValueAtTime(f * 1.5, t);
+      lp.frequency.exponentialRampToValueAtTime(Math.min(7000, f * 9), t + 0.09);
+      lp.frequency.exponentialRampToValueAtTime(f * 2.5, t + 0.6);
+      for (const c of [-7, 7]) {
+        const o = osc(a, 'sawtooth', f * 0.94, t, stop);
+        o.frequency.exponentialRampToValueAtTime(f, t + 0.07);
+        o.detune.value = c;
+        o.connect(lp);
+      }
+      vibrato(a, lp.frequency, t, stop, 0.8, f * 0.5, 0.4);
+      lp.connect(g);
       return;
     }
-    case 'piano': {
-      // piano bastringue : deux cordes désaccordées
-      const g = gain(a, 0);
-      const stop = env(g.gain, t, v, 0.003, 1.1, 0.06, t + d, 0.15);
-      osc(a, 'triangle', f * Math.pow(2, 9 / 1200), t, stop).connect(g);
-      osc(a, 'triangle', f * Math.pow(2, -9 / 1200), t, stop).connect(g);
-      osc(a, 'sine', f * 2, t, stop).connect(gain(a, 0.2)).connect(g);
-      g.connect(out);
+    case 'sweep': {
+      // nappe « spatiale » : filtre résonant qui monte puis redescend lentement
+      const stop = env(g.gain, t, v, d * 0.35, d * 0.3, 0.6, t + d * 0.8, 1.6);
+      const lp = filter(a, 'lowpass', 250, 9);
+      lp.frequency.setValueAtTime(250, t);
+      lp.frequency.exponentialRampToValueAtTime(3200, t + d * 0.5);
+      lp.frequency.exponentialRampToValueAtTime(300, stop);
+      for (const c of [-12, 12]) {
+        const o = osc(a, 'sawtooth', f, t, stop);
+        o.detune.value = c;
+        o.connect(lp);
+      }
+      lp.connect(g);
       return;
     }
-    case 'theremin': {
-      const g = gain(a, 0);
-      const stop = env(g.gain, t, v, 0.15, 0.2, 0.85, t + d, 0.3);
-      const o = osc(a, 'sine', f * 0.97, t, stop);
-      o.frequency.exponentialRampToValueAtTime(f, t + 0.14);
-      vibrato(a, o.detune, t, stop, 6.2, 18, 0);
-      o.connect(g).connect(out);
+    case 'bell': {
+      // cymbalettes / crotale : partiels inharmoniques, longue résonance
+      const stop = env(g.gain, t, v, 0.001, 3, 0.001, t + 0.01, 0.1);
+      [1, 2.76, 5.4, 8.93].forEach((k, i) => {
+        if (f * k < 16000) osc(a, 'sine', f * k, t, stop).connect(gain(a, [1, 0.5, 0.25, 0.12][i])).connect(g);
+      });
       return;
     }
-    case 'ride':
-      noiseHit(a, out, t, v, 'highpass', 6500, 0.5, 0.002, 0.4);
+    case 'gong': {
+      // gong doux frappé à la mailloche : partiels graves qui gonflent puis s'éteignent
+      const stop = env(g.gain, t, v, 0.25, 6, 0.001, t + 0.3, 0.2);
+      [1, 1.47, 2.09, 2.56, 3.13].forEach((k, i) => {
+        const o = osc(a, 'sine', f * k, t, stop);
+        o.detune.setValueAtTime(-15, t);
+        o.detune.linearRampToValueAtTime(0, t + 1.5);
+        o.connect(gain(a, 1 / (i + 1))).connect(g);
+      });
+      noiseHit(a, g, t, 0.25, 'lowpass', 500, 0.7, 0.4, 1.5);
       return;
-    case 'brush':
-      noiseHit(a, out, t, v, 'bandpass', 2800, 0.7, 0.035, 0.2);
+    }
+    case 'shaker':
+      noiseHit(a, g, t, 1, 'bandpass', 6500, 1.2, 0.008, 0.055);
+      g.gain.value = v;
       return;
     case 'hat':
-      noiseHit(a, out, t, v, 'highpass', 8000, 0.7, 0.001, 0.045);
+      noiseHit(a, g, t, 1, 'highpass', 7500, 0.7, 0.002, 0.05);
+      g.gain.value = v;
       return;
-    case 'rim': {
-      const g = gain(a, 0);
-      const stop = env(g.gain, t, v, 0.001, 0.035, 0.01, t + 0.04, 0.01);
-      osc(a, 'triangle', 1750, t, stop).connect(g).connect(out);
-      noiseHit(a, out, t, v * 0.6, 'bandpass', 2500, 1, 0.001, 0.025);
-      return;
-    }
-    case 'kick': {
-      const g = gain(a, 0);
-      const stop = env(g.gain, t, v, 0.003, 0.22, 0.01, t + 0.23, 0.02);
-      const o = osc(a, 'sine', 105, t, stop);
-      o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
-      o.connect(g).connect(out);
+    case 'ride': {
+      // cymbale ride à la baguette légère : souffle aigu + petit tintement
+      noiseHit(a, g, t, 1, 'highpass', 5500, 0.5, 0.002, 0.7);
+      const ping = gain(a, 0);
+      const stop = env(ping.gain, t, 0.12, 0.001, 0.4, 0.01, t + 0.41, 0.05);
+      osc(a, 'triangle', 3150, t, stop).connect(ping).connect(g);
+      g.gain.value = v;
       return;
     }
+    case 'swell': {
+      // roulement de cymbale aux mailloches : crescendo puis longue extinction
+      noiseHit(a, g, t, 1, 'bandpass', 4200, 0.4, Math.max(0.2, d), 2.2);
+      g.gain.value = v;
+      return;
+    }
+    case 'tom': {
+      // tambour à main grave
+      const stop = env(g.gain, t, v, 0.004, 0.35, 0.01, t + 0.36, 0.03);
+      const o = osc(a, 'sine', 110, t, stop);
+      o.frequency.exponentialRampToValueAtTime(68, t + 0.2);
+      o.connect(g);
+      noiseHit(a, g, t, 0.15, 'bandpass', 350, 1, 0.002, 0.05);
+      return;
+    }
+    case 'drone':
+      return;
   }
 }
 
 // ── lecture ──────────────────────────────────────────────────────────────
 
-/** Lecture d'un thème (une platine par thème ; deux pendant un fondu enchaîné). */
+/**
+ * Lecture d'un thème (une platine par thème ; deux pendant un fondu enchaîné).
+ * Chaque platine porte son bourdon (tonique + quinte, tenus en continu), son
+ * phaser + chorus stéréo pour les nappes, et son écho filtré à réinjection.
+ */
 class Deck {
   readonly out: GainNode;
+  private outs: Outs;
+  private lfos: OscillatorNode[] = [];
+  private solo: Soloist = { phrase: 0, rest: 0, deg: 4 };
   bar: number;
   next: number;
-  lastBass: number;
   fadeEnd = Infinity;
 
   constructor(
@@ -560,11 +592,65 @@ class Deck {
     start: number,
     bar = 0,
   ) {
-    this.out = gain(a, 0);
-    this.out.connect(dest);
     this.next = start;
     this.bar = bar;
-    this.lastBass = arr.tune.tonic;
+    this.out = gain(a, 0);
+    this.out.connect(dest);
+    const lfo = (rate: number, depth: number, target: AudioParam) => {
+      const o = osc(a, 'sine', rate, start, start + 1e6);
+      o.connect(gain(a, depth)).connect(target);
+      this.lfos.push(o);
+    };
+
+    const dry = gain(a, 1);
+    dry.connect(this.out);
+
+    // phaser (4 passe-tout balayés) puis chorus stéréo (deux lignes modulées)
+    const pad = gain(a, 1);
+    pad.connect(gain(a, 0.6)).connect(this.out);
+    let ph: AudioNode = pad;
+    for (let i = 0; i < 4; i++) {
+      const ap = filter(a, 'allpass', 700 + i * 250, 0.6);
+      lfo(0.11, 450 + i * 150, ap.frequency);
+      ph = ph.connect(ap);
+    }
+    ph.connect(gain(a, 0.5)).connect(this.out);
+    [-0.7, 0.7].forEach((pan, i) => {
+      const dl = a.createDelay(0.1);
+      dl.delayTime.value = 0.016 + i * 0.006;
+      lfo(0.43 + i * 0.17, 0.004, dl.delayTime);
+      const sp = a.createStereoPanner();
+      sp.pan.value = pan;
+      ph.connect(dl).connect(gain(a, 0.45)).connect(sp).connect(this.out);
+    });
+
+    // écho : croche pointée × 2, réinjection filtrée (sombre, qui s'éloigne)
+    const echo = gain(a, 1);
+    const dl = a.createDelay(3);
+    dl.delayTime.value = (60 / arr.bpm) * 1.5;
+    const fb = gain(a, 0.42);
+    const tone = filter(a, 'lowpass', 2200, 0.5);
+    echo.connect(dl).connect(tone).connect(fb).connect(dl);
+    const sp = a.createStereoPanner();
+    sp.pan.value = 0.35;
+    tone.connect(gain(a, 0.6)).connect(sp).connect(this.out);
+
+    // bourdon : pédale sur la tonique de la forme, filtre qui respire lentement
+    const root = nearest(pitchClass(arr.form[0][0]), 38, 33, 44);
+    const dg = gain(a, 0);
+    dg.gain.setValueAtTime(0.0001, start);
+    dg.gain.exponentialRampToValueAtTime(MIX.drone, start + 4);
+    const dlp = filter(a, 'lowpass', 500, 2);
+    lfo(0.07, 250, dlp.frequency);
+    for (const [m, type, v] of [[root, 'sine', 1], [root + 7, 'triangle', 0.35], [root + 12, 'sawtooth', 0.12], [root + 19, 'triangle', 0.08]] as const) {
+      const o = osc(a, type, hz(m), start, start + 1e6);
+      o.detune.value = (m - root) * 0.3;
+      o.connect(gain(a, v)).connect(dlp);
+      this.lfos.push(o);
+    }
+    dlp.connect(dg).connect(this.out);
+
+    this.outs = { dry, pad, echo };
   }
 
   get spb(): number {
@@ -587,16 +673,21 @@ class Deck {
   /** Planifie les mesures qui commencent avant `until`. */
   fill(until: number): void {
     while (this.next < until && this.next < this.fadeEnd) {
-      const { evs, lastBass } = barEvents(this.arr, this.bar, this.lastBass);
-      this.lastBass = lastBass;
       const spb = this.spb;
-      for (const e of evs) voice(this.a, this.out, e.inst, this.next + e.t * spb, e.d * spb, e.m, e.v);
-      this.next += 4 * spb;
+      for (const e of barEvents(this.arr, this.bar, this.solo)) voice(this.a, this.outs, e.inst, this.next + e.t * spb, e.d * spb, e.m, e.v);
+      this.next += this.arr.beats * spb;
       this.bar++;
     }
   }
 
   stop(): void {
+    for (const o of this.lfos) {
+      try {
+        o.stop();
+      } catch {
+        /* déjà arrêté */
+      }
+    }
     this.out.disconnect();
   }
 }
@@ -631,22 +722,27 @@ function readEnabled(): boolean {
 
 let enabled = readEnabled();
 
-/** Réverbération courte : réponse impulsionnelle générée (bruit à décroissance exponentielle). */
+/**
+ * Grande réverbe « cathédrale cosmique » : réponse impulsionnelle générée,
+ * bruit stéréo décorrélé qui s'assombrit en s'éteignant, attaque adoucie.
+ */
 function impulse(a: BaseAudioContext, seconds: number): AudioBuffer {
   const len = Math.floor(a.sampleRate * seconds);
   const buf = a.createBuffer(2, len, a.sampleRate);
+  const fade = Math.floor(a.sampleRate * 0.08);
   for (let ch = 0; ch < 2; ch++) {
     const d = buf.getChannelData(ch);
     let lp = 0;
     for (let i = 0; i < len; i++) {
-      lp += ((Math.random() * 2 - 1) - lp) * 0.35; // un peu sombre
-      d[i] = lp * Math.pow(1 - i / len, 2.6);
+      const x = i / len;
+      lp += ((Math.random() * 2 - 1) - lp) * (0.5 - 0.42 * x); // de plus en plus sombre
+      d[i] = lp * Math.pow(1 - x, 3) * Math.min(1, i / fade);
     }
   }
   return buf;
 }
 
-/** Chaîne de mixage : platines → bus → (sec + réverbe) → ducking → passe-bas → compresseur → volume. */
+/** Chaîne de mixage : platines → bus → (sec + grande réverbe) → ducking → passe-bas → compresseur → volume. */
 function buildGraph(a: BaseAudioContext, dest: AudioNode): Omit<Graph, 'a'> {
   if (!noiseBuf || noiseBuf.sampleRate !== a.sampleRate) {
     noiseBuf = a.createBuffer(1, a.sampleRate * 2, a.sampleRate);
@@ -664,14 +760,16 @@ function buildGraph(a: BaseAudioContext, dest: AudioNode): Omit<Graph, 'a'> {
   comp.release.value = 0.25;
   const master = gain(a, 0);
   const verb = a.createConvolver();
-  verb.buffer = impulse(a, 2.2);
+  verb.buffer = impulse(a, 4.5);
+  const predelay = a.createDelay(0.2);
+  predelay.delayTime.value = 0.045;
   bus.connect(duck);
-  bus.connect(verb).connect(gain(a, 0.22)).connect(duck);
+  bus.connect(predelay).connect(verb).connect(gain(a, 0.5)).connect(duck);
   duck.connect(tone).connect(comp).connect(master).connect(dest);
   return { bus, duck, tone, master };
 }
 
-const MASTER = 0.32;
+const MASTER = 0.26;
 
 function applyTone(g: Graph, at: number): void {
   const arr = decks.length ? decks[decks.length - 1].arr : null;
@@ -700,8 +798,8 @@ function startTheme(id: ThemeId): void {
   const cur = decks.find((d) => d.fadeEnd === Infinity);
   if (cur?.id === id) return;
   const arr: Arrangement = THEMES[id];
-  // même grille (variation de pièce) : on reprend à la mesure en cours
-  const bar = cur && cur.arr.tune === arr.tune ? cur.bar : 0;
+  // même forme : on reprend à la mesure en cours
+  const bar = cur && cur.arr.form === arr.form ? cur.bar : 0;
   cur?.fadeOut(now, 1.4);
   const deck = new Deck(g.a, id, arr, g.bus, now + (cur ? 0.25 : 0.05), bar);
   deck.fadeIn(now + 0.05, cur ? 1.8 : 2.5);
