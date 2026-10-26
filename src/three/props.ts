@@ -35,17 +35,26 @@ export function bob(w: number): THREE.Group {
   lidHinge.add(at(cyl(r * 0.78, r * 0.82, h * 0.18, '#a9b4c2', { seg: 20 }), r * 0.8, 0, 0));
   const maw = at(cyl(r * 0.66, r * 0.66, h * 0.02, '#1a1020', { glow: true, seg: 20 }), 0, h + r * 0.04, 0);
   const lid = group([lidHinge, maw]);
+  const eyeR = r * 0.16;
+  const eyeY = h * 0.62;
+  const eyeZ = r * 0.9;
   const eyes = [-1, 1].map((sx) => {
-    const eye = at(sphere(r * 0.16, '#ffffff', { seg: 10 }), sx * r * 0.36, h * 0.62, r * 0.9);
+    const eye = at(sphere(eyeR, '#ffffff', { seg: 10 }), sx * r * 0.36, eyeY, eyeZ);
     const pupil = at(sphere(r * 0.07, '#11131a', { glow: true, seg: 8 }), sx * r * 0.36, h * 0.55, r * 1.04);
     return group([eye, pupil]);
   });
-  // sourcils-plaques tombants sur le haut des yeux (la déprime, en low-poly),
-  // orientés selon l'humeur (setBrows, poses de engine/brows.ts) ; hors des
-  // groupes `eyes` pour que clignements et mâchouillage ne les écrasent pas
-  const eyeR = r * 0.16;
-  const browY = h * 0.8;
-  const brows = [-1, 1].map((sx) => at(group([box(r * 0.38, r * 0.1, r * 0.2, '#4f5764', { edges: false })]), sx * r * 0.36, browY, r * 0.92));
+  // sourcils-plaques au-dessus des yeux (la déprime, en low-poly), orientés
+  // selon l'humeur (setBrows, poses de engine/brows.ts) ; hors des groupes
+  // `eyes` pour que clignements et mâchouillage ne les écrasent pas.
+  // Au repos, le bas de la plaque flotte un poil au-dessus du sommet de l'œil ;
+  // la plaque est avancée devant la sphère (face avant > avant de l'œil) pour
+  // que les poses plongeantes (angry, suspicious) masquent le blanc au lieu
+  // de le laisser dépasser devant.
+  const browT = r * 0.1;
+  const browD = r * 0.2;
+  const browY = eyeY + eyeR + browT / 2 + r * 0.03;
+  const browZ = eyeZ + eyeR - browD / 2 + r * 0.03;
+  const brows = [-1, 1].map((sx) => at(group([box(r * 0.38, browT, browD, '#4f5764', { edges: false })]), sx * r * 0.36, browY, browZ));
   /** Pose des sourcils ; `lift` = sursaut commun, en rayons d'œil (négatif = plus haut). */
   const setBrows = (p: BrowPair, lift = 0) => {
     brows.forEach((b, i) => {
