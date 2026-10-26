@@ -1,5 +1,6 @@
 // Écrit public/portraits/{id}-sheet.png (planche idle + talk) et {id}-ref.png
 // (frame idle0, image de référence pour GenAI) à partir du Studio Three.js.
+// Les planches GenAI (GENAI_SHEETS dans Studio.ts, ex. gary) ne sont pas touchées.
 // Usage : npm run bake:portraits   (CHROME=/chemin/vers/chrome pour forcer le navigateur)
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';

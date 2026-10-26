@@ -5,7 +5,8 @@
 // Portraits parlants : chaque personnage est aussi shooté en planche de sprites
 // (boucle idle + boucle talk, voir SHEET). `npm run bake:portraits` écrit ces
 // planches dans public/portraits/ ; un PNG présent là (bake ou remplacement
-// GenAI au même layout) prime sur le bake runtime.
+// GenAI au même layout) prime sur le bake runtime. Les planches GenAI
+// (GENAI_SHEETS) ne sont jamais rebakées.
 import Phaser from 'phaser';
 import * as THREE from 'three';
 import { at, cyl, glow } from './kit';
@@ -140,6 +141,11 @@ const PORTRAITS: Record<string, Pose & { bg: [string, string] }> = {
 
 /** Ids des personnages ayant un portrait (et donc une planche). */
 export const PORTRAIT_IDS = Object.keys(PORTRAITS);
+/**
+ * Planches GenAI (docs/PORTRAIT_GENAI.md) : jamais rebakées, ni par
+ * `bake:portraits` ni au runtime — le 3D suit l'image, pas l'inverse.
+ */
+export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary']);
 
 function makeRenderer(): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
@@ -242,7 +248,8 @@ function shootSheet(renderer: THREE.WebGLRenderer, id: string): HTMLCanvasElemen
 /** Rend les planches de tous les portraits (outil `bake:portraits`). */
 export function renderPortraitSheets(): Record<string, HTMLCanvasElement> {
   const renderer = makeRenderer();
-  const out = Object.fromEntries(PORTRAIT_IDS.map((id) => [id, shootSheet(renderer, id)]));
+  const ids = PORTRAIT_IDS.filter((id) => !GENAI_SHEETS.has(id));
+  const out = Object.fromEntries(ids.map((id) => [id, shootSheet(renderer, id)]));
   disposeRenderer(renderer);
   return out;
 }
@@ -260,7 +267,8 @@ export function bakeStudio(textures: Phaser.Textures.TextureManager): void {
   for (const [id, pose] of Object.entries(PORTRAITS)) {
     textures.addCanvas(portraitKey(id), shootSingle(renderer, pose, 300, pose.bg));
     // planche absente de public/portraits/ (ou illisible) : bake runtime, même layout
-    if (!textures.exists(sheetKey(id))) textures.addCanvas(sheetKey(id), shootSheet(renderer, id));
+    // (sauf planche GenAI : repli sur le portrait fixe)
+    if (!GENAI_SHEETS.has(id) && !textures.exists(sheetKey(id))) textures.addCanvas(sheetKey(id), shootSheet(renderer, id));
   }
   disposeRenderer(renderer);
 }
