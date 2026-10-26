@@ -1,5 +1,7 @@
 id: couloir
 title: Couloir de service C
+sector: Pont C · Circulation
+icon: corridor
 background: "#22283a"
 
 art:

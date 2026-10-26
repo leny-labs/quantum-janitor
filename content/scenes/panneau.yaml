@@ -1,5 +1,7 @@
 id: panneau
-title: Panneau de contrôle du réacteur (gros plan)
+title: Console du réacteur
+sector: Laboratoire · Gros plan
+icon: console
 background: "#10161f"
 
 art:

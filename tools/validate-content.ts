@@ -6,7 +6,7 @@
 import { assembleInk, locateInkLine, parseContent, toActions } from '../src/engine/content';
 import { compileInk, INK_TAG_KEYS, parseTag } from '../src/engine/ink';
 import { SMART_VALUES } from '../src/engine/verbs';
-import type { Action, ArtShape, Condition, GameContent, Interaction } from '../src/engine/types';
+import { ROOM_ICONS, type Action, type ArtShape, type Condition, type GameContent, type Interaction } from '../src/engine/types';
 import { readRawContent } from './readContent';
 
 const END_SCENE_ID = 'fin';
@@ -140,6 +140,8 @@ if (!content.scenes.has(content.startScene)) err(`game.yaml : startScene « ${co
 
 for (const s of content.scenes.values()) {
   const w = `scène ${s.id}`;
+  if (!s.title) err(`${w} : title manquant`);
+  if (s.icon !== undefined && !(ROOM_ICONS as readonly string[]).includes(s.icon)) err(`${w}.icon : valeur inconnue « ${s.icon} » (${ROOM_ICONS.join(', ')})`);
   checkArt(s.art, w);
   checkInteraction(s.onEnter, `${w}.onEnter`);
   checkInteraction(s.onFirstEnter, `${w}.onFirstEnter`);

@@ -21,8 +21,9 @@ import { playMusic, themeForScene } from '../ui/music';
 import { makeMusicToggle } from '../ui/MusicToggle';
 import { swoosh } from '../ui/sfx';
 import { PressRing } from '../ui/PressRing';
+import { RoomPlaque } from '../ui/RoomPlaque';
 import { VerbCoin } from '../ui/VerbCoin';
-import { COLORS, FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
+import { FONT, MONO, ROOM_H, W, hex, setCursor } from '../ui/theme';
 
 const WRONG_ITEM = [
   'Utiliser {item} sur {target} ? Même moi, je trouve ça bête.',
@@ -46,7 +47,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   private press: PressRing | null = null;
   private dropButton: Phaser.GameObjects.Container | null = null;
   private runner!: ActionRunner;
-  private titleText!: Phaser.GameObjects.Text;
+  private plaque!: RoomPlaque;
   /** Boutons du HUD (lus aussi par tools/tap-check.ts). */
   menuButton!: Phaser.GameObjects.Container;
   musicButton!: Phaser.GameObjects.Container;
@@ -112,9 +113,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     );
 
     // HUD
-    this.titleText = this.add
-      .text(14, 10, '', { fontFamily: FONT, fontSize: '18px', color: COLORS.dim, backgroundColor: '#00000088', padding: { x: 8, y: 4 } })
-      .setDepth(700);
+    this.plaque = new RoomPlaque(this);
     const menu = (this.menuButton = makeButton(this, W - 14, 10, 'Menu', () => !this.busy && this.scene.start('Title'), {
       size: uiPx(this, 18, 14),
       align: 'right',
@@ -123,7 +122,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.musicButton = makeMusicToggle(this, menu.x - menu.width / 2 - 8 - menu.height / 2, menu.y, menu.height).setDepth(700);
     if (this.session.debug.overlay) {
       this.debugText = this.add
-        .text(14, 44, '', { fontFamily: MONO, fontSize: '13px', color: '#ff99ff', backgroundColor: '#000000aa', wordWrap: { width: 700 } })
+        .text(14, 96, '', { fontFamily: MONO, fontSize: '13px', color: '#ff99ff', backgroundColor: '#000000aa', wordWrap: { width: 700 } })
         .setDepth(700);
     }
     this.heldItem = this.add
@@ -178,7 +177,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.scenes.refresh();
     this.inventory.render();
     const { state, content } = this.session;
-    this.titleText.setText(this.scenes.current().title);
+    this.plaque.show(this.scenes.current());
     playMusic(themeForScene(state.scene));
     const held = state.selectedItem ? content.items.get(state.selectedItem) : null;
     this.heldItem.setVisible(!!held);

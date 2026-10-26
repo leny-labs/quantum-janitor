@@ -81,9 +81,17 @@ export interface Exit {
   lockedText?: Interaction;
 }
 
+/** Pictogramme de la plaque de pièce. */
+export const ROOM_ICONS = ['bucket', 'corridor', 'reactor', 'console'] as const;
+export type RoomIcon = (typeof ROOM_ICONS)[number];
+
 export interface SceneDef {
   id: string;
+  /** Nom de la pièce (plaque en haut à gauche). */
   title: string;
+  /** Secteur, en sous-titre de la plaque. */
+  sector?: string;
+  icon?: RoomIcon;
   background: string;
   art?: ArtShape[];
   onFirstEnter?: Interaction;

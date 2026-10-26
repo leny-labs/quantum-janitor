@@ -1,5 +1,7 @@
 id: placard
-title: Placard à balais — Secteur Entretien
+title: Placard à balais
+sector: Secteur Entretien · Klepsydra-9
+icon: bucket
 background: "#26332d"
 
 # Décor placeholder (dessiné dans l'ordre)
