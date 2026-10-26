@@ -25,9 +25,8 @@ hotspots:
       - { rect: [80, 170, 90, 60], color: "#c9a13a", stroke: "#ffffff", text: "DÉGRAISSANT\nABSOLU", size: 10 }
       - { rect: [200, 180, 60, 50], color: "#3ab36b", stroke: "#ffffff", text: "???", size: 14 }
     look:
-      - say: "Javel quantique, désodorisant « Brise du Vide », anti-flux, et un bidon marqué « ??? »."
-      - say: "Le « ??? » est mon préféré. Il change d'odeur quand on ne le regarde pas."
-    use: "Je ne touche pas aux produits sans fiche de sécurité. Il n'y a pas de fiche de sécurité. Donc je ne touche pas. C'est ça, le professionnalisme."
+      - say: "Le bidon « ??? » est mon préféré. Il change d'odeur quand on ne le regarde pas."
+    use: "Pas de fiche de sécurité, pas de contact. C'est ça, le professionnalisme."
 
   - id: seau
     label: Seau
@@ -37,12 +36,12 @@ hotspots:
       - { rect: [262, 390, 96, 86], color: "#3d7dd8", stroke: "#ffffff" }
       - { rect: [262, 382, 96, 14], color: "#6fa8ff", stroke: "#ffffff" }
       - { text: "SEAU", at: [310, 435], size: 18, color: "#ffffff" }
-    look: "Mon seau. Mon fidèle seau. Rempli d'eau grise de catégorie 4. On a traversé beaucoup de choses ensemble. Surtout des sols."
+    look: "Mon fidèle seau. Eau grise de catégorie 4. On a traversé beaucoup de choses ensemble. Surtout des sols."
     useLabel: Prendre
     use:
       - give: seau
         set: seau_pris
-      - say: "Je prends le seau. Un agent d'entretien sans son seau, c'est comme un capitaine sans vaisseau. Sauf que le capitaine, lui, a un CDI."
+      - say: "Un agent d'entretien sans seau, c'est un capitaine sans vaisseau. Sauf que le capitaine, lui, a un CDI."
 
   - id: serpilliere
     label: Serpillière
@@ -68,7 +67,7 @@ hotspots:
       - { text: "B.O.B.", at: [780, 480], size: 13, color: "#1a1a1a" }
       - { if: { notFlags: [bob_suit] }, text: "…", at: [780, 418], size: 22, color: "#bbbbbb" }
     look:
-      - say: "B.O.B. : Balayeur Organique Bienveillant. Modèle de 2291. Il a été programmé pour aspirer la poussière et, par erreur, pour ressentir des choses."
+      - say: "Balayeur Organique Bienveillant. Programmé pour aspirer la poussière et, par erreur, pour ressentir des choses."
       - if: { notFlags: [bob_suit] }
         say: "Il fixe le mur depuis vingt minutes. Il fait ça quand il pense à l'entropie."
     talk:
@@ -79,11 +78,11 @@ hotspots:
     useItem:
       sandwich:
         - dialogue: bob_sandwich
-      seau: "bob: Ne me renverse pas ton seau dessus. Je suis déjà assez triste comme ça. Je suis étanche, mais pas émotionnellement."
+      seau: "bob: Pas ton seau. Je suis étanche, mais pas émotionnellement."
       serpilliere: "bob: Tu veux me serpiller ? Je ne suis pas sale, Gary. Je suis juste... terne. À l'intérieur."
-      badge: "bob: Oui, c'est ton badge. Je suis content pour toi. Je ne le montre pas, mais je suis content. Enfin, moins triste."
+      badge: "bob: Oui, c'est ton badge. Je suis content pour toi. Enfin, moins triste."
       fusible: "bob: Je fonctionne sur batterie, Gary. Et sur la résignation."
-    useItemDefault: "bob: Merci, mais non. Je ne peux pas aspirer ça. Je ne peux pas aspirer grand-chose. Même pas à une vie meilleure."
+    useItemDefault: "bob: Je ne peux pas aspirer ça. Je ne peux aspirer à rien. Même pas à une vie meilleure."
 
   - id: casier
     label: Casier de Gary
@@ -95,7 +94,7 @@ hotspots:
       - { rect: [985, 155, 100, 8], color: "#2e353c" }
       - { rect: [985, 170, 100, 8], color: "#2e353c" }
       - { text: "G. PLUNK\n(intérim)", at: [1035, 230], size: 14, color: "#ffffff" }
-    look: "Mon casier. Il y a dedans : une photo de ma mère, qui croit que je suis capitaine ; un guide « Survivre en intérim spatial » ; et ma dignité, roulée en boule."
+    look: "Une photo de ma mère, qui me croit capitaine ; un guide « Survivre en intérim spatial » ; et ma dignité, roulée en boule."
     use: "Rien d'utile là-dedans. Sauf si on doit vaincre l'univers avec de la culpabilité maternelle."
 
   - id: affiche
@@ -105,8 +104,7 @@ hotspots:
       - { rect: [565, 195, 180, 140], color: "#e8e1c8", stroke: "#b33a3a" }
       - { text: "RÈGLEMENT\nN°1 :\nNE JAMAIS\nNETTOYER LE\nRÉACTEUR", at: [655, 265], size: 14, color: "#b33a3a" }
     look:
-      - say: "« Règlement n°1 : ne jamais nettoyer le Réacteur d'Improbabilité. » En dessous, au marqueur : « Règlement n°2 : voir règlement n°1. Sérieusement, Gary. »"
-      - say: "Ils m'ont nommé. Sur une plaque officielle, émaillée. C'est presque une promotion."
+      - say: "Au marqueur : « Règlement n°2 : voir règlement n°1. Sérieusement, Gary. » Ils m'ont nommé. Sur une plaque émaillée. C'est presque une promotion."
 
 exits:
   - id: vers_couloir

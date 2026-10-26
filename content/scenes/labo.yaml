@@ -29,13 +29,12 @@ hotspots:
       - { text: "Mk IV", at: [640, 445], size: 16, color: "#ffffff" }
       - { if: { flags: [refroidissement_verse] }, text: "glou… glou…", at: [640, 60], size: 16, color: "#7fbf3f" }
     look:
-      - say: "Le Réacteur d'Improbabilité Mark IV. Il transforme l'improbable en énergie. Il ronronne."
-      - say: "Parfois, il ronronne en morse. Le message dit « aidez-moi ». Ou « ail de moi ». Mon morse est rouillé."
+      - say: "Le Mk IV ronronne. En morse. Ça dit « aidez-moi ». Ou « ail de moi ». Mon morse est rouillé."
       - if: { flags: [refroidissement_verse] }
         say: "Et maintenant il fait des bulles. Des bulles qui sentent le thon."
     use: "Toucher le réacteur ? Règlement n°1. Il y a une affiche avec mon nom dessus, je ne vais pas la décevoir."
     useItem:
-      seau: "Le verser directement dessus ? Non, il y a une trappe pour ça, à droite. Je suis un professionnel. Un professionnel désespéré, mais un professionnel."
+      seau: "Verser direct dessus ? Il y a une trappe pour ça, à droite. Je suis un professionnel. Désespéré, mais professionnel."
       serpilliere: "Nettoyer le réacteur avec Josiane ? Règlement n°1. Et Josiane a peur des radiations."
 
   - id: trappe
@@ -49,12 +48,12 @@ hotspots:
       - { if: { flags: [refroidissement_verse] }, text: "PLEIN 100 %", at: [895, 430], size: 12, color: "#7fbf3f" }
     look:
       - if: { notFlags: [panneau_allume] }
-        say: "Une trappe marquée « REFROIDISSEMENT ». Verrouillée tant que le panneau de contrôle est hors tension."
+        say: "Verrouillée tant que le panneau de contrôle est hors tension."
         stop: true
       - if: { flags: [refroidissement_verse] }
-        say: "Le réservoir est plein. De mon eau. De mon seau. Avec du yaourt. J'ai un très léger doute."
+        say: "Plein. De mon eau. De mon seau. Avec du yaourt. J'ai un très léger doute."
         stop: true
-      - say: "La trappe est ouverte. Étiquette : « Liquide de refroidissement réglementaire UNIQUEMENT ». Le réservoir est à sec."
+      - say: "« Liquide de refroidissement réglementaire UNIQUEMENT ». Le réservoir est à sec."
     use:
       - if: { notFlags: [panneau_allume] }
         say: "Verrouillée. Le panneau de contrôle doit être alimenté."
@@ -62,11 +61,11 @@ hotspots:
       - if: { flags: [refroidissement_verse] }
         say: "Plein. Si j'en rajoute, ça va déborder. Et devinez qui devra nettoyer."
         stop: true
-      - say: "Il faut verser un liquide de refroidissement là-dedans. Je n'ai pas de liquide de refroidissement. J'ai... un seau."
+      - say: "Il faut du liquide de refroidissement. Je n'en ai pas. J'ai... un seau."
     useItem:
       seau:
         - if: { notFlags: [panneau_allume] }
-          say: "La trappe est verrouillée. Il faut d'abord remettre le panneau sous tension."
+          say: "Verrouillée. Il faut d'abord remettre le panneau sous tension."
           stop: true
         - dialogue: verser_seau
       sandwich: "Refroidir un réacteur avec un sandwich. Ce serait l'idée la plus bête de la journée. La journée n'est pas finie."
@@ -78,8 +77,7 @@ hotspots:
       - { rect: [920, 90, 280, 170], color: "#eeeeee", stroke: "#888888" }
       - { text: "I = P⁻¹ × café\n\nNE JAMAIS VERSER\nDE LIQUIDE NON\nRÉGLEMENTAIRE !!!\n— Dr Halvorsen  :'(", at: [1060, 175], size: 14, color: "#333366" }
     look:
-      - say: "« Improbabilité = Probabilité⁻¹ × café. » Et en dessous : « NE JAMAIS VERSER DE LIQUIDE NON RÉGLEMENTAIRE DANS LE RÉACTEUR. — Dr Halvorsen »."
-      - say: "Souligné trois fois. Avec un petit smiley qui pleure. Les scientifiques sont tellement dramatiques."
+      - say: "« NE JAMAIS VERSER DE LIQUIDE NON RÉGLEMENTAIRE. » Souligné trois fois, avec un smiley qui pleure. Les scientifiques sont tellement dramatiques."
 
   - id: bureau
     label: Bureau des scientifiques
@@ -92,8 +90,7 @@ hotspots:
       - { rect: [1030, 350, 60, 30], color: "#ffffaa", stroke: "#999999", text: "mot", size: 12 }
       - { rect: [1120, 340, 40, 40], color: "#ffffff", stroke: "#999999", text: "café", size: 11 }
     look:
-      - say: "Un mot sur le bureau : « Partis en séminaire de cohésion sur Mercure. Si le réacteur fait des bruits bizarres, NE RIEN TOUCHER. »"
-      - say: "« Sauf si c'est un bruit de type PLOUF. Dans ce cas : fuyez. Bisous. L'équipe. »"
+      - say: "Un mot : « Séminaire sur Mercure. Si le réacteur fait un bruit bizarre, NE RIEN TOUCHER. Sauf si c'est PLOUF : fuyez. Bisous. »"
     use: "Le café est froid depuis trois semaines. Il a développé une conscience. Je le laisse tranquille."
 
   - id: bob

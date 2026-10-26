@@ -17,13 +17,11 @@ hotspots:
       - { if: { flags: [refroidissement_verse] }, text: "ALIMENTATION ....... OK\nREFROIDISSEMENT .. 100 %\nCOMPOSITION ...... ???\n\n> APPUYER SUR STABILISER", at: [640, 218], size: 14, color: "#ffd166" }
     look:
       - if: { notFlags: [panneau_allume] }
-        say: "L'écran est éteint. Juste une ligne en veille : « fusible stabilisateur 7B absent »."
+        say: "« Fusible 7B absent ». 7B, comme le distributeur du couloir. Coïncidence improbable. À côté d'un Réacteur d'Improbabilité."
         set: sait_fusible
-      - if: { notFlags: [panneau_allume] }
-        say: "7B... Le circuit du distributeur du couloir est aussi marqué 7B. Ce serait une coïncidence improbable. On est à côté d'un Réacteur d'Improbabilité."
         stop: true
       - if: { notFlags: [refroidissement_verse] }
-        say: "Refroidissement : 0 %. Il faut remplir le réservoir par la trappe d'admission, dans le labo."
+        say: "0 %. À remplir par la trappe d'admission, dans le labo."
         stop: true
       - say: "« Composition : ??? ». Les points d'interrogation sur un écran de réacteur, ce n'est jamais bon signe."
 
@@ -38,11 +36,10 @@ hotspots:
       - { if: { flags: [fusible_pose] }, rect: [312, 369, 36, 36], color: "#d94f4f", stroke: "#ffffff", text: "7B", size: 10 }
     look:
       - if: { flags: [fusible_pose] }
-        say: "Le fusible 7B est en place. Le distributeur me manque un peu. Non, en fait, pas du tout."
+        say: "Le 7B est en place. Le distributeur me manque un peu. Non, en fait, pas du tout."
         stop: true
-      - say: "Un logement vide, marqué « STABILISATEUR — 7B ». Il y avait un fusible ici. Quelqu'un a dû l'emprunter pour faire marcher autre chose."
+      - say: "Vide. 7B, comme le circuit du distributeur du couloir. Les ingénieurs recyclent les numéros. Ou ils sont fainéants. Ou les deux."
         set: sait_fusible
-      - say: "Sept B... Comme le circuit du distributeur dans le couloir. Les ingénieurs de cette station réutilisent les numéros. Ou ils sont fainéants. Ou les deux."
     use: "Il faut un fusible 7B pour ce logement."
     useItem:
       fusible:
@@ -58,8 +55,7 @@ hotspots:
       - { if: { notFlags: [refroidissement_verse] }, rect: [611, 366, 4, 50], color: "#ff5c7a" }
       - { if: { flags: [refroidissement_verse] }, rect: [726, 366, 4, 50], color: "#ff5c7a" }
     look:
-      - say: "Un cadran gradué de « PROBABLE » à « IMPROBABLE ». La dernière graduation dit « GARY »."
-      - say: "Je ne sais pas si je dois être vexé ou flatté. Je choisis vexé. C'est plus confortable."
+      - say: "La dernière graduation dit « GARY ». Vexé ou flatté ? Vexé. C'est plus confortable."
     use: "Je tapote le cadran. L'aiguille tapote en retour. Je n'aime pas ça."
 
   - id: bouton
@@ -70,14 +66,14 @@ hotspots:
       - { circle: [907, 373, 40], color: "#d62839", stroke: "#ffffff" }
       - { text: "STABILISER", at: [907, 373], size: 11, color: "#ffffff" }
       - { text: "(ne pas appuyer sans raison)", at: [907, 424], size: 8, color: "#ff99aa" }
-    look: "Un gros bouton rouge marqué « STABILISER ». Les gros boutons rouges veulent toujours qu'on appuie dessus. C'est leur seul but dans la vie. Je les comprends."
+    look: "Les gros boutons rouges veulent toujours qu'on appuie dessus. C'est leur seul but dans la vie. Je les comprends."
     useLabel: Appuyer
     use:
       - if: { notFlags: [panneau_allume] }
         say: "narrateur: Clic. Rien. Le panneau est hors tension."
         stop: true
       - if: { notFlags: [refroidissement_verse] }
-        say: "sylvie: STABILISATION IMPOSSIBLE. NIVEAU DE REFROIDISSEMENT : 0 %. VEUILLEZ REMPLIR LE RÉSERVOIR."
+        say: "sylvie: STABILISATION IMPOSSIBLE. RÉSERVOIR VIDE."
         stop: true
       - dialogue: catastrophe
 

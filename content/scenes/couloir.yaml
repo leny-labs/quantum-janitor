@@ -30,20 +30,19 @@ hotspots:
       - if: { flags: [sandwich_tombe] }
         say: "Le distributeur est vide. Comme mon compte en banque. Comme le regard de B.O.B."
         stop: true
-      - say: "Un distributeur. Un seul produit dedans : un sandwich coincé contre la spirale depuis l'inauguration de la station."
-      - say: "Étiquette : « Thon-Mayo-Mystère ». Le mystère, c'est surtout la date limite."
+      - say: "Un seul sandwich, coincé contre la spirale depuis l'inauguration. « Thon-Mayo-Mystère ». Le mystère, c'est la date limite."
     use:
       - if: { flags: [sandwich_tombe] }
-        say: "Il n'y a plus rien à tirer de cette machine. À part de la tristesse, et elle est gratuite."
+        say: "Plus rien à tirer de cette machine. À part de la tristesse, et elle est gratuite."
         stop: true
-      - say: "narrateur: Gary donne un coup de pied dans la machine. L'écran affiche : « COUP DE PIED FACTURÉ : 2 CRÉDITS »."
-      - say: "Le sandwich est coincé contre la vitre. Il faudrait le pousser avec quelque chose de long, par la trappe de sortie."
+      - say: "narrateur: Coup de pied. L'écran affiche : « COUP DE PIED FACTURÉ : 2 CRÉDITS »."
+      - say: "Coincé. Il faudrait le pousser avec un truc long, par la trappe de sortie."
     useItem:
       serpilliere:
         - if: { flags: [sandwich_tombe] }
           say: "Il n'y a plus rien à décoincer."
           stop: true
-        - say: "narrateur: Gary glisse le manche de la serpillière par la trappe, vise, et donne un petit coup. Le sandwich tombe avec un bruit mou, presque un soupir."
+        - say: "narrateur: Gary glisse le manche par la trappe. Le sandwich tombe avec un bruit mou, presque un soupir."
           give: sandwich
           set: sandwich_tombe
         - say: "Il est à moi. Je ne sais pas si c'est une victoire."
@@ -59,18 +58,18 @@ hotspots:
       - { if: { flags: [fusible_retire] }, rect: [535, 290, 40, 26], color: "#111111", stroke: "#666666" }
     look:
       - if: { flags: [fusible_retire] }
-        say: "Le logement du fusible 7B est vide. Le distributeur est mort. Je ne le regretterai pas. Lui non plus."
+        say: "Logement 7B vide. Le distributeur est mort. Je ne le regretterai pas. Lui non plus."
         stop: true
-      - say: "Une boîte à fusibles. Le fusible 7B alimente le distributeur et « l'éclairage d'ambiance », qui consiste en une seule LED bleue triste."
+      - say: "Le 7B alimente le distributeur et « l'éclairage d'ambiance » : une LED bleue triste."
     useLabel: Prendre le fusible
     use:
       - if: { flags: [fusible_retire] }
-        say: "Il n'y a plus de fusible. J'ai déjà tout pris. C'est mon côté pirate."
+        say: "Plus de fusible. J'ai tout pris. Mon côté pirate."
         stop: true
       - if: { notFlags: [sait_fusible] }
         say: "Je ne touche pas aux fusibles sans raison. C'est dans mon contrat, page 47, juste après la clause « pas de pleurs dans les sas »."
         stop: true
-      - say: "narrateur: Gary retire le fusible 7B. Le distributeur s'éteint dans un dernier « bzzouiiip ». La LED d'ambiance vire au rouge."
+      - say: "narrateur: Gary retire le fusible 7B. Le distributeur meurt dans un dernier « bzzouiiip »."
         give: fusible
         set: fusible_retire
       - say: "Un panneau de réacteur a besoin d'un fusible. Un distributeur n'a besoin que d'amour. Priorités."
@@ -92,7 +91,7 @@ hotspots:
     art:
       - { rect: [690, 290, 220, 70], color: "#111111", stroke: "#7fffd4" }
       - { text: "KLEPSYDRA-9\n0098 JOURS SANS INCIDENT\nD'IMPROBABILITÉ", at: [800, 325], size: 13, color: "#7fffd4" }
-    look: "« 98 jours sans incident d'improbabilité. » Le record est de 99. Je ne sais pas pourquoi, mais j'ai l'impression qu'on ne va pas le battre."
+    look: "Le record est de 99 jours. J'ai comme l'impression qu'on ne va pas le battre."
 
   - id: lecteur
     label: Lecteur de badge
@@ -104,14 +103,14 @@ hotspots:
       - { if: { flags: [lecteur_propre] }, circle: [1215, 290, 10], color: "#7fffd4" }
     look:
       - if: { flags: [lecteur_propre] }
-        say: "Le lecteur est propre. Il brille. C'est la plus belle chose que j'aie jamais nettoyée. J'en ai un peu les larmes aux yeux."
+        say: "Il brille. La plus belle chose que j'aie jamais nettoyée. J'en ai les larmes aux yeux."
         stop: true
-      - say: "Un lecteur de badge recouvert d'une croûte verdâtre. On dirait du yaourt. Du yaourt qui... respire."
+      - say: "Une croûte verdâtre. On dirait du yaourt. Du yaourt qui... respire."
     use:
       - if: { notItems: [badge] }
         say: "Pour ouvrir, il me faut mon badge. Que je n'ai pas. Classique."
         stop: true
-      - say: "Il faudrait passer mon badge dessus. Je le sélectionne dans l'inventaire et j'essaie."
+      - say: "Il faut badger. Avec le badge. Logique implacable."
     useItem:
       badge:
         - if: { flags: [labo_ouvert] }
@@ -127,15 +126,15 @@ hotspots:
         - dialogue: badge_porte
       serpilliere:
         - if: { flags: [lecteur_propre] }
-          say: "Il est déjà propre. Plus propre que ça, il deviendrait transparent."
+          say: "Plus propre que ça, il deviendrait transparent."
           stop: true
         - if: { notFlags: [serpilliere_mouillee] }
-          say: "Avec une serpillière sèche ? Ça étale, ça ne nettoie pas. Il faut d'abord la tremper dans quelque chose. Quelque chose de bien sale, par tradition."
+          say: "Une serpillière sèche, ça étale. Il faut d'abord la tremper. Dans un truc bien sale, par tradition."
           stop: true
-        - say: "narrateur: Gary frotte. Le yaourt résiste, couine, puis abandonne. Gary rince ensuite la serpillière dans son seau. Par habitude. Par professionnalisme."
+        - say: "narrateur: Gary frotte. Le yaourt résiste, couine, abandonne. Gary rince la serpillière dans son seau. Par professionnalisme."
           set: lecteur_propre
-        - say: "Et voilà. Brillant. Le yaourt est maintenant dans mon seau, mais c'est un problème pour Gary du futur."
-      seau: "Jeter un seau d'eau sur un appareil électronique ? Non. Pas aujourd'hui. Peut-être plus tard, si la journée se passe mal."
+        - say: "Brillant. Le yaourt est dans mon seau, mais ça, c'est un problème pour Gary du futur."
+      seau: "Un seau d'eau sur de l'électronique ? Pas aujourd'hui. Peut-être plus tard, si la journée tourne mal."
 
   - id: bob
     label: B.O.B.
@@ -145,7 +144,7 @@ hotspots:
       - { rect: [775, 455, 140, 45], color: "#7c8794", stroke: "#ffffff" }
       - { circle: [815, 474, 6], color: "#ffffff" }
       - { circle: [875, 474, 6], color: "#ffffff" }
-    look: "B.O.B. me suit partout. Il dit que c'est par loyauté. Je pense que c'est parce que je suis la seule source de miettes de la station."
+    look: "B.O.B. me suit partout. Par loyauté, dit-il. Je pense surtout que je suis la seule source de miettes de la station."
     talk:
       - dialogue: bob_compagnon
     useItemDefault: "bob: Non merci, Gary. Je suis encore en train de digérer le thon."
@@ -163,6 +162,6 @@ exits:
     rect: [1010, 130, 150, 335]
     requires: { flags: [labo_ouvert] }
     lockedText:
-      - say: "La porte du labo est verrouillée. Il y a un lecteur de badge juste à droite."
+      - say: "Verrouillée. Il y a un lecteur de badge juste à droite."
       - if: { notItems: [badge] }
         say: "Et je n'ai pas mon badge. Bien sûr."

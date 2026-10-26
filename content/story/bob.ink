@@ -9,31 +9,26 @@
 }
 
 = premiere
-bob: (long soupir électronique) Bonjour, Gary. Encore une journée. Encore de la poussière.
-bob: Elle revient toujours, tu sais. La poussière. Comme le désespoir. Comme les lundis.
+bob: (long soupir électronique) Bonjour, Gary. Encore de la poussière. Elle revient toujours. Comme le désespoir. Comme les lundis.
 * [« Salut B.O.B. Tu n'aurais pas vu mon badge ? »]
     gary: Salut, B.O.B. Dis, tu n'aurais pas vu mon badge ? Il était juste là.
     bob: Ton badge. Oui. Je l'ai vu. De très près. De l'intérieur, même.
     -> confession
 * [« Courage, mon vieux. Tu fais un boulot formidable. »]
     gary: Courage, mon vieux. Tu fais un boulot formidable, tu sais.
-    bob: ...Personne ne m'avait jamais dit ça.
-    bob: Tu mens. Mais c'est le plus beau mensonge qu'on m'ait fait. Alors je vais te dire la vérité, en échange.
+    bob: ...Tu mens. Mais c'est le plus beau mensonge qu'on m'ait fait. Alors voici la vérité, en échange.
     -> confession
 * [« Toi. L'aspirateur. Tu as bouffé mon badge. »]
     gary: Toi. L'aspirateur. Tu as bouffé mon badge, hein ?
-    bob: Accusation sans preuve. Je vais pleurer.
-    bob: Je n'ai pas de canaux lacrymaux, alors je vais juste... vibrer tristement.
-    bob: (il vibre tristement)
+    bob: Accusation sans preuve. Je vais pleurer. Enfin, vibrer tristement. Je n'ai pas de canaux lacrymaux.
     bob: ...D'accord. C'est moi.
     -> confession
 
 = confession
-bob: Cette nuit, j'ai aspiré un petit rectangle de plastique. Il y avait ton visage dessus. Et « GARRY », avec deux R.
-bob: J'ai trouvé ça tellement triste que je l'ai gardé. Pour te protéger. Ou pour me sentir moins seul. Les deux sont tristes.
+bob: Cette nuit, j'ai aspiré un rectangle avec ton visage dessus. « GARRY », deux R. C'était si triste que je l'ai gardé. Pour me sentir moins seul.
 gary: Rends-le-moi, B.O.B. SYLVIE va me retirer cent pour cent de mon salaire par minute.
 bob: Je ne peux pas. Mon bac à poussière est verrouillé par un protocole anti-recrachage. Brevet déposé.
-bob: Il faudrait que j'avale quelque chose de vraiment... indigeste. Quelque chose de si mauvais que mon système le rejetterait. Avec tout le reste. # set: bob_avoue_badge
+bob: Il faudrait que j'avale quelque chose de vraiment... indigeste. Si mauvais que mon système le rejetterait. Avec tout le reste. # set: bob_avoue_badge
 gary: Quelque chose d'indigeste. Sur une station spatiale. Ça devrait se trouver.
 -> menu
 
@@ -65,11 +60,11 @@ bob: Ah, Gary. Tu as trouvé quelque chose d'immonde pour moi ? Non ? Évidemmen
 === bob_sandwich ===
 gary: Tiens, B.O.B. Cadeau. Ne me remercie pas.
 bob: Un sandwich ? Pour moi ? Personne ne m'avait jamais rien offert. À part des miettes. Et du mépris.
-Gary pose le sandwich. B.O.B. l'aspire dans un long bruit de succion. Puis plus rien. Un silence lourd. # take: sandwich
+B.O.B. aspire le sandwich dans un long bruit de succion. Puis un silence lourd. # take: sandwich
 bob: Oh non. Oh non non non. C'est... du thon ? Ça a été du thon, un jour ?
 bob: Protocole anti-recrachage... en échec... # shake
 B.O.B. clignote, tremble, puis expulse dans un hoquet sonore un nuage de poussière, une chaussette, trois boulons et un rectangle de plastique gluant.
-Gary récupère son badge. Il est tiède. Gary décide de ne pas y penser. # give: badge
+Gary récupère son badge. Tiède. Il décide de ne pas y penser. # give: badge
 bob: Je me sens vide. Plus que d'habitude. C'est presque agréable.
 bob: Gary... Tu es la seule personne qui m'ait jamais nourri. Je crois que je vais te suivre. Si ça ne te dérange pas. Et même si ça te dérange. # set: bob_suit
 gary: Bienvenue dans l'équipe, B.O.B. L'équipe, c'est nous deux. Et Josiane.
@@ -88,7 +83,7 @@ bob: Évidemment.
 - not has_flag("labo_ouvert"):
     bob: Le lecteur est propre. Il ne te reste plus qu'à badger, « Garry ».
 - not has_flag("sait_fusible"):
-    bob: Ce labo me met mal à l'aise. Tu devrais regarder le panneau de contrôle de près. Moi je reste ici. À distance de sécurité. Enfin, à distance de tristesse.
+    bob: Ce labo me met mal à l'aise. Regarde le panneau de contrôle de près. Moi je reste ici. À distance de tristesse.
 - not has_flag("fusible_pose") && has_item("fusible"):
     bob: Tu as un fusible 7B dans la poche et un logement 7B vide sur le panneau. Je ne suis qu'un aspirateur, mais même moi, je vois le motif.
 - not has_flag("fusible_pose"):
