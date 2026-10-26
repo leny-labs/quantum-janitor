@@ -42,7 +42,7 @@ export class TitleScene extends Phaser.Scene {
     }
 
     this.hero = new HeroView(this, titleShot(W, H));
-    playMusic('title');
+    playMusic('menu');
 
     // assombrit la colonne gauche (lisibilité) + vignette haut/bas
     const shade = this.add.graphics();

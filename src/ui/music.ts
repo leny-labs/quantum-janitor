@@ -56,14 +56,56 @@ interface Arrangement {
   /** Coupure du passe-bas général (Hz) : plus bas = plus feutré. */
   tone: number;
   level: number;
+  /** Thème écrit (« la tête ») joué en début de forme ; le soliste improvise sur le reste. */
+  head?: Head;
+}
+
+/** Note écrite : [mesure dans la tête, temps, hauteur MIDI absolue, durée en temps]. */
+type Mel = [bar: number, beat: number, midi: number, len: number];
+
+interface Head {
+  /** Mesures de la tête (jouée aux mesures 0 … bars-1 de chaque tour de forme). */
+  bars: number;
+  notes: Mel[];
+  /** Pupitre à l'unisson : instrument et transposition (demi-tons). */
+  voices: [inst: Inst, shift: number, vel: number][];
 }
 
 /**
- * Thèmes : un par pièce, plus titre et fin. Un gros plan garde le thème de
+ * Thèmes : menu, intro, un par pièce, et fin. Un gros plan garde le thème de
  * sa pièce.
  */
 const THEMES = {
-  /** Écran titre / intro : 6/4 en ré dorien, orgue, harpe et flûte, ride léger. */
+  /**
+   * Menu : la « signature » du jeu. Fa dorien, 4/4 à 96, groove droit
+   * (Lonnie Liston Smith), Rhodes, harpe ; la tête est jouée à l'unisson
+   * flûte + sax une octave dessous (pupitre façon Arkestra), puis le Moog
+   * improvise sur le second tour. Forme de 16 mesures (40 s) qui boucle.
+   */
+  menu: {
+    form: [['F', 'dorian', 4], ['Db', 'lydian', 2], ['C', 'phrygdom', 2], ['F', 'dorian', 4], ['Db', 'lydian', 2], ['C', 'phrygdom', 2]],
+    bpm: 96, beats: 4, swing: 0.56,
+    ostinato: [[0, 0, 1], [1, 7, 0.5], [1.5, 4, 0.5], [2.5, 0, 0.5], [3, 2, 0.5], [3.5, 4, 0.5]],
+    pad: 'rhodes', lead: 'moog', talk: 0.7, harp: 0.35, drums: 'hands', space: 0.6, tone: 6500, level: 0.95,
+    head: {
+      bars: 8,
+      voices: [['flute', 0, 0.95], ['sax', -12, 0.8]],
+      notes: [
+        // A : l'appel — quinte, petite tierce, tonique, sixte dorienne
+        [0, 0, 72, 1.5], [0, 1.5, 75, 0.5], [0, 2, 77, 1], [0, 3, 74, 1],
+        [1, 0, 72, 0.5], [1, 0.5, 70, 0.5], [1, 1, 68, 1], [1, 2, 65, 2],
+        // A' : même appel, la réponse monte
+        [2, 0, 72, 1.5], [2, 1.5, 75, 0.5], [2, 2, 77, 1], [2, 3, 79, 1],
+        [3, 0, 80, 0.5], [3, 0.5, 79, 0.5], [3, 1, 77, 1], [3, 2, 72, 2],
+        // B : ciel lydien (sol bécarre), puis cadence phrygienne dominante
+        [4, 0, 77, 1.5], [4, 1.5, 79, 0.5], [4, 2, 80, 1], [4, 3, 77, 1],
+        [5, 0, 75, 1], [5, 1, 72, 1], [5, 2, 73, 2],
+        [6, 0, 72, 0.5], [6, 0.5, 73, 0.5], [6, 1, 76, 1], [6, 2, 79, 1], [6, 3, 80, 1],
+        [7, 0, 79, 1], [7, 1, 76, 1], [7, 2, 73, 0.5], [7, 2.5, 72, 1.5],
+      ],
+    },
+  },
+  /** Intro : 6/4 en ré dorien, orgue, harpe et flûte, ride léger. */
   title: {
     form: [['D', 'dorian', 8], ['Bb', 'lydian', 4], ['D', 'dorian', 4], ['G', 'mixolydian', 2], ['A', 'phrygdom', 2]],
     bpm: 74, beats: 6, swing: 0.62,
@@ -241,8 +283,20 @@ function barEvents(arr: Arrangement, bar: number, solo: Soloist): Ev[] {
     for (let e = 0; e < B * 2; e++) push(sw(e / 2), 1.2, 'harp', at(shape[e % shape.length] + shift, 55), e % 2 ? 0.35 : 0.5);
   }
 
+  // ── tête écrite : pupitre à l'unisson, puis le soliste reprend la main ──
+  const inHead = !!arr.head && p.pos < arr.head.bars;
+  if (arr.head && inHead) {
+    for (const [hb, b, m, len] of arr.head.notes) {
+      if (hb !== p.pos) continue;
+      for (const [inst, shift, vel] of arr.head.voices) push(sw(b), len * 0.92, inst, m + shift, vel * (b === 0 ? 0.95 : 0.85));
+    }
+    if (p.pos === 0) push(0, 2, 'bell', 84, 0.6);
+    solo.phrase = 0;
+    solo.rest = 0;
+  }
+
   // ── soliste : phrases improvisées dans le mode, silences entre deux ──
-  if (bar >= 4) {
+  if (!inHead && (bar >= 4 || arr.head)) {
     if (solo.rest > 0) solo.rest--;
     else {
       if (solo.phrase === 0) solo.phrase = 1 + Math.floor(r() * 3);
@@ -657,15 +711,25 @@ class Deck {
     return 60 / this.arr.bpm;
   }
 
+  /** Fige le gain à sa valeur courante en `t` (sans saut, même en plein fondu). */
+  private hold(t: number): void {
+    const g = this.out.gain;
+    if (typeof g.cancelAndHoldAtTime === 'function') g.cancelAndHoldAtTime(t);
+    else {
+      g.cancelScheduledValues(t);
+      g.setValueAtTime(Math.max(g.value, 0.0001), t);
+    }
+  }
+
   fadeIn(t: number, dur: number): void {
-    this.out.gain.cancelScheduledValues(t);
-    this.out.gain.setValueAtTime(0.0001, t);
+    this.hold(t);
+    if (this.out.gain.value < 0.0002) this.out.gain.setValueAtTime(0.0001, t);
     this.out.gain.exponentialRampToValueAtTime(this.arr.level, t + dur);
+    this.fadeEnd = Infinity;
   }
 
   fadeOut(t: number, dur: number): void {
-    this.out.gain.cancelScheduledValues(t);
-    this.out.gain.setValueAtTime(Math.max(this.out.gain.value, 0.0001), t);
+    this.hold(t);
     this.out.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     this.fadeEnd = t + dur + 0.1;
   }
@@ -772,7 +836,7 @@ function buildGraph(a: BaseAudioContext, dest: AudioNode): Omit<Graph, 'a'> {
 const MASTER = 0.26;
 
 function applyTone(g: Graph, at: number): void {
-  const arr = decks.length ? decks[decks.length - 1].arr : null;
+  const arr = (decks.find((d) => d.fadeEnd === Infinity) ?? decks[decks.length - 1])?.arr ?? null;
   const base = arr?.tone ?? 6000;
   g.tone.frequency.setTargetAtTime(ducked ? Math.min(base, 2400) : base, at, 0.25);
   g.duck.gain.setTargetAtTime(ducked ? 0.55 : 1, at, 0.2);
@@ -797,10 +861,17 @@ function startTheme(id: ThemeId): void {
   const now = g.a.currentTime;
   const cur = decks.find((d) => d.fadeEnd === Infinity);
   if (cur?.id === id) return;
+  cur?.fadeOut(now, 1.4);
+  // aller-retour rapide (menu → jeu → menu) : on rattrape la platine qui s'éteint
+  const back = decks.find((d) => d.id === id && d.fadeEnd > now + 0.15);
+  if (back) {
+    back.fadeIn(now, 1.2);
+    applyTone(g, now);
+    return;
+  }
   const arr: Arrangement = THEMES[id];
   // même forme : on reprend à la mesure en cours
   const bar = cur && cur.arr.form === arr.form ? cur.bar : 0;
-  cur?.fadeOut(now, 1.4);
   const deck = new Deck(g.a, id, arr, g.bus, now + (cur ? 0.25 : 0.05), bar);
   deck.fadeIn(now + 0.05, cur ? 1.8 : 2.5);
   decks.push(deck);
@@ -831,6 +902,10 @@ export function installMusic(): void {
   if (installed) return;
   installed = true;
   for (const ev of ['pointerdown', 'keydown', 'touchend']) window.addEventListener(ev, unlock, { capture: true });
+  // Si le navigateur autorise déjà l'audio (politique autoplay, activation
+  // antérieure), le menu joue dès son affichage ; sinon, au premier geste.
+  const nav = navigator as Navigator & { getAutoplayPolicy?: (type: 'audiocontext') => string };
+  if (nav.getAutoplayPolicy?.('audiocontext') === 'allowed' || navigator.userActivation?.hasBeenActive) unlock();
   window.addEventListener('keydown', (e) => {
     if ((e.key === 'm' || e.key === 'M') && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) toggleMusic();
   });
@@ -842,7 +917,10 @@ export function installMusic(): void {
   });
 }
 
-/** Thème à jouer (fondu enchaîné si un autre joue déjà ; sans effet si c'est le même). */
+/**
+ * Thème à jouer (fondu enchaîné si un autre joue déjà ; sans effet si c'est le
+ * même). Avant le déblocage audio, il est retenu et démarre au premier geste.
+ */
 export function playMusic(id: ThemeId): void {
   wanted = id;
   startTheme(id);
@@ -889,4 +967,9 @@ export async function renderMusic(id: ThemeId, seconds: number, startBar = 0): P
   deck.out.gain.value = THEMES[id].level;
   deck.fill(seconds);
   return a.startRendering();
+}
+
+/** Platines en cours (thème, en fondu de sortie ?) : pour les vérifications automatisées. */
+export function musicDecks(): { id: ThemeId; fading: boolean }[] {
+  return decks.map((d) => ({ id: d.id, fading: d.fadeEnd !== Infinity }));
 }
