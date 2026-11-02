@@ -14,6 +14,7 @@
  *   ?scene=placard&items=sandwich                               sandwich à B.O.B. : aspiré, puis recraché avec le badge (# shake)
  *   ?scene=couloir&flags=sait_fusible                           « Prendre le fusible » : étincelles, le néon du circuit 7B hoquette et meurt
  *   ?scene=placard&items=seau,serpilliere                       serpillière sur le seau (inventaire) : plouf et gerbe de gouttes
+ *   ?resume=1                                                   reprend directement la sauvegarde (page /creator), sans écran titre
  *   ?scene=fin&roach2d=1                                        PoC : la cour de la Reine en sprites cafards 2D (props.ROACH_2D)
  * `scene=fin` saute directement au cliffhanger ; `scene=panneau` ouvre le labo cadré sur la console.
  * En mode debug, la sauvegarde automatique est désactivée.
@@ -33,6 +34,8 @@ export interface DebugOptions {
   shot?: string;
   /** Rejouer le plan d'arrivée (onFirstEnter filmé) de la scène de départ. */
   cine: boolean;
+  /** Reprendre la sauvegarde sans passer par l'écran titre (sauvegarde active). */
+  resume: boolean;
 }
 
 export function parseDebug(search: string): DebugOptions {
@@ -54,5 +57,6 @@ export function parseDebug(search: string): DebugOptions {
     intro: q.get('intro') === '1',
     shot: q.get('shot')?.trim() || undefined,
     cine: q.get('cine') === '1',
+    resume: q.get('resume') === '1',
   };
 }

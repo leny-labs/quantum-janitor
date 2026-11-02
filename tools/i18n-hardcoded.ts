@@ -12,7 +12,8 @@ import { join, relative } from 'node:path';
 import { ROOT } from './readContent';
 
 const SRC = join(ROOT, 'src');
-const SKIP_DIRS = [join(SRC, 'i18n', 'locales')];
+// Outillage debug (page /creator, solution scriptée) : français seulement, hors jeu.
+const SKIP = [join(SRC, 'i18n', 'locales'), join(SRC, 'creator'), join(SRC, 'engine', 'walkthrough.ts')];
 
 /** Littéraux techniques qui ressemblent à du texte. */
 const IGNORE = new Set([
@@ -153,9 +154,10 @@ export function looksLikeText(s: string): boolean {
 }
 
 function walk(dir: string): string[] {
-  if (SKIP_DIRS.includes(dir)) return [];
+  if (SKIP.includes(dir)) return [];
   return readdirSync(dir).flatMap((f) => {
     const p = join(dir, f);
+    if (SKIP.includes(p)) return [];
     if (statSync(p).isDirectory()) return walk(p);
     return p.endsWith('.ts') && !p.endsWith('.d.ts') ? [p] : [];
   });

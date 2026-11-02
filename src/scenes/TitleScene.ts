@@ -48,6 +48,15 @@ export class TitleScene extends Phaser.Scene {
       else this.scene.start('Room');
       return;
     }
+    // ?resume=1 (page /creator) : reprend la sauvegarde écrite, une seule fois.
+    if (d.resume && !d.active && !this.registry.get('debugStarted')) {
+      this.registry.set('debugStarted', true);
+      if (session.loadGame()) {
+        if (session.state.ended) this.scene.start('End', { final: true });
+        else this.scene.start('Room');
+        return;
+      }
+    }
 
     this.hero = new HeroView(this, titleShot(W, H));
     playMusic('menu');
