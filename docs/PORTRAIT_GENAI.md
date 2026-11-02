@@ -8,7 +8,7 @@ Deux sources selon le personnage :
 | `gary` | **GenAI v2** (planche stabilisée validée par Leny, design « Janék ») — plus de bake | à la main, voir ci-dessous |
 | `sylvie` | **GenAI** (moniteur teal validé par Leny) — planche à **humeurs** + bouche-onde procédurale | à la main, voir « SYLVIE » |
 | `bob` | **GenAI** (robot-aspirateur à écran-bouche validé par Leny) — planche + bouche-onde cyan procédurale | à la main, voir « B.O.B. » |
-| `reine` | bake du Studio 3D (`src/three/Studio.ts`) | `npm run bake:portraits` |
+| `reine` | **GenAI** (buste bust-v1 validé par Leny) — planche **composée** : base nue + calques antennes / sourcils / yeux / mandibules, bakée en 8 frames | à la main, voir « Reine » |
 
 Pas de GenAI au runtime. Un PNG présent dans `public/portraits/` prime ; s'il manque,
 le jeu bake la planche au démarrage — **sauf pour les planches GenAI** (`GENAI_SHEETS`
@@ -240,6 +240,39 @@ personnage ne connaît pas retombe sur son `fallback` pour la planche et l'onde
 (paupières mi-closes en sad / suspicious, LED qui s'affole en angry). Toutes les
 répliques de B.O.B. (ink + YAML) portent un `# mood:` / `mood:`.
 
+## Reine — planche GenAI composée (calques bakés)
+
+**Cible : `_briefs/reine/bust-v1.jpg`** (buste validé par Leny, 2026-11-02). Plus de bake 3D :
+la Reine est dans `GENAI_SHEETS`.
+
+Fichiers :
+- `public/portraits/reine-sheet.png` — 1024 × 512, 4 × 2 frames de 256 px, fond bleu nuit
+  peint de bust-v1. Chaque frame = base nue + calques composés (pas d'overlay runtime).
+- `public/portraits/reine-ref.png` — frame idle0 (256 × 256).
+
+Mapping :
+
+| | col 0 | col 1 | col 2 | col 3 |
+|---|---|---|---|---|
+| **idle** | 0 · neutre | 1 · clignement (paupières) | 2 · inspire (buste +1 px, antennes) | 3 · regard de côté + sourcil sceptique |
+| **talk** | 4 · mi-ouvert | 5 · grand ouvert (sourcils haussés) | 6 · entrouvert | 7 · ouvert ¾ |
+
+En parole, les mandibles s'écartent (frames 1 → 3 de la planche mandibles + `spread`) et la
+lèvre basse descend sous la plaque du museau (`jaw`, gueule sombre découverte).
+
+Sources (dans `_briefs/reine/`, non suivi) :
+- `snout.py` → `base-snout.png` : base nue (`base-strong-nose.png`, alignée au pixel sur
+  bust-v1) + **museau greffé depuis bust-v1** (plaque segmentée, lèvre brun-rouge) ;
+  mandibles de bust-v1 effacées au tampon, lèvres repeintes, raccord d'éclairage Poisson.
+- `compose.py` : place les calques (`eyes/antennae/eyebrows/mandibles-sheet-rgba.png`)
+  d'après `ANCHORS` (px @1024, voir `out/anchors.json`), écrit previews + `compare.png`
+  (bust-v1 | idle | talk) et, avec `--sheet DIR`, la planche + la ref (recadrage carré
+  `(160, 40, 800, 680)` → 256).
+
+Régénérer : `cd _briefs/reine && python3 snout.py && python3 compose.py out --sheet ../../public/portraits`.
+Ne **pas** lancer de bake pour la Reine. Calques runtime séparés (façon drone de Gary)
+possibles plus tard ; pour l'instant tout est baké dans la planche.
+
 ## Layout de la planche (`{id}-sheet.png`)
 
 Grille **4 colonnes × 2 lignes**, frames carrées, lues ligne par ligne.
@@ -259,7 +292,7 @@ micro-mouvement de tête** changent : même cadrage, même fond, même éclairag
   le drone dorsal est un calque à part (voir « Gary : base + calque robot »).
 - B.O.B. : planche GenAI (voir « B.O.B. ») ; bouche = onde cyan procédurale sur l'écran-grille.
 - SYLVIE : planche GenAI à humeurs, layout propre (voir « SYLVIE ») ; bouche = onde procédurale.
-- Reine : mandibules qui s'écartent, gueule sombre qui s'ouvre.
+- Reine : planche GenAI composée (voir « Reine ») ; mandibules qui s'écartent, gueule sombre qui s'ouvre.
 
 ## Prompt — style lock
 
@@ -269,7 +302,7 @@ micro-mouvement de tête** changent : même cadrage, même fond, même éclairag
 À ajouter : le personnage et l'état de bouche de chaque frame, « same framing, same
 background gradient and scanlines as reference, 4×2 sprite sheet, no gaps, no borders ».
 
-Ce style lock vaut pour les personnages bakés (Reine). Gary a quitté le
+Ce style lock vaut pour les personnages bakés (plus aucun portrait de dialogue depuis la Reine GenAI). Gary a quitté le
 bake : son style est celui de la planche v2 de Leny (cartoon encré, fond bleu nuit
 `#071D40`) — joindre `public/portraits/gary-ref.png` et `gary-sheet.png`.
 
