@@ -1,0 +1,13 @@
+export { TalkingPortrait } from './TalkingPortrait';
+export { TypewriterMouth, shapeForChar } from './TypewriterMouth';
+export type { TypewriterMouthOptions } from './TypewriterMouth';
+export { SpriteTalk } from './SpriteTalk';
+export type { SpriteTalkOptions } from './SpriteTalk';
+export { AudioMouth, shapeFromViseme } from './AudioMouth';
+export type { AudioMouthOptions, LipSyncModule } from './AudioMouth';
+export { typewrite } from './typewrite';
+export type { TypewriteHandle, TypewriteOptions } from './typewrite';
+export { ensureMouthTextures, drawMouth, mouthTextureKey, MOUTH_TEX_W, MOUTH_TEX_H } from './mouths';
+export { revealTimeline } from './timing';
+export { MOUTH_SHAPES } from './types';
+export type { BlinkOptions, EyeOptions, MouthDriver, MouthOptions, MouthShape, MouthStyle, NormPoint, PortraitLayers, SpriteFrame, SpriteLoop, SpriteSheetOptions, TalkingPortraitOptions, } from './types';

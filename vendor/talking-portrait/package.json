@@ -1,0 +1,42 @@
+{
+  "name": "talking-portrait",
+  "version": "0.1.0",
+  "description": "Portraits parlants pour Phaser 3 : bouche animée (typewriter ou audio) + clignement d'yeux. Mobile-first, zéro dépendance.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/talking-portrait.js",
+  "module": "./dist/talking-portrait.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/talking-portrait.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leny-labs/talking-portrait.git"
+  },
+  "keywords": [
+    "phaser",
+    "phaser3",
+    "portrait",
+    "lipsync",
+    "dialogue",
+    "typewriter"
+  ],
+  "peerDependencies": {
+    "@beer-digital/lipsync-engine": ">=1.0.0",
+    "phaser": "^3.60.0"
+  },
+  "peerDependenciesMeta": {
+    "@beer-digital/lipsync-engine": {
+      "optional": true
+    }
+  }
+}
