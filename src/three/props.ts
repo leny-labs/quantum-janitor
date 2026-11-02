@@ -597,6 +597,49 @@ export function roach(len: number, crown = false): THREE.Group {
   return g;
 }
 
+/** Sprite cafard 2D (PoC, _briefs/roach-2d/) : profil tourné vers la droite, pieds en bas. */
+export const ROACH_SPRITE_URL = `${import.meta.env.BASE_URL}props/roach-2d.png`;
+const ROACH_SPRITE_RATIO = 381 / 512;
+/** `?roach2d=1` : cafards en sprites 2D à la place de `roach()` (PoC, plan de fin). */
+export const ROACH_2D = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('roach2d') === '1';
+/** Matériaux partagés, un par sens (le scale.x négatif ne retourne pas un Sprite : UV miroir). */
+const roachSpriteMats = new Map<boolean, THREE.SpriteMaterial>();
+
+function roachSpriteMat(facingRight: boolean): THREE.SpriteMaterial {
+  let m = roachSpriteMats.get(facingRight);
+  if (!m) {
+    const map = new THREE.TextureLoader().load(ROACH_SPRITE_URL);
+    map.colorSpace = THREE.SRGBColorSpace;
+    if (!facingRight) {
+      map.wrapS = THREE.RepeatWrapping;
+      map.repeat.x = -1;
+    }
+    m = new THREE.SpriteMaterial({ map, alphaTest: 0.4, transparent: true });
+    roachSpriteMats.set(facingRight, m);
+  }
+  return m;
+}
+
+/**
+ * Cafard en billboard 2D, même repère que `roach(len)` (pieds en y = 0) : le
+ * sprite fait toujours face à la caméra ; `facingRight` = tête vers +x écran.
+ * Ombre portée = disque sombre au sol (les sprites n'en projettent pas).
+ */
+export function roachSprite(len: number, facingRight = true): THREE.Group {
+  const w = len * 1.15;
+  const sprite = new THREE.Sprite(roachSpriteMat(facingRight));
+  sprite.center.set(0.5, 0.02);
+  sprite.scale.set(w, w * ROACH_SPRITE_RATIO, 1);
+  const shadow = new THREE.Mesh(
+    new THREE.CircleGeometry(len * 0.5, 20),
+    new THREE.MeshBasicMaterial({ color: '#1a0812', transparent: true, opacity: 0.35, depthWrite: false }),
+  );
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.scale.set(1, 0.45, 1);
+  shadow.position.y = 0.02;
+  return group([shadow, sprite]);
+}
+
 /** Texture de la plaque « Règlement n°1 » : émail bleu nuit, bandeau rouge, gravure ambre. */
 function reglementTexture(aspect: number): THREE.CanvasTexture {
   const W = 1024;

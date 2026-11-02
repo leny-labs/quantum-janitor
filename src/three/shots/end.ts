@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import type { HeroShot } from '../Hero';
 import { at, box, cyl, glow, mat, sphere, Vignette } from '../kit';
-import { bob, gary, roach, seau } from '../props';
+import { ROACH_2D, bob, gary, roach, roachSprite, seau } from '../props';
 import { skyPlane, skyTexture } from './backdrop';
 
 export function endShot(width: number, height: number): HeroShot {
@@ -71,7 +71,8 @@ export function endShot(width: number, height: number): HeroShot {
   scene.add(queen);
   const court: THREE.Object3D[] = [];
   for (const [x, z, sz, ry] of [[6, -11, 3.4, -2.6], [9.5, -6.5, 2.4, -2.2], [-9, -12, 2.8, 0.5], [3, -16, 2, -1.7], [-6, -4, 1.6, 0.9]] as const) {
-    const r = at(roach(sz), x, 0, z, ry);
+    // ?roach2d=1 : PoC sprites 2D (tête vers la droite de l'écran si cos(ry) > 0)
+    const r = ROACH_2D ? at(roachSprite(sz, Math.cos(ry) > 0), x, 0, z) : at(roach(sz), x, 0, z, ry);
     scene.add(r);
     court.push(r);
   }
