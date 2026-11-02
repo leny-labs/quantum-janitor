@@ -34,9 +34,10 @@ export const sheetUrl = (id: string) => `portraits/${id}-sheet.png`;
 export const overlayKey = (id: string) => `portraitOverlay:${id}`;
 export const overlayUrl = (id: string) => `portraits/${id}-robot.png`;
 /**
- * Portraits fixes GenAI (sans planche) : PNG chargé sous `portraitKey(id)`,
- * affiché par DialogueBox comme un portrait 3D fixe (Frère Élytre : buste
- * recadré de son sprite en pied, _briefs/ch1/genai/scribe-body.png).
+ * Portraits GenAI sans modèle 3D : PNG fixe chargé sous `portraitKey(id)` (repli)
+ * + planche `sheetUrl(id)` au layout SHEET, qui prime dès qu'elle est chargée
+ * (Frère Élytre : _briefs/ch1/genai-fix/faces.py — mandibules qui s'écartent en
+ * parlant, jamais de bouche).
  */
 const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png' };
 
@@ -167,7 +168,7 @@ export const PORTRAIT_IDS = Object.keys(PORTRAITS);
  * Planches GenAI (docs/PORTRAIT_GENAI.md) : jamais rebakées, ni par
  * `bake:portraits` ni au runtime — le 3D suit l'image, pas l'inverse.
  */
-export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob', 'reine']);
+export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob', 'reine', 'scribe']);
 
 function makeRenderer(): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
@@ -567,7 +568,10 @@ export function preloadPortraitSheets(load: Phaser.Loader.LoaderPlugin): void {
   for (const id of Object.keys(PORTRAIT_OVERLAYS)) if (!load.textureManager.exists(overlayKey(id))) load.image(overlayKey(id), overlayUrl(id));
   for (const id of GENAI_ICONS) if (!load.textureManager.exists(iconKey(id))) load.image(iconKey(id), genaiIconUrl(id));
   for (const { icon } of Object.values(GENAI_VARIANTS)) if (!load.textureManager.exists(iconKey(icon))) load.image(iconKey(icon), genaiIconUrl(icon));
-  for (const [id, url] of Object.entries(GENAI_PORTRAITS)) if (!load.textureManager.exists(portraitKey(id))) load.image(portraitKey(id), url);
+  for (const [id, url] of Object.entries(GENAI_PORTRAITS)) {
+    if (!load.textureManager.exists(portraitKey(id))) load.image(portraitKey(id), url);
+    if (!load.textureManager.exists(sheetKey(id))) load.image(sheetKey(id), sheetUrl(id));
+  }
 }
 
 /** Génère (une fois par jeu) toutes les textures d'icônes et de portraits. */

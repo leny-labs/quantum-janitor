@@ -56,17 +56,9 @@ const FACES: Record<string, { mouth: MouthOptions; blink?: BlinkOptions }> = {
   sylvie: {
     mouth: { x: 0.5, y: 0.6, width: 0.26, style: { lipColor: '#7fffd4', innerColor: '#0b3a35', teethColor: null, tongueColor: null, outlineColor: null } },
   },
-  reine: {
-    mouth: { x: 0.58, y: 0.79, width: 0.2, style: { lipColor: '#3a1a08', innerColor: '#120600', teethColor: '#e8d890', tongueColor: null } },
-    blink: {
-      eyes: [
-        { x: 0.405, y: 0.51, width: 0.17, height: 0.18 },
-        { x: 0.76, y: 0.51, width: 0.17, height: 0.18 },
-      ],
-      lidColor: '#5a2e0c',
-      lashColor: '#1a0a02',
-    },
-  },
+  // cafards : mandibules + palpes seulement, jamais de bouche (largeur 0 = rien dessiné)
+  reine: { mouth: { width: 0, showClosed: false }, blink: { enabled: false } },
+  scribe: { mouth: { width: 0, showClosed: false }, blink: { enabled: false } },
 };
 
 /** Boîte de dialogue : portrait 3D, cartouche de nom, texte, choix. */

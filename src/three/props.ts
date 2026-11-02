@@ -696,12 +696,12 @@ export function billboard(url: string, h: number, aspect: number, o: { tint?: TH
   return g;
 }
 
-/** Sa Majesté Blattaria XIV en pied (GenAI, 754 × 1024). */
+/** Sa Majesté Blattaria XIV en pied (GenAI, 768 × 1024, _briefs/ch1/genai-fix/cutout.py). */
 export const REINE_URL = `${import.meta.env.BASE_URL}props/ch1/reine.png`;
-export const REINE_ASPECT = 754 / 1024;
-/** Frère Élytre, Grand Scribe, en pied (GenAI, 643 × 1024). */
+export const REINE_ASPECT = 768 / 1024;
+/** Frère Élytre, Grand Scribe, en pied (GenAI, 637 × 1024, _briefs/ch1/genai-fix/cutout.py). */
 export const SCRIBE_URL = `${import.meta.env.BASE_URL}props/ch1/scribe.png`;
-export const SCRIBE_ASPECT = 643 / 1024;
+export const SCRIBE_ASPECT = 637 / 1024;
 
 /** Texture de la plaque « Règlement n°1 » : émail bleu nuit, bandeau rouge, gravure ambre. */
 function reglementTexture(aspect: number): THREE.CanvasTexture {
