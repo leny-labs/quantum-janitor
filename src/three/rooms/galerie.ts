@@ -50,28 +50,31 @@ export const galerie: RoomBuild = {
       [-6.4, 6.5, 1.8, 1.1, 0.13],
     ] as const) s.add(at(drip(len, r), x, y, z));
 
-    // ── fresque de la Prophétie : enduit peint, cadre sculpté ──
+    // ── fresque de la Prophétie : peinture GenAI, cadre sculpté ──
     const ff = s.fit(s.rect('fresque'), 0.08);
+    // cadre au rapport de la peinture (contenu dans le hotspot, centré) : rien n'est rogné
+    const fw = Math.min(ff.w, (ff.h * 0.88 * FRESCO_ASPECT) / 0.92);
+    const fh = (fw * 0.92) / FRESCO_ASPECT / 0.88;
     const fresco = new THREE.Group();
-    const paint = new THREE.Mesh(new THREE.PlaneGeometry(ff.w * 0.92, ff.h * 0.88), mat('#ffffff', { map: prophecyTexture(ff.w / ff.h) }));
+    const paint = new THREE.Mesh(new THREE.PlaneGeometry(fw * 0.92, fh * 0.88), mat('#ffffff', { map: prophecyTexture((fw * 0.92) / (fh * 0.88)) }));
     paint.receiveShadow = true;
     fresco.add(at(paint, 0, 0, 0.03));
-    const t = ff.h * 0.07;
+    const t = fh * 0.07;
     for (const [x, y, w, h] of [
-      [0, ff.h / 2 - t / 2, ff.w, t],
-      [0, -ff.h / 2 + t / 2, ff.w, t],
-      [-ff.w / 2 + t / 2, 0, t, ff.h],
-      [ff.w / 2 - t / 2, 0, t, ff.h],
+      [0, fh / 2 - t / 2, fw, t],
+      [0, -fh / 2 + t / 2, fw, t],
+      [-fw / 2 + t / 2, 0, t, fh],
+      [fw / 2 - t / 2, 0, t, fh],
     ]) fresco.add(at(box(w, h, 0.16, '#4a2410'), x, y, 0.06), at(box(w * (w > h ? 1 : 0.4), h * (h > w ? 1 : 0.4), 0.17, GOLD_DARK, { edges: false }), x, y, 0.07));
-    for (const [cx, cy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) fresco.add(at(sphere(t * 0.7, GOLD, { seg: 12 }), cx * (ff.w / 2 - t / 2), cy * (ff.h / 2 - t / 2), 0.16));
+    for (const [cx, cy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) fresco.add(at(sphere(t * 0.7, GOLD, { seg: 12 }), cx * (fw / 2 - t / 2), cy * (fh / 2 - t / 2), 0.16));
     s.spot('fresque', at(fresco, ff.x, ff.y, 0.08));
     // appliques : deux bougies sur consoles, de part et d'autre
     for (const sx of [-1, 1]) {
-      const cx = ff.x + sx * (ff.w / 2 + 0.35);
-      const cy = ff.y - ff.h * 0.32;
+      const cx = ff.x + sx * (fw / 2 + 0.35);
+      const cy = ff.y - fh * 0.32;
       s.add(at(box(0.36, 0.08, 0.3, '#4a2410'), cx, cy, 0.18), at(candle(s, 0.34), cx, cy + 0.04, 0.2));
     }
-    s.add(at(pool('#ffc47a', ff.w * 1.3, ff.h * 1.1, 0.14), ff.x, ff.y, 0.05));
+    s.add(at(pool('#ffc47a', fw * 1.3, fh * 1.1, 0.14), ff.x, ff.y, 0.05));
 
     // ── Frère Élytre, Grand Scribe : sprite GenAI derrière son pupitre ──
     const sc = s.stand(s.rect('scribe'));
@@ -308,226 +311,22 @@ export const galerie: RoomBuild = {
   },
 };
 
+/** Fresque de la Prophétie (GenAI, 1024 × 768) : _briefs/ch1/genai-fix/fresco-homme-seau-v1.jpg. */
+const FRESCO_URL = `${import.meta.env.BASE_URL}props/ch1/fresco.jpg`;
+const FRESCO_ASPECT = 1024 / 768;
+
 /**
  * Fresque de la Prophétie, peinte sur enduit ocre : l'Homme au Seau lève
  * son seau, des rayons fendent quatre mondes, la foule des cafards
  * s'agenouille ; sur son cœur, le Signe aux deux R. Frise de glyphes.
- * Pas de texte lisible : la réplique « Regarder » le lit pour le joueur.
+ * Recadrée en « cover » sur un panneau de rapport `aspect` (centrée).
  */
-function prophecyTexture(aspect: number): THREE.CanvasTexture {
-  const W = 1536;
-  const H = Math.round(W / aspect);
-  const c = document.createElement('canvas');
-  c.width = W;
-  c.height = H;
-  const g = c.getContext('2d')!;
-  const r = rng(97);
-  const INK = '#2a1206';
-  const bg = g.createRadialGradient(W * 0.5, H * 0.4, H * 0.1, W * 0.5, H * 0.5, W * 0.7);
-  bg.addColorStop(0, '#e2b878');
-  bg.addColorStop(0.6, '#b9844a');
-  bg.addColorStop(1, '#6e4420');
-  g.fillStyle = bg;
-  g.fillRect(0, 0, W, H);
-  g.lineJoin = g.lineCap = 'round';
-  // auréole derrière l'Homme au Seau
-  const cx = W * 0.5;
-  const halo = g.createRadialGradient(cx, H * 0.42, 10, cx, H * 0.42, H * 0.5);
-  halo.addColorStop(0, 'rgba(255,236,170,0.95)');
-  halo.addColorStop(1, 'rgba(255,236,170,0)');
-  g.fillStyle = halo;
-  g.fillRect(0, 0, W, H);
-  // rayons qui partent du seau
-  const sy = H * 0.2;
-  for (let i = 0; i < 14; i++) {
-    const a = Math.PI + (i / 13) * Math.PI;
-    g.strokeStyle = i % 2 ? 'rgba(255,214,120,0.75)' : 'rgba(255,248,214,0.6)';
-    g.lineWidth = 10;
-    g.beginPath();
-    g.moveTo(cx, sy);
-    g.lineTo(cx + Math.cos(a) * W, sy + Math.sin(a) * W * 0.5 + W * 0.25);
-    g.stroke();
-  }
-  // quatre mondes fendus
-  const worlds: [number, number, number, string][] = [
-    [0.13, 0.22, 0.09, '#3d7dd8'],
-    [0.3, 0.12, 0.07, '#b56cff'],
-    [0.7, 0.12, 0.07, '#7fbf3f'],
-    [0.87, 0.22, 0.09, '#ff8a5a'],
-  ];
-  for (const [x, y, rr, color] of worlds) {
-    g.fillStyle = color;
-    g.strokeStyle = INK;
-    g.lineWidth = 7;
-    g.beginPath();
-    g.arc(W * x, H * y, H * rr, 0, Math.PI * 2);
-    g.fill();
-    g.stroke();
-    g.strokeStyle = '#fff4c8';
-    g.lineWidth = 6;
-    g.beginPath();
-    g.moveTo(W * x - H * rr * 0.2, H * y - H * rr);
-    g.lineTo(W * x + H * rr * 0.15, H * y - H * rr * 0.1);
-    g.lineTo(W * x - H * rr * 0.1, H * y + H * rr * 0.3);
-    g.lineTo(W * x + H * rr * 0.2, H * y + H * rr);
-    g.stroke();
-  }
-  // l'Homme au Seau : bleu de travail, moustache, seau levé à deux mains
-  const bodyTop = H * 0.4;
-  g.fillStyle = '#4a6a9a';
-  g.strokeStyle = INK;
-  g.lineWidth = 8;
-  g.beginPath();
-  g.moveTo(cx - H * 0.13, bodyTop);
-  g.lineTo(cx + H * 0.13, bodyTop);
-  g.lineTo(cx + H * 0.17, H * 0.78);
-  g.lineTo(cx - H * 0.17, H * 0.78);
-  g.closePath();
-  g.fill();
-  g.stroke();
-  // jambes
-  g.fillStyle = '#3a557e';
-  for (const sx of [-1, 1]) {
-    g.beginPath();
-    g.rect(cx + sx * H * 0.09 - H * 0.05, H * 0.77, H * 0.1, H * 0.13);
-    g.fill();
-    g.stroke();
-  }
-  // bras levés
-  g.lineWidth = H * 0.05;
-  g.strokeStyle = '#4a6a9a';
-  for (const sx of [-1, 1]) {
-    g.beginPath();
-    g.moveTo(cx + sx * H * 0.12, bodyTop + H * 0.04);
-    g.lineTo(cx + sx * H * 0.16, H * 0.27);
-    g.stroke();
-  }
-  // tête + moustache
-  g.fillStyle = '#e8b98a';
-  g.strokeStyle = INK;
-  g.lineWidth = 8;
-  g.beginPath();
-  g.arc(cx, H * 0.34, H * 0.075, 0, Math.PI * 2);
-  g.fill();
-  g.stroke();
-  g.fillStyle = '#4a2a14';
-  g.beginPath();
-  g.ellipse(cx, H * 0.37, H * 0.05, H * 0.014, 0, 0, Math.PI * 2);
-  g.fill();
-  // le seau, tenu au-dessus de la tête
-  g.fillStyle = '#3d7dd8';
-  g.beginPath();
-  g.moveTo(cx - H * 0.12, H * 0.14);
-  g.lineTo(cx + H * 0.12, H * 0.14);
-  g.lineTo(cx + H * 0.09, H * 0.26);
-  g.lineTo(cx - H * 0.09, H * 0.26);
-  g.closePath();
-  g.fill();
-  g.stroke();
-  g.lineWidth = 6;
-  g.beginPath();
-  g.arc(cx, H * 0.14, H * 0.1, Math.PI, 0);
-  g.stroke();
-  // le Signe aux deux R, sur le cœur : badge blanc, deux R tracés au pinceau
-  const bx = cx - H * 0.08;
-  const by = H * 0.47;
-  g.fillStyle = '#f6efe2';
-  g.lineWidth = 5;
-  g.beginPath();
-  g.rect(bx - H * 0.05, by - H * 0.035, H * 0.1, H * 0.07);
-  g.fill();
-  g.stroke();
-  g.strokeStyle = '#c0392b';
-  g.lineWidth = 5;
-  for (const dx of [-0.022, 0.016]) {
-    const x = bx + H * dx;
-    const s = H * 0.024;
-    g.beginPath();
-    g.moveTo(x, by + s);
-    g.lineTo(x, by - s);
-    g.quadraticCurveTo(x + s * 1.2, by - s, x + s * 0.9, by - s * 0.1);
-    g.lineTo(x, by - s * 0.05);
-    g.lineTo(x + s * 0.9, by + s);
-    g.stroke();
-  }
-  // la foule des cafards agenouillés, de part et d'autre
-  for (let i = 0; i < 10; i++) {
-    const side = i % 2 ? 1 : -1;
-    const k = Math.floor(i / 2);
-    const x = cx + side * (H * 0.3 + k * W * 0.075);
-    const y = H * (0.84 - k * 0.02);
-    g.fillStyle = '#5a2c12';
-    g.strokeStyle = INK;
-    g.lineWidth = 6;
-    g.beginPath();
-    g.ellipse(x, y, H * 0.06, H * 0.035, side * 0.5, 0, Math.PI * 2);
-    g.fill();
-    g.stroke();
-    g.beginPath();
-    g.arc(x - side * H * 0.055, y - H * 0.03, H * 0.022, 0, Math.PI * 2);
-    g.fill();
-    g.stroke();
-    g.lineWidth = 3;
-    g.beginPath();
-    g.moveTo(x - side * H * 0.065, y - H * 0.05);
-    g.quadraticCurveTo(x - side * H * 0.12, y - H * 0.16, x - side * H * 0.15, y - H * 0.12);
-    g.stroke();
-  }
-  // frise de glyphes en bas
-  g.fillStyle = 'rgba(60,30,10,0.55)';
-  g.fillRect(0, H * 0.92, W, H * 0.08);
-  g.strokeStyle = '#ffd98a';
-  g.lineWidth = 5;
-  for (let x = W * 0.04; x < W * 0.96; x += H * 0.07) {
-    const y = H * 0.96;
-    const s = H * 0.022;
-    g.beginPath();
-    switch (Math.floor(r() * 4)) {
-      case 0:
-        g.arc(x, y, s, 0, Math.PI * 2);
-        break;
-      case 1:
-        g.moveTo(x - s, y + s);
-        g.lineTo(x, y - s);
-        g.lineTo(x + s, y + s);
-        break;
-      case 2:
-        g.moveTo(x - s, y - s);
-        g.lineTo(x + s, y + s);
-        g.moveTo(x + s, y - s);
-        g.lineTo(x - s, y + s);
-        break;
-      default:
-        g.moveTo(x, y - s);
-        g.lineTo(x, y + s);
-        g.moveTo(x - s, y);
-        g.lineTo(x + s, y);
-    }
-    g.stroke();
-  }
-  // craquelures et usure de l'enduit
-  g.strokeStyle = 'rgba(40,20,8,0.45)';
-  g.lineWidth = 2.5;
-  for (let i = 0; i < 18; i++) {
-    let x = r() * W;
-    let y = r() * H;
-    g.beginPath();
-    g.moveTo(x, y);
-    for (let k = 0; k < 5; k++) {
-      x += (r() - 0.5) * 90;
-      y += (r() - 0.3) * 60;
-      g.lineTo(x, y);
-    }
-    g.stroke();
-  }
-  for (let i = 0; i < 26; i++) {
-    g.fillStyle = `rgba(110,68,32,${0.15 + r() * 0.25})`;
-    g.beginPath();
-    g.ellipse(r() * W, r() * H, 10 + r() * 40, 6 + r() * 20, r() * 3, 0, Math.PI * 2);
-    g.fill();
-  }
-  const t = new THREE.CanvasTexture(c);
+function prophecyTexture(aspect: number): THREE.Texture {
+  const t = new THREE.TextureLoader().load(FRESCO_URL);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 8;
+  if (aspect > FRESCO_ASPECT) t.repeat.set(1, FRESCO_ASPECT / aspect);
+  else t.repeat.set(aspect / FRESCO_ASPECT, 1);
+  t.offset.set((1 - t.repeat.x) / 2, (1 - t.repeat.y) / 2);
   return t;
 }
