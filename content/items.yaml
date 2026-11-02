@@ -6,6 +6,16 @@ items:
     name: Seau
     icon: { color: "#3d7dd8", glyph: "SEAU" }
     look:
+      # ch.1 : le Seau Sacré, rendu par la Reine ; son contenu est porté par les flags
+      - if: { flags: [ch1, ch1_seau_miettes], notFlags: [ch1_foule_dispersee] }
+        say: "Plein à ras bord de miettes saintes. Ça craque. Ça sent le goûter. B.O.B. me regarde avec des yeux que je ne lui connaissais pas."
+        stop: true
+      - if: { flags: [ch1, ch1_seau_plein], notFlags: [ch1_eclat_stabilise] }
+        say: "De l'eau bénite. Tiède. Évidemment."
+        stop: true
+      - if: { flags: [ch1] }
+        say: "Le Seau Sacré. C'est mon seau. Ils l'ont léché si consciencieusement qu'il n'a jamais été aussi propre. Je ne sais pas quoi en penser."
+        stop: true
       - say: "Eau grise de catégorie 4 et une dose de « Dégraissant Absolu ». Ça brille dans le noir. C'est normal. Je crois."
       - if: { flags: [lecteur_propre] }
         say: "Plus du yaourt du lecteur de badge. Le yaourt bouge. Je fais comme si de rien n'était."
@@ -14,22 +24,52 @@ items:
     name: Serpillière
     icon: { color: "#c9b458", glyph: "SERP" }
     look:
+      - if: { flags: [ch1, ch1_josiane_mouillee] }
+        say: "Josiane, trempée d'eau bénite. Elle a l'air apaisée. C'est la première fois."
+        stop: true
       - if: { flags: [serpilliere_mouillee] }
         say: "Trempée, lourde, vaguement phosphorescente. Prête au combat."
         stop: true
       - say: "Sèche. Une serpillière sèche, c'est un balai qui a abandonné ses rêves."
     combine:
       seau:
+        - if: { flags: [ch1] }
+          say: "Tremper Josiane dans le Seau Sacré ? Les cafards me regardent. Tous. Il y a des bassins pour ça, apparemment."
+          stop: true
         - if: { flags: [serpilliere_mouillee] }
           say: "Elle est déjà trempée. Plus, ce serait de l'acharnement."
           stop: true
         - say: "Gluante, lourde, et elle bourdonne. Exactement la consistance réglementaire."
           set: serpilliere_mouillee
+      # ch.1 : nettoyer le Signe aux deux R
+      badge:
+        - if: { notFlags: [ch1] }
+          say: "Frotter mon badge avec Josiane ? Il a déjà vécu l'intérieur de B.O.B. Laissons-le tranquille."
+          stop: true
+        - if: { flags: [ch1_badge_propre] }
+          say: "Il brille déjà. Encore un coup et je lime le deuxième R. Ce serait un blasphème, apparemment."
+          stop: true
+        - if: { notFlags: [ch1_josiane_mouillee] }
+          say: "À sec, Josiane ne fait qu'étaler le thon. Il me faut de l'eau. Propre, si possible. Sainte, à la rigueur."
+          stop: true
+        - say: "narrateur: Gary frotte le badge avec Josiane, longuement, avec la ferveur d'un homme qui n'a plus rien à perdre. L'odeur de thon capitule."
+          set: ch1_badge_propre
+        - say: "« GARRY PLUNK ». Les deux R brillent. Je n'ai jamais été aussi fier d'une faute de frappe."
+        - say: "sylvie: BADGE... VALI... GARRY... AGENT... PLUNK... BONHEUR... OBLIGA..."
+          mood: suspicious
+        - say: "SYLVIE ? ...Non. Juste un grésillement. Le badge a de la mémoire. Moi aussi, malheureusement."
 
   - id: badge
     name: Badge « Garry »
     icon: { color: "#e0e0e0", glyph: "ID" }
-    look: "« GARRY PLUNK — Agent d'entretien (intérim) ». Deux R. La RH refuse de corriger. Encore tiède de l'intérieur de B.O.B."
+    look:
+      - if: { flags: [ch1_badge_propre] }
+        say: "« GARRY PLUNK ». Propre, brillant, sacré. Le Signe aux deux R. La RH serait fière. Non. La RH ne ressent rien."
+        stop: true
+      - if: { flags: [ch1] }
+        say: "« GARRY PLUNK — Agent d'entretien (intérim) ». Deux R. Et une odeur de thon tenace : souvenir de mon séjour chez B.O.B."
+        stop: true
+      - say: "« GARRY PLUNK — Agent d'entretien (intérim) ». Deux R. La RH refuse de corriger. Encore tiède de l'intérieur de B.O.B."
 
   - id: sandwich
     name: Sandwich douteux
@@ -42,3 +82,11 @@ items:
     name: Fusible 7B
     icon: { color: "#d94f4f", glyph: "7B" }
     look: "Un fusible « 7B ». Tiède. Tout est tiède sur cette station. C'est inquiétant."
+
+  # ch.1 — le premier des 4 096 morceaux du Réacteur d'Improbabilité
+  - id: fragment
+    name: Éclat du Réacteur (1/4096)
+    icon: { color: "#b56cff", glyph: "1/4096" }
+    look: "Un éclat du Réacteur d'Improbabilité, gravé « Mk IV — 1/4096 ». Stabilisé, mouillé, tiède. Il ronronne. Plus que 4 095. Je vais avoir besoin d'un plus grand seau."
+    combine:
+      seau: "Il a déjà pris son bain. Un deuxième PLOUF, et il risque d'y prendre goût."

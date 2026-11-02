@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getSession } from '../session';
+import { CHAPTERS } from '../engine/walkthrough';
 import { t } from '../i18n';
 import { makeButton } from '../ui/Button';
 import { HeroView } from '../three/Hero';
@@ -15,9 +16,20 @@ interface EndData {
   final?: boolean;
 }
 
-/** Cliffhanger : la dimension des cafards, puis « À suivre… ». */
+/**
+ * Fin de chaque chapitre : flag posé, plan affiché, chapitre suivant
+ * proposé. `roaches` = plan 3D de la Reine (ch.0) ; `stub` = fond 2D de
+ * transition (ch.1 → Station Bureaucratique, non implémentée).
+ */
+const END_BY_CHAPTER: Record<string, { flag: string; shot: 'roaches' | 'stub'; next?: string }> = {
+  ch0: { flag: 'chapitre0_termine', shot: 'roaches', next: 'ch1' },
+  ch1: { flag: 'chapitre1_termine', shot: 'stub' },
+};
+
+/** Cliffhanger du chapitre (ch.0 : la dimension des cafards), puis « À suivre… ». */
 export class EndScene extends Phaser.Scene {
   private hero: HeroView | null = null;
+  private chapter = 'ch0';
 
   constructor() {
     super('End');
@@ -27,19 +39,26 @@ export class EndScene extends Phaser.Scene {
     const session = getSession();
     session.activeScene = this;
     const { state } = session;
+    // le knot de fin désigne le chapitre ; sinon (reprise d'une partie finie) celui de la sauvegarde
+    this.chapter = CHAPTERS.find((c) => c.endKnot === data.knot)?.id ?? session.chapter;
+    const end = END_BY_CHAPTER[this.chapter] ?? END_BY_CHAPTER.ch0;
+    state.chapter ??= this.chapter;
     playMusic('fin');
     state.ended = true;
-    state.setFlag('chapitre0_termine');
+    state.setFlag(end.flag);
     state.emit();
     bakeStudio(this.textures);
 
-    this.drawRoachDimension();
+    this.hero = null;
+    if (end.shot === 'stub') this.drawBureaucracyStub();
+    else this.drawRoachDimension();
+    const knot = data.knot;
 
-    if (!data.final && data.knot) {
+    if (!data.final && knot) {
       this.cameras.main.fadeIn(1400, 255, 255, 255);
       await new Promise((r) => this.time.delayedCall(1500, r));
       const box = new DialogueBox(this);
-      const deferred = await session.dialogue.run(data.knot, box);
+      const deferred = await session.dialogue.run(knot, box);
       if (deferred.length) console.warn('goto/end ignorés dans la scène de fin', deferred);
     }
     this.showToBeContinued();
@@ -51,17 +70,58 @@ export class EndScene extends Phaser.Scene {
 
   private drawRoachDimension(): void {
     this.hero = new HeroView(this, endShot(W, H));
+    this.drawLocation(t('end.location'), t('end.jurisdiction'));
+  }
+
+  /** Fin du ch.1 : la faille s'ouvre sur la Station Bureaucratique (plan 2D, ch.2 non implémenté). */
+  private drawBureaucracyStub(): void {
+    const g = this.add.graphics();
+    g.fillGradientStyle(0x1a0830, 0x1a0830, 0x6b5a3a, 0x6b5a3a, 1);
+    g.fillRect(0, 0, W, H);
+    // rangées de guichets à perte de vue
+    for (let row = 0; row < 4; row++) {
+      const y = 250 + row * 90;
+      const n = 6 + row * 3;
+      const w = W / n;
+      for (let i = 0; i < n; i++) {
+        g.fillStyle(0x2a2238, 0.55 + row * 0.1);
+        g.fillRect(i * w + w * 0.12, y, w * 0.76, 60 + row * 6);
+        g.fillStyle(0xffd166, 0.35 + row * 0.12);
+        g.fillRect(i * w + w * 0.3, y + 12, w * 0.4, 8);
+      }
+    }
+    // la faille
+    g.lineStyle(5, 0xff8ab8, 0.9);
+    g.beginPath();
+    g.moveTo(W / 2 - 10, 100);
+    [[W / 2 + 30, 160], [W / 2 - 25, 220], [W / 2 + 15, 260]].forEach(([x, y]) => g.lineTo(x, y));
+    g.strokePath();
+    this.add
+      .text(W / 2, 175, t('end.ch1.stub'), { fontFamily: FONT, fontSize: '26px', fontStyle: '700', color: '#ffd166', align: 'center' })
+      .setOrigin(0.5)
+      .setLetterSpacing(3)
+      .setStroke('#07050f', 6);
+    // le tampon géant
+    this.add
+      .text(W * 0.84, 150, t('end.ch1.stamp'), { fontFamily: DISPLAY, fontSize: '52px', color: '#ff4f9a' })
+      .setOrigin(0.5)
+      .setAngle(-14)
+      .setAlpha(0.85)
+      .setStroke('#ff4f9a', 3);
+    this.drawLocation(t('end.ch1.location'), t('end.ch1.jurisdiction'));
+  }
+
+  private drawLocation(label: string, jurisdiction: string): void {
     const g = this.add.graphics();
     g.fillGradientStyle(COLORS.ink, COLORS.ink, COLORS.ink, COLORS.ink, 0.7, 0.7, 0, 0);
     g.fillRect(0, 0, W, 90);
     // cartouche de localisation
-    const label = t('end.location');
     const tag = this.add.text(W / 2, 34, label, { fontFamily: FONT, fontSize: '17px', fontStyle: '700', color: COLORS.hover }).setOrigin(0.5).setLetterSpacing(4);
     const p = this.add.graphics();
     drawPanel(p, W / 2 - tag.width / 2 - 30, 16, tag.width + 60, 36, { fill: COLORS.ink, fillAlpha: 0.75, edge: hex(COLORS.hover), cut: 10 });
     tag.setDepth(1);
     this.add
-      .text(W / 2, 64, t('end.jurisdiction'), { fontFamily: FONT, fontSize: '11px', color: COLORS.dim })
+      .text(W / 2, 64, jurisdiction, { fontFamily: FONT, fontSize: '11px', color: COLORS.dim })
       .setOrigin(0.5)
       .setLetterSpacing(2);
   }
@@ -85,13 +145,13 @@ export class EndScene extends Phaser.Scene {
     grad.addColorStop(1, '#ff4f9a');
     title.setFill(grad).setStroke('#07050f', 10).setShadow(0, 10, 'rgba(255,79,154,0.55)', 26, true, true);
     const sub = this.add
-      .text(W / 2, 385, t('end.next'), { fontFamily: FONT, fontSize: '22px', fontStyle: '600', color: COLORS.hover })
+      .text(W / 2, 385, this.chapter === 'ch1' ? t('end.ch1.next') : t('end.next'), { fontFamily: FONT, fontSize: '22px', fontStyle: '600', color: COLORS.hover })
       .setOrigin(0.5)
       .setLetterSpacing(3)
       .setDepth(1001)
       .setAlpha(0);
     const thanks = this.add
-      .text(W / 2, 425, t('end.thanks'), { fontFamily: FONT, fontSize: '17px', color: COLORS.dim })
+      .text(W / 2, 425, this.chapter === 'ch1' ? t('end.ch1.thanks') : t('end.thanks'), { fontFamily: FONT, fontSize: '17px', color: COLORS.dim })
       .setOrigin(0.5)
       .setDepth(1001)
       .setAlpha(0);
@@ -100,18 +160,31 @@ export class EndScene extends Phaser.Scene {
 
     this.time.delayedCall(1800, () => {
       const session = getSession();
-      makeButton(this, W / 2 - 16, 560, t('end.menu'), () => this.scene.start('Title'), { align: 'right', size: 20, minWidth: 300 }).setDepth(1001);
-      makeButton(
-        this,
-        W / 2 + 16,
-        560,
-        t('end.replay'),
-        () => {
-          session.newGame();
-          this.scene.start('Room');
-        },
-        { align: 'left', size: 20, primary: true, minWidth: 300, kicker: t('end.replayKicker') },
-      ).setDepth(1001);
+      const chapter = this.chapter;
+      const next = END_BY_CHAPTER[chapter]?.next;
+      const play = (id: string) => () => {
+        session.newGame(id);
+        this.scene.start('Room');
+      };
+      // avec un chapitre suivant : trois boutons, le suivant en principal à droite
+      const dx = next ? 290 : 0;
+      makeButton(this, W / 2 - 16 - dx / 2, 560, t('end.menu'), () => this.scene.start('Title'), { align: 'right', size: 20, minWidth: next ? 250 : 300 }).setDepth(1001);
+      makeButton(this, W / 2 + 16 - dx / 2, 560, t('end.replay'), play(chapter), {
+        align: 'left',
+        size: 20,
+        primary: !next,
+        minWidth: next ? 250 : 300,
+        kicker: t('end.replayKicker'),
+      }).setDepth(1001);
+      if (next) {
+        makeButton(this, W / 2 + 16 - dx / 2 + 282, 560, t('end.nextChapter'), play(next), {
+          align: 'left',
+          size: 20,
+          primary: true,
+          minWidth: 250,
+          kicker: t('end.nextChapterKicker'),
+        }).setDepth(1001);
+      }
     });
   }
 }

@@ -8,6 +8,7 @@ import { compileInk, INK_TAG_KEYS, parseTag } from '../src/engine/ink';
 import { MOODS, isMood } from '../src/engine/mood';
 import { SMART_VALUES } from '../src/engine/verbs';
 import { ROOM_ICONS, type Action, type ArtShape, type Condition, type GameContent, type Interaction } from '../src/engine/types';
+import { CHAPTERS } from '../src/engine/walkthrough';
 import { readRawContent } from './readContent';
 
 const END_SCENE_ID = 'fin';
@@ -136,11 +137,16 @@ function checkInteraction(i: Interaction | undefined, where: string): void {
 function checkArt(art: ArtShape[] | undefined, where: string): void {
   (art ?? []).forEach((a, n) => {
     checkCondition(a.if, `${where}.art[${n}]`);
-    if (!a.rect && !a.circle && !a.text) warn(`${where}.art[${n}] : forme vide`);
+    if (!a.rect && !a.circle && !a.text && !a.image) warn(`${where}.art[${n}] : forme vide`);
   });
 }
 
-const reachable = new Set<string>([content.startScene]);
+// chaque chapitre démarre dans sa propre scène (src/engine/walkthrough.ts)
+const reachable = new Set<string>([content.startScene, ...CHAPTERS.map((c) => c.startScene)]);
+for (const c of CHAPTERS) {
+  if (!content.scenes.has(c.startScene)) err(`chapitre ${c.id} : startScene « ${c.startScene} » inconnue`);
+  c.initial?.items?.forEach((i) => content.items.has(i) || err(`chapitre ${c.id} : objet initial inconnu « ${i} »`));
+}
 if (!content.scenes.has(content.startScene)) err(`game.yaml : startScene « ${content.startScene} » inconnue`);
 
 for (const s of content.scenes.values()) {
@@ -205,7 +211,8 @@ if (story) {
   }
 }
 
-const ENGINE_FLAGS = new Set(['chapitre0_termine']);
+// posés par le moteur : EndScene, état initial des chapitres
+const ENGINE_FLAGS = new Set(['chapitre0_termine', 'chapitre1_termine', ...CHAPTERS.flatMap((c) => c.initial?.flags ?? [])]);
 for (const [f, where] of flagsRead) {
   if (!flagsSet.has(f) && !ENGINE_FLAGS.has(f)) err(`flag « ${f} » lu mais jamais posé (lu : ${where.slice(0, 3).join(', ')})`);
 }

@@ -4,6 +4,8 @@ import { introSeen } from './IntroScene';
 import { lang, langName, nextLang, setLang, t, tl } from '../i18n';
 import { HeroView } from '../three/Hero';
 import { titleShot } from '../three/shots/title';
+import { ROACH_SPRITE_URL } from '../three/props';
+import { endKnotOf, findChapter } from '../engine/walkthrough';
 import { bakeStudio, preloadPortraitSheets } from '../three/Studio';
 import { makeButton } from '../ui/Button';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
@@ -12,6 +14,9 @@ import { onSfxChange, sfxEnabled, toggleSfx } from '../ui/sfx';
 import { makeMusicToggle } from '../ui/MusicToggle';
 import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
 import { BAY, DECOR_KEY, MILKY_DUST_KEY, MILKY_KEY, MILKY_SHADE_KEY, PUDDLE_KEY, ROCK_BLUR_KEYS, ROCK_KEYS, SHEEN_KEY, SOFT_KEY, STREAK_KEY, VIGNETTE_KEY, bakeDecor, bandY, bayPoints } from './titleDecor';
+
+/** Texture du cafard 2D (`image: roach2d` dans l'art YAML). */
+const ROACH_2D_KEY = 'roach2d';
 
 /** Ligne des réglages (♪, effets, langue), en haut à droite. */
 const SETTINGS_Y = 62;
@@ -34,6 +39,8 @@ export class TitleScene extends Phaser.Scene {
     // planches de portraits parlants (bake ou GenAI) ; absentes → bake runtime
     preloadPortraitSheets(this.load);
     if (!this.textures.exists(HERO_ART)) this.load.image(HERO_ART, HERO_URL);
+    // cafards 2D des décors du ch.1 (art `image: roach2d` du YAML)
+    if (!this.textures.exists(ROACH_2D_KEY)) this.load.image(ROACH_2D_KEY, ROACH_SPRITE_URL);
   }
 
   create(): void {
@@ -44,7 +51,7 @@ export class TitleScene extends Phaser.Scene {
     if (d.active && !this.registry.get('debugStarted')) {
       this.registry.set('debugStarted', true);
       session.startDebug();
-      if (d.scene === END_SCENE_ID) this.scene.start('End', { knot: 'cafards' });
+      if (d.scene === END_SCENE_ID) this.scene.start('End', { knot: endKnotOf(session.chapter) });
       else this.scene.start('Room');
       return;
     }
@@ -56,6 +63,14 @@ export class TitleScene extends Phaser.Scene {
         else this.scene.start('Room');
         return;
       }
+    }
+
+    // ?chapter=1 : nouvelle partie directement au début du chapitre, une seule fois
+    if (d.chapter && !d.active && !this.registry.get('debugStarted') && findChapter(d.chapter)) {
+      this.registry.set('debugStarted', true);
+      session.newGame(d.chapter);
+      this.scene.start('Room');
+      return;
     }
 
     this.hero = new HeroView(this, titleShot(W, H));

@@ -21,6 +21,10 @@ characters:
     name: Sa Majesté Blattaria XIV
     color: "#6b3a12"
     portrait: "♛\n(◉ ◉)"
+  - id: scribe
+    name: Frère Élytre, Grand Scribe
+    color: "#4a3a1c"
+    portrait: "✒\n(◔ ◔)"
   - id: narrateur
     name: ""
     color: "#000000"

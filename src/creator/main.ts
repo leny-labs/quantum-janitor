@@ -41,6 +41,8 @@ function locate(s: SaveData | null): { exact?: Checkpoint; near?: Checkpoint } {
 /** URL debug équivalente (?scene&flags&items) : n'écrase pas la sauvegarde, mais sans état Ink. */
 function debugUrl(c: Checkpoint): string {
   const q = new URLSearchParams({ scene: c.save.ended ? 'fin' : c.save.scene });
+  // hors ch.0 : le chapitre choisit la bonne fin (`scene=fin`) et se retrouve dans la sauvegarde
+  if (c.save.chapter && c.save.chapter !== 'ch0') q.set('chapter', c.save.chapter.replace(/^ch/, ''));
   if (c.save.flags.length) q.set('flags', c.save.flags.join(','));
   if (c.save.items.length) q.set('items', c.save.items.join(','));
   return `${GAME_URL}?${q.toString().replace(/%2C/g, ',')}`;

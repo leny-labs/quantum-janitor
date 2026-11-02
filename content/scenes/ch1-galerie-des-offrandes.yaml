@@ -1,0 +1,182 @@
+# Chapitre 1 — hub : la prophétie, l'eau bénite, les miettes, la foule.
+id: galerie-des-offrandes
+title: Galerie des Offrandes
+sector: B-7 · Archives sacrées
+background: "#24180f"
+
+onFirstEnter:
+  - say: "La Galerie des Offrandes. Des miettes, des fresques, et une foule en prière. Ça ressemble à la salle de pause, avec plus de ferveur."
+  - say: "bob: Gary. Il y a des miettes partout. Je crois que je suis au paradis. Ne me réveille pas."
+    mood: love
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#1a110a" }
+  - { rect: [0, 462, 1280, 8], color: "#5a3a20" }
+  - { rect: [0, 0, 1280, 30], color: "#3a2614" }
+  - { circle: [640, 0, 360], color: "#ffd166", alpha: 0.04 }
+  # le goûter, au fond de la galerie, une fois la foule dispersée
+  - { if: { flags: [ch1_foule_dispersee] }, circle: [1110, 470, 90], color: "#c9a13a", alpha: 0.25 }
+  - { if: { flags: [ch1_foule_dispersee] }, image: roach2d, at: [1060, 470], scale: 0.14 }
+  - { if: { flags: [ch1_foule_dispersee] }, image: roach2d, at: [1150, 476], scale: 0.15, flipX: true }
+  - { if: { flags: [ch1_foule_dispersee] }, text: "(miam)", at: [1110, 395], size: 14, color: "#ffe9b0" }
+
+hotspots:
+  - id: fresque
+    label: Fresque de la Prophétie
+    rect: [60, 60, 420, 230]
+    art:
+      - { rect: [70, 70, 400, 210], color: "#6b4a26", stroke: "#c9a13a" }
+      - { text: "UN HOMME — UN SEAU — LES MONDES\n\n☼  ⚱  ✦  ✦  ✦\n\nIL PORTERA SUR SON CŒUR\nLE SIGNE AUX DEUX R", at: [270, 175], size: 15, color: "#ffe9b0" }
+    look:
+      - if: { flags: [ch1_sait_signe] }
+        say: "« Le Signe aux deux R ». Gravé dans la pierre. La faute de frappe de la RH est devenue une écriture sainte. Ça ne m'étonne même plus."
+        stop: true
+      - say: "Une fresque. Un bonhomme avec un seau, qui fend des mondes. Et une inscription : « L'HOMME AU SEAU PORTERA SUR SON CŒUR LE SIGNE AUX DEUX R »."
+      - say: "Je regarde mon badge. « GARRY ». Deux R. Oh non."
+        set: ch1_sait_signe
+      - say: "bob: Félicitations, Gary. Tu es une prophétie. C'est comme une promotion, mais sans augmentation."
+        mood: suspicious
+
+  - id: scribe
+    label: Frère Élytre, Grand Scribe
+    rect: [520, 170, 200, 290]
+    art:
+      - { rect: [540, 390, 160, 70], color: "#5a3a20", stroke: "#c9a13a" }
+      - { text: "PUPITRE", at: [620, 440], size: 12, color: "#c9a13a" }
+      - { image: roach2d, at: [620, 400], scale: 0.42 }
+      - { text: "✒", at: [690, 230], size: 34, color: "#ffe9b0" }
+    look: "Le Grand Scribe. Il porte des lunettes sur les antennes. Il est myope des deux côtés."
+    talk:
+      - dialogue: ch1_scribe
+    useItem:
+      badge:
+        - if: { flags: [ch1_signe_reconnu] }
+          say: "scribe: OUI, OUI, LE SIGNE. NOUS L'AVONS ENREGISTRÉ. EN TROIS EXEMPLAIRES."
+          stop: true
+        - if: { flags: [ch1_badge_propre] }
+          dialogue: ch1_signe
+          stop: true
+        - say: "scribe: (il approche ses antennes) LE SIGNE... IL EST TERNI. IL SENT... LE POISSON ANCIEN."
+          set: ch1_badge_refuse
+        - say: "scribe: PROPHÉTIE, VERSET 7, ALINÉA B : « LE SIGNE SERA PUR, OU IL NE SERA PAS ». REVIENS QUAND IL SERA PUR."
+        - say: "Il sent le thon. Merci, B.O.B."
+        - say: "bob: De rien."
+          mood: sad
+      fragment: "scribe: UN ÉCLAT DU PREMIER MONDE ? NE ME LE MONTRE PAS, À MOI. MONTRE-LE À LA REINE. JE NE SUIS QU'UN FONCTIONNAIRE."
+      seau: "scribe: LE SEAU SACRÉ ! NE LE POSE PAS SUR MES ARCHIVES, JE VIENS DE LES CLASSER. PAR ODEUR."
+    useItemDefault:
+      - say: "scribe: CET OBJET N'EST MENTIONNÉ DANS AUCUN VERSET. IL N'EXISTE DONC PAS. RANGE-LE."
+
+  - id: bassin
+    label: Bassin des Ablutions
+    rect: [760, 330, 220, 140]
+    art:
+      - { rect: [770, 380, 200, 80], color: "#5a3a20", stroke: "#c9a13a" }
+      - { rect: [785, 388, 170, 30], color: "#7fd8ff", alpha: 0.75 }
+      - { text: "≈ EAU BÉNITE ≈\n(tiède)", at: [870, 440], size: 12, color: "#ffe9b0" }
+    look: "Le Bassin des Ablutions. De l'eau bénite. Je trempe un doigt : tiède. Évidemment. Même les miracles sont tièdes ici."
+    use: "Je ne vais pas me laver les mains dans l'eau bénite. Enfin, si, mais pas devant tout le monde."
+    useItem:
+      serpilliere:
+        - if: { flags: [ch1_josiane_mouillee] }
+          say: "Josiane est déjà trempée. Plus bénie que ça, elle devient sainte."
+          stop: true
+        - say: "narrateur: Gary plonge Josiane dans le bassin. La foule retient son souffle. Puis, ne voyant pas de miracle, reprend sa prière."
+          set: ch1_josiane_mouillee
+        - say: "Trempée d'eau bénite. Tiède. Josiane n'a jamais été aussi propre. Moi non plus, par contagion."
+      seau:
+        - if: { flags: [ch1_seau_plein] }
+          say: "Il est déjà plein. Un seau plein d'eau bénite, c'est lourd. Spirituellement et physiquement."
+          stop: true
+        - if: { flags: [ch1_seau_miettes], notFlags: [ch1_foule_dispersee] }
+          say: "Il est plein de miettes. De la soupe de miettes bénites ? Même B.O.B. ne mangerait pas ça. ...Si, en fait."
+          stop: true
+        - if: { notFlags: [ch1_voit_eclat] }
+          say: "Remplir mon seau sans raison ? Je ne suis pas encore assez désespéré pour faire du zèle."
+          stop: true
+        - say: "narrateur: Gary remplit le Seau Sacré d'eau bénite. Un cafard en tombe en syncope de bonheur."
+          set: ch1_seau_plein
+        - say: "Un seau d'eau tiède. Pour refroidir un morceau de réacteur. Mon plan est simple. Mon plan est stupide. C'est mon genre de plan."
+      badge: "Laver le Signe dans le bassin, devant tout le monde ? Il me faudrait une serpillière. Discrète. Mouillée."
+
+  - id: grenier
+    label: Grenier aux Miettes
+    rect: [770, 50, 220, 230]
+    art:
+      - { rect: [780, 60, 200, 210], color: "#4a3018", stroke: "#c9a13a" }
+      - { text: "GRENIER\nAUX MIETTES\n∴ ∵ ∴ ∵ ∴", at: [880, 165], size: 16, color: "#ffe9b0" }
+    look: "Le Grenier aux Miettes. Des tonnes de miettes saintes, triées par époque. Il y a une section « croissant, ère préhistorique »."
+    use:
+      - say: "À mains nues ? J'en mettrais partout. Je suis agent d'entretien : je sais ce que coûte une miette par terre."
+      - say: "Il me faudrait un récipient. Un truc rond. Avec une anse. Un truc que j'ai déjà eu, dans une vie antérieure."
+    useItem:
+      seau:
+        - if: { flags: [ch1_seau_miettes] }
+          say: "J'ai déjà assez de miettes. Prendre plus, ce serait de la gourmandise. B.O.B. dit que ce n'est pas un défaut."
+          stop: true
+        - say: "narrateur: Gary remplit le Seau Sacré de miettes saintes. Ça craque. Ça sent le goûter."
+          set: ch1_seau_miettes
+        - say: "bob: Gary. Si tu ne me laisses pas ce seau, je ne réponds plus de rien."
+          mood: angry
+      serpilliere: "Serpiller des miettes, c'est faire de la pâte. Je ne suis pas boulanger. Je n'ai pas le CDI pour."
+
+  - id: foule
+    label: La foule en prière
+    if: { notFlags: [ch1_foule_dispersee] }
+    rect: [1000, 300, 280, 170]
+    art:
+      - { image: roach2d, at: [1040, 470], scale: 0.2 }
+      - { image: roach2d, at: [1110, 460], scale: 0.22, flipX: true }
+      - { image: roach2d, at: [1180, 472], scale: 0.2 }
+      - { image: roach2d, at: [1245, 458], scale: 0.24, flipX: true }
+      - { image: roach2d, at: [1070, 420], scale: 0.16, flipX: true }
+      - { image: roach2d, at: [1200, 415], scale: 0.16 }
+    look:
+      - say: "Des centaines de cafards en prière. Ils bouchent le passage vers le Temple. On ne dérange pas la prière."
+      - say: "narrateur: Un fidèle lève une antenne : « ON NE DÉRANGE PAS LA PRIÈRE. SAUF POUR LE GOÛTER. »"
+    talk:
+      - say: "Excusez-moi ? Pardon ? Je peux passer ? C'est pour le ménage."
+      - say: "narrateur: La foule bruisse. Avec beaucoup de pattes. Personne ne bouge. Quelqu'un, au fond, murmure « goûter »."
+    useItem:
+      seau:
+        - if: { notFlags: [ch1_seau_miettes] }
+          say: "Un seau vide ? Ils me regardent avec pitié. Même eux savent qu'un seau vide, ce n'est pas un goûter."
+          stop: true
+        - say: "narrateur: Gary s'approche, lève le Seau Sacré... et le vide au fond de la galerie. Un PLOUF sec de miettes."
+          set: ch1_foule_dispersee
+        - say: "narrateur: La foule se rue sur le goûter. Le passage vers le Temple est libre. B.O.B. a disparu dans la mêlée."
+        - say: "bob: (de très loin, la bouche pleine) Ne m'attends pas !"
+          mood: love
+        - say: "Une religion qui s'arrête pour le goûter. Je pourrais me convertir."
+      badge: "narrateur: La foule regarde le badge, applaudit poliment, et reprend sa prière. La célébrité a ses limites. Le goûter, non."
+      serpilliere: "Serpiller une foule en prière ? Je suis intérimaire, pas suicidaire."
+
+  - id: bob
+    label: B.O.B.
+    rect: [300, 470, 170, 70]
+    art:
+      - { rect: [315, 485, 140, 45], color: "#7c8794", stroke: "#ffffff" }
+      - { circle: [355, 504, 6], color: "#ffffff" }
+      - { circle: [415, 504, 6], color: "#ffffff" }
+    look: "B.O.B. tourne autour des miettes comme un requin autour d'un nageur. Un requin dépressif."
+    talk:
+      - dialogue: ch1_bob
+    useItemDefault:
+      - say: "bob: Non merci, Gary. Je garde de la place pour les miettes saintes."
+        mood: calm
+
+exits:
+  - id: vers_nid
+    label: Nid Royal
+    to: nid-royal
+    dir: left
+    rect: [10, 300, 80, 170]
+  - id: vers_temple
+    label: Temple de l'Ancien Couloir
+    to: temple-couloir
+    dir: right
+    rect: [1195, 110, 75, 170]
+    requires: { flags: [ch1_foule_dispersee] }
+    lockedText:
+      - say: "La foule en prière bouche le passage. Des centaines de cafards à genoux. Enfin, à pattes."
+      - say: "narrateur: « ON NE DÉRANGE PAS LA PRIÈRE. SAUF POUR LE GOÛTER. »"

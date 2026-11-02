@@ -6,6 +6,7 @@ import { GameState } from './engine/GameState';
 import { repairState } from './engine/repair';
 import { SaveSystem } from './engine/SaveSystem';
 import type { GameContent } from './engine/types';
+import { CHAPTERS, chapterState, findChapter } from './engine/walkthrough';
 
 export const END_SCENE_ID = 'fin';
 
@@ -27,8 +28,14 @@ export class Session {
     if (this.debug.active) this.save.enabled = false;
   }
 
-  newGame(): void {
-    this.attach(new GameState(this.content.startScene));
+  /** Nouvelle partie au début d'un chapitre (ch0 par défaut), avec son état initial propre. */
+  newGame(chapterId = 'ch0'): void {
+    this.attach(chapterState(findChapter(chapterId) ?? CHAPTERS[0]));
+  }
+
+  /** Chapitre de la partie en cours (absent de la sauvegarde = ch0). */
+  get chapter(): string {
+    return this.state?.chapter ?? 'ch0';
   }
 
   loadGame(): boolean {
@@ -41,11 +48,13 @@ export class Session {
   /** Démarre une partie construite depuis les paramètres d'URL. */
   startDebug(): void {
     const d = this.debug;
-    const scene = d.scene && this.content.scenes.has(d.scene) ? d.scene : this.content.startScene;
+    const start = findChapter(d.chapter)?.startScene ?? this.content.startScene;
+    const scene = d.scene && this.content.scenes.has(d.scene) ? d.scene : start;
     if (d.scene && d.scene !== END_SCENE_ID && !this.content.scenes.has(d.scene)) {
       console.warn(`[debug] scène inconnue "${d.scene}". Scènes : ${[...this.content.scenes.keys()].join(', ')}`);
     }
     const s = new GameState(scene);
+    if (findChapter(d.chapter)) s.chapter = d.chapter;
     d.flags.forEach((f) => s.flags.add(f));
     d.items.forEach((i) => {
       if (this.content.items.has(i)) s.items.push(i);

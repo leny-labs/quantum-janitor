@@ -61,6 +61,37 @@ keys:
   scene.panneau.hotspot.bouton.useLabel: Press
   scene.panneau.exit.retour_labo.label: Back to the lab
 
+  # chapitre 1 — pièces et libellés (le reste du ch.1 s'affiche en français)
+  scene.nid-royal.title: Royal Nest
+  scene.nid-royal.sector: B-7 · Throne Room
+  scene.nid-royal.hotspot.reine.label: Her Majesty Blattaria XIV
+  scene.nid-royal.hotspot.autel.label: Altar of the Sacred Bucket
+  scene.nid-royal.hotspot.courtisans.label: The court
+  scene.nid-royal.exit.vers_galerie.label: Gallery of Offerings
+  scene.galerie-des-offrandes.title: Gallery of Offerings
+  scene.galerie-des-offrandes.sector: B-7 · Sacred archives
+  scene.galerie-des-offrandes.hotspot.fresque.label: Fresco of the Prophecy
+  scene.galerie-des-offrandes.hotspot.scribe.label: Brother Elytron, Grand Scribe
+  scene.galerie-des-offrandes.hotspot.bassin.label: Ablution Basin
+  scene.galerie-des-offrandes.hotspot.grenier.label: Crumb Granary
+  scene.galerie-des-offrandes.hotspot.foule.label: The praying crowd
+  scene.galerie-des-offrandes.exit.vers_nid.label: Royal Nest
+  scene.galerie-des-offrandes.exit.vers_temple.label: Temple of the Ancient Corridor
+  scene.temple-couloir.title: Temple of the Ancient Corridor
+  scene.temple-couloir.sector: B-7 · Fragment K9-C
+  scene.temple-couloir.hotspot.distributeur.label: “Distrib'O-Matic 3000” reliquary
+  scene.temple-couloir.hotspot.compteur.label: “Days without incident” sign
+  scene.temple-couloir.hotspot.hublot.label: Porthole
+  scene.temple-couloir.hotspot.lecteur.label: Badge reader
+  scene.temple-couloir.exit.vers_galerie.label: Gallery of Offerings
+  scene.temple-couloir.exit.vers_eclat.label: The Reactor shard
+  scene.coeur-eclat.title: Reactor shard
+  scene.coeur-eclat.sector: Temple · Close-up
+  scene.coeur-eclat.hotspot.eclat.label: Reactor shard
+  scene.coeur-eclat.hotspot.jauge.label: Stability gauge
+  scene.coeur-eclat.hotspot.gravure.label: Engraving
+  scene.coeur-eclat.exit.retour_temple.label: Back to the Temple
+
   # objets
   item.seau.name: Bucket
   item.seau.glyph: BUCKET
@@ -70,12 +101,14 @@ keys:
   item.sandwich.name: Dubious sandwich
   item.sandwich.glyph: SAND
   item.fusible.name: Fuse 7B
+  item.fragment.name: Reactor shard (1/4096)
 
   # personnages
   character.gary.name: Gary Plunk
   character.bob.name: B.O.B.
   character.sylvie.name: SYLVIE — station AI
   character.reine.name: Her Majesty Blattaria XIV
+  character.scribe.name: Brother Elytron, Grand Scribe
 
 ink:
   # bob.ink — B.O.B. en compagnon (exemple de traduction de dialogue Ink)

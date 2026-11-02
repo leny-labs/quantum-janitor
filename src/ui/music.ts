@@ -145,7 +145,17 @@ const THEMES = {
 export type ThemeId = keyof typeof THEMES;
 
 /** Thème d'une scène YAML (les gros plans suivent leur pièce hôte). */
-const SCENE_THEME: Record<string, ThemeId> = { placard: 'placard', couloir: 'couloir', labo: 'labo', panneau: 'labo' };
+const SCENE_THEME: Record<string, ThemeId> = {
+  placard: 'placard',
+  couloir: 'couloir',
+  labo: 'labo',
+  panneau: 'labo',
+  // ch.1 (thèmes réutilisés en attendant les siens)
+  'nid-royal': 'fin',
+  'galerie-des-offrandes': 'couloir',
+  'temple-couloir': 'couloir',
+  'coeur-eclat': 'labo',
+};
 export function themeForScene(id: string): ThemeId {
   return SCENE_THEME[id] ?? 'couloir';
 }

@@ -14,4 +14,6 @@ export function repairState(state: GameState): void {
     state.give('badge');
     if (!state.hasFlag('bob_suit')) state.setFlag('bob_suit');
   }
+  // ch.1 : `ch1_plouf` stabilise l'éclat plusieurs répliques avant de le donner
+  if (state.hasFlag('ch1_eclat_stabilise') && !state.hasItem('fragment') && !state.ended) state.give('fragment');
 }

@@ -142,11 +142,21 @@ export const en: PartialCatalog = {
     location: 'DIMENSION B-7  ·  “BLATTARIA PRIME”',
     jurisdiction: 'OUTSIDE SYLVIE’S JURISDICTION · YOUR HAPPINESS IS NO LONGER GUARANTEED',
     toBeContinued: 'TO BE CONTINUED…',
-    next: 'COMING SOON — CHAPTER 1: “THE COCKROACH QUEEN”',
+    next: 'NOW PLAYING — CHAPTER 1: “BLATTARIA PRIME”',
     thanks: 'Thanks for playing chapter 0. Your satisfaction has been recorded automatically.',
     menu: 'Main menu',
     replay: 'Play again',
     replayKicker: 'A NEW CLONE IS READY',
+    nextChapter: 'Chapter 1 →',
+    nextChapterKicker: 'BLATTARIA PRIME · THE PROPHECY AWAITS',
+    ch1: {
+      location: 'RIFT B-7 → ???  ·  “BUREAUCRATIC STATION”',
+      jurisdiction: 'JURISDICTION: ALL · YOUR FILE IS BEING PROCESSED',
+      stub: 'BUREAUCRATIC STATION\nFORM BEING PROCESSED',
+      stamp: 'RECEIVED',
+      next: 'COMING SOON — CHAPTER 2: “THE BUREAUCRATIC STATION”',
+      thanks: 'Thanks for playing chapter 1. First world washed: 1/4096.',
+    },
   },
   props: {
     rule: {

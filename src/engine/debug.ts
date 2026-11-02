@@ -16,6 +16,8 @@
  *   ?scene=placard&items=seau,serpilliere                       serpillière sur le seau (inventaire) : plouf et gerbe de gouttes
  *   ?resume=1                                                   reprend directement la sauvegarde (page /creator), sans écran titre
  *   ?scene=fin&roach2d=1                                        PoC : la cour de la Reine en sprites cafards 2D (props.ROACH_2D)
+ *   ?chapter=1                                                  nouvelle partie du chapitre 1 (état initial propre, sauvegarde active)
+ *   ?scene=nid-royal&chapter=1&flags=…                          debug dans le ch.1 ; `scene=fin&chapter=1` = fin du ch.1
  * `scene=fin` saute directement au cliffhanger ; `scene=panneau` ouvre le labo cadré sur la console.
  * En mode debug, la sauvegarde automatique est désactivée.
  */
@@ -36,6 +38,8 @@ export interface DebugOptions {
   cine: boolean;
   /** Reprendre la sauvegarde sans passer par l'écran titre (sauvegarde active). */
   resume: boolean;
+  /** Chapitre (`?chapter=1` ou `ch1`) : nouvelle partie de ce chapitre, ou contexte du mode debug. */
+  chapter?: string;
 }
 
 export function parseDebug(search: string): DebugOptions {
@@ -46,6 +50,7 @@ export function parseDebug(search: string): DebugOptions {
       .map((s) => s.trim())
       .filter(Boolean);
   const scene = q.get('scene')?.trim() || undefined;
+  const ch = q.get('chapter')?.trim();
   return {
     active: !!scene,
     scene,
@@ -58,5 +63,6 @@ export function parseDebug(search: string): DebugOptions {
     shot: q.get('shot')?.trim() || undefined,
     cine: q.get('cine') === '1',
     resume: q.get('resume') === '1',
+    chapter: ch ? (/^\d+$/.test(ch) ? `ch${ch}` : ch) : undefined,
   };
 }

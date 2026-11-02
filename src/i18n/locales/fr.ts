@@ -149,11 +149,21 @@ export const fr = {
     location: 'DIMENSION B-7  ·  « BLATTARIA PRIME »',
     jurisdiction: 'HORS JURIDICTION DE SYLVIE · VOTRE BONHEUR N’Y EST PLUS GARANTI',
     toBeContinued: 'À SUIVRE…',
-    next: 'PROCHAINEMENT — CHAPITRE 1 : « LA REINE DES CAFARDS »',
+    next: 'MAINTENANT — CHAPITRE 1 : « BLATTARIA PRIME »',
     thanks: "Merci d'avoir joué le chapitre 0. Votre satisfaction a été enregistrée d'office.",
     menu: 'Menu principal',
     replay: 'Rejouer',
     replayKicker: 'UN NOUVEAU CLONE EST PRÊT',
+    nextChapter: 'Chapitre 1 →',
+    nextChapterKicker: 'BLATTARIA PRIME · LA PROPHÉTIE VOUS ATTEND',
+    ch1: {
+      location: 'FAILLE B-7 → ???  ·  « STATION BUREAUCRATIQUE »',
+      jurisdiction: 'JURIDICTION : TOUTES · VOTRE DOSSIER EST EN COURS DE TRAITEMENT',
+      stub: 'STATION BUREAUCRATIQUE\nFORMULAIRE EN COURS DE TRAITEMENT',
+      stamp: 'REÇU',
+      next: 'PROCHAINEMENT — CHAPITRE 2 : « LA STATION BUREAUCRATIQUE »',
+      thanks: "Merci d'avoir joué le chapitre 1. Premier monde lavé : 1/4096.",
+    },
   },
   /** Textes peints dans les décors 3D (affiches, étiquettes, écrans). */
   props: {

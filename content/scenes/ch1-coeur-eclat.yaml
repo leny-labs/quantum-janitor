@@ -1,0 +1,73 @@
+# Chapitre 1 — gros plan : l'éclat du Réacteur dans le logement de sortie du distributeur.
+id: coeur-eclat
+title: Éclat du Réacteur
+sector: Temple · Gros plan
+icon: reactor
+background: "#120c1c"
+
+art:
+  - { rect: [207, 103, 866, 368], color: "#1b1428", stroke: "#4a3a70" }
+  - { text: "LOGEMENT DE SORTIE — DISTRIB'Ô-MATIC 3000 (RELIQUAIRE)", at: [640, 117], size: 11, color: "#9aa5b1" }
+  - { rect: [300, 300, 680, 150], color: "#0b0b12", stroke: "#666666" }
+
+hotspots:
+  - id: eclat
+    label: Éclat du Réacteur
+    if: { notFlags: [ch1_eclat_stabilise] }
+    rect: [520, 210, 240, 230]
+    art:
+      - { circle: [640, 360, 110], color: "#b56cff", alpha: 0.18 }
+      - { circle: [640, 360, 70], color: "#b56cff", alpha: 0.35 }
+      - { circle: [640, 360, 40], color: "#e0b0ff", stroke: "#ffffff" }
+      - { text: "≋ ≋ ≋", at: [640, 260], size: 22, color: "#ff8ab8" }
+    look:
+      - say: "L'éclat. Il vibre, il chauffe, il fredonne. Quand je le regarde trop longtemps, je me souviens de choses qui ne me sont jamais arrivées."
+      - if: { notFlags: [ch1_seau_plein] }
+        say: "Il faut le refroidir. Avec un seau. Plein. D'un liquide. Mon domaine d'expertise, en somme."
+    use:
+      - say: "narrateur: Gary tend la main. Sa moustache pousse d'un centimètre de plus. Il retire la main."
+      - say: "Non. Trop chaud. Et je tiens à ma lèvre supérieure, telle qu'elle est."
+    useItem:
+      seau:
+        - if: { notFlags: [ch1_seau_plein] }
+          say: "Un seau vide sur un éclat brûlant ? Ça ferait « clang », pas « plouf ». Et c'est le plouf qui compte."
+          stop: true
+        - dialogue: ch1_plouf
+      serpilliere:
+        - if: { flags: [ch1_josiane_mouillee] }
+          say: "narrateur: Josiane grésille au contact. Gary la retire. Elle fume légèrement. Elle a l'air vexée."
+        - say: "Une serpillière, ça étale. Là, ça étalerait de l'improbabilité. Partout. Il faut un seau. Plein."
+      badge: "Le badge fond un peu sur les bords. « GARRY » devient « GAAARRY ». Non. Je le range."
+
+  - id: jauge
+    label: Jauge de stabilité
+    smart: look
+    rect: [240, 160, 240, 120]
+    art:
+      - { rect: [250, 170, 220, 100], color: "#222c3a", stroke: "#9aa5b1" }
+      - { text: "STABILITÉ", at: [360, 188], size: 11, color: "#ffffff" }
+      - { if: { notFlags: [ch1_eclat_stabilise] }, text: "GARY", at: [360, 230], size: 30, color: "#ff5c7a" }
+      - { if: { flags: [ch1_eclat_stabilise] }, text: "STABLE (TIÈDE)", at: [360, 230], size: 18, color: "#7fffd4" }
+    look:
+      - if: { flags: [ch1_eclat_stabilise] }
+        say: "« STABLE (TIÈDE) ». Le premier monde est lavé. J'aimerais que ma mère voie ça. Elle ne comprendrait rien, mais elle serait fière."
+        stop: true
+      - say: "« STABILITÉ : GARY ». C'est le niveau juste au-dessus de « catastrophe ». Ou juste en dessous. Personne ne sait."
+      - say: "bob: Il est brûlant, Gary. Il faudrait le refroidir. Tu as un seau. Et tu as un passé avec les seaux. Fais-en bon usage, cette fois."
+        mood: suspicious
+
+  - id: gravure
+    label: Gravure
+    smart: look
+    rect: [800, 160, 240, 120]
+    art:
+      - { rect: [810, 170, 220, 100], color: "#2a1a3a", stroke: "#b56cff" }
+      - { text: "RÉACTEUR D'IMPROBABILITÉ\nMk IV — 1/4096\n« NE PAS NETTOYER »", at: [920, 220], size: 13, color: "#e0b0ff" }
+    look: "« Mk IV — 1/4096. Ne pas nettoyer. » Même éparpillé dans le multivers, le règlement n°1 me poursuit."
+
+exits:
+  - id: retour_temple
+    label: Retour au Temple
+    to: temple-couloir
+    dir: down
+    rect: [540, 500, 200, 70]

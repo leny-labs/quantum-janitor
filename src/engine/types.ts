@@ -45,6 +45,12 @@ export interface ArtShape {
   stroke?: string;
   alpha?: number;
   size?: number;
+  /** Image (clé de texture chargée par TitleScene, ex. `roach2d`), posée par le bas au point `at`. */
+  image?: string;
+  /** Échelle de `image` (1 = taille du fichier). */
+  scale?: number;
+  /** Retourne `image` horizontalement. */
+  flipX?: boolean;
 }
 
 export interface Hotspot {
@@ -142,4 +148,6 @@ export interface SaveData {
   visited: string[];
   ended: boolean;
   inkState?: string;
+  /** Chapitre de la partie (absent = ch0 ; ajouté sans changer `version`). */
+  chapter?: string;
 }

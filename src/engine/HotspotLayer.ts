@@ -114,6 +114,17 @@ export class HotspotLayer {
         if (a.stroke) c.setStrokeStyle(2, hex(a.stroke), alpha);
         this.container.add(c);
       }
+      if (a.image && s.textures.exists(a.image)) {
+        const [x, y] = a.at ?? [0, 0];
+        const img = s.add
+          .image(x, y, a.image)
+          .setOrigin(0.5, 1)
+          .setScale(a.scale ?? 1)
+          .setFlipX(!!a.flipX)
+          .setAlpha(alpha);
+        if (a.color) img.setTint(hex(a.color));
+        this.container.add(img);
+      }
       if (a.text) {
         const pos = a.at ?? (a.rect ? [a.rect[0] + a.rect[2] / 2, a.rect[1] + a.rect[3] / 2] : a.circle ? [a.circle[0], a.circle[1]] : [0, 0]);
         const color = a.rect || a.circle ? (a.stroke ?? '#ffffff') : (a.color ?? '#ffffff');

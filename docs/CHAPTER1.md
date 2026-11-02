@@ -241,6 +241,35 @@ nouveau format.
 **Ne pas toucher** : contenu ch.0 (scènes `placard/couloir/labo/panneau`, Ink ch.0)
 hormis les ajouts gardés par `ch1` dans `items.yaml`.
 
+## Implémentation (Phase B) — état et écarts au design
+
+**Fait** : les 4 salles, les 3 puzzles et la fin sont jouables de bout en bout
+(`npm run playthrough` : ch0 27 checkpoints inchangés, ch1 29 checkpoints jusqu'à
+`ch1_suite`). Démarrer / reprendre :
+
+| Comment | Effet |
+|---|---|
+| `/?chapter=1` | nouvelle partie du ch.1 (état initial propre : `serpilliere`, `badge`, flags `ch1`, `chapitre0_termine`), sauvegarde active — écrase la sauvegarde existante |
+| Écran de fin du ch.0 → **« Chapitre 1 → »** | idem ; « Reprendre » sur une partie ch.0 finie ramène à cet écran |
+| `/creator?ch=ch1` → « Jouer ici » | checkpoint du ch.1 écrit dans la sauvegarde (avec `chapter: 'ch1'`) puis `?resume=1` |
+| `/?scene=<salle>&chapter=1&flags=…&items=…` | mode debug ; `scene=fin&chapter=1` = fin du ch.1 (les liens « URL » de /creator l'ajoutent) |
+
+Écarts au design ci-dessus :
+- Sortie `temple-couloir` → `coeur-eclat` : `if: ch1_eclat_tombe` (n'apparaît qu'une
+  fois l'éclat tombé) plutôt que `requires` + `lockedText`.
+- `ch1_couronnement` ne retire pas l'éclat : Gary le garde (fin = tag `# end`).
+- Fin : table `END_BY_CHAPTER` (ch0 → plan 3D `roaches` + bouton « Chapitre 1 → » ;
+  ch1 → plan `stub` 2D « Station Bureaucratique ») ; le chapitre est déduit du knot de
+  fin (`CHAPTERS[].endKnot`), sinon de `SaveData.chapter`.
+- Sprites cafards : texture `roach2d` (= `public/props/roach-2d.png`) préchargée par
+  `TitleScene` ; art YAML `{ image: roach2d, at, scale, flipX }` (+ `color` = teinte).
+- `tools/validate-content.ts` connaît les scènes de départ des chapitres et les flags
+  posés par l'état initial / la fin (`ch1`, `chapitre1_termine`).
+- Le seau ne peut être rempli d'eau bénite qu'après avoir vu l'éclat
+  (`ch1_voit_eclat`), pour éviter un seau à la fois plein de miettes et d'eau.
+- `en.yaml` : titres de pièces, libellés de hotspots / sorties, `fragment`, `scribe` ;
+  répliques et Ink du ch.1 en français (repli clé par clé).
+
 ## Vérification attendue (Phase B)
 
 `npm run build` (inclut `check:i18n`) ; `npm run playthrough` : ch0 inchangé (même
@@ -255,3 +284,9 @@ d'une salle ch.1.
 - Portrait du Scribe (planche GenAI ou variante de `reine`).
 - Traduction anglaise complète du ch.1.
 - Mini-animations (PLOUF sur l'éclat, foule qui se rue) — `beats.ts`.
+- Musique propre au ch.1 (les 4 salles réutilisent `fin` / `couloir` / `labo`).
+- Icônes d'inventaire GenAI pour `fragment` (glyphe texte au MVP) et variante
+  « Josiane trempée d'eau bénite » (`GENAI_VARIANTS` ne connaît que `serpilliere_mouillee`).
+- Gros plan `coeur-eclat` : pas d'entrée `CLOSEUPS` (retour par la flèche, pas par
+  clic dans le vide) ; à ajouter avec la pièce 3D.
+- Vraie fin ch.1 filmée (tampons animés, faille) au lieu du plan `stub` statique.

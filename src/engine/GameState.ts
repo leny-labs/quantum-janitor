@@ -10,6 +10,8 @@ export class GameState {
   visited = new Set<string>();
   ended = false;
   inkState?: string;
+  /** Chapitre de la partie (absent = ch0). */
+  chapter?: string;
   /** Objet actuellement sélectionné dans l'inventaire (non sauvegardé). */
   selectedItem: string | null = null;
 
@@ -86,6 +88,7 @@ export class GameState {
       visited: [...this.visited],
       ended: this.ended,
       inkState: this.inkState,
+      ...(this.chapter ? { chapter: this.chapter } : {}),
     };
   }
 
@@ -96,6 +99,7 @@ export class GameState {
     s.visited = new Set(d.visited);
     s.ended = d.ended;
     s.inkState = d.inkState;
+    s.chapter = d.chapter;
     return s;
   }
 }

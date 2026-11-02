@@ -20,6 +20,10 @@ export type WalkStep =
 export interface ChapterDef {
   id: string;
   title: string;
+  /** Scène de départ d'une nouvelle partie de ce chapitre. */
+  startScene: string;
+  /** État initial propre du chapitre (rien d'autre n'est hérité des chapitres précédents). */
+  initial?: { items?: string[]; flags?: string[] };
   /** Knot de fin attendu (cliffhanger). */
   endKnot: string;
   steps: WalkStep[];
@@ -29,6 +33,7 @@ export const CHAPTERS: ChapterDef[] = [
   {
     id: 'ch0',
     title: 'Chapitre 0 : Le Seau',
+    startScene: 'placard',
     endKnot: 'cafards',
     steps: [
       { section: 'Puzzle 1 : le badge' },
@@ -62,7 +67,66 @@ export const CHAPTERS: ChapterDef[] = [
       { use: 'bouton' },
     ],
   },
+  {
+    id: 'ch1',
+    title: 'Chapitre 1 : Blattaria Prime',
+    startScene: 'nid-royal',
+    // arrivé par la faille avec Josiane et le badge ; le Seau est passé avant lui
+    initial: { items: ['serpilliere', 'badge'], flags: ['ch1', 'chapitre0_termine'] },
+    endKnot: 'ch1_suite',
+    steps: [
+      { section: 'Puzzle 1 : le Signe aux deux R' },
+      { talk: 'reine' },
+      { use: 'autel' }, // refusé : les gardes
+      { go: 'galerie-des-offrandes' },
+      { look: 'fresque' },
+      { useItem: ['badge', 'scribe'] }, // refusé : sent le thon
+      { useItem: ['serpilliere', 'bassin'] },
+      { combine: ['serpilliere', 'badge'] },
+      { useItem: ['badge', 'scribe'] },
+      { go: 'nid-royal' },
+      { talk: 'reine' },
+      { section: 'Puzzle 2 : la Foule' },
+      { go: 'galerie-des-offrandes' },
+      { look: 'foule' },
+      { use: 'grenier' }, // à mains nues : non
+      { useItem: ['seau', 'grenier'] },
+      { useItem: ['seau', 'foule'] },
+      { section: 'Puzzle 3 : laver le premier monde' },
+      { go: 'temple-couloir' },
+      { look: 'distributeur' },
+      { useItem: ['serpilliere', 'distributeur'] },
+      { go: 'galerie-des-offrandes' },
+      { useItem: ['seau', 'bassin'] },
+      { go: 'temple-couloir' },
+      { go: 'coeur-eclat' },
+      { look: 'jauge' },
+      { useItem: ['seau', 'eclat'] },
+      { go: 'temple-couloir' },
+      { go: 'galerie-des-offrandes' },
+      { go: 'nid-royal' },
+      { useItem: ['fragment', 'reine'] },
+    ],
+  },
 ];
+
+export function findChapter(id: string | undefined): ChapterDef | undefined {
+  return CHAPTERS.find((c) => c.id === id);
+}
+
+/** Knot de fin d'un chapitre (inconnu = ch0). */
+export function endKnotOf(id: string | undefined): string {
+  return (findChapter(id) ?? CHAPTERS[0]).endKnot;
+}
+
+/** Nouvelle partie au début d'un chapitre : scène de départ + état initial déclaré. */
+export function chapterState(chapter: ChapterDef): GameState {
+  const s = new GameState(chapter.startScene);
+  s.chapter = chapter.id;
+  chapter.initial?.flags?.forEach((f) => s.flags.add(f));
+  chapter.initial?.items?.forEach((i) => s.items.push(i));
+  return s;
+}
 
 export interface Checkpoint {
   index: number;
@@ -92,7 +156,7 @@ export interface WalkResult {
 /** Rejoue un chapitre depuis le début ; lève une erreur si une étape est impossible. */
 export async function walkChapter(content: GameContent, chapter: ChapterDef, opts: WalkOptions = {}): Promise<WalkResult> {
   const log = opts.log ?? (() => {});
-  const state = new GameState(content.startScene);
+  const state = chapterState(chapter);
   let ended: string | null = null;
   let choiceCursor = 0;
 

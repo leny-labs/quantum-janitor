@@ -1,0 +1,111 @@
+# Chapitre 1 « Blattaria Prime » — pièce de départ (docs/CHAPTER1.md).
+# Décor 2D de repli ; les cafards sont des sprites 2D (`image: roach2d`).
+id: nid-royal
+title: Nid Royal
+sector: B-7 · Salle du Trône
+background: "#2a1612"
+
+onFirstEnter:
+  - dialogue: ch1_arrivee
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#1c0f0b" }                    # sol tiède et collant
+  - { rect: [0, 462, 1280, 8], color: "#5a3420" }
+  - { circle: [300, 520, 60], color: "#c9a13a", alpha: 0.08 }          # flaques
+  - { circle: [960, 540, 80], color: "#c9a13a", alpha: 0.06 }
+  - { circle: [160, 120, 220], color: "#3a1e14", alpha: 0.7 }          # voûtes organiques
+  - { circle: [1120, 110, 240], color: "#3a1e14", alpha: 0.7 }
+  - { circle: [680, 40, 300], color: "#ffb347", alpha: 0.05 }          # lueur royale
+  - { rect: [500, 330, 360, 140], color: "#4a2a14", stroke: "#c9a13a" } # trône
+  - { text: "BLATTARIA XIV", at: [680, 410], size: 18, color: "#c9a13a" }
+
+hotspots:
+  - id: reine
+    label: Sa Majesté Blattaria XIV
+    rect: [470, 40, 420, 300]
+    art:
+      - { image: roach2d, at: [690, 340], scale: 0.78, flipX: true }
+      - { text: "♛", at: [555, 120], size: 64, color: "#ffd166" }
+    look:
+      - say: "Un cafard de la taille d'une navette de fret, avec une couronne. La couronne est trop petite. Personne n'ose le lui dire. Moi non plus."
+      - if: { flags: [ch1_seau_rendu], notFlags: [ch1_eclat_stabilise] }
+        say: "Elle me regarde comme ma mère me regardait le jour de ma remise de diplôme. Je n'ai pas eu de diplôme."
+    talk:
+      - dialogue: ch1_reine
+    useItem:
+      fragment:
+        - if: { notFlags: [ch1_eclat_stabilise] }
+          say: "reine: CET ÉCLAT EST INSTABLE, GARRY. ON NE PRÉSENTE PAS UN MONDE SALE À SA REINE."
+          stop: true
+        - dialogue: ch1_couronnement
+      seau:
+        - say: "reine: GARDE-LE, C'EST TON SEAU. ENFIN, PAS ENCORE."
+          if: { notFlags: [ch1_seau_rendu] }
+        - say: "reine: GARDE-LE. L'HOMME AU SEAU NE LÂCHE JAMAIS SON SEAU. C'EST LE VERSET 2."
+          if: { flags: [ch1_seau_rendu] }
+      badge:
+        - if: { flags: [ch1_signe_reconnu] }
+          say: "reine: OUI, GARRY. NOUS AVONS VU. TOUT LE MONDE A VU. RANGE-LE AVANT QU'ILS NE RECOMMENCENT À APPLAUDIR."
+          stop: true
+        - say: "reine: CE N'EST PAS À MOI DE VALIDER LE SIGNE. C'EST AU GRAND SCRIBE. NOUS AVONS UNE ADMINISTRATION, TOUT DE MÊME."
+      serpilliere:
+        - say: "reine: TU VEUX SERPILLER TA REINE ? QUELLE AUDACE. QUELLE DÉVOTION. NON."
+    useItemDefault:
+      - say: "reine: LES OFFRANDES SE DÉPOSENT DANS LA GALERIE, GARRY. JE NE SUIS PAS UNE BOÎTE AUX LETTRES."
+
+  - id: autel
+    label: Autel du Seau Sacré
+    if: { notFlags: [ch1_seau_rendu] }
+    rect: [170, 250, 220, 220]
+    art:
+      - { rect: [190, 380, 180, 90], color: "#5a3a20", stroke: "#c9a13a" }
+      - { rect: [232, 300, 96, 80], color: "#3d7dd8", stroke: "#ffffff" }
+      - { rect: [232, 292, 96, 14], color: "#6fa8ff", stroke: "#ffffff" }
+      - { text: "SEAU", at: [280, 345], size: 18, color: "#ffffff" }
+      - { circle: [280, 300, 90], color: "#ffd166", alpha: 0.08 }
+      - { image: roach2d, at: [160, 470], scale: 0.2 }
+      - { image: roach2d, at: [400, 470], scale: 0.2, flipX: true }
+    look: "Mon seau. Sur un autel. Entouré de bougies. Deux gardes le veillent. Il a une meilleure carrière que moi."
+    use:
+      - say: "narrateur: Gary tend la main. Deux gardes cafards croisent leurs pattes devant lui. Beaucoup de pattes."
+      - say: "reine: ON NE TOUCHE PAS AU SEAU SACRÉ. SAUF L'HOMME AU SEAU. QUI DOIT D'ABORD PROUVER QU'IL EST L'HOMME AU SEAU."
+      - say: "C'est mon seau. J'ai la preuve d'achat. Non. C'est le seau de la station. Bon."
+    useItem:
+      serpilliere: "Je ne vais pas faire le ménage sur un autel. Pas sans fiche de poste."
+      badge: "Les gardes regardent le badge, puis moi, puis le badge. « LE SCRIBE », disent-ils. Tout le monde ici renvoie au Scribe."
+
+  - id: courtisans
+    label: La cour
+    rect: [910, 330, 340, 150]
+    art:
+      - { image: roach2d, at: [970, 470], scale: 0.22, flipX: true }
+      - { image: roach2d, at: [1060, 455], scale: 0.18, flipX: true }
+      - { image: roach2d, at: [1150, 472], scale: 0.24, flipX: true }
+      - { image: roach2d, at: [1225, 450], scale: 0.16, flipX: true }
+    look: "La cour royale. Ils se lissent les antennes en me fixant. Chez nous, ça s'appelle une réunion d'équipe."
+    talk:
+      - say: "narrateur: La cour bruisse. Avec beaucoup de pattes."
+      - say: "Bonjour. Je suis Gary. Un seul R. ...Ils ont noté « GARRY »."
+    useItemDefault:
+      - say: "narrateur: Les courtisans reniflent l'objet, puis se tournent vers la Reine, puis vers Gary. Ils attendent visiblement autre chose. Un miracle, par exemple."
+
+  - id: bob
+    label: B.O.B.
+    rect: [380, 470, 170, 70]
+    art:
+      - { rect: [395, 485, 140, 45], color: "#7c8794", stroke: "#ffffff" }
+      - { circle: [435, 504, 6], color: "#ffffff" }
+      - { circle: [495, 504, 6], color: "#ffffff" }
+    look: "B.O.B. Les cafards l'appellent « le Grand Avaleur ». Il fait semblant de ne pas aimer ça."
+    talk:
+      - dialogue: ch1_bob
+    useItemDefault:
+      - say: "bob: Non merci, Gary. Ici, on m'apporte des miettes sur un coussin. J'ai des standards, désormais."
+        mood: love
+
+exits:
+  - id: vers_galerie
+    label: Galerie des Offrandes
+    to: galerie-des-offrandes
+    dir: right
+    rect: [1180, 120, 90, 190]

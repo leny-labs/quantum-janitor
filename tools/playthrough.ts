@@ -1,5 +1,5 @@
 /**
- * Partie scriptée sans navigateur : rejoue la solution complète du chapitre 0
+ * Partie scriptée sans navigateur : rejoue la solution complète de chaque chapitre (CHAPTERS)
  * avec le vrai moteur (ActionRunner + DialogueRunner) et vérifie qu'on atteint
  * le cliffhanger.   npm run playthrough   (ajouter -- -v pour voir les dialogues)
  * `-- lang=en` applique d'abord le catalogue content/locales/en.yaml : même
@@ -28,6 +28,9 @@ async function main() {
       });
       const sandwich = checkpoints.find((c) => c.label === 'utiliser sandwich sur bob');
       if (sandwich && !sandwich.save.items.includes('badge')) throw new Error('pas de badge après le sandwich');
+      // ch.1 : l'éclat du Réacteur doit être dans l'inventaire avant le couronnement
+      const plouf = checkpoints.find((c) => c.label === 'utiliser seau sur eclat');
+      if (chapter.id === 'ch1' && !plouf?.save.items.includes('fragment')) throw new Error('pas d\'éclat (fragment) après le PLOUF');
       if (ended !== chapter.endKnot) throw new Error(`fin non atteinte (ended=${ended})`);
       console.log(`\n✓ ${chapter.title} terminé — cliffhanger « ${ended} » atteint (${checkpoints.length} checkpoints).`);
       console.log(`  flags : ${[...state.flags].join(', ')}`);
