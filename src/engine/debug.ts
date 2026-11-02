@@ -15,7 +15,7 @@
  *   ?scene=couloir&flags=sait_fusible                           « Prendre le fusible » : étincelles, le néon du circuit 7B hoquette et meurt
  *   ?scene=placard&items=seau,serpilliere                       serpillière sur le seau (inventaire) : plouf et gerbe de gouttes
  *   ?resume=1                                                   reprend directement la sauvegarde (page /creator), sans écran titre
- *   ?scene=fin&roach2d=1                                        PoC : la cour de la Reine en sprites cafards 2D (props.ROACH_2D)
+ *   ?scene=fin&roach2d=0                                        plan de fin avec l'ancienne Reine / cour en 3D procédural (défaut : sprites GenAI)
  *   ?chapter=1                                                  nouvelle partie du chapitre 1 (état initial propre, sauvegarde active)
  *   ?scene=nid-royal&chapter=1&flags=…                          debug dans le ch.1 ; `scene=fin&chapter=1` = fin du ch.1
  * `scene=fin` saute directement au cliffhanger ; `scene=panneau` ouvre le labo cadré sur la console.

@@ -3,8 +3,12 @@
 import type { SceneDef } from '../../engine/types';
 import type { CameraSpec, ShotSpec, Stage } from '../Stage';
 import { couloir } from './couloir';
+import { eclat } from './eclat';
+import { galerie } from './galerie';
 import { labo } from './labo';
+import { nid } from './nid';
 import { placard } from './placard';
+import { temple } from './temple';
 
 export interface RoomBuild {
   camera: CameraSpec;
@@ -22,7 +26,16 @@ export interface RoomBuild {
   intro?: string;
 }
 
-export const ROOMS: Record<string, RoomBuild> = { placard, couloir, labo };
+export const ROOMS: Record<string, RoomBuild> = {
+  placard,
+  couloir,
+  labo,
+  // ch.1 « Blattaria Prime »
+  'nid-royal': nid,
+  'galerie-des-offrandes': galerie,
+  'temple-couloir': temple,
+  'coeur-eclat': eclat,
+};
 
 /**
  * Gros plans filmés dans le décor d'une autre pièce (même rendu 3D) :

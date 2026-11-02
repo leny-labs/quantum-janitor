@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import type { HeroShot } from '../Hero';
 import { at, box, cyl, glow, mat, sphere, Vignette } from '../kit';
-import { ROACH_2D, bob, gary, roach, roachSprite, seau } from '../props';
+import { REINE_ASPECT, REINE_URL, ROACH_2D, billboard, bob, gary, roach, roachSprite, seau } from '../props';
 import { skyPlane, skyTexture } from './backdrop';
 
 export function endShot(width: number, height: number): HeroShot {
@@ -67,12 +67,13 @@ export function endShot(width: number, height: number): HeroShot {
   }
 
   // la Reine et sa cour
-  const queen = at(roach(6, true), -2.2, 0, -7, -0.35);
+  // Reine : sprite GenAI en pied (par défaut), ou l'ancien cafard 3D couronné (?roach2d=0)
+  const queen = ROACH_2D ? at(billboard(REINE_URL, 6.2, REINE_ASPECT, { shadow: 1.6 }), -2.2, 0, -7) : at(roach(6, true), -2.2, 0, -7, -0.35);
   scene.add(queen);
   const court: THREE.Object3D[] = [];
   for (const [x, z, sz, ry] of [[6, -11, 3.4, -2.6], [9.5, -6.5, 2.4, -2.2], [-9, -12, 2.8, 0.5], [3, -16, 2, -1.7], [-6, -4, 1.6, 0.9]] as const) {
-    // ?roach2d=1 : PoC sprites 2D (tête vers la droite de l'écran si cos(ry) > 0)
-    const r = ROACH_2D ? at(roachSprite(sz, Math.cos(ry) > 0), x, 0, z) : at(roach(sz), x, 0, z, ry);
+    // sprites GenAI en prière (tête vers la droite de l'écran si cos(ry) > 0) ; ?roach2d=0 : cafards 3D
+    const r = ROACH_2D ? at(roachSprite(sz * 0.8, Math.cos(ry) > 0, { pose: 'worship', tint: '#ffd9c4' }), x, 0, z) : at(roach(sz), x, 0, z, ry);
     scene.add(r);
     court.push(r);
   }
@@ -103,11 +104,16 @@ export function endShot(width: number, height: number): HeroShot {
     }
   });
 
+  const queenSprite = queen.userData.sprite as THREE.Sprite | undefined;
+  const queenScale = queenSprite?.scale.clone();
   const LOOK = new THREE.Vector3(0, 2.4, -3);
   const tick = (t: number) => {
     camera.position.set(Math.sin(t * 0.1) * 0.8, 2.4 + Math.sin(t * 0.13) * 0.15, 11);
     camera.lookAt(LOOK);
-    queen.position.y = Math.abs(Math.sin(t * 1.4)) * 0.06;
+    if (queenSprite && queenScale) {
+      // sprite : respiration royale plutôt que des petits sauts
+      queenSprite.scale.set(queenScale.x, queenScale.y * (1 + Math.sin(t * 1.3) * 0.015), 1);
+    } else queen.position.y = Math.abs(Math.sin(t * 1.4)) * 0.06;
     court.forEach((r, i) => (r.position.y = Math.abs(Math.sin(t * 6 + i)) * 0.08));
     robot.rotation.y = -0.6 + Math.sin(t * 0.7) * 0.15;
   };

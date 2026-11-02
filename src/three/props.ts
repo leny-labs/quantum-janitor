@@ -597,48 +597,111 @@ export function roach(len: number, crown = false): THREE.Group {
   return g;
 }
 
-/** Sprite cafard 2D (PoC, _briefs/roach-2d/) : profil tourné vers la droite, pieds en bas. */
+/** Sprite cafard 2D placeholder (PIL, _briefs/roach-2d/) : art YAML de repli des salles ch.1 (`image: roach2d`). */
 export const ROACH_SPRITE_URL = `${import.meta.env.BASE_URL}props/roach-2d.png`;
-const ROACH_SPRITE_RATIO = 381 / 512;
-/** `?roach2d=1` : cafards en sprites 2D à la place de `roach()` (PoC, plan de fin). */
-export const ROACH_2D = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('roach2d') === '1';
-/** Matériaux partagés, un par sens (le scale.x négatif ne retourne pas un Sprite : UV miroir). */
-const roachSpriteMats = new Map<boolean, THREE.SpriteMaterial>();
+/** Cafards du plan de fin en sprites 2D GenAI (par défaut) ; `?roach2d=0` revient aux `roach()` 3D. */
+export const ROACH_2D = typeof window === 'undefined' || new URLSearchParams(window.location.search).get('roach2d') !== '0';
+/** Planche GenAI des cafards (_briefs/ch1/genai) : 4 cellules égales, alignées en bas. */
+export const ROACH_SHEET_URL = `${import.meta.env.BASE_URL}props/ch1/roach-sheet.png`;
+/** Poses de la planche, dans l'ordre des cellules : marche (2 frames, profil droite), 3/4 face, dressé en prière. */
+export const ROACH_POSES = ['walk1', 'walk2', '34', 'worship'] as const;
+export type RoachPose = (typeof ROACH_POSES)[number];
+/** Rapport hauteur / largeur d'une cellule (362 × 336). */
+const ROACH_CELL_RATIO = 336 / 362;
+let roachSheet: THREE.Texture | null = null;
+/** Une texture par (pose, sens) : clones de la planche (même image, une seule copie GPU), UV décalées. */
+const roachFrames = new Map<string, THREE.Texture>();
 
-function roachSpriteMat(facingRight: boolean): THREE.SpriteMaterial {
-  let m = roachSpriteMats.get(facingRight);
-  if (!m) {
-    const map = new THREE.TextureLoader().load(ROACH_SPRITE_URL);
-    map.colorSpace = THREE.SRGBColorSpace;
-    if (!facingRight) {
-      map.wrapS = THREE.RepeatWrapping;
-      map.repeat.x = -1;
-    }
-    m = new THREE.SpriteMaterial({ map, alphaTest: 0.4, transparent: true });
-    roachSpriteMats.set(facingRight, m);
-  }
-  return m;
+function roachFrame(pose: RoachPose, facingRight: boolean): THREE.Texture {
+  const key = `${pose}:${facingRight}`;
+  let t = roachFrames.get(key);
+  if (t) return t;
+  // les clones faits avant la fin du chargement doivent être re-téléversés une fois l'image arrivée
+  roachSheet ??= new THREE.TextureLoader().load(ROACH_SHEET_URL, () => roachFrames.forEach((f) => (f.needsUpdate = true)));
+  roachSheet.colorSpace = THREE.SRGBColorSpace;
+  t = roachSheet.clone();
+  const i = ROACH_POSES.indexOf(pose);
+  // sens : UV miroir (un scale.x négatif ne retourne pas un Sprite three.js)
+  t.repeat.set(facingRight ? 0.25 : -0.25, 1);
+  t.offset.set(facingRight ? i * 0.25 : (i + 1) * 0.25, 0);
+  t.anisotropy = 4;
+  if (roachSheet.image) t.needsUpdate = true;
+  roachFrames.set(key, t);
+  return t;
+}
+
+/** Disque d'ombre au sol (un sprite ne projette pas d'ombre). */
+function spriteShadow(r: number, opacity = 0.38): THREE.Mesh {
+  const shadow = new THREE.Mesh(
+    new THREE.CircleGeometry(r, 20),
+    new THREE.MeshBasicMaterial({ color: '#12060a', transparent: true, opacity, depthWrite: false }),
+  );
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.scale.set(1, 0.42, 1);
+  shadow.position.y = 0.015;
+  shadow.renderOrder = 1;
+  return shadow;
+}
+
+export interface RoachSpriteOpts {
+  pose?: RoachPose;
+  /** Teinte multipliée (lumière de la pièce : les sprites ne sont pas éclairés). */
+  tint?: THREE.ColorRepresentation;
 }
 
 /**
- * Cafard en billboard 2D, même repère que `roach(len)` (pieds en y = 0) : le
- * sprite fait toujours face à la caméra ; `facingRight` = tête vers +x écran.
- * Ombre portée = disque sombre au sol (les sprites n'en projettent pas).
+ * Cafard en billboard 2D GenAI, même repère que `roach(len)` (pieds en y = 0) :
+ * le sprite fait toujours face à la caméra ; `facingRight` = tête vers +x écran.
+ * Matériau propre à chaque cafard (teinte, surbrillance de hotspot) ; la frame
+ * (et le sens) se changent avec `userData.setPose(pose, right?)`. Ombre = disque sombre au sol.
  */
-export function roachSprite(len: number, facingRight = true): THREE.Group {
+export function roachSprite(len: number, facingRight = true, o: RoachSpriteOpts = {}): THREE.Group {
   const w = len * 1.15;
-  const sprite = new THREE.Sprite(roachSpriteMat(facingRight));
+  const material = new THREE.SpriteMaterial({ map: roachFrame(o.pose ?? 'walk1', facingRight), color: o.tint ?? '#ffffff', alphaTest: 0.12, transparent: true });
+  const sprite = new THREE.Sprite(material);
   sprite.center.set(0.5, 0.02);
-  sprite.scale.set(w, w * ROACH_SPRITE_RATIO, 1);
-  const shadow = new THREE.Mesh(
-    new THREE.CircleGeometry(len * 0.5, 20),
-    new THREE.MeshBasicMaterial({ color: '#1a0812', transparent: true, opacity: 0.35, depthWrite: false }),
-  );
-  shadow.rotation.x = -Math.PI / 2;
-  shadow.scale.set(1, 0.45, 1);
-  shadow.position.y = 0.02;
-  return group([shadow, sprite]);
+  sprite.scale.set(w, w * ROACH_CELL_RATIO, 1);
+  const g = group([spriteShadow(len * 0.45), sprite]);
+  g.userData.sprite = sprite;
+  let facing = facingRight;
+  g.userData.setPose = (pose: RoachPose, right = facing) => {
+    facing = right;
+    const map = roachFrame(pose, right);
+    if (material.map !== map) material.map = map;
+  };
+  return g;
 }
+
+const billboardMaps = new Map<string, THREE.Texture>();
+
+/**
+ * Personnage GenAI en pied (Reine, Scribe) plaqué en billboard : sprite ancré
+ * en bas (pieds en y = 0), hauteur `h` monde, rapport largeur / hauteur
+ * `aspect` de l'image. Ombre disque au sol. `userData.sprite` = le Sprite
+ * (respiration / balancement animés par la pièce).
+ */
+export function billboard(url: string, h: number, aspect: number, o: { tint?: THREE.ColorRepresentation; shadow?: number } = {}): THREE.Group {
+  let map = billboardMaps.get(url);
+  if (!map) {
+    map = new THREE.TextureLoader().load(url);
+    map.colorSpace = THREE.SRGBColorSpace;
+    map.anisotropy = 8;
+    billboardMaps.set(url, map);
+  }
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map, color: o.tint ?? '#ffffff', alphaTest: 0.12, transparent: true }));
+  sprite.center.set(0.5, 0.008);
+  sprite.scale.set(h * aspect, h, 1);
+  const g = group([spriteShadow(o.shadow ?? h * aspect * 0.4), sprite]);
+  g.userData.sprite = sprite;
+  return g;
+}
+
+/** Sa Majesté Blattaria XIV en pied (GenAI, 754 × 1024). */
+export const REINE_URL = `${import.meta.env.BASE_URL}props/ch1/reine.png`;
+export const REINE_ASPECT = 754 / 1024;
+/** Frère Élytre, Grand Scribe, en pied (GenAI, 643 × 1024). */
+export const SCRIBE_URL = `${import.meta.env.BASE_URL}props/ch1/scribe.png`;
+export const SCRIBE_ASPECT = 643 / 1024;
 
 /** Texture de la plaque « Règlement n°1 » : émail bleu nuit, bandeau rouge, gravure ambre. */
 function reglementTexture(aspect: number): THREE.CanvasTexture {

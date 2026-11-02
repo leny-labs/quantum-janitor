@@ -1,5 +1,5 @@
 # Chapitre 1 « Blattaria Prime » — pièce de départ (docs/CHAPTER1.md).
-# Décor 2D de repli ; les cafards sont des sprites 2D (`image: roach2d`).
+# Rendu 3D : src/three/rooms/nid.ts (Reine + cafards en sprites GenAI). `art:` = repli 2D.
 id: nid-royal
 title: Nid Royal
 sector: B-7 · Salle du Trône

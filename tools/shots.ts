@@ -36,6 +36,16 @@ const SHOTS: [name: string, query: string][] = [
   ['shot-casier', '?scene=placard&shot=casier'],
   ['shot-reacteur', '?scene=labo&flags=bob_suit,labo_ouvert&shot=reacteur'],
   ['fin', '?scene=fin'],
+  // ch.1 « Blattaria Prime »
+  ['nid-royal', '?scene=nid-royal&chapter=1&items=serpilliere,badge'],
+  ['nid-royal-seau', '?scene=nid-royal&chapter=1&flags=ch1_seau_rendu&items=serpilliere,badge,seau'],
+  ['galerie', '?scene=galerie-des-offrandes&chapter=1&items=serpilliere,badge'],
+  ['galerie-goute', '?scene=galerie-des-offrandes&chapter=1&flags=ch1_foule_dispersee&items=serpilliere,badge,seau'],
+  ['temple', '?scene=temple-couloir&chapter=1&flags=ch1_foule_dispersee&items=serpilliere,badge,seau'],
+  ['temple-tombe', '?scene=temple-couloir&chapter=1&flags=ch1_foule_dispersee,ch1_voit_eclat,ch1_eclat_tombe&items=serpilliere,badge,seau'],
+  ['eclat', '?scene=coeur-eclat&chapter=1&flags=ch1_foule_dispersee,ch1_voit_eclat,ch1_eclat_tombe&items=serpilliere,badge,seau'],
+  ['eclat-stable', '?scene=coeur-eclat&chapter=1&flags=ch1_eclat_tombe,ch1_eclat_stabilise&items=serpilliere,badge,seau,fragment'],
+  ['shot-reine', '?scene=nid-royal&chapter=1&shot=reine'],
 ];
 
 mkdirSync(OUT, { recursive: true });

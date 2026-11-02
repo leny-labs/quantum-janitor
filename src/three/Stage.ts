@@ -135,7 +135,8 @@ export class Stage {
   private shotKey: string | null = null;
   private spots = new Map<string, THREE.Object3D[]>();
   private ticks: Tick[] = [];
-  private lit: { mat: THREE.MeshToonMaterial; base: THREE.Color }[] = [];
+  /** Matériaux surlignés (toon : émissif ; sprite GenAI : teinte) et leur couleur d'origine. */
+  private lit: { mat: THREE.MeshToonMaterial | THREE.SpriteMaterial; base: THREE.Color }[] = [];
   private highlighted: string | null = null;
   private raycaster = new THREE.Raycaster();
   private check: Check = () => true;
@@ -651,7 +652,7 @@ export class Stage {
 
   highlight(id: string | null): void {
     if (id === this.highlighted) return;
-    for (const { mat, base } of this.lit) mat.emissive.copy(base);
+    for (const { mat, base } of this.lit) (mat instanceof THREE.SpriteMaterial ? mat.color : mat.emissive).copy(base);
     this.lit = [];
     this.highlighted = id;
     this.dirty = true;
@@ -662,6 +663,11 @@ export class Stage {
         if (m instanceof THREE.MeshToonMaterial && !this.lit.some((l) => l.mat === m)) {
           this.lit.push({ mat: m, base: m.emissive.clone() });
           m.emissive.set(0x2a2a1a);
+        }
+        // personnages en billboard (non éclairés) : teinte éclaircie ; les halos additifs ne bougent pas
+        if (m instanceof THREE.SpriteMaterial && m.blending === THREE.NormalBlending && !this.lit.some((l) => l.mat === m)) {
+          this.lit.push({ mat: m, base: m.color.clone() });
+          m.color.multiplyScalar(1.22).addScalar(0.06);
         }
       });
     }

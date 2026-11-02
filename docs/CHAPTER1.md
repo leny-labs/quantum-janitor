@@ -48,15 +48,23 @@ Navigation : `nid-royal` ⇄ `galerie-des-offrandes` ⇄ `temple-couloir` ⇄ `c
 La sortie galerie → temple a `requires: { flags: [ch1_foule_dispersee] }` ; la sortie
 temple → `coeur-eclat` a `requires: { flags: [ch1_eclat_tombe] }`.
 
-**Rendu** : MVP en **2D de repli** (`art:` YAML, comme toute scène absente de
-`ROOMS` dans `src/three/rooms/index.ts`). Les cafards sont des **sprites 2D** : on
-ajoute au `ArtShape` un champ minimal `image` (clé de texture + `at` + `scale` +
-`flipX`) dessiné par `HotspotLayer.drawArt`, qui affiche `public/props/roach-2d.png`
-(même sprite que le PoC `?roach2d=1`). Pas de cafard 3D procédural. Une vraie pièce
-3D (`src/three/rooms/nid.ts` avec `roachSprite()` en billboard) est hors MVP
-(« Reste à faire »). La Reine n'apparaît en pied que comme silhouette 2D dans le
-décor ; en dialogue c'est le **portrait GenAI** existant (`reine-sheet.png`,
-`GENAI_SHEETS`).
+**Rendu** : les 4 vues sont de **vraies pièces 3D RoomScene** (entrées de `ROOMS`
+dans `src/three/rooms/index.ts` : `nid.ts`, `galerie.ts`, `temple.ts`, `eclat.ts`),
+même mécanique que le ch.0 (caméra fixe, rect YAML projetés sur les props, travels
+d'examen, plan d'arrivée `intro: reine` au Nid). Décor **toon** : coque organique
+commune `rooms/hive.ts` (paroi de chitine peinte, sol de résine brillant, côtes de
+voûte effilées, coulures, flaques ambrées, lanternes-œufs, bougies, brume) ; le Temple
+réutilise le gabarit du couloir C (paroi acier, dalle, distributeur reconstruit en
+reliquaire, sans toucher `vending.ts`). Les **personnages insectes sont des sprites
+2D GenAI en billboard** (`THREE.Sprite`, non éclairés, teintés à la lumière de la
+pièce, ombre disque) : cafards = planche `public/props/ch1/roach-sheet.png`
+(`roachSprite(len, right, { pose, tint })`, poses `walk1`/`walk2`/`34`/`worship`,
+foules via `crowd()`), Reine = `public/props/ch1/reine.png` sur un trône 3D, Frère
+Élytre = `public/props/ch1/scribe.png` derrière son pupitre. Le survol d'un hotspot
+éclaircit aussi la teinte des sprites (`Stage.highlight`). L'`art:` des YAML reste
+comme repli 2D mais ne s'affiche plus. En dialogue : Reine = planche GenAI existante
+(`reine-sheet.png`) ; Scribe = portrait fixe `public/portraits/scribe-portrait.png`
+(buste recadré, `GENAI_PORTRAITS` dans `Studio.ts`).
 
 Musique : `themeForScene()` retombe sur `couloir` pour un id inconnu ; MVP = mapper les
 4 ids ch.1 sur les thèmes existants (`fin` pour `nid-royal`, `couloir` ailleurs) dans
@@ -130,7 +138,7 @@ l'éclat ; fragment sur le Scribe ; etc. `useItemDefault` sur les cafards.
 | **Gary Plunk** | `gary` | Messie malgré lui. Répète qu'il est intérimaire, en période d'essai, et qu'un messie a forcément un CDI. | existant |
 | **B.O.B.** | `bob` | Compagnon d'office (suit Gary depuis le ch.0). **Système d'indices** : Ink `ch1_bob`, une branche par étape (même structure que `bob_compagnon`). Running gag : les cafards le vénèrent comme « LE GRAND AVALEUR » et il trouve ça, pour la première fois, presque agréable. | existant |
 | **Sa Majesté Blattaria XIV** | `reine` | Donneuse de quête et de récompense. MAJUSCULES royales, « GARRY », le badge fait foi. Sincèrement émue par la prophétie. | GenAI existant (`reine-sheet.png`) |
-| **Frère Élytre**, Grand Scribe | `scribe` | Gardien de la prophétie, pédant, myope (antennes-lunettes). Parle en citations numérotées (« PROPHÉTIE, VERSET 7, ALINÉA B »). Valide le Signe. | nouveau `characters` dans `game.yaml`, portrait texte (`portrait: "✒\n(◔ ◔)"`) — pas de planche 3D/GenAI au MVP (à vérifier : le `DialogueBox` doit retomber sur le portrait texte pour un id absent de `PORTRAITS`) |
+| **Frère Élytre**, Grand Scribe | `scribe` | Gardien de la prophétie, pédant, myope (antennes-lunettes). Parle en citations numérotées (« PROPHÉTIE, VERSET 7, ALINÉA B »). Valide le Signe. | nouveau `characters` dans `game.yaml` ; portrait fixe GenAI `public/portraits/scribe-portrait.png` (buste recadré de `scribe-body.png`), repli texte `portrait: "✒\n(◔ ◔)"` |
 | La Foule / les gardes | narrateur ou `scribe` | Décor parlant via `say:` narrateur (« La foule bruisse. Avec beaucoup de pattes. »). | — |
 | **SYLVIE** | `sylvie` | **Absente**, en écho : le badge, une fois propre, grésille « BADGE… VALI… GARRY… » avec sa voix ; et dans `ch1_suite`, un message brouillé de l'autre côté du multivers (« FORMULAIRE B-7/12 REQUIS POUR TOUT CHANGEMENT DE DIMENSION ») qui annonce la Station Bureaucratique. | existant |
 
@@ -278,15 +286,13 @@ d'une salle ch.1.
 
 ## Reste à faire (hors MVP)
 
-- Pièce 3D `nid-royal` (`src/three/rooms/`) avec cafards `roachSprite()` billboard et
-  Reine en sprite couronné ; plans d'arrivée filmés.
-- Sprite cafard GenAI (planche de poses, `_briefs/roach-2d/README.md`).
-- Portrait du Scribe (planche GenAI ou variante de `reine`).
+- Plans d'arrivée filmés pour la galerie et le temple (seul le Nid a son `intro`).
+- Portrait parlant du Scribe (planche idle/talk au layout `GENAI_SHEETS` ; portrait fixe au MVP).
 - Traduction anglaise complète du ch.1.
 - Mini-animations (PLOUF sur l'éclat, foule qui se rue) — `beats.ts`.
 - Musique propre au ch.1 (les 4 salles réutilisent `fin` / `couloir` / `labo`).
 - Icônes d'inventaire GenAI pour `fragment` (glyphe texte au MVP) et variante
   « Josiane trempée d'eau bénite » (`GENAI_VARIANTS` ne connaît que `serpilliere_mouillee`).
-- Gros plan `coeur-eclat` : pas d'entrée `CLOSEUPS` (retour par la flèche, pas par
-  clic dans le vide) ; à ajouter avec la pièce 3D.
+- Gros plan `coeur-eclat` : pièce 3D à part entière (pas d'entrée `CLOSEUPS` : pas de
+  travel caméra depuis le temple, retour par la flèche, pas par clic dans le vide).
 - Vraie fin ch.1 filmée (tampons animés, faille) au lieu du plan `stub` statique.

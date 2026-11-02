@@ -33,6 +33,12 @@ export const sheetUrl = (id: string) => `portraits/${id}-sheet.png`;
 /** Calque animé collé par-dessus la planche (ex. drone dorsal de Gary). */
 export const overlayKey = (id: string) => `portraitOverlay:${id}`;
 export const overlayUrl = (id: string) => `portraits/${id}-robot.png`;
+/**
+ * Portraits fixes GenAI (sans planche) : PNG chargé sous `portraitKey(id)`,
+ * affiché par DialogueBox comme un portrait 3D fixe (Frère Élytre : buste
+ * recadré de son sprite en pied, _briefs/ch1/genai/scribe-body.png).
+ */
+const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png' };
 
 /** Une frame de planche : expression + micro-mouvement du buste. */
 interface SheetFrame extends FacePose {
@@ -561,6 +567,7 @@ export function preloadPortraitSheets(load: Phaser.Loader.LoaderPlugin): void {
   for (const id of Object.keys(PORTRAIT_OVERLAYS)) if (!load.textureManager.exists(overlayKey(id))) load.image(overlayKey(id), overlayUrl(id));
   for (const id of GENAI_ICONS) if (!load.textureManager.exists(iconKey(id))) load.image(iconKey(id), genaiIconUrl(id));
   for (const { icon } of Object.values(GENAI_VARIANTS)) if (!load.textureManager.exists(iconKey(icon))) load.image(iconKey(icon), genaiIconUrl(icon));
+  for (const [id, url] of Object.entries(GENAI_PORTRAITS)) if (!load.textureManager.exists(portraitKey(id))) load.image(portraitKey(id), url);
 }
 
 /** Génère (une fois par jeu) toutes les textures d'icônes et de portraits. */
