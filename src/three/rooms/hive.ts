@@ -349,6 +349,9 @@ export interface RoachSpec {
   walk?: number;
 }
 
+/** Profondeur mini des pieds d'un cafard : devant la paroi (z = 0) et son bourrelet de résine. */
+const CROWD_MIN_Z = 0.5;
+
 export interface Crowd {
   roaches: THREE.Group[];
 }
@@ -361,7 +364,15 @@ export interface Crowd {
 export function crowd(s: Stage, specs: RoachSpec[], tint: THREE.ColorRepresentation, floorY = 0): Crowd {
   const roaches = specs.map((r, i) => {
     const foot = s.floorAt(r.px[0], r.px[1], floorY);
-    const top = s.wallAt(r.px[0], r.px[1] - r.hpx, foot.z);
+    let [px, py] = r.px;
+    // un pied trop haut à l'écran tombe dans le bourrelet (r = 0.32) au pied de la
+    // paroi, voire derrière elle : pattes enterrées ou cafard invisible. On l'avance
+    // devant (z distinct par cafard, pas de z-fight) en gardant sa taille à l'écran.
+    if (foot.z < CROWD_MIN_Z) {
+      foot.z = CROWD_MIN_Z + i * 0.01;
+      [px, py] = s.project(foot);
+    }
+    const top = s.wallAt(px, py - r.hpx, foot.z);
     const h = top.y - floorY;
     // hauteur du sprite = len × 1.15 × (336 / 362)
     const len = h / (1.15 * (336 / 362));
