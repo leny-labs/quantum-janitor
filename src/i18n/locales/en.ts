@@ -8,6 +8,7 @@ export const en: PartialCatalog = {
     docTitle: 'Quantum Janitor — Chapter 0: The Bucket',
   },
   hud: {
+    map: 'Map',
     menu: 'Menu',
     drop: 'Put down',
     held: 'HOLDING: {item}',
@@ -173,6 +174,18 @@ export const en: PartialCatalog = {
       thanks: 'Thanks for playing the first rooms of the Station. Customs ticket and Mr Ficus: to be continued. File 2% complete.',
     },
   },
+  map: {
+    title: 'STATION MAP',
+    sub: 'FORM P-0 · RESTRICTED CIRCULATION · 1987 EDITION (LAST UPDATED: 1987)',
+    stamp: 'SEEN · COMPLIANT',
+    here: '● YOU ARE HERE',
+    seen: 'VISIT IN PERSON FIRST',
+    refused: 'ACCESS DENIED — {reason}',
+    refusedDefault: 'CONFIDENTIAL REASON',
+    legend: 'WHITE: GO THERE  ·  GREY: ACCESS DENIED  ·  ???: NOT ON RECORD (YET)',
+    close: 'Fold the map',
+    closeKicker: 'ESC · P',
+  },
   card: {
     ch1: {
       kicker: 'CHAPTER 1',
@@ -207,6 +220,7 @@ export const en: PartialCatalog = {
       toSas: 'AIRLOCK',
       toDesk: 'DESK',
       takeTicket: 'PLEASE\nTAKE A\nTICKET',
+      planIcon: 'MAP',
       ficusTag: 'HON. MEMBER OF THE C…',
     },
     cockpit: {

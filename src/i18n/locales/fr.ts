@@ -11,6 +11,8 @@ export const fr = {
   },
   hud: {
     menu: 'Menu',
+    /** Bouton du plan de la Station (ch.1), visible avec l'objet `plan_station`. */
+    map: 'Plan',
     drop: 'Reposer',
     held: 'EN MAIN : {item}',
     useOn: 'Utiliser {item} sur {target}',
@@ -184,6 +186,20 @@ export const fr = {
       thanks: 'Merci d’avoir joué les premières salles de la Station. Ticket de douane et M. Ficus : à suivre. Dossier complet à 2 %.',
     },
   },
+  /** Plan de la Station (src/ui/StationMap.ts, docs/CHAPTER1.md §4.1). */
+  map: {
+    title: 'PLAN DE LA STATION',
+    sub: 'FORMULAIRE P-0 · DIFFUSION RESTREINTE · ÉDITION 1987 (DERNIÈRE MISE À JOUR : 1987)',
+    stamp: 'VU · CONFORME',
+    here: '● VOUS ÊTES ICI',
+    unknown: '???',
+    seen: 'À DÉCOUVRIR SUR PLACE',
+    refused: 'ACCÈS REFUSÉ — {reason}',
+    refusedDefault: 'MOTIF CONFIDENTIEL',
+    legend: 'CASE BLANCHE : S’Y RENDRE  ·  GRISÉE : ACCÈS REFUSÉ  ·  ??? : NON RÉPERTORIÉ (PAS ENCORE)',
+    close: 'Replier le plan',
+    closeKicker: 'ÉCHAP · P',
+  },
   /** Cartes de transition (src/ui/ChapterCard.ts, docs/CHAPTERS.md §2). */
   card: {
     ch1: {
@@ -293,6 +309,7 @@ export const fr = {
       toSas: 'SAS',
       toDesk: 'GUICHET',
       takeTicket: 'MUNISSEZ-\nVOUS D’UN\nTICKET',
+      planIcon: 'PLAN',
       ficusTag: 'MEMBRE HON. DU C…',
     },
     cockpit: {

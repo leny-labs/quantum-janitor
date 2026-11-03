@@ -12,6 +12,8 @@ import { parseContent } from '../src/engine/content';
 import { localizeContent, parseCatalog } from '../src/engine/localize';
 import { migrateSave, SAVE_VERSION } from '../src/engine/saveMigration';
 import type { SaveData } from '../src/engine/types';
+import { GameState } from '../src/engine/GameState';
+import { parseStationMap, zoneState } from '../src/engine/stationMap';
 import { CHAPTERS, walkChapter } from '../src/engine/walkthrough';
 import { ROOT, readRawContent } from './readContent';
 
@@ -41,6 +43,12 @@ function checkMigration(): void {
   eq('v2 ch1 Station intacte', migrateSave(st), st);
   eq('format inconnu', migrateSave({ version: 9, scene: 'x', flags: [], items: [] }), null);
   console.log('✓ migration des sauvegardes v1 → v2 (4 cas)');
+}
+
+/** Copie de l'état, dans `scene`, avec seulement `visited` comme pièces visitées. */
+function chapterStateAt(s: GameState, scene: string, visited: string[]): GameState {
+  const c = GameState.fromSave({ ...s.toSave(), scene, visited });
+  return c;
 }
 
 async function main() {
@@ -83,10 +91,22 @@ async function main() {
         for (const kept of ['fragment', 'badge']) if (!jump.save.items.includes(kept)) throw new Error(`interlude : « ${kept} » perdu`);
         if (state.hasFlag('ch1')) throw new Error('la Station ne doit jamais poser le flag ch1 (acte Blattaria)');
         // stub de la Station : objets à payoff différé gardés jusqu'à la fin provisoire
-        for (const kept of ['ticket_douane', 'plante', 'ticket_9848', 'fragment', 'badge']) if (!state.hasItem(kept)) throw new Error(`Station : « ${kept} » absent à la fin du stub`);
+        for (const kept of ['ticket_douane', 'plante', 'ticket_9848', 'fragment', 'badge', 'plan_station']) if (!state.hasItem(kept)) throw new Error(`Station : « ${kept} » absent à la fin du stub`);
         const decoy = checkpoints.find((c) => c.label === 'utiliser ticket_douane sur distributeur');
         if (!decoy?.save.items.includes('ticket_douane')) throw new Error('fausse piste : le distributeur ne doit pas garder le ticket de douane');
         for (const f of ['st_arrive', 'st_laisse', 'st_ticket_9848']) if (!state.hasFlag(f)) throw new Error(`Station : flag ${f} absent`);
+        // carte : les 2 salles du stub warpables, le guichet repéré mais refusé, la Direction inconnue
+        const map = parseStationMap(readFileSync(join(ROOT, 'content', 'station-map.yaml'), 'utf8'));
+        const zone = (id: string) => map.bands.flatMap((b) => b.zones).find((z) => z.scene === id)!;
+        const exists = (id: string) => content.scenes.has(id);
+        const expect = { 'st-sas': 'open', 'st-attente': 'here', 'st-guichet': 'locked', 'st-fourriere': 'locked', 'st-direction': 'unknown' } as const;
+        // repérée et accessible mais jamais visitée : pas de warp (on y va à pied d'abord)
+        const early = chapterStateAt(state, 'st-sas', ['st-sas']);
+        if (zoneState(early, zone('st-attente'), exists) !== 'seen') throw new Error('carte : salle d\'attente non visitée devrait être « seen »');
+        for (const [id, want] of Object.entries(expect)) {
+          const got = zoneState(state, zone(id), exists);
+          if (got !== want) throw new Error(`carte : ${id} « ${got} » au lieu de « ${want} »`);
+        }
       }
       if (ended !== chapter.endKnot) throw new Error(`fin non atteinte (ended=${ended})`);
       console.log(`\n✓ ${chapter.title} terminé — cliffhanger « ${ended} » atteint (${checkpoints.length} checkpoints).`);

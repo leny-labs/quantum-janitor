@@ -172,6 +172,7 @@ export const CHAPTERS: ChapterDef[] = [
       { use: 'portique' }, // +ticket_douane (payoff différé : la fourrière, fin du ch.1)
       { talk: 'guerite' }, // M. Sabot : « ticket d'entrée + permis de la Direction » (objectif final semé)
       { look: 'borne' }, // « les animaux doivent être accompagnés »
+      { use: 'borne' }, // +plan_station : la carte de la Station (bouton PLAN, warp)
       { talk: 'bob', pick: [0] }, // « Tiens-moi en laisse, B.O.B. » → porte de l'attente
       { go: 'st-attente' },
       { section: 'Station · la Salle d\'Attente (M. Patience)' },

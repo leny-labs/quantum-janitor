@@ -46,6 +46,19 @@ export function ficus(h: number, pot = true): THREE.Group {
   return g;
 }
 
+/** Le dépliant « Plan de la Station », plié en accordéon (icône d'inventaire). */
+export function planFolded(w: number): THREE.Group {
+  const g = new THREE.Group();
+  for (let i = 0; i < 3; i++) {
+    const leaf = at(box(w * 0.34, w * 0.8, w * 0.01, i === 1 ? '#efe7d0' : '#f6efdc'), (i - 1) * w * 0.32, 0, i === 1 ? -w * 0.04 : 0);
+    leaf.rotation.y = (i - 1) * 0.35;
+    g.add(leaf);
+  }
+  g.add(at(label(tr('props.station.planIcon'), w * 0.3, w * 0.14, { color: '#1f7f73', bold: true }), 0, w * 0.25, -w * 0.03));
+  g.add(at(label(tr('props.station.stampSeen'), w * 0.22, w * 0.12, { color: '#c0392b', bold: true }), w * 0.32, -w * 0.25, w * 0.03));
+  return g;
+}
+
 /** Tubes néon au plafond (lumière blafarde qui grésille). */
 function neonTubes(s: Stage, y: number, xs: number[], z: number): void {
   for (const x of xs) {

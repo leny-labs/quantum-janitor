@@ -1,0 +1,103 @@
+# Carte de la Station Bureaucratique (ch.1) — docs/CHAPTER1.md §4.1.
+# Bandes = étages / ailes du plan, de haut en bas. Zone :
+#   scene    id de scène (warp) ; `planned: true` = pas encore dans le jeu (affichée, jamais warpable)
+#   visible  condition pour repérer la zone sans l'avoir visitée (sinon « ??? »)
+#   unlock   condition d'accès (reprend la sortie qui y mène) ; refused = motif « ACCÈS REFUSÉ — … »
+# Une zone n'est warpable que visitée, déverrouillée et existante.
+bands:
+  - id: direction
+    label: { fr: "NIVEAU 12 · DIRECTION GÉNÉRALE", en: "LEVEL 12 · GENERAL DIRECTORATE" }
+    zones:
+      - scene: st-direction
+        planned: true
+        label: { fr: "Direction Générale de l'Existence", en: "General Directorate of Existence" }
+        visible: { flags: [st_case_c] }
+        unlock: { flags: [st_case_e] }
+        refused: { fr: "AVIS DU CONSEIL REQUIS", en: "COUNCIL OPINION REQUIRED" }
+
+  - id: conseil
+    label: { fr: "NIVEAU 7 · CONSEIL", en: "LEVEL 7 · COUNCIL" }
+    zones:
+      - scene: st-conseil
+        planned: true
+        label: { fr: "Salle du Conseil", en: "Council Chamber" }
+        visible: { flags: [st_case_d] }
+        unlock: { flags: [st_ascenseur_conseil] }
+        refused: { fr: "CONVOCATION DU CONSEIL", en: "COUNCIL SUMMONS" }
+
+  - id: ascenseur
+    label: { fr: "NIVEAU ? · ASCENSEUR À FORMULAIRES", en: "LEVEL ? · FORM ELEVATOR" }
+    zones:
+      - scene: st-ascenseur
+        planned: true
+        label: { fr: "Ascenseur à Formulaires", en: "Form Elevator" }
+        visible: { flags: [st_couloir_resolu] }
+        unlock: { flags: [st_case_d] }
+        refused: { fr: "DOSSIER INCOMPLET (3/4)", en: "FILE INCOMPLETE (3/4)" }
+
+  - id: aile-b
+    label: { fr: "NIVEAU 0 · AILE B (COULOIR INFINI)", en: "LEVEL 0 · WING B (INFINITE CORRIDOR)" }
+    zones:
+      - scene: st-couloir-b
+        planned: true
+        label: { fr: "Couloir Infini B", en: "Infinite Corridor B" }
+        visible: { flags: [st_formulaire] }
+        unlock: { flags: [st_formulaire] }
+        refused: { fr: "FORMULAIRE B-7/12 REQUIS", en: "FORM B-7/12 REQUIRED" }
+      - scene: st-archives
+        planned: true
+        label: { fr: "Archives Centrales", en: "Central Archives" }
+        visible: { flags: [st_couloir_boucle] }
+        unlock: { flags: [st_couloir_resolu] }
+        refused: { fr: "COULOIR NON DÉNOUÉ", en: "CORRIDOR STILL KNOTTED" }
+      - scene: st-tampons
+        planned: true
+        label: { fr: "Bureau des Tampons", en: "Stamp Office" }
+        visible: { flags: [st_couloir_boucle] }
+        unlock: { flags: [st_couloir_resolu] }
+        refused: { fr: "COULOIR NON DÉNOUÉ", en: "CORRIDOR STILL KNOTTED" }
+      - scene: st-reclamations
+        planned: true
+        label: { fr: "Réclamations", en: "Complaints" }
+        visible: { flags: [st_couloir_boucle] }
+        unlock: { flags: [st_couloir_resolu] }
+        refused: { fr: "COULOIR NON DÉNOUÉ", en: "CORRIDOR STILL KNOTTED" }
+      - scene: st-pause
+        planned: true
+        label: { fr: "Salle de Pause", en: "Break Room" }
+        visible: { flags: [st_couloir_boucle] }
+        unlock: { flags: [st_couloir_resolu] }
+        refused: { fr: "COULOIR NON DÉNOUÉ", en: "CORRIDOR STILL KNOTTED" }
+      - scene: st-sous-chef
+        planned: true
+        label: { fr: "Sous-Chef Adjoint", en: "Deputy Assistant Manager" }
+        visible: { flags: [st_couloir_boucle] }
+        unlock: { flags: [st_couloir_resolu] }
+        refused: { fr: "COULOIR NON DÉNOUÉ", en: "CORRIDOR STILL KNOTTED" }
+
+  - id: accueil
+    label: { fr: "NIVEAU 0 · ACCUEIL", en: "LEVEL 0 · RECEPTION" }
+    zones:
+      - scene: st-sas
+        label: { fr: "Sas d'Arrivée", en: "Arrivals Airlock" }
+      - scene: st-attente
+        label: { fr: "Salle d'Attente", en: "Waiting Room" }
+        visible: { flags: [st_voit_borne] }
+        unlock: { flags: [st_laisse] }
+        refused: { fr: "ANIMAL NON ACCOMPAGNÉ", en: "UNACCOMPANIED PET" }
+      - scene: st-guichet
+        planned: true
+        label: { fr: "Guichet d'Accueil", en: "Reception Desk" }
+        visible: { flags: [st_voit_afficheur] }
+        unlock: { flags: [st_guichet_ouvert] }
+        refused: { fr: "10 H 12 – 10 H 14", en: "10:12 – 10:14 ONLY" }
+
+  - id: quai
+    label: { fr: "NIVEAU −1 · QUAI & FOURRIÈRE", en: "LEVEL −1 · DOCK & IMPOUND" }
+    zones:
+      - scene: st-fourriere
+        planned: true
+        label: { fr: "Fourrière & Quai des Navettes", en: "Impound & Shuttle Dock" }
+        visible: { flags: [st_sabot_vu] }
+        unlock: { flags: [st_eclat2] }
+        refused: { fr: "PERMIS DE LA DIRECTION", en: "DIRECTORATE PERMIT" }

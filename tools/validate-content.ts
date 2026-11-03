@@ -9,7 +9,10 @@ import { MOODS, isMood } from '../src/engine/mood';
 import { SMART_VALUES } from '../src/engine/verbs';
 import { ROOM_ICONS, type Action, type ArtShape, type Condition, type GameContent, type Interaction } from '../src/engine/types';
 import { CHAPTERS } from '../src/engine/walkthrough';
-import { readRawContent } from './readContent';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { parseStationMap } from '../src/engine/stationMap';
+import { ROOT, readRawContent } from './readContent';
 
 const END_SCENE_ID = 'fin';
 
@@ -210,6 +213,38 @@ for (const it of content.items.values()) {
     if (!content.items.has(other)) err(`${w}.combine : objet inconnu « ${other} »`);
     checkInteraction(i, `${w}.combine.${other}`);
   }
+}
+
+// ── Carte de la Station (content/station-map.yaml, docs/CHAPTER1.md §4.1) ─────
+{
+  const w = 'station-map.yaml';
+  let map;
+  try {
+    map = parseStationMap(readFileSync(join(ROOT, 'content', 'station-map.yaml'), 'utf8'));
+  } catch (e) {
+    err(`${w} : YAML invalide (${(e as Error).message})`);
+  }
+  const seen = new Set<string>();
+  for (const band of map?.bands ?? []) {
+    if (!band.id || !band.label?.fr) err(`${w} : bande sans id ou sans label.fr`);
+    for (const z of band.zones ?? []) {
+      const zw = `${w} › ${band.id} › ${z.scene}`;
+      if (seen.has(z.scene)) err(`${zw} : zone en double`);
+      seen.add(z.scene);
+      if (!z.label?.fr) err(`${zw} : label.fr manquant`);
+      if (z.unlock && !z.refused?.fr) warn(`${zw} : verrou sans motif « refused »`);
+      if (z.planned) {
+        // salle prévue (doc seulement) : pas de scène exigée ; ses flags viendront avec elle
+        if (content.scenes.has(z.scene)) warn(`${zw} : la scène existe, retirer « planned: true »`);
+        for (const c of [z.visible, z.unlock]) for (const k of Object.keys(c ?? {})) if (!['flags', 'notFlags', 'items', 'notItems'].includes(k)) err(`${zw} : clé de condition inconnue « ${k} »`);
+        continue;
+      }
+      if (!content.scenes.has(z.scene)) err(`${zw} : scène inconnue (ajouter « planned: true » si elle n'existe pas encore)`);
+      checkCondition(z.visible, `${zw}.visible`);
+      checkCondition(z.unlock, `${zw}.unlock`);
+    }
+  }
+  for (const id of content.scenes.keys()) if (id.startsWith('st-') && !seen.has(id)) warn(`${w} : la scène « ${id} » n'apparaît pas sur la carte`);
 }
 
 // ── Références croisées ────────────────────────────────────────────────

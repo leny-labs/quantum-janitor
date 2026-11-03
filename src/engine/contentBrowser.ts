@@ -11,6 +11,12 @@ const locales = import.meta.glob('/content/locales/*.yaml', { query: '?raw', imp
 import items from '/content/items.yaml?raw';
 import game from '/content/game.yaml?raw';
 
+import stationMapYaml from '/content/station-map.yaml?raw';
+import { parseStationMap, type StationMap } from './stationMap';
+
+/** Plan de la Station (ch.1), content/station-map.yaml. */
+export const STATION_MAP: StationMap = parseStationMap(stationMapYaml);
+
 export function loadContent(): GameContent {
   const content = parseContent({ scenes, ink, items, game });
   const file = locales[`/content/locales/${lang()}.yaml`];

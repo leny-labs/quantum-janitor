@@ -134,3 +134,9 @@ items:
     combine:
       ticket_douane: "Accrocher le ticket au ficus ? Il en ferait un sapin de Noël administratif. On n'est pas en décembre. On n'est même pas sûr d'être un jour."
       fragment: "L'éclat sur le ficus ? Il pourrait se mettre à pousser. Ou à voter. Gardons ça pour plus tard."
+
+  # ouvre la carte de la Station (bouton PLAN du HUD ; content/station-map.yaml)
+  - id: plan_station
+    name: Plan de la Station
+    icon: { color: "#f3ecd8", glyph: "PLAN" }
+    look: "Le dépliant d'accueil, édition 1987. Les pièces que j'ai visitées sont blanches, les autres grisées « ACCÈS REFUSÉ » ou marquées « ??? ». On le déplie avec le bouton PLAN. Ou la touche P, pour les connaisseurs."

@@ -20,6 +20,9 @@ import { LecteurRig } from '../three/rooms/lecteur';
 import { VendingRig } from '../three/rooms/vending';
 import { makeButton } from '../ui/Button';
 import { showChapterCard } from '../ui/ChapterCard';
+import { STATION_MAP } from '../engine/contentBrowser';
+import { hasStationMap } from '../engine/stationMap';
+import { StationMapOverlay } from '../ui/StationMap';
 import { DialogueBox } from '../ui/DialogueBox';
 import { HoverLabel } from '../ui/HoverLabel';
 import { ProgressCue } from '../ui/ProgressCue';
@@ -64,6 +67,9 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   /** Boutons du HUD (lus aussi par tools/tap-check.ts). */
   menuButton!: Phaser.GameObjects.Container;
   musicButton!: Phaser.GameObjects.Container;
+  /** Plan de la Station (ch.1) : visible avec l'objet `plan_station`. */
+  mapButton!: Phaser.GameObjects.Container;
+  private mapOverlay: StationMapOverlay | null = null;
   private debugText: Phaser.GameObjects.Text | null = null;
   private heldItem!: Phaser.GameObjects.Text;
   /** Flèche « retour » quand la caméra reste sur un travel d'examen (?shot=…). */
@@ -135,6 +141,14 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       valign: 'top',
     }).setDepth(700));
     this.musicButton = makeMusicToggle(this, menu.x - menu.width / 2 - 8 - menu.height / 2, menu.y, menu.height).setDepth(700);
+    this.mapOverlay = null;
+    this.mapButton = makeButton(this, this.musicButton.x - menu.height / 2 - 8, menu.y, t('hud.map'), () => this.openMap(), {
+      size: uiPx(this, 18, 14),
+      align: 'right',
+      valign: 'top',
+    })
+      .setDepth(700)
+      .setVisible(hasStationMap(state));
     if (this.session.debug.overlay) {
       this.debugText = this.add
         .text(14, 96, '', { fontFamily: MONO, fontSize: '13px', color: '#ff99ff', backgroundColor: '#000000aa', wordWrap: { width: 700 } })
@@ -161,6 +175,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     });
     const onKey = (e: KeyboardEvent) => {
       if (this.skipCine && !this.dialogueBox.isOpen && !e.repeat) return this.skipCine();
+      if ((e.key === 'p' || e.key === 'P') && !e.repeat && !this.mapOverlay) return this.openMap();
       if (e.key === 'Escape' || e.key === 'ArrowDown') this.leaveCloseup();
     };
     window.addEventListener('keydown', onKey);
@@ -174,6 +189,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       this.cue.check();
     });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.mapOverlay?.close();
       this.press?.cancel();
       off();
       setCursor(this, 'default');
@@ -202,6 +218,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.inventory.render();
     const { state, content } = this.session;
     this.plaque.show(this.scenes.current());
+    this.mapButton.setVisible(hasStationMap(state));
     playMusic(themeForScene(state.scene));
     const held = state.selectedItem ? content.items.get(state.selectedItem) : null;
     this.heldItem.setVisible(!!held);
@@ -421,7 +438,28 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   }
 
   private get blocked(): boolean {
-    return this.busy || this.dialogueBox.isOpen || this.coin.isOpen || !!this.room.examining;
+    return this.busy || this.dialogueBox.isOpen || this.coin.isOpen || !!this.room.examining || !!this.mapOverlay;
+  }
+
+  /** Plan de la Station : une zone découverte = warp (comme une sortie, fondu compris). */
+  private openMap(): void {
+    const { state, content } = this.session;
+    if (this.blocked || !hasStationMap(state)) return;
+    state.select(null);
+    this.hover.set(null);
+    this.mapOverlay = new StationMapOverlay(
+      this,
+      STATION_MAP,
+      state,
+      (id) => content.scenes.has(id),
+      (id) => {
+        this.mapOverlay = null;
+        void this.act([{ goto: id }]);
+      },
+      () => {
+        this.mapOverlay = null;
+      },
+    );
   }
 
   /** Tactile : objet en main → bouton « Reposer » (pas de clic droit au doigt). */

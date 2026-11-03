@@ -53,6 +53,17 @@ hotspots:
         mood: calm
         set: st_voit_borne
       - say: "Accompagnés. Par leur propriétaire. Mon propriétaire est un aspirateur dépressif. Je n'ai jamais été aussi bien entouré."
+    useLabel: Demander un plan
+    # le dépliant « Plan de la Station » : ouvre la carte (bouton PLAN du HUD, docs/CHAPTER1.md §4.1)
+    use:
+      - if: { items: [plan_station] }
+        say: "sylvie: UN PLAN PAR VISITEUR. VOUS AVEZ DÉJÀ ÉTÉ ORIENTÉ. ORIENTATION : DÉFINITIVE."
+        mood: calm
+        stop: true
+      - say: "narrateur: Gary appuie sur « ORIENTATION ». La borne réfléchit, soupire, puis imprime un dépliant plié en accordéon, tiède."
+      - give: plan_station
+        set: st_voit_borne
+      - say: "« PLAN DE LA STATION — ÉDITION 1987 ». La moitié des cases sont grisées, l'autre est marquée « ??? ». C'est le plan le plus honnête que j'aie jamais vu."
     talk:
       - say: "sylvie: LA BORNE NE DIALOGUE PAS. LA BORNE INFORME. VOUS ÊTES INFORMÉ."
         mood: suspicious

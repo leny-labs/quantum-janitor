@@ -155,6 +155,8 @@ keys:
   item.plante.name: Mr Ficus (plastic plant)
   character.sabot.name: Mr Jean-Claude Sabot, impound officer
   character.guichard.name: Mrs Odile Guichard, reception desk
+  scene.st-sas.hotspot.borne.useLabel: Ask for a map
+  item.plan_station.name: Station map
 
 ink:
   # bob.ink — B.O.B. en compagnon (exemple de traduction de dialogue Ink)
