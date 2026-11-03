@@ -21,9 +21,12 @@ interface EndData {
  * proposé. `roaches` = plan 3D de la Reine (ch.0) ; `stub` = fond 2D de
  * transition (ch.1 → Station Bureaucratique, non implémentée).
  */
-const END_BY_CHAPTER: Record<string, { flag: string; shot: 'roaches' | 'stub'; next?: string }> = {
+const END_BY_CHAPTER: Record<string, { flag: string; shot: 'roaches' | 'stub'; next?: string; hook?: string[] }> = {
   ch0: { flag: 'chapitre0_termine', shot: 'roaches', next: 'ch1' },
-  ch1: { flag: 'chapitre1_termine', shot: 'stub' },
+  // hook merge ch.0 → Station 2 : la faille du Nid est franchie. TOUTES les sorties du Nid
+  // (couronnement `# end: ch1_suite`, sortie « La Faille » `to: fin`, Reine avec la combi)
+  // arrivent ici ; le merge n'a qu'à rebrancher `next` (Station Bureaucratique) et lire ces flags.
+  ch1: { flag: 'chapitre1_termine', shot: 'stub', hook: ['go_station2', 'fin_ch0'] },
 };
 
 /** Cliffhanger du chapitre (ch.0 : la dimension des cafards), puis « À suivre… ». */
@@ -46,6 +49,7 @@ export class EndScene extends Phaser.Scene {
     playMusic('fin');
     state.ended = true;
     state.setFlag(end.flag);
+    end.hook?.forEach((f) => state.setFlag(f));
     state.emit();
     bakeStudio(this.textures);
 

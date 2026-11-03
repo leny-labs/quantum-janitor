@@ -9,7 +9,8 @@ import { lineMood } from '../engine/mood';
 import { SceneManager } from '../engine/SceneManager';
 import type { Action, CharacterDef, Exit, Hotspot, Interaction } from '../engine/types';
 import { hotspotVerbs, smartVerb, type HotspotVerb } from '../engine/verbs';
-import { getSession, type Session } from '../session';
+import { END_SCENE_ID, getSession, type Session } from '../session';
+import { endKnotOf } from '../engine/walkthrough';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { CLOSEUPS, ROOMS } from '../three/rooms';
 import { BobRig } from '../three/rooms/bobrepas';
@@ -558,7 +559,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       void this.act(e.lockedText ?? t('room.locked'));
       return;
     }
-    void this.act([{ goto: e.to }]);
+    // `to: fin` : franchir la faille = fin du chapitre (même chemin que `# end:` en Ink)
+    void this.act([e.to === END_SCENE_ID ? { end: endKnotOf(this.session.chapter) } : { goto: e.to }]);
   }
 
   /**

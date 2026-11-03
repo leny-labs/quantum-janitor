@@ -154,8 +154,8 @@ export const en: PartialCatalog = {
       jurisdiction: 'JURISDICTION: ALL · YOUR FILE IS BEING PROCESSED',
       stub: 'BUREAUCRATIC STATION\nFORM BEING PROCESSED',
       stamp: 'RECEIVED',
-      next: 'COMING SOON — CHAPTER 2: “THE BUREAUCRATIC STATION”',
-      thanks: 'Thanks for playing chapter 1. Rift sealed, shard contained: 1/4096.',
+      next: 'THE RIFT OPENS… NEXT STOP: THE BUREAUCRATIC STATION (COMING SOON)',
+      thanks: 'Thanks for playing this far. Rift sealed, shard contained: 1/4096.',
     },
   },
   props: {

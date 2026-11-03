@@ -33,9 +33,22 @@ hotspots:
       - if: { notFlags: [ch1_eclat_stabilise] }
         say: "narrateur: Derrière le trône, un pan de mur clignote, disparaît, revient. Personne ne commente. Ici, c'est devenu la météo."
     talk:
+      # filet de sécurité « combi mais pas fini » (sauvegarde prise pendant la fin du couronnement) :
+      # la Reine renvoie vers la faille → fin, au lieu de répéter « montre-le-moi »
+      - if: { flags: [ch1_combi] }
+        say: "reine: VA, GARDIEN. LA FAILLE EST OUVERTE ET ELLE NE T'ATTENDRA PAS. ELLE A DES HORAIRES. COMME TOUT LE MONDE."
+      - if: { flags: [ch1_combi] }
+        end: ch1_suite
       - dialogue: ch1_reine
     useItem:
+      combi_chitine:
+        - say: "reine: ELLE TE VA, GARDIEN. MAINTENANT, PASSE LA FAILLE. TU LA PORTERAS LÀ-BAS."
+        - end: ch1_suite
       fragment:
+        - if: { flags: [ch1_combi] }
+          say: "reine: TU L'AS DÉJÀ MONTRÉ, GARRY. TOUT LE NID L'A VU. LA FAILLE, MAINTENANT."
+        - if: { flags: [ch1_combi] }
+          end: ch1_suite
         - if: { notFlags: [ch1_eclat_stabilise] }
           say: "reine: CET ÉCLAT SAIGNE ENCORE DE L'IMPROBABILITÉ, GARRY. CONTIENS-LE D'ABORD. MES MURS VIENNENT DE CLIGNOTER."
           stop: true
@@ -118,3 +131,12 @@ exits:
     to: galerie-des-offrandes
     dir: right
     rect: [1180, 120, 90, 190]
+  # Après le couronnement (combi remise) : la faille dans la voûte mène à la fin du Nid.
+  # `to: fin` = END_SCENE_ID → RoomScene lance `end` avec le knot de fin du chapitre (ch1_suite).
+  # Toujours là tant que la fin n'est pas jouée : jamais bloqué avec la combi.
+  - id: vers_faille
+    label: La Faille
+    to: fin
+    dir: up
+    rect: [320, 50, 120, 100]
+    if: { flags: [ch1_combi] }

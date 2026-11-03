@@ -180,7 +180,8 @@ for (const s of content.scenes.values()) {
   }
   for (const e of s.exits ?? []) {
     const ew = `${w} › sortie ${e.id}`;
-    if (!content.scenes.has(e.to)) err(`${ew} : scène cible inconnue « ${e.to} »`);
+    // `to: fin` (END_SCENE_ID) = sortie vers la fin du chapitre (RoomScene → EndScene)
+    if (e.to !== 'fin' && !content.scenes.has(e.to)) err(`${ew} : scène cible inconnue « ${e.to} »`);
     reachable.add(e.to);
     checkCondition(e.if, ew);
     checkCondition(e.requires, ew);

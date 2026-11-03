@@ -161,8 +161,9 @@ export const fr = {
       jurisdiction: 'JURIDICTION : TOUTES · VOTRE DOSSIER EST EN COURS DE TRAITEMENT',
       stub: 'STATION BUREAUCRATIQUE\nFORMULAIRE EN COURS DE TRAITEMENT',
       stamp: 'REÇU',
-      next: 'PROCHAINEMENT — CHAPITRE 2 : « LA STATION BUREAUCRATIQUE »',
-      thanks: "Merci d'avoir joué le chapitre 1. Faille refermée, éclat contenu : 1/4096.",
+      // neutre : la numérotation des chapitres change au merge ch.0 + Blattaria
+      next: 'LA FAILLE S’OUVRE… PROCHAIN ARRÊT : LA STATION BUREAUCRATIQUE (À VENIR)',
+      thanks: "Merci d'avoir joué jusqu'ici. Faille refermée, éclat contenu : 1/4096.",
     },
   },
   /** Textes peints dans les décors 3D (affiches, étiquettes, écrans). */
