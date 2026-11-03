@@ -79,6 +79,19 @@ objets à payoff différé (voir [`CHAPTER1.md`](CHAPTER1.md), §5).
 - Caméra très plongeante (cockpit) : `tilt` négatif le cabre vers l'objectif ; `BobVoice` conserve
   cette inclinaison de repos.
 
+### Convention : visage de B.O.B. toujours identique
+
+> **B.O.B. 3D = toujours gros yeux ronds blancs à pupilles noires + sourcils gris + plaque-écran
+> « B.O.B. » verte (cadre clair) sous les yeux ; yeux visibles caméra, en profondeur, face/¾.**
+
+- Une seule source du visage : `bob(w)` dans `src/three/props.ts`. Toutes les salles passent par
+  `bobSpot` (`src/three/rooms/bobspot.ts`), le studio de portraits (`src/three/Studio.ts`) et la
+  cinématique de fin (`src/three/shots/end.ts`) appellent ce même `bob()`. Pas de variante locale
+  (sans yeux, sans sourcils, sans plaque, ni d'échelle non uniforme qui écrase les yeux).
+- Au repos, la plaque affiche « B.O.B. » en LED verte ; quand il parle, `setFace` la remplace par
+  l'écran-onde, et `restFace` la remet. Look aligné sur les portraits GenAI (`public/portraits/bob-*.png`).
+- Réf. visuelle : `_briefs/bob-interlude-face/leny-bob-face-ref.png`.
+
 ### Convention : icônes d'inventaire 100 % GenAI
 
 > **Tout item d'inventaire / transportable = icône GenAI (`public/inventory/`), jamais de plot 2D

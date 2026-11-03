@@ -70,11 +70,17 @@ export function bob(w: number): THREE.Group {
   setBrows(BROW_POSES.calm);
   const antenna = at(cyl(r * 0.02, r * 0.02, r * 0.5, '#3f4652', { edges: false }), r * 0.4, h + r * 0.3, -r * 0.3);
   const tip = at(sphere(r * 0.06, '#ff5c7a', { glow: true }), r * 0.4, h + r * 0.56, -r * 0.3);
-  const plate = at(label('B.O.B.', r * 0.7, r * 0.18, { color: '#1a1a1a', bold: true }), 0, h * 0.28, r * 1.05);
-  // « bouche » façon Bender : écran-grille où une onde danse avec la voix.
-  // Caché en salle (plaque B.O.B. visible) ; le studio de portraits l'allume.
+  // visage canonique (docs/CHAPTERS.md « visage de B.O.B. ») : yeux ronds blancs + pupilles noires,
+  // sourcils gris, et sous les yeux l'écran-plaque « B.O.B. » vert dans son cadre clair.
+  // Au repos l'écran affiche « B.O.B. » en LED verte ; en parlant (setFace), l'onde le remplace.
   const sy = h * 0.28;
   const sz = r * 1.06;
+  // plaque de repos : plus étroite que l'écran parlant, centrée sous les yeux sans les mordre
+  const py = h * 0.2;
+  const plate = group([
+    at(box(r * 0.56, r * 0.19, r * 0.02, '#c9d2dc', { edges: false, shadow: false }), 0, py, sz),
+    at(label('B.O.B.', r * 0.5, r * 0.14, { color: '#5dffb0', bg: '#0b1a14', bold: true, mono: true }), 0, py, sz + r * 0.012),
+  ]);
   const bezel = at(box(r * 0.8, r * 0.26, r * 0.02, '#c9d2dc', { edges: false, shadow: false }), 0, sy, sz - r * 0.01);
   const screen = at(box(r * 0.74, r * 0.2, r * 0.02, '#0b1018', { edges: false, shadow: false }), 0, sy, sz);
   // grille des « dents » : montants fins par-dessus l'onde

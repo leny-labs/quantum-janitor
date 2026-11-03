@@ -89,10 +89,11 @@ hotspots:
 
   - id: bob
     label: B.O.B.
-    # reculé devant les chaises : yeux au-dessus du HUD (docs/CHAPTERS.md)
-    rect: [560, 430, 170, 85]
+    # à droite, entre le distributeur et M. Ficus : équilibre M. Patience (à gauche) ;
+    # yeux au-dessus du HUD, face/¾ caméra (docs/CHAPTERS.md)
+    rect: [880, 415, 150, 80]
     art:
-      - { rect: [575, 450, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+      - { rect: [885, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
     look: "B.O.B. tient toujours ma laisse, du bout de l'antenne. Il fixe M. Patience avec respect. Et un peu d'appétit, je crois."
     talk:
       - dialogue: st_patience
