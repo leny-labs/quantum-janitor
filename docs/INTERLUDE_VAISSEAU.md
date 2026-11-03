@@ -29,7 +29,8 @@ Cadrage : caméra fixe **au-dessus de l'épaule de Gary**, très serrée. Gary e
 coincé, genoux au menton ; B.O.B. est sur ses genoux ; le drone porte-outils est
 plaqué contre le plafond. Devant : un **tableau de bord gigantesque** qui déborde du
 cadre (on ne voit jamais ses bords) : 60 boutons, 14 leviers, 3 volants, un pare-brise
-minuscule au milieu. Par le pare-brise : la faille, violette, qui ondule.
+minuscule au milieu. Par le pare-brise panoramique (le seul truc bien fait de la capsule) : le ciel
+intersidéral, nébuleuses et étoiles, et la faille, violette, qui ondule au milieu.
 
 Ton : chaque bouton fait quelque chose d'inutile et de parfaitement documenté.
 
@@ -46,14 +47,16 @@ Arrivée (onFirstEnter, Ink iv_arrivee) : la porte se referme sur le pied de Gar
    (« c'est la première fois qu'un siège m'épouse »).   [combi_portee] [iv_assis] −combi_chitine
 2. Badge sur la fente « CONTACT » → l'écran affiche « BONJOUR, GARRY » (les deux R, même
    ici) ; tout s'allume en même temps.                                     [iv_contact]
-3. Tableau de bord (Ink iv_boutons, menu libre, on peut tout essayer) :
+3. Tableau de bord — **clic direct** sur chaque bouton / le levier (hotspots `bouton_npa`,
+   `bouton_hyper`, `bouton_eject`, `bouton_auto`, `levier` ; knots `iv_btn_*`, `iv_levier`) :
    - « NE PAS APPUYER » → musique d'ascenseur, pour toujours (jusqu'au saut) ;
    - « HYPERESPACE » → allume-cigare ;
    - « ÉJECTION » → éjecte le porte-gobelet (B.O.B. : « On avait un porte-gobelet ? ») ;
    - « AUTOPILOTE » → un post-it du Dr Halvorsen : « L'autopilote c'est vous 😭 » ;
-   - levier « DIMENSION » → bascule le navigateur ; c'est le seul utile.  [iv_navigateur]
+   - levier gris sans étiquette → bascule le navigateur ; c'est le seul utile. [iv_navigateur]
    B.O.B. indique le levier si on lui parle (« Celui qui n'a pas d'étiquette drôle. »).
-4. Navigateur → choix de destination (Ink iv_destination) :
+4. Navigateur — **clic direct** sur une ligne de l'écran tactile (hotspots `dest_*`,
+   knots `iv_dest_*`) :
    - « DIMENSION MINIATURE » → « FORMULAIRE D'ACCÈS MANQUANT » ;
    - « KLEPSYDRA-LUX » → « RÉSERVÉ AU CAPITAINE. VOUS N'ÊTES PAS CAPITAINE. ENCORE. » ;
    - « L'ENVERS DU YAOURT » → l'écran se couvre de condensation, Gary recule ;
@@ -85,11 +88,11 @@ Flag persistant `iv_vu` à la fin : les fois suivantes, bouton « Passer ».
 | Élément | Stub |
 |---|---|
 | Scène | `content/scenes/interlude-vaisseau.yaml`, une seule vue ; art 2D (YAML `art:` : rectangles + labels) **ou** RoomScene 3D minimale (boîte serrée + plan incliné de boutons colorés) — choisir le 2D si le temps manque |
-| Hotspots | `siege` (useItem `combi_chitine`), `contact` (useItem `badge`), `tableau` (use → Ink `iv_boutons` : 4 boutons absurdes + levier), `navigateur` (`if: iv_navigateur`, use → Ink `iv_destination`), `reacteur` (`if: iv_destination`, useItem `fragment`), `bob` (talk → indice) |
-| Ink | `content/story/interlude_vaisseau.ink` : knots `iv_arrivee`, `iv_boutons`, `iv_destination`, `iv_saut` (tag de sortie vers `st-sas` : `# go: st-sas` ou équivalent existant) |
+| Hotspots | `siege` (useItem `combi_chitine`), `contact` (useItem `badge`), `tableau` (regard), `bouton_npa` / `bouton_hyper` / `bouton_eject` / `bouton_auto` / `levier` (clic direct → `iv_btn_*` / `iv_levier`), `navigateur` (regard) + `dest_miniature` / `dest_klepsydra` / `dest_yaourt` / `dest_station` (`if: iv_navigateur`, clic direct → `iv_dest_*`), `reacteur` (`if: iv_destination`, useItem `fragment`), `bob` (talk → indice) |
+| Ink | `content/story/interlude_vaisseau.ink` : knots `iv_arrivee`, `iv_btn_*`, `iv_levier`, `iv_dest_*`, `iv_saut` (tag de sortie vers `st-sas` : `# go: st-sas` ou équivalent existant) |
 | Objets | aucun nouveau ; `combi_chitine` consommé (→ `combi_portee`), `badge` et `fragment` gardés |
 | Transition | fondu au noir à l'entrée (depuis le bouton « Chapitre 1 → »), carte titre ch.1 à la sortie (§2 de `CHAPTERS.md`) |
-| Walkthrough | `ch1` commence par : `useItem combi_chitine siege`, `useItem badge contact`, `use tableau`, `use navigateur`, `useItem fragment reacteur` |
+| Walkthrough | `ch1` commence par : `useItem combi_chitine siege`, `useItem badge contact`, `use bouton_npa`, `use bouton_auto`, `use levier`, `use dest_miniature`, `use dest_station`, `useItem fragment reacteur` |
 | i18n | titre de pièce, libellés de hotspots, carte titre |
 
 Si le temps manque encore : `ch1.startScene = 'st-sas'` avec l'état final de

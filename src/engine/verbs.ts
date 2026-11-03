@@ -34,6 +34,10 @@ export function guessUseIcon(label: string | undefined): UseIcon {
 }
 
 /**
+ * Props interactifs physiques (bouton, levier, interrupteur, poussoir, pad…) → clic direct
+ * = action (use), hotspot dédié aligné sur le mesh 3D (three/press.ts). Dialogue/choix
+ * uniquement pour paroles de PNJ ou vrai choix narratif (docs/CHAPTERS.md, conventions).
+ *
  * Verbe joué au clic gauche / tap court, ou `null` s'il faut ouvrir le verb
  * coin. Priorité par défaut : Parler (personnage) > Utiliser > Regarder ;
  * `smart:` dans le YAML la remplace (ex. `smart: look` quand « utiliser »

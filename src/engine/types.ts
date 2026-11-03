@@ -55,6 +55,12 @@ export interface ArtShape {
   flipX?: boolean;
 }
 
+/**
+ * Zone cliquable d'une scène (YAML `hotspots:`). Props interactifs physiques (bouton,
+ * levier, interrupteur, poussoir, pad…) → clic direct = action (use), hotspot dédié
+ * aligné sur le mesh 3D. Dialogue/choix uniquement pour paroles de PNJ ou vrai choix
+ * narratif (docs/CHAPTERS.md, conventions).
+ */
 export interface Hotspot {
   id: string;
   label: string;

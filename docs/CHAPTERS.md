@@ -41,6 +41,22 @@ objets à payoff différé (voir [`CHAPTER1.md`](CHAPTER1.md), §5).
 - Ajouter un commentaire d'en-tête dans `walkthrough.ts`, `repair.ts` et
   `content/story/ch1_*.ink` : « préfixe ch1_ = acte Blattaria du chapitre 0 (historique) ».
 
+### Convention : props interactifs physiques en clic direct
+
+> **Props interactifs physiques (bouton, levier, interrupteur, poussoir, pad…) → clic direct
+> = action (`use`), hotspot dédié aligné sur le mesh 3D. Dialogue/choix uniquement pour
+> paroles de PNJ ou vrai choix narratif.**
+
+- Un hotspot **par** prop (pas un `tableau` générique qui ouvre un menu « quel bouton ? ») ;
+  le mesh 3D est construit depuis `s.rect('<id>')` et enregistré avec `pressable(s, id, obj)`
+  (`src/three/press.ts`) : petit geste (bouton qui s'enfonce, levier qui bascule) + son au clic.
+- Le `use` joue directement l'effet : `say` / `set:` simples, ou un knot Ink **linéaire**
+  (répliques sans choix). Réappui : une réplique courte conditionnée par le flag posé.
+- `look` reste au verb coin / clic droit. Une zone générale (tableau de bord…) peut rester
+  en `smart: look`.
+- Exemples : `panneau/bouton` (STABILISER : 1er appui `catastrophe`, 2e appui
+  `catastrophe_fort`), `interlude-vaisseau/bouton_*`, `levier`, `dest_*`.
+
 ## 2. Règles de transition (pas de hard cut)
 
 Toute transition suit la même grammaire, en trois temps :
