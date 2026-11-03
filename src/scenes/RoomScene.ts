@@ -18,7 +18,7 @@ import { BobVoice } from '../three/rooms/bobvoix';
 import { FuseRig } from '../three/rooms/fusible';
 import { LecteurRig } from '../three/rooms/lecteur';
 import { VendingRig } from '../three/rooms/vending';
-import type { PressRig } from '../three/press';
+import { PRESS_LEAD, type PressRig } from '../three/press';
 import { propSound } from '../ui/sfx';
 import { propSfx } from '../engine/propSfx';
 import { makeButton } from '../ui/Button';
@@ -318,9 +318,11 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
    * Regarder d'un hotspot qui a un travel d'examen), la caméra glisse vers
    * l'objet pendant la réplique puis revient.
    */
-  private async act(i: Interaction | undefined, shot?: string): Promise<void> {
+  /** `lead` (ms) : petit temps mort avant la bulle (geste 3D d'un prop physique à laisser voir). */
+  private async act(i: Interaction | undefined, shot?: string, lead = 0): Promise<void> {
     if (this.busy || !i || (Array.isArray(i) && i.length === 0)) return;
     await this.locked(async () => {
+      if (lead > 0) await new Promise((r) => setTimeout(r, lead));
       const scene = this.session.state.scene;
       const move = shot ? this.room.examine(shot) : null;
       if (move) this.scenes.spots(false);
@@ -435,12 +437,15 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     if (fuse) return void this.locked(() => this.fuse(fuse, v.action));
     // props physiques en clic direct (three/press.ts) : le bouton s'enfonce, le levier bascule,
     // et un bruitage joue à CHAQUE actionnement (réappui, hors tension, refus : engine/propSfx.ts)
+    // (+ flash/halo bref ; la bulle attend PRESS_LEAD ms pour laisser voir le geste)
+    let lead = 0;
     if (v.kind === 'use') {
       const gesture = this.room.rig<PressRig>('press')?.press(h.id);
       const sound = propSfx(h, state, gesture);
       if (sound) propSound(sound, h.id);
+      if (gesture) lead = PRESS_LEAD;
     }
-    void this.act(v.action, v.kind === 'look' ? h.id : undefined);
+    void this.act(v.action, v.kind === 'look' ? h.id : undefined, lead);
   }
 
   private pick(list: string[]): string {

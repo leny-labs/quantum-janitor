@@ -55,6 +55,8 @@ objets à payoff différé (voir [`CHAPTER1.md`](CHAPTER1.md), §5).
 - **Tout prop physique actionnable joue un SFX** à chaque `use` (réappui, hors tension, refus
   compris) : `sfx: click|clonk|lever|beep|none` + `sfxDud: <condition>` (→ `dud`) sur le hotspot,
   défaut d'après le mesh `pressable` / picto `press` (`src/engine/propSfx.ts`, vérif `npm run check:sfx`).
+- **VFX automatique** pour tout mesh `pressable` : enfoncement / bascule franc, flash + halo teinté +
+  étincelles (~0,65 s, pommeau pour un levier) ; la bulle attend `PRESS_LEAD` (220 ms) pour laisser voir le geste.
 - `look` reste au verb coin / clic droit. Une zone générale (tableau de bord…) peut rester
   en `smart: look`.
 - Exemples : `panneau/bouton` (STABILISER : 1er appui `catastrophe`, 2e appui

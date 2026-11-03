@@ -19,7 +19,7 @@ onEnter:
 
 art:
   - { rect: [0, 0, 1280, 580], color: "#1b1430" }
-  - { rect: [370, 16, 580, 180], color: "#3a1050", stroke: "#b56cff" }        # pare-brise panoramique
+  - { rect: [420, 74, 590, 132], color: "#3a1050", stroke: "#b56cff" }        # pare-brise panoramique
   - { rect: [0, 210, 1280, 190], color: "#2a3140", stroke: "#7fffd4" }        # tableau de bord
   - { text: "60 BOUTONS · 14 LEVIERS · 3 VOLANTS", at: [640, 300], size: 18, color: "#ffd166" }
 
@@ -27,7 +27,7 @@ hotspots:
   - id: pare_brise
     label: Pare-brise
     smart: look
-    rect: [370, 16, 580, 180]
+    rect: [420, 74, 590, 132]
     look:
       - say: "Un pare-brise panoramique. Le seul truc bien fait de la capsule : il a dû tomber d'un autre vaisseau, et personne ne l'a réclamé."
       - say: "Derrière, le ciel intersidéral, des étoiles par milliards. Et au milieu, la faille qui ondule, violette, comme un rideau de douche cosmique."
