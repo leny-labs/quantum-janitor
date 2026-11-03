@@ -898,6 +898,9 @@ export const PATIENCE_ACTOR: ActorLoops = {
 /** Siège vide de salle d'attente (GenAI, même style que la chaise de M. Patience, 589 × 768). */
 export const SIEGE_URL = `${import.meta.env.BASE_URL}props/st/siege.png`;
 export const SIEGE_ASPECT = 589 / 768;
+/** Siège de pilote en carapace de cafard de la capsule CS-07 (interlude ; GenAI, 610 × 1024). */
+export const SIEGE_CARAPACE_URL = `${import.meta.env.BASE_URL}props/interlude/siege-carapace.png`;
+export const SIEGE_CARAPACE_ASPECT = 610 / 1024;
 
 /** Sa Majesté Blattaria XIV en pied (GenAI, 768 × 1024, _briefs/ch1/genai-fix/cutout.py). */
 export const REINE_URL = `${import.meta.env.BASE_URL}props/ch1/reine.png`;

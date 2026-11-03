@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { t as tr } from '../../i18n';
 import { at, box, cyl, glow, label, plane, pool, sphere, torus } from '../kit';
-import { bob } from '../props';
+import { SIEGE_CARAPACE_ASPECT, SIEGE_CARAPACE_URL, billboard, bob } from '../props';
 import { BobVoice } from './bobvoix';
 import type { RoomBuild } from './index';
 
@@ -247,21 +247,11 @@ export const cockpit: RoomBuild = {
     s.spot('reacteur', at(cup, rc.x, rc.y, 2.2), cupGlow);
     s.animate((t) => (cupGlow.material.opacity = 0.35 + Math.sin(t * 3) * 0.15));
 
-    // ── siège-carapace, la Mue Sacrée posée dessus ──
-    const st = s.stand(s.rect('siege'));
-    const seat = new THREE.Group();
-    // dossier en carapace (ovale aplati, segments sombres) et assise basse
-    const shellMesh = at(sphere(st.w * 0.46, '#6b3a12', { seg: 24 }), 0, st.h * 0.5, -st.w * 0.15);
-    shellMesh.scale.set(1, 1.25, 0.32);
-    seat.add(shellMesh);
-    for (let k = 0; k < 4; k++) {
-      const seg = at(torus(st.w * (0.36 - Math.abs(k - 1.5) * 0.04), 0.018, '#3e1f08'), 0, st.h * (0.3 + k * 0.15), -st.w * 0.02);
-      seg.scale.set(1, 0.18, 1);
-      seat.add(seg);
-    }
-    seat.add(at(box(st.w * 0.7, st.h * 0.12, st.w * 0.5, '#4a2810'), 0, st.h * 0.12, st.w * 0.15));
-    // pas de combi posée ici : la Mue Sacrée est dans l'inventaire (icône GenAI), Gary l'enfile en l'utilisant sur le siège
-    s.spot('siege', at(seat, st.x, 0, st.z, 0.35));
+    // ── siège-carapace (GenAI) : Gary y enfile la Mue Sacrée (useItem combi sur le siège) ──
+    // posé en avant-plan (devant le pan du tableau de bord), pied bien au-dessus de la barre d'inventaire
+    const st = s.fit(s.rect('siege'), 2.3);
+    const seatH = Math.min(st.h, st.w / SIEGE_CARAPACE_ASPECT);
+    s.spot('siege', at(billboard(SIEGE_CARAPACE_URL, seatH, SIEGE_CARAPACE_ASPECT, { tint: '#f2e4ff', shadow: 0 }), st.x, st.y - st.h / 2, st.z));
 
     // ── B.O.B., sur les genoux de Gary, le porte-gobelet sur la tête ──
     const bb = s.stand(s.rect('bob'));

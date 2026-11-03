@@ -36,11 +36,11 @@ hotspots:
 
   - id: siege
     label: Siège-carapace
-    rect: [40, 300, 260, 280]
+    rect: [40, 250, 240, 295]
     if: { notFlags: [iv_assis] }
     art:
-      - { rect: [60, 330, 220, 240], color: "#6b3a12", stroke: "#c9a13a" }
-      - { text: "SIÈGE", at: [170, 450], size: 18, color: "#ffd166" }
+      - { rect: [60, 270, 200, 255], color: "#6b3a12", stroke: "#c9a13a" }
+      - { text: "SIÈGE", at: [160, 400], size: 18, color: "#ffd166" }
     look: "Un siège moulé en forme de carapace. Pour un cafard, c'est un fauteuil club. Pour moi, c'est une coquille d'œuf avec un dossier."
     use:
       - say: "narrateur: Gary essaie de s'asseoir. Le siège le recrache poliment. Il refuse tout ce qui n'a pas d'exosquelette."
