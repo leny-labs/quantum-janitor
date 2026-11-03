@@ -49,22 +49,34 @@ bretelle, drone porte-outils sur l'épaule gauche. Modèle 3D : `gary()` dans
 
 ## Dimensions prévues (chapitres)
 
+Numérotation t173–t176 (2026-11-03) ; mapping ancien → nouveau, transitions et plan
+de fusion : [`CHAPTERS.md`](CHAPTERS.md).
+
 | Ch. | Dimension | Idée |
 |---|---|---|
-| 0 | *Klepsydra-9* (originale) | Le Seau. Tutoriel + catastrophe. **(MVP)** |
-| 1 | **B-7 « Blattaria Prime »** | Les cafards ont hérité de la galaxie. Gary est un messie malgré lui ; la prophétie veut qu'il « tienne l'éclat » et referme la faille qui replie leur nid. Il y perd Josiane et le Seau, et repart en combinaison de chitine. |
-| 2 | **Station Bureaucratique** | La station où le règlement a gagné : chaque porte exige un formulaire, SYLVIE y est reine. Paperasse, fonctionnaires caricaturaux, couloirs interminables, zéro nettoyage. |
-| 3 | **Dimension Miniature** | Tout est minuscule sauf la poussière. B.O.B. devient un titan. |
-| 4 | **Klepsydra-Lux** | Version luxueuse de la station où Gary est capitaine (sa mère avait raison). Il déteste ça. |
-| 5 | **L'Envers du Yaourt** | Le yaourt conscient du lecteur de badge a fondé une civilisation lactée. Il est en colère. |
+| 0 | *Klepsydra-9* (acte I) + **B-7 « Blattaria Prime »** (acte II) | **Le Seau.** Acte I : tutoriel + catastrophe (ci-dessous). Acte II : les cafards ont hérité de la galaxie ; Gary est un messie malgré lui, « tient l'éclat » et referme la faille ; il y perd Josiane et le Seau et repart en combinaison de chitine ([`CHAPTER0_BLATTARIA.md`](CHAPTER0_BLATTARIA.md)). **(jouable)** |
+| — | *Interlude : le mini-vaisseau* | Cockpit très serré, énorme tableau de bord, boutons absurdes, choix de destination ([`INTERLUDE_VAISSEAU.md`](INTERLUDE_VAISSEAU.md)). |
+| 1 | **Station Bureaucratique** | La station où le règlement a gagné : SYLVIE y est reine, Gary y est classé « animal de compagnie ». 13 lieux, paperasse, fonctionnaires caricaturaux, couloirs infinis, zéro nettoyage, inventaire à payoffs différés ([`CHAPTER1.md`](CHAPTER1.md)). |
+| 2 | **Dimension Miniature** | Tout est minuscule sauf la poussière. B.O.B. devient un titan. |
+| 3 | **Klepsydra-Lux** | Version luxueuse de la station où Gary est capitaine (sa mère avait raison). Il déteste ça. |
+| 4 | **L'Envers du Yaourt** | Le yaourt conscient du lecteur de badge a fondé une civilisation lactée. Il est en colère. |
 | fin | **Le Placard Originel** | Tous les morceaux reconvergent dans le placard à balais. |
 
 Chaque chapitre : un fragment de station à stabiliser / contenir pour récupérer
-un morceau du réacteur (à partir du ch.1, plus de thème ménage : Gary a perdu ses
-outils de janitor). Interlude envisagé entre deux chapitres : un mini-vaisseau très
-serré, à piloter sans savoir à quoi servent les boutons (non implémenté).
+un morceau du réacteur (à partir de l'acte Blattaria, plus de thème ménage : Gary a
+perdu ses outils de janitor). Transitions sans hard cut : carte de fin → interlude
+éventuel → carte titre du chapitre suivant ([`CHAPTERS.md`](CHAPTERS.md) §2).
 
-## Chapitre 0 « Le Seau » — chaîne de puzzles
+> **Note t176 — inventaire et difficulté.** Le ch.0 reste un tutoriel linéaire
+> (petit inventaire, puzzles courts). Il lui manque, volontairement, la sensation
+> « plein d'objets en poche, dont certains ne serviront que 4–5 étapes plus tard ».
+> À partir du ch.1, **c'est une exigence** : 12–18 objets par chapitre, 5–8 en poche
+> simultanément, plusieurs objets ramassés tôt avec un payoff très tardif, puzzles
+> multi-salles, chaînes longues explicites (tampon → formulaire → bureau → archive →
+> accès), quelques fausses pistes et objets à double usage, des combinaisons. Voir le
+> tableau d'inventaire de [`CHAPTER1.md`](CHAPTER1.md) §5.
+
+## Chapitre 0 « Le Seau », acte I (Klepsydra-9) — chaîne de puzzles
 
 Objets : **seau**, **serpillière**, **badge « Garry »**, **sandwich douteux**, **fusible 7B**.
 Vues : **placard à balais**, **couloir de service**, **labo du réacteur**, **panneau de contrôle** (gros plan).

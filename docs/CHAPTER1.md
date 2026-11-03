@@ -1,372 +1,394 @@
-# Chapitre 1 « Blattaria Prime » — design
+# Chapitre 1 « La Station Bureaucratique » — design
 
-> Dimension B-7. Les cafards ont hérité de la galaxie, et ils ont une prophétie.
-> Gary a un badge avec deux R. Pour eux, ça suffit.
+> Une station où le règlement a gagné. Chaque porte exige un formulaire, chaque
+> formulaire exige un tampon, chaque tampon exige de l'encre, et l'encre est en grève.
 
-Suite directe du cliffhanger du ch.0 (`fin.ink`, knot `cafards`). Même moteur, même
-grain de puzzles, même ton (*Space Quest* × *Rick & Morty* × *Paranoia* × *Futurama*,
-voir `docs/STORY.md`). Scope : MVP jouable de bout en bout sur un chemin scripté.
+Voir [`CHAPTERS.md`](CHAPTERS.md) (numérotation, transitions, ids), le chapitre
+précédent [`CHAPTER0_BLATTARIA.md`](CHAPTER0_BLATTARIA.md), l'interlude d'arrivée
+[`INTERLUDE_VAISSEAU.md`](INTERLUDE_VAISSEAU.md) et la bible [`STORY.md`](STORY.md).
+Statut : **design** (rien n'est codé). Préfixes : scènes `st-*`, flags `st_*`,
+knots `st_*`.
 
 ## 1. Pitch
 
-> **Réécriture « containment » (2026-11-03, validée par Leny)** : plus de thème
-> nettoyage dans l'intrigue. Le ch.0 était un jeu de ménage ; le ch.1 fait évoluer
-> Gary : il y **perd ses outils de janitor** (Josiane, puis le Seau) et repart en
-> **combinaison de chitine**, gardien d'une faille plutôt qu'agent d'entretien.
+Le mini-vaisseau de l'interlude s'encastre dans le sas d'arrivée d'un morceau de
+station que Gary reconnaît à peine : c'est *Klepsydra-9*, mais une Klepsydra où, le jour
+de la catastrophe, **le règlement a gagné**. SYLVIE n'y est plus une IA d'entretien :
+elle est **Directrice Générale de l'Existence**, reine d'un empire de guichets, de
+tampons et de couloirs qui ne mènent qu'à d'autres couloirs.
 
-Gary s'est réveillé face contre un sol tiède et collant, au pied du trône de
-**Sa Majesté Blattaria XIV**. Pour les cafards de B-7, il est **l'Homme au Seau** de
-la prophétie : « QUAND LE NID SE REPLIERA, VIENDRA L'HOMME AU SEAU. IL **TIENDRA
-L'ÉCLAT**, ET LA **FAILLE SE REFERMERA**. » Problème : le Seau est passé dans la
-faille avant Gary. Les cafards l'ont trouvé, l'ont léché (consciencieusement), et
-l'ont posé sur un autel. On ne touche pas au Seau Sacré. Sauf l'Homme au Seau. Qui
-doit d'abord prouver qu'il est l'Homme au Seau. Avec un badge qui sent le thon.
+Le **deuxième éclat du Réacteur** est là. Il est tombé dans la station, quelqu'un l'a
+trouvé, et donc il a été **classé** : « OBJET TROUVÉ N° 2/4096 — EN ATTENTE DE
+RÉCLAMATION », sous scellés dans le coffre de la Direction. Pour le récupérer, Gary
+doit déposer le **Formulaire B-7/12 (Demande de restitution d'un bien trouvé
+inter-dimensionnel)**, rempli, tamponné, signé, en trois exemplaires, avec avis du
+Conseil, **au guichet, aux heures d'ouverture**. Le guichet ouvre de 10 h 12 à 10 h 14.
+L'horloge est bloquée sur 10 h 11 depuis quarante et un ans.
 
-Au fond de la galerie des offrandes, les cafards vénèrent « le Temple de l'Ancien
-Couloir » : un morceau de **Klepsydra-9** échoué là — le couloir C, distributeur
-compris. Coincé derrière la spirale du Distrib'Ô-Matic pulse un **éclat du Réacteur
-d'Improbabilité** : un morceau d'improbabilité, une **faille** ouverte en plein nid.
-Elle **menace le nid** : les murs clignotent, le Nid se replie (la nurserie est
-aussi dans la cuisine), les cafards apparaissent en double (le Scribe est deux), la
-gravité hésite dans le Temple. Gary doit **contenir** l'éclat, sinon le nid
-s'effondre jusqu'à tenir dans une miette. Le prix : Josiane reste coincée dans le
-distributeur, et le Seau devient le réceptacle de la faille. L'Homme au Seau…
-sans seau. Encore.
+Problème initial : le portique a scanné Gary dans sa combinaison de chitine.
+**Statut : ANIMAL DE COMPAGNIE. Propriétaire : B.O.B.** Un animal ne peut pas déposer
+de demande. B.O.B., pour la première fois de sa vie, a un pouvoir. Il en est terrifié.
 
-**Running gags mobilisés** : GARRY (le badge fait foi, littéralement : c'est le Signe
-de la prophétie) ; tout est tiède (même l'eau bénite, même la réussite) ; Gary est
-intérimaire (« je ne peux pas être un messie, je suis en période d'essai ») ; PLOUF
-(le seau sur l'éclat — un bon PLOUF, cette fois, « le PLOUF qui referme ») ; le yaourt (il a quitté le seau en arrivant : « UN ÊTRE LACTÉ. IL EST PARTI
-FONDER QUELQUE CHOSE. » — graine du ch.5 *L'Envers du Yaourt*) ; le distributeur qui
-recoince toujours quelque chose (cette fois : Josiane).
+Ce que Gary a en arrivant : le **badge « Garry »**, l'**éclat contenu** (`fragment`,
+1/4096), la **combinaison de chitine** (portée), et B.O.B. Pas de seau, pas de Josiane :
+**zéro nettoyage** de tout le chapitre (une seule blague à ce sujet : Gary voit une
+tache de café et sa main tremble).
 
-## 2. Vues / salles
+## 2. Ton et règles de design
 
-Même logique que ch.0 : 3 pièces + 1 gros plan. Ids kebab-case, fichiers
-`content/scenes/ch1-<id>.yaml` (le glob de `contentBrowser.ts` n'est pas récursif :
-le préfixe de fichier range le chapitre, l'`id` reste celui ci-dessous).
+- **Absurde administratif cohérent** : chaque règle est stupide, mais elle est
+  **appliquée à la lettre et toujours la même** ; le joueur gagne en apprenant le
+  règlement, puis en le retournant contre lui-même (l'intérimaire qui signe « p.o. »,
+  le tampon ANNULÉ qu'on n'utilise jamais, la plante membre honoraire du Conseil).
+- **Plus dur que le ch.0, mais juste** : chaque solution est annoncée au moins une fois
+  (panneau, réplique, document lisible) avant d'être nécessaire ; B.O.B. donne des
+  indices gradués (1re demande = vague, 2e = précise). Aucune impasse : aucun objet
+  indispensable ne peut être perdu ou gâché (voir §6.5).
+- **Inventaire qui s'empile** : 14 objets sur le chapitre, 5–8 en poche la plupart du
+  temps, plusieurs ramassés **20 à 40 étapes** avant leur usage (§5).
+- **Chaînes longues, explicites** : le Formulaire B-7/12 a 5 cases (A → E) annoncées
+  dès l'acte I ; son gros plan sert de **tableau de bord de la progression**.
+- **Personnages sincères** : chaque fonctionnaire a une petite tristesse (Delaigue est
+  intérimaire depuis 19 ans, Tamponnet n'a plus d'encre, Paraphe vote contre parce que
+  personne ne l'écoute quand elle vote pour). SYLVIE, au fond, garde ce dossier
+  ouvert parce que c'est celui de Gary.
+- **Running gags** : GARRY (le dossier est classé à « GARRY » : la faute de la RH est
+  universelle à travers les dimensions) ; tout est tiède (le café, la grève, la
+  colère) ; Gary est intérimaire (et cette fois, **ça sert**) ; « en trois
+  exemplaires » ; Duplicata répète tout deux fois ; l'horloge 10 h 11.
 
-| id | Titre / secteur | Rôle | Hotspots principaux |
+## 3. Personnages
+
+| Perso | id | Rôle | Tic / voix |
 |---|---|---|---|
-| `nid-royal` | **Nid Royal** · B-7 · Salle du Trône | Pièce de départ. La Reine, l'autel. | `reine` (talk, useItem badge/fragment), `autel` (Seau Sacré, `if: notFlags ch1_seau_rendu`), `courtisans` (look, sprites), `bob` |
-| `galerie-des-offrandes` | **Galerie des Offrandes** · B-7 · Archives sacrées | Hub : prophétie, eau, miettes, foule. | `fresque` (look), `scribe` (Frère Élytre, talk/useItem badge), `bassin` (Bassin des Ablutions, tiède), `grenier` (Grenier aux Miettes), `foule` (bloque la sortie, `if: notFlags ch1_foule_dispersee`), `bob` |
-| `temple-couloir` | **Temple de l'Ancien Couloir** · B-7 · Fragment K9-C | Le morceau de Klepsydra-9. | `distributeur` (Distrib'Ô-Matic devenu reliquaire), `compteur` (« 0000 JOURS SANS INCIDENT »), `hublot` (le multivers en mosaïque), `lecteur` (traces de yaourt… parties), `bob` |
-| `coeur-eclat` | **Éclat du Réacteur** · Gros plan | Gros plan (comme `panneau`). | `eclat` (look/useItem seau), `jauge` (stabilité), `gravure` (« Mk IV — 1/4096 — NE PAS LÉCHER »), `seau_sacre` (le Seau qui contient la faille, `if: ch1_seau_perdu`) |
+| **Gary Plunk** | `gary` | Héros, en combi de chitine. Classé animal puis intérimaire (« c'est pire »). | Résigné ; découvre qu'il connaît le règlement mieux que les fonctionnaires (il a lu tous les panneaux pendant ses pauses). |
+| **B.O.B.** | `bob` | Compagnon, **propriétaire officiel** de Gary jusqu'à l'acte II ; système d'indices (`st_bob`). Aspire un ticket au squelette. | Dépressif, terrifié par sa responsabilité : « Je n'ai jamais eu d'animal. J'ai eu un tome 2. » |
+| **SYLVIE** | `sylvie` | **Reine du règlement**, Directrice Générale de l'Existence. Voix des haut-parleurs, des bornes, puis en personne (trône-photocopieuse, acte IV). | MAJUSCULES ; cite des articles qui n'existent pas encore (« ARTICLE 0 : TOUT EST INTERDIT SAUF LE RESTE ») ; craque une seule fois (§8). |
+| **Mme Odile Guichard** | `guichard` | Guichet d'accueil. Ne travaille que de 10 h 12 à 10 h 14. Remet le Formulaire et en énonce les 5 cases. | « C'est pas moi qui décide. » Mange un sandwich depuis 41 ans (le même). |
+| **M. Régis Duplicata** | `duplicata` | Archiviste. Ne délivre que des copies ; certifie « CONFORME ». | **Répète tout deux fois.** Deux fois. Myope, photocopie ses propres lunettes. |
+| **Mme Gisèle Tamponnet** | `tamponnet` | Bureau des Tampons, 412 tampons au mur, encreur sec depuis la grève. | Tamponne tout ce qu'on lui tend, y compris les mains. Parle en onomatopées de tampons (« CLONK. Bonjour. CLONK. »). |
+| **M. Hubert Delaigue** | `delaigue` | Sous-chef adjoint **par intérim** depuis 19 ans ; dort sur son fax. Signe « p.o. » d'un chef absent depuis 1987. | Murmure « …réunion… » en dormant ; se réveille au mot « prime » ou à l'odeur du café. Solidarité instantanée d'intérimaire avec Gary. |
+| **PERCO** | `perco` | Machine à café syndiquée, **déléguée du personnel**, en grève illimitée. Ses gobelets font le piquet. | Voix de percolateur militant, slogans (« CAFÉ TIÈDE, COLÈRE CHAUDE ! »), crachote de la vapeur quand on la contredit. |
+| **Mme Augustine Paraphe** | `paraphe` | Présidente du Conseil (seule membre présente). Vote contre « par principe ». | Paraphe chaque phrase (« … A.P. »). Exige le quorum. |
+| **M. Jean-Claude Sabot** | `sabot` | Agent de la fourrière / quai des navettes. | « Je fais pas les ventes. » Calcule les amendes en dimensions. |
+| *M. Patience* | — | Squelette d'usager, salle d'attente, ticket 9848 à la main. Figurant. | Ne dit rien. B.O.B. lui fait un éloge funèbre. |
+| *M. Ficus* | — | Plante en plastique de la salle d'attente. Membre honoraire du Conseil (on l'apprend tard). | En plastique. Comme tout le monde. |
 
-Navigation : `nid-royal` ⇄ `galerie-des-offrandes` ⇄ `temple-couloir` ⇄ `coeur-eclat`.
-La sortie galerie → temple a `requires: { flags: [ch1_foule_dispersee] }` ; la sortie
-temple → `coeur-eclat` a `requires: { flags: [ch1_eclat_tombe] }`.
+Portraits : SYLVIE et B.O.B. existants ; fonctionnaires = portraits fixes GenAI
+(buste, style `scribe-portrait.png`), repli texte. PERCO = prop 3D avec écran-visage.
 
-**Rendu** : les 4 vues sont de **vraies pièces 3D RoomScene** (entrées de `ROOMS`
-dans `src/three/rooms/index.ts` : `nid.ts`, `galerie.ts`, `temple.ts`, `eclat.ts`),
-même mécanique que le ch.0 (caméra fixe, rect YAML projetés sur les props, travels
-d'examen, plan d'arrivée `intro: reine` au Nid). Décor **toon** : coque organique
-commune `rooms/hive.ts` (paroi de chitine peinte, sol de résine brillant, côtes de
-voûte effilées, coulures, flaques ambrées, lanternes-œufs, bougies, brume) ; le Temple
-réutilise le gabarit du couloir C (paroi acier, dalle, distributeur reconstruit en
-reliquaire, sans toucher `vending.ts`). Les **personnages insectes sont des sprites
-2D GenAI en billboard** (`THREE.Sprite`, non éclairés, teintés à la lumière de la
-pièce, ombre disque) : cafards = planche `public/props/ch1/roach-sheet.png`
-(`roachSprite(len, right, { pose, tint })`, poses `walk1`/`walk2`/`34`/`worship`,
-foules via `crowd()`), Reine = `public/props/ch1/reine.png` sur un trône 3D, Frère
-Élytre = `public/props/ch1/scribe.png` derrière son pupitre. Le survol d'un hotspot
-éclaircit aussi la teinte des sprites (`Stage.highlight`). L'`art:` des YAML reste
-comme repli 2D mais ne s'affiche plus. En dialogue : Reine = planche GenAI existante
-(`reine-sheet.png`) ; Scribe = portrait fixe `public/portraits/scribe-portrait.png`
-(buste recadré, `GENAI_PORTRAITS` dans `Studio.ts`).
+## 4. Lieux (13 + 1 gros plan)
 
-Musique : `themeForScene()` retombe sur `couloir` pour un id inconnu ; MVP = mapper les
-4 ids ch.1 sur les thèmes existants (`fin` pour `nid-royal`, `couloir` ailleurs) dans
-`SCENE_THEME` (`src/ui/music.ts`).
+| # | id | Lieu | Description | On y trouve | Sorties |
+|---|---|---|---|---|---|
+| 1 | `st-sas` | **Sas d'Arrivée** · Douane dimensionnelle | Portique de scan, tapis roulant à l'arrêt, borne SYLVIE, panneau « BIENVENUE — VOTRE VISITE EST ENREGISTRÉE ». Le vaisseau encastré est remorqué à l'arrivée. | `ticket_douane` ; borne (statut de Gary) ; panneau « LES ANIMAUX DOIVENT ÊTRE ACCOMPAGNÉS » | `st-attente` (après `st_laisse`), `st-fourriere` |
+| 2 | `st-attente` | **Salle d'Attente** | Chaises vissées, afficheur « 9 847 », distributeur de tickets vide (« RUPTURE — FORMULAIRE DE RÉAPPROVISIONNEMENT AU GUICHET »), squelette M. Patience. | `ticket_9848` (via B.O.B.), `plante` (M. Ficus) | `st-sas`, `st-guichet` |
+| 3 | `st-guichet` | **Guichet d'Accueil** | Hygiaphone, rideau métallique, horloge 10 h 11, horaires « 10 h 12 – 10 h 14 », pupitre de remplissage. Mme Guichard derrière la vitre. | `formulaire` ; horloge (puzzle de l'éclat) | `st-attente`, `st-couloir-b`, gros plan `st-formulaire` (pupitre) |
+| 4 | `st-couloir-b` | **Couloir Infini B** · hub | Portes B-1, B-2… qui bouclent : on revient toujours au même extincteur. Une fois « dénoué » : hub des bureaux. | (puzzle de la plante) | `st-guichet`, `st-archives`, `st-tampons`, `st-reclamations`, `st-pause`, `st-sous-chef`, `st-ascenseur` (toutes après `st_couloir_resolu`) |
+| 5 | `st-archives` | **Archives Centrales** | Rayonnages jusqu'au plafond (et au-delà), fichier à tiroirs A–Z, photocopieuse « EN PANNE DE PAPIER », M. Duplicata. | dossier « PLUNK, GARRY » (copies) ; photocopieuse (réutilisée) | `st-couloir-b` |
+| 6 | `st-tampons` | **Bureau des Tampons** | Mur de 412 tampons classés par humeur, encreur sec, Mme Tamponnet qui tamponne dans le vide. | `tampon_annule`, `encreur` | `st-couloir-b` |
+| 7 | `st-reclamations` | **Service des Réclamations** | Comptoir « RÉSERVÉ AU PERSONNEL », chatière « ANIMAUX DE SERVICE », boîte à réclamations reliée à une broyeuse, terminal de tubes pneumatiques. Personne (« VOTRE RÉCLAMATION EST IMPORTANTE POUR NOUS »). | `liasse`, `capsule` (derrière le comptoir) | `st-couloir-b` |
+| 8 | `st-pause` | **Salle de Pause** | PERCO sous banderole « GRÈVE ILLIMITÉE », piquet de grève de gobelets, préavis, frigo « NE PAS TOUCHER AU YAOURT DE M. DELAIGUE » (graine ch.4). Terminal de tube pneumatique. | `accord` (P-15), `gobelet` (café, après la grève) | `st-couloir-b` |
+| 9 | `st-sous-chef` | **Bureau du Sous-Chef Adjoint** | Un placard à balais reconverti (Gary se sent chez lui). Fax, plaque « H. DELAIGUE, p.i. », note de délégation de signature punaisée. | (signature p.o., réveil au café) | `st-couloir-b` |
+| 10 | `st-ascenseur` | **Ascenseur à Formulaires** | Cabine sans boutons : une fente. On y glisse un dossier, l'ascenseur lit la case la plus avancée et choisit l'étage. | — | `st-couloir-b`, `st-conseil` (case C), `st-direction` (case E) |
+| 11 | `st-conseil` | **Salle du Conseil** | Table ovale pour 12, Mme Paraphe seule, tableau des membres (Paraphe ; Représentant du personnel : PERCO ; Membre honoraire : M. FICUS), urne transparente, tube pneumatique d'arrivée. | (quorum, vote) | `st-ascenseur` |
+| 12 | `st-direction` | **Direction Générale de l'Existence** | Bureau de SYLVIE : trône-photocopieuse, mur d'écrans, **coffre des Objets Trouvés** (le 2e éclat pulse derrière la vitre). | `permis` ; 2e éclat ; retour du `badge` | `st-ascenseur` |
+| 13 | `st-fourriere` | **Fourrière & Quai des Navettes** | Le mini-vaisseau sabot aux patins, guérite de M. Sabot, panneau des amendes en dimensions. Visitable dès le début (graine du final). | (amende, sortie) | `st-sas` |
+| — | `st-formulaire` | **Gros plan : Formulaire B-7/12** | Le formulaire sur le pupitre : cases A–E qui se remplissent (tampons, signature, trombone des 3 exemplaires). Tableau de bord du chapitre. | — | retour (`st-guichet`) |
 
-## 3. Chaîne de puzzles
+Navigation : `st-fourriere` ⇄ `st-sas` ⇄ `st-attente` ⇄ `st-guichet` ⇄ `st-couloir-b`
+⇄ {archives, tampons, réclamations, pause, sous-chef, ascenseur} ; `st-ascenseur` ⇄
+`st-conseil` / `st-direction` selon le dossier glissé dans la fente.
 
-Objets ch.1 : **serpillière** (Josiane) et **badge « Garry »** arrivés avec Gary,
-**seau** (rendu par la Reine, réutilise l'objet `seau` du ch.0), **éclat du réacteur**
-(`fragment`, contenu), **combinaison de chitine** (`combi_chitine`, fin). Tous les
-flags du chapitre sont préfixés `ch1_` ; le flag `ch1` marque l'état « on est dans
-le chapitre 1 » (garde des textes partagés de `items.yaml`).
+## 5. Inventaire
+
+Arrivée : `badge`, `fragment`, `combi_chitine` (cette dernière est **enfilée pendant
+l'interlude** → flag `combi_portee`, elle quitte l'inventaire). Étapes = numéros de
+l'arbre §6.
+
+| Objet | id | Ramassé (étape) | Utilisé (étape) | Écart | Remarque |
+|---|---|---|---|---|---|
+| Badge « Garry » | `badge` | départ (0) | 14 (fichier des archives) | **14** | Payoff du double R. Duplicata le garde comme pièce justificative ; rendu par SYLVIE à l'étape 43. |
+| Éclat contenu 1/4096 | `fragment` | départ (0) | 8, 42 (horloge), 43 (coffre) | 8 / 34 / 1 | **Réutilisé** : l'improbabilité fait avancer l'horloge ; fusionne avec le 2e éclat. |
+| Ticket de douane | `ticket_douane` | 2 (sas) | 44 (fourrière) | **42** | Le plus long payoff du chapitre ; fausse piste au distributeur de tickets. |
+| Plante en plastique (M. Ficus) | `plante` | 5 (attente) | 11 (couloir), 36 (Conseil) | 6 / **31** | **Double usage** : repère dans le couloir infini, puis membre honoraire au quorum. |
+| Ticket n° 9848 | `ticket_9848` | 6 (B.O.B. l'aspire) | 9 (guichet) | 3 | Court, tutoriel du chapitre. |
+| Formulaire B-7/12 | `formulaire` | 9 (guichet) | 20, 29, 32, 33, 34, 40, 42 | — | **Fil rouge** réutilisé 7 fois ; état par flags `st_case_a…e`. |
+| Tampon « ANNULÉ » | `tampon_annule` | 15 (tampons) | 39 (Conseil), 45 (fourrière) | **24 / 30** | **Réutilisé** ; fausse piste sur la borne du sas (« on n'annule pas un statut »). |
+| Encreur sec → imbibé | `encreur` | 16 (tampons) | 28 (combinaison), 29 (Tamponnet) | **12 / 13** | Combinaison avec le café. |
+| Liasse de réclamations vierges | `liasse` | 18 (réclamations) | 19 (photocopieuse) | 1 | Le papier reste dans le bac : resservira à l'étape 33 (via la machine). |
+| Capsule pneumatique | `capsule` | 18 (réclamations) | 37 (PERCO → Conseil) | **19** | Vote par procuration. |
+| Copies du dossier Plunk | `copies_dossier` | 19 (archives) | 20 (combinaison avec le formulaire) | 1 | Remplit la case A. |
+| Accord de pause P-15 | `accord` | 22 (pause) | 25 (signature p.o.), 26 (PERCO) | 3 / 4 | Bloqué tant que Gary est un animal (dépendance croisée). |
+| Gobelet de café tiède | `gobelet` | 27 (PERCO) | 28 (combinaison), 31 (Delaigue) | 1 / 4 | Rempli deux fois (étapes 27 et 30) ; Delaigue le garde. |
+| Permis de quitter la dimension | `permis` | 43 (SYLVIE) | 46 (quai) | 3 | Rendu du badge au même moment. |
+
+**Total : 14 objets** (2 hérités + 12 nouveaux). **En poche simultanément** : 2–5 à
+l'acte I, 6–8 aux actes II–III (pic à 8 aux étapes 18–19, 22–25, 27–28), 4–6 à
+l'acte IV. **6 objets à écart ≥ 5** : `ticket_douane` (42), `plante` (31),
+`tampon_annule` (24/30), `capsule` (19), `badge` (14), `encreur` (12), plus `fragment`
+(34 entre ses deux usages d'horloge).
+
+**Combinaisons** : `copies_dossier` + `formulaire` → case A ; `encreur` + `gobelet` →
+encreur imbibé ; (refus drôles) `plante` + `gobelet` (« elle est en plastique, Gary ;
+elle n'a pas soif, elle a des principes »), `ticket_9848` + `ticket_douane`
+(« deux tickets ne font pas un rendez-vous »), `tampon_annule` + `formulaire`
+(« tu veux annuler ta propre demande ? C'est très local, comme réflexe »).
+
+## 6. Chaîne de puzzles
+
+Flag d'état `st` posé par l'état initial. Les cases du formulaire s'enchaînent dans un
+ordre imposé et annoncé (A identité → B « VU » → D signature → C copies conformes →
+E avis du Conseil → dépôt). Mme Guichard l'explique à l'étape 9 ; le gros plan
+`st-formulaire` le montre en permanence.
 
 ```
-Arrivée (nid-royal, onFirstEnter, Ink ch1_arrivee) : la Reine accueille GARRY, garde le
-Seau Sacré « JUSQU'À CE QU'IL AIT PROUVÉ QU'IL EST L'HOMME AU SEAU » ; les murs clignotent :
-la faille du Temple replie le nid.
+Arrivée (interlude → st-sas, onFirstEnter, Ink st_arrivee) : le vaisseau s'encastre ;
+le portique scanne Gary : « ESPÈCE : BLATTE (COMBINAISON). STATUT : ANIMAL DE COMPAGNIE.
+PROPRIÉTAIRE : B.O.B. » ; le vaisseau part en fourrière ; SYLVIE annonce que
+« L'OBJET TROUVÉ N° 2/4096 » attend sa réclamation.        [st_arrive] [st_vaisseau_fourriere]
 │
-├─ PUZZLE 1 — Le Signe aux deux R (récupérer le Seau)
-│   1. Parler à la Reine (ch1_reine) → prophétie de la faille + exigence du Signe. [ch1_audience]
-│      L'autel est intouchable : utiliser l'autel → deux gardes croisent leurs pattes.
-│   2. Galerie (cafards en double à l'entrée) : regarder la fresque → « LE SIGNE AUX
-│      DEUX R ». Gary regarde son badge. Oh non.                             [ch1_sait_signe]
-│   3. Badge sur le Scribe → refusé : il sent « LE POISSON ANCIEN ».        [ch1_badge_refuse]
-│   4. Serpillière sur le bassin → Josiane trempée d'eau bénite. Tiède.   [ch1_josiane_mouillee]
-│   5. Combiner serpillière + badge → badge désodorisé, « GARRY » brille.   [ch1_badge_propre]
-│      (dernier usage de Josiane avant le Temple : pas de conflit)
-│   6. Badge sur le Scribe → proclamation (ch1_signe).                     [ch1_signe_reconnu]
-│   7. Nid : parler à la Reine → elle rend le Seau ; le yaourt est parti « FONDER
-│      QUELQUE CHOSE » ; « TIENS L'ÉCLAT, REFERME LA FAILLE ».          [ch1_seau_rendu] +seau
+├─ ACTE I — « Vous êtes un animal » (sas, attente, guichet, couloir B)
+│   1. (arrivée ci-dessus)
+│   2. Sas : prendre le ticket de douane au portique.                 [st_ticket_douane] +ticket_douane
+│   3. Sas : regarder la borne (« ANIMAUX ACCOMPAGNÉS ») ; parler à B.O.B. → il « tient
+│      Gary en laisse, symboliquement ». La porte de l'attente s'ouvre.          [st_laisse]
+│      (Fourrière visitable dès maintenant : M. Sabot exige « le ticket d'entrée et le
+│       permis de la Direction » → objectif final semé.)
+│   4. Attente : regarder le squelette (ticket 9848), l'afficheur (9 847), le
+│      distributeur vide.                                                    [st_voit_patience]
+│   5. Attente : prendre la plante en plastique.                             +plante
+│   6. Attente : parler à B.O.B. (option « Il n'en a plus besoin… ») → B.O.B. aspire le
+│      ticket ; éloge funèbre.                                 [st_ticket_9848] +ticket_9848
+│   7. Guichet : rideau baissé, horloge 10 h 11, horaires 10 h 12–10 h 14.   [st_voit_horloge]
+│   8. Guichet : éclat sur l'horloge → l'improbabilité pousse la grande aiguille :
+│      10 h 12, le rideau remonte, l'afficheur passe à 9848.               [st_guichet_ouvert]
+│   9. Guichet : ticket 9848 sur Mme Guichard → « les animaux s'adressent au
+│      propriétaire » → B.O.B. parle → Formulaire B-7/12 + énoncé des 5 cases ;
+│      10 h 14, rideau.                       [st_formulaire] −ticket_9848 +formulaire
+│  10. Couloir B : on boucle (même extincteur, même porte B-1).              [st_couloir_boucle]
+│  11. Couloir B : poser la plante → au tour suivant, la plante est **une porte plus
+│      à gauche** : le couloir glisse.                                [st_plante_posee] −plante
+│  12. Couloir B : « suivre la plante » (Ink, 3 choix de direction, le bon = vers la
+│      plante) → le couloir se dénoue, les bureaux apparaissent ; Gary reprend M. Ficus.
+│                                                               [st_couloir_resolu] +plante
 │
-├─ PUZZLE 2 — La Foule (accéder au Temple)  — inchangé
-│   8. Regarder / parler à la foule → « SAUF POUR LE GOÛTER ».              (indice)
-│   9. Grenier à mains nues → non. Seau sur le grenier → miettes.          [ch1_seau_miettes]
-│  10. Seau sur la foule → goûter au fond de la galerie, passage libre.  [ch1_foule_dispersee]
+├─ ACTE II — « Humain, preuves à l'appui » (archives, tampons, réclamations)
+│  13. Archives : parler à Duplicata, chercher « PLUNK, GARY » → « AUCUN GARY. AUCUN
+│      GARY. »                                                               [st_cherche_gary]
+│  14. Archives : badge sur le fichier → tiroir G : « PLUNK, GARRY — STATUT : HUMAIN.
+│      INTÉRIMAIRE. RENOUVELABLE PAR PITIÉ. » L'original ne sort pas ; la photocopieuse
+│      n'a plus de papier ; Duplicata garde le badge (pièce justificative).
+│                                                               [st_dossier_trouve] −badge
+│  15. Tampons : parler à Tamponnet → plus d'encre « depuis la grève : l'encre, c'était
+│      le café » ; elle donne le tampon ANNULÉ (« ICI, ON N'ANNULE JAMAIS RIEN »).
+│                                                               [st_tamponnet] +tampon_annule
+│  16. Tampons : prendre l'encreur sec.                                     +encreur
+│  17. Réclamations : comptoir réservé au personnel ; combi de chitine sur la chatière
+│      « ANIMAUX DE SERVICE » → Gary s'aplatit, la chatière reconnaît la carapace.
+│                                                                            [st_chatiere]
+│  18. Réclamations (derrière le comptoir) : prendre la liasse de formulaires de
+│      réclamation vierges et une capsule pneumatique vide.          +liasse +capsule
+│  19. Archives : liasse sur la photocopieuse → 3 copies du dossier, Duplicata :
+│      « CONFORME. CONFORME. » ; le papier reste dans le bac.
+│                                             [st_papier] −liasse +copies_dossier
+│  20. Combiner copies + formulaire → case A remplie ; haut-parleurs : « RECLASSEMENT :
+│      INTÉRIMAIRE. (C'EST PIRE.) » ; B.O.B. perd son animal, soulagé et un peu triste.
+│                                          [st_case_a] [st_reclasse] −copies_dossier
+│  21. (Tampons : formulaire sur Tamponnet → « PAS D'ENCRE, PAS DE VU. » → renvoie à la
+│      grève.)                                                               [st_sait_greve]
 │
-└─ PUZZLE 3 — Tenir l'éclat, refermer la faille
-   11. Temple (la gravité hésite) : regarder le distributeur → l'éclat derrière la
-       spirale.                                                              [ch1_voit_eclat]
-   12. Serpillière sur le distributeur (Ink ch1_josiane) → l'éclat tombe dans le
-       logement de sortie… et la spirale fait un tour de plus : **Josiane reste
-       coincée** (« Josiane… on avait dit jusqu'à la retraite »). Deux fidèles
-       l'adorent déjà. Elle quitte l'inventaire.
-                              [ch1_eclat_tombe] [ch1_josiane_coincee] −serpilliere
-   13. Galerie : seau sur le bassin → seau d'eau bénite tiède.               [ch1_seau_plein]
-   14. Gros plan coeur-eclat : jauge « STABILITÉ : GARY ». Seau sur l'éclat (Ink
-       ch1_plouf, 3 choix ironiques) → PLOUF. Le seau aspire la chaleur, le
-       grésillement, la faille : le Nid arrête de clignoter, les doubles fusionnent.
-       L'éclat remonte, **contenu** dans une coque d'eau bénite figée : Gary le garde.
-       Le seau, lui, flotte à 3 cm du bac, existe « un peu à gauche de lui-même » :
-       il **contient la faille** et ne peut plus bouger. **Gary perd son seau.**
-                [ch1_eclat_stabilise] +fragment, puis [ch1_seau_perdu] −seau
-   15. Nid : éclat sur la Reine → couronnement (ch1_couronnement) : « GARDIEN DE LA
-       FAILLE, TENEUR D'ÉCLAT » ; procession de la **Mue Sacrée** → combinaison de
-       chitine.                                      [ch1_combi] +combi_chitine
-       → # end: ch1_suite.
+├─ ACTE III — « La Grève » (pause, sous-chef, tampons, archives)
+│  22. Pause : parler à PERCO → grève jusqu'à la signature de l'accord P-15 « par la
+│      direction OU SON INTÉRIMAIRE » ; prendre l'accord.        [st_greve_connue] +accord
+│  23. Sous-chef : Delaigue dort ; lire la plaque « p.i. » et la note : « en cas
+│      d'absence (sommeil compris), tout intérimaire de la station signe p.o. ».
+│                                                                       [st_voit_delegation]
+│  24. (Si Gary n'est pas reclassé : accord sur Delaigue → « UN ANIMAL NE SIGNE PAS. IL
+│      TAMPONNE AVEC LA PATTE. » — garde-fou, voir §6.5.)
+│  25. Sous-chef : accord sur Delaigue (requiert `st_reclasse`) → Gary signe « p.o. »
+│      avec le stylo enchaîné. « Pour la première fois de ma vie, être intérimaire
+│      me sert à quelque chose. »                                         [st_accord_signe]
+│  26. Pause : accord signé sur PERCO → fin de grève, les gobelets rentrent au
+│      dépôt.                                                     [st_greve_finie] −accord
+│  27. Pause : parler à PERCO → café tiède dans un gobelet (« UN À LA FOIS »). +gobelet
+│  28. Combiner encreur + gobelet → encreur imbibé de café (brun, « conforme »).
+│                                                                   [st_encreur_cafe]
+│  29. Tampons : encreur sur Tamponnet → CLONK de joie ; formulaire sur Tamponnet →
+│      « VU » (requiert case A).                                   [st_case_b] −encreur
+│  30. Pause : gobelet sur PERCO → 2e café.                                  [st_cafe2]
+│  31. Sous-chef : gobelet sur Delaigue → « …PRIME ? QUELLE PRIME ? » Réveillé ; il
+│      garde le gobelet.                                     [st_delaigue_reveille] −gobelet
+│  32. Sous-chef : formulaire sur Delaigue → signature hiérarchique (requiert « VU ») ;
+│      il explique l'ascenseur (« il ne prend que les dossiers complets aux trois
+│      quarts ») et le quorum du Conseil.                                     [st_case_d]
+│  33. Archives : formulaire sur la photocopieuse (papier de l'étape 19) → 3
+│      exemplaires, Duplicata certifie (tampon léché au café).               [st_case_c]
+│
+└─ ACTE IV — « Le Conseil et la Restitution » (ascenseur, Conseil, Direction, guichet, fourrière)
+   34. Ascenseur : formulaire dans la fente → « AVIS DU CONSEIL REQUIS » → étage Conseil
+       (refusé avant case C).                                         [st_ascenseur_conseil]
+   35. Conseil : parler à Paraphe → quorum de 3 ; tableau des membres : PERCO
+       (représentant du personnel), M. FICUS (membre honoraire, « en plastique depuis
+       le déménagement »).                                                [st_quorum_connu]
+   36. Conseil : plante sur le siège du membre honoraire. Présent.        [st_ficus] −plante
+   37. Pause : capsule sur PERCO (requiert `st_greve_finie`) → procuration + un café
+       (« UN CAFÉ = UN POUR ») envoyés par tube au Conseil.           [st_vote_perco] −capsule
+   38. Conseil : parler à Paraphe → vote : PERCO POUR, Ficus abstention, Paraphe CONTRE
+       « par principe » → égalité, avis AJOURNÉ.                           [st_vote_egalite]
+   39. Conseil : tampon ANNULÉ sur le bulletin de Paraphe → « ON N'ANNULE JAMAIS RIEN…
+       DONC C'EST VALABLE. » Avis favorable ; Paraphe, touchée qu'on ait lu son bulletin,
+       paraphe.                                                               [st_case_e]
+   40. Ascenseur : formulaire complet → DIRECTION GÉNÉRALE.
+   41. Direction : SYLVIE en personne (Ink st_sylvie) → « DÉPÔT AU GUICHET
+       UNIQUEMENT. » Le coffre pulse.                                     [st_sylvie_refuse]
+   42. Guichet : éclat sur l'horloge (2e fois ; B.O.B. : « tu l'as déjà fait ») → 10 h 12,
+       formulaire sur Mme Guichard → tube pneumatique vers la Direction.
+                                                                     [st_dossier_depose]
+   43. Direction : parler à SYLVIE → le coffre s'ouvre : « PROUVEZ QUE L'OBJET EST À
+       VOUS. » Éclat sur le coffre → les deux éclats se reconnaissent et fusionnent
+       (2/4096) ; SYLVIE craque (§8), rend le badge, délivre le permis.
+                                                  [st_eclat2] +badge +permis
+   44. Fourrière : ticket de douane sur M. Sabot → « RETRAIT POSSIBLE. AMENDE : 4 096
+       CRÉDITS (STATIONNEMENT EN TRAVERS D'UNE DIMENSION). » −ticket_douane [st_amende]
+   45. Fourrière : tampon ANNULÉ sur l'amende → Sabot : « …Je fais pas les ventes, mais
+       ça, c'est réglementaire. »                                  [st_vaisseau_libere]
+   46. Quai : permis sur le vaisseau → décollage → `# end: st_suite`.     −permis
 ```
 
-Le seau n'est plus porté jusqu'au bout : il reste au Temple comme réceptacle de la
-faille (hotspot `seau_sacre` du gros plan, prop 3D flottant + double clignotant).
-L'état « vide / miettes / eau » de son icône est porté par les flags tant que Gary
-l'a ; après `ch1_seau_perdu` l'objet a quitté l'inventaire (pas d'icône fantôme).
-Le verset 2 (« IL NE LÂCHERA PLUS SON SEAU ») est, de l'aveu du Scribe, traduit
-« à quatre-vingts pour cent » — B.O.B. : « ils l'avaient traduit à l'envers ».
+### 6.1 Chaînes longues (explicites)
 
-**Invariants (`src/engine/repair.ts`)** : `ch1_eclat_tombe` ⇒ `ch1_josiane_coincee` ;
-`ch1_josiane_coincee` ⇒ pas de `serpilliere` ; `ch1_eclat_stabilise` ⇒ `fragment`
-(hors fin) et `ch1_seau_perdu` ; `ch1_seau_perdu` ⇒ pas de `seau` ; `ch1_combi` ⇒
-`combi_chitine`.
+1. **Identité** : ticket 9848 (6) → guichet (9) → couloir (12) → badge aux archives (14)
+   → papier volé par la chatière (17–18) → copies (19) → case A / reclassement (20).
+2. **Grève** : reclassement (20) → signature p.o. (25) → fin de grève (26) → café (27)
+   → encre (28) → « VU » (29) → 2e café (30) → Delaigue réveillé (31) → signature (32).
+3. **Quorum** : plante prise à l'acte I (5) → Conseil (36) ; capsule prise à l'acte II
+   (18) → PERCO, qui ne vote que si la grève est finie (37) ; tampon ANNULÉ (15) →
+   égalité brisée (39).
+4. **Sortie** : ticket de douane (2) + horloge apprise à l'acte I (8 → 42) + tampon
+   (15 → 45) + permis (43) → décollage (46).
 
-Réponses aux fausses pistes (au moins une par hotspot clé) : seau sur la Reine
-(« GARDE-LE, C'EST TON SEAU. ENFIN, PAS ENCORE. ») ; badge sur la foule ; seau vide
-sur l'éclat (« ça ferait clang ») ; fragment sur le Scribe ; coup de pied au
-distributeur après Josiane (« ARTICLE TOUJOURS NON DISTRIBUABLE ») ; prendre le seau
-sacré (« l'anse se décale poliment d'un univers ») ; `useItemDefault` sur les cafards.
+### 6.2 Dépendances croisées
 
-## 4. Personnages et beats
-
-| Perso | id | Rôle ch.1 | Portrait |
-|---|---|---|---|
-| **Gary Plunk** | `gary` | Messie malgré lui. Répète qu'il est intérimaire, en période d'essai, et qu'un messie a forcément un CDI. | existant |
-| **B.O.B.** | `bob` | Compagnon d'office (suit Gary depuis le ch.0). **Système d'indices** : Ink `ch1_bob`, une branche par étape (même structure que `bob_compagnon`). Running gag : les cafards le vénèrent comme « LE GRAND AVALEUR » et il trouve ça, pour la première fois, presque agréable. | existant |
-| **Sa Majesté Blattaria XIV** | `reine` | Donneuse de quête et de récompense. MAJUSCULES royales, « GARRY », le badge fait foi. Sincèrement émue par la prophétie. | GenAI existant (`reine-sheet.png`) |
-| **Frère Élytre**, Grand Scribe | `scribe` | Gardien de la prophétie, pédant, myope (antennes-lunettes). Parle en citations numérotées (« PROPHÉTIE, VERSET 7, ALINÉA B »). Valide le Signe. | nouveau `characters` dans `game.yaml` ; portrait fixe GenAI `public/portraits/scribe-portrait.png` (buste recadré de `scribe-body.png`), repli texte `portrait: "✒\n(◔ ◔)"` |
-| La Foule / les gardes | narrateur ou `scribe` | Décor parlant via `say:` narrateur (« La foule bruisse. Avec beaucoup de pattes. »). | — |
-| **SYLVIE** | `sylvie` | **Absente**, en écho : le badge, une fois propre, grésille « BADGE… VALI… GARRY… » avec sa voix ; et dans `ch1_suite`, un message brouillé de l'autre côté du multivers (« FORMULAIRE B-7/12 REQUIS POUR TOUT CHANGEMENT DE DIMENSION ») qui annonce la Station Bureaucratique. | existant |
-
-Beats de dialogue (Ink, `content/story/ch1_*.ink`) :
-
-- **`ch1_arrivee`** (onFirstEnter `nid-royal`) : Gary se relève ; B.O.B. inventorie
-  (« Josiane : présente. Badge : présent. Seau : absent. ») ; la Reine : « L'HOMME AU
-  SEAU SANS SEAU. » ; les murs clignotent, « LE NID SE REPLIE SUR LUI-MÊME » ; B.O.B. :
-  « un petit bout de notre catastrophe. Elle a suivi le seau. »
-- **`ch1_reine`** : 1re audience → choix (« Je suis intérimaire » / « Vous avez vu mon
-  seau ? » / « Pourquoi moi ? ») → exigence du Signe ; ensuite branche « attente » ;
-  après `ch1_signe_reconnu` → remise du Seau (+ réplique yaourt) ; après le seau →
-  rappel « LE TEMPLE, GARRY » (symptômes du nid : trône au plafond, étage perdu).
-- **`ch1_scribe`** : récitation de la prophétie (verset 12 : « IL TIENDRA L'ÉCLAT, ET
-  LA FAILLE SE REFERMERA »), menu (la prophétie / la faille — « JE SUIS DEUX » / les
-  cafards et la galaxie / « pourquoi deux R ? »).
-- **`ch1_signe`** : badge propre → proclamation, applaudissements, `# set: ch1_signe_reconnu`.
-- **`ch1_bob`** : indices contextuels (ordre des flags ci-dessus) + `+ [« Raconte-moi
-  quelque chose de déprimant. »]` version cafards (« Ils vivent 6 mois et ils ont l'air
-  plus épanouis que moi. »).
-- **`ch1_josiane`** : serpillière dans le distributeur, `# set: ch1_eclat_tombe`, la
-  spirale garde Josiane, 2 choix (« Tirer plus fort » / « Négocier avec le
-  distributeur »), « Josiane… on avait dit jusqu'à la retraite », `# take:
-  serpilliere # set: ch1_josiane_coincee`.
-- **`ch1_plouf`** : seau sur l'éclat, 3 choix ironiques → PLOUF ; le seau aspire la
-  faille, le nid se calme `# set: ch1_eclat_stabilise` ; l'éclat contenu `# give:
-  fragment` ; l'anse traverse la main de Gary, « Au revoir, seau. Tiens bon. » `# take:
-  seau # set: ch1_seau_perdu` ; B.O.B. : « L'Homme au Seau. Sans seau. Encore. »
-- **`ch1_couronnement`** : la Reine constate le nid sauvé, « L'HOMME AU SEAU… SANS
-  SEAU. ENCORE. » (le seau restera au Temple, léché chaque jour) ; adoube Gary
-  « GARDIEN DE LA FAILLE, TENEUR D'ÉCLAT » (« Je peux avoir ça par écrit ? Pour la
-  RH ? ») ; procession de la **Mue Sacrée** (« IL Y A UN PEU DE MA GRAND-MÈRE DANS
-  L'ÉPAULE GAUCHE » ; Gary : « Ça compte comme équipement de protection
-  individuelle ? »), `# give: combi_chitine # set: ch1_combi` ; B.O.B. : « un cafard qui
-  aurait fait des études » ; l'éclat projette le prochain morceau (un tampon) ;
-  « IL RESTE 4 095 ÉCLATS. ET AUCUN NE SE TIENDRA TOUT SEUL. » `# end: ch1_suite`.
-- **`ch1_suite`** (joué dans l'écran de fin) : faille, écho SYLVIE brouillé, tampon
-  administratif géant qui traverse l'écran ; B.O.B. : « J'ai un mauvais
-  pressentiment. Il est en trois exemplaires. » ; si `ch1_combi`, SYLVIE classe la
-  combi « ANIMAL DE COMPAGNIE » ; Gary : « Pas de seau. Pas de Josiane. Une
-  combinaison en cafard et un éclat tiède. B.O.B., on y va. Et cette fois, je
-  badge. » → « À suivre… ».
-
-## 5. Condition de fin et transition
-
-- **Fin** : `useItem: fragment` sur `reine` (avec `ch1_eclat_stabilise`) → dialogue
-  `ch1_couronnement` (nid sauvé, Gary sacré Gardien de la Faille, combi remise) → tag
-  `# end: ch1_suite`. Plus de « premier monde lavé » : l'éclat est **contenu**, Gary
-  le garde (`fragment`, 1/4096 = premier des 4 096 morceaux à tenir), le seau reste
-  au Temple, Josiane dans le distributeur. `RoomScene.end()` lance `End` avec
-  `{ knot: 'ch1_suite' }`.
-- **EndScene** : aujourd'hui câblée sur ch.0 (plan 3D de la Reine, flag
-  `chapitre0_termine`). On la paramètre par knot : une table
-  `END_BY_KNOT = { cafards: { flag: 'chapitre0_termine', shot: 'roaches' }, ch1_suite:
-  { flag: 'chapitre1_termine', shot: 'stub' } }`. Le plan `stub` du ch.1 = fond 2D
-  (dégradé + texte « STATION BUREAUCRATIQUE — FORMULAIRE EN COURS DE TRAITEMENT »),
-  puis le même « À SUIVRE… ». Pas de ch.2 implémenté.
-- Bouton supplémentaire sur l'écran de fin du ch.0 : **« Chapitre 1 → »** (lance le
-  ch.1 avec son état initial propre). Sur l'écran de fin du ch.1 : seulement « Menu ».
-
-## 6. Démarrer / reprendre le ch.1 — approche retenue
-
-Principe : **un chapitre = un état initial déclaré**, pas de nouvelle sauvegarde ni de
-nouveau format.
-
-1. **`ChapterDef`** (`src/engine/walkthrough.ts`) gagne `startScene` et `initial: {
-   items, flags }`. ch0 : `startScene: 'placard'`, rien d'autre. ch1 :
-   `startScene: 'nid-royal'`, `items: [serpilliere, badge]`, `flags: [ch1,
-   chapitre0_termine]`. Une fonction pure `chapterState(content, ch)` construit le
-   `GameState` (aucun flag/objet du ch.0 hérité hormis ceux-là → **état initial
-   propre**, la sauvegarde ch.0 n'interfère pas). `walkChapter` l'utilise au lieu de
-   `new GameState(content.startScene)`.
-2. **`?chapter=1`** (`src/engine/debug.ts`, champ `chapter`) : `TitleScene` démarre
-   directement une nouvelle partie du ch.1 (`session.newGame('ch1')`), sauvegarde
-   active (ce n'est pas un mode debug).
-3. **Continuité** : bouton « Chapitre 1 → » sur l'écran de fin du ch.0 →
-   `session.newGame('ch1')` puis `Room`. Une sauvegarde ch.0 terminée reprise par
-   « Reprendre » revient à l'écran de fin, qui propose ce bouton.
-4. **Reprise** : rien à faire — la sauvegarde contient `scene: 'nid-royal'` etc.,
-   `loadGame()` la reprend. Pour l'écran de fin, `SaveData` gagne un champ optionnel
-   `chapter?: string` (absent = `ch0`, rétrocompatible, `version` reste 1) afin que
-   `End { final: true }` affiche la bonne fin.
-5. **/creator** : `CHAPTERS` contient `ch1` → sélecteur `?ch=ch1`, checkpoints
-   calculés par `walkChapter` ; « Jouer ici » écrit la sauvegarde et ouvre `?resume=1`
-   (inchangé) ; « URL » utilise `?scene&flags&items` (inchangé, `scene=nid-royal`).
-   Seul ajustement : le lien URL d'un checkpoint de fin ch.1 doit viser la bonne fin
-   (aujourd'hui `scene=fin` = cliffhanger ch.0).
-
-## 7. Fichiers à créer / modifier (Phase B)
-
-**Créer**
-- `content/scenes/ch1-nid-royal.yaml`, `ch1-galerie-des-offrandes.yaml`,
-  `ch1-temple-couloir.yaml`, `ch1-coeur-eclat.yaml`.
-- `content/story/ch1_reine.ink`, `ch1_scribe.ink`, `ch1_bob.ink`, `ch1_eclat.ink`
-  (`ch1_plouf`, `ch1_couronnement`), `ch1_fin.ink` (`ch1_suite`). Assemblés
-  automatiquement (`assembleInk`, ordre alphabétique) ; knots tous préfixés `ch1_`.
-
-**Modifier**
-- `content/items.yaml` : objet `fragment` (« Éclat du Réacteur (1/4096) ») ;
-  combinaison `serpilliere` + `badge` gardée par `if: { flags: [ch1] }` (réplique
-  neutre sinon, pour ne rien changer au ch.0) ; `look` du seau / de la serpillière :
-  entrées ch.1 en tête, gardées par `ch1`.
-- `content/game.yaml` : personnage `scribe`. `startScene` reste `placard`.
-- `src/engine/walkthrough.ts` : `startScene`/`initial` dans `ChapterDef`,
-  `chapterState()`, entrée `ch1` (steps = arbre §3, `endKnot: 'ch1_suite'`).
-- `src/engine/types.ts` : `ArtShape.image` (+ `scale`, `flipX`) ; `SaveData.chapter?`.
-- `src/engine/HotspotLayer.ts` : dessin de `image` (sprite cafard 2D).
-- `src/engine/GameState.ts` : sérialiser `chapter`.
-- `src/engine/debug.ts` : `?chapter=1`.
-- `src/session.ts` : `newGame(chapterId = 'ch0')` via `chapterState()`.
-- `src/scenes/TitleScene.ts` : `?chapter=1` ; préchargement de `roach-2d.png`.
-- `src/scenes/EndScene.ts` : fin paramétrée par knot (`END_BY_KNOT`), plan stub ch.1,
-  bouton « Chapitre 1 → » après le ch.0.
-- `src/creator/main.ts` : lien URL de fin selon le chapitre.
-- `src/ui/music.ts` : `SCENE_THEME` pour les 4 ids.
-- `src/i18n/locales/fr.ts` (+ `en.ts`) : `end.nextChapter`, `end.locationCh1`,
-  texte du plan stub — obligatoire, `check:i18n` refuse les littéraux.
-- `content/locales/en.yaml` : facultatif (repli FR clé par clé) ; au minimum titres de
-  pièces et nom du `fragment` si le temps le permet.
-- `tools/playthrough.ts` : boucle déjà sur `CHAPTERS` ; vérifier en plus
-  `fragment` dans l'inventaire avant la fin du ch.1.
-- `src/engine/repair.ts` : invariant ch.1 si un dialogue donne/retire en plusieurs
-  temps (`ch1_eclat_stabilise` sans `fragment` → redonner `fragment`).
-
-**Ne pas toucher** : contenu ch.0 (scènes `placard/couloir/labo/panneau`, Ink ch.0)
-hormis les ajouts gardés par `ch1` dans `items.yaml`.
-
-## Implémentation (Phase B) — état et écarts au design
-
-**Fait** : les 4 salles, les 3 puzzles et la fin sont jouables de bout en bout
-(`npm run playthrough` : ch0 27 checkpoints inchangés, ch1 29 checkpoints jusqu'à
-`ch1_suite`). Démarrer / reprendre :
-
-| Comment | Effet |
+| Puzzle bloqué | Tant que… (ailleurs) |
 |---|---|
-| `/?chapter=1` | nouvelle partie du ch.1 (état initial propre : `serpilliere`, `badge`, flags `ch1`, `chapitre0_termine`), sauvegarde active — écrase la sauvegarde existante |
-| Écran de fin du ch.0 → **« Chapitre 1 → »** | idem ; « Reprendre » sur une partie ch.0 finie ramène à cet écran |
-| `/creator?ch=ch1` → « Jouer ici » | checkpoint du ch.1 écrit dans la sauvegarde (avec `chapter: 'ch1'`) puis `?resume=1` |
-| `/?scene=<salle>&chapter=1&flags=…&items=…` | mode debug ; `scene=fin&chapter=1` = fin du ch.1 (les liens « URL » de /creator l'ajoutent) |
+| Signer l'accord P-15 (sous-chef) | Gary n'est pas reclassé intérimaire (archives, case A) |
+| Tampon « VU » (tampons) | la grève n'est pas finie (pause) **et** la case A n'est pas remplie |
+| Signature hiérarchique (sous-chef) | Delaigue dort (café de la pause) **et** pas de « VU » (tampons) |
+| 3 exemplaires (archives) | pas de papier (réclamations, via la chatière) **et** pas de signature |
+| Ascenseur → Conseil | case C (archives) |
+| Quorum (Conseil) | plante (attente, acte I) + vote de PERCO (pause, grève finie + capsule des réclamations) |
+| Dépôt (guichet) | avis du Conseil + savoir manipuler l'horloge (acte I) |
+| Sortie (fourrière) | ticket de douane (sas, acte I) + tampon ANNULÉ (tampons, acte II) + permis (Direction) |
 
-**Tester la transition ch.0 → ch.1 depuis /creator** (`ChapterDef.from: 'ch0'` →
-`chapterPrelude()` dans `src/engine/walkthrough.ts`, hors solution : les comptes de
-checkpoints du playthrough ne bougent pas). `/creator?ch=ch1` commence par la section
-« ↪ Transition ch.0 → ch.1 » :
+### 6.3 Indices B.O.B. (`st_bob`)
 
-| Entrée | « Jouer ici » | « URL » (sauvegarde intacte) |
-|---|---|---|
-| ↪ fin ch.0 | sauvegarde ch.0 terminée + `?resume=1` → écran « À suivre… » ; **« Chapitre 1 → »** = `newGame('ch1')`, arrivée au Nid avec le plan d'arrivée filmé | `/?scene=fin&flags=…` : rejoue aussi le cliffhanger avant les boutons |
-| ▶ lancement ch.1 | état initial, Nid jamais visité → intro `ch1_arrivee` filmée | `/?scene=nid-royal&chapter=1&flags=ch1,chapitre0_termine&items=serpilliere,badge&cine=1` |
-| #0 début (« Départ direct ») | Nid, intro déjà vue (comme avant) | `/?scene=nid-royal&chapter=1&…` |
+Une branche par étape bloquante, deux niveaux : 1er appel vague, 2e appel précis
+(flag `st_bob_<étape>_2`). Exemples : horloge (« Il est très improbable que ce guichet
+ouvre. Tu as quelque chose d'improbable sur toi ? ») ; couloir (« Il faudrait un repère.
+Quelque chose qui ne bouge pas. Quelque chose de… plastique. ») ; quorum (« Lis le
+tableau des membres. Le troisième, tu le connais. Tu l'as dans ta poche depuis une
+heure. ») ; égalité (« Elle vote contre. Personne n'a jamais annulé son vote. Tu as un
+tampon que personne n'utilise. »).
 
-Sur `/creator?ch=ch0`, le checkpoint FIN porte « → suite : transition ch.1 »
-(`/creator?ch=ch1#transition`).
+### 6.4 Fausses pistes et répliques (au moins une par hotspot clé)
 
-Écarts au design ci-dessus :
-- Sortie `temple-couloir` → `coeur-eclat` : `if: ch1_eclat_tombe` (n'apparaît qu'une
-  fois l'éclat tombé) plutôt que `requires` + `lockedText`.
-- `ch1_couronnement` ne retire pas l'éclat : Gary le garde (fin = tag `# end`). Il
-  remet la combinaison de chitine (`combi_chitine`).
-- Fin : table `END_BY_CHAPTER` (ch0 → plan 3D `roaches` + bouton « Chapitre 1 → » ;
-  ch1 → plan `stub` 2D « Station Bureaucratique ») ; le chapitre est déduit du knot de
-  fin (`CHAPTERS[].endKnot`), sinon de `SaveData.chapter`.
-- Sprites cafards : texture `roach2d` (= `public/props/roach-2d.png`) préchargée par
-  `TitleScene` ; art YAML `{ image: roach2d, at, scale, flipX }` (+ `color` = teinte).
-- `tools/validate-content.ts` connaît les scènes de départ des chapitres et les flags
-  posés par l'état initial / la fin (`ch1`, `chapitre1_termine`).
-- Le seau ne peut être rempli d'eau bénite qu'après avoir vu l'éclat
-  (`ch1_voit_eclat`), pour éviter un seau à la fois plein de miettes et d'eau.
-- `en.yaml` : titres de pièces, libellés de hotspots / sorties, `fragment`, `scribe` ;
-  répliques et Ink du ch.1 en français (repli clé par clé).
+- `tampon_annule` sur la borne du sas : « ON N'ANNULE PAS UN STATUT. VOUS ÊTES UN ÉTAT
+  DE FAIT. »
+- `ticket_douane` sur le distributeur de tickets / Guichard : « Pas le bon ticket. Pas
+  le bon guichet. Pas la bonne vie. »
+- prendre un gobelet du piquet avant la fin de la grève : « BRISEUR DE GRÈVE ! » (les
+  gobelets sifflent).
+- secouer Delaigue : « …réunion… reportée… »
+- `fragment` sur PERCO : la machine sert un café **froid** (« IMPROBABLE. INADMISSIBLE.
+  PRÉAVIS RECONDUIT. » — puis rien ne change, pas de blocage).
+- `plante` sur Paraphe : « Il vote déjà mieux que vous. A.P. »
+- `badge` sur le portique : « BADGE : GARRY. ESPÈCE : TOUJOURS BLATTE. »
+- `fragment` sur le coffre avant le dépôt : « DÉPÔT AU GUICHET. MÊME POUR LES MIRACLES. »
 
-## Vérification attendue (Phase B)
+### 6.5 Aucune impasse (garde-fous)
 
-`npm run build` (inclut `check:i18n`) ; `npm run playthrough` : ch0 inchangé (même
-nombre de checkpoints) puis ch1 jusqu'à `ch1_suite` ; captures `/creator?ch=ch1` et
-d'une salle ch.1.
+- Aucun objet indispensable ne peut être donné au mauvais PNJ : les mauvais usages
+  répondent mais ne consomment rien.
+- La chatière reconnaît la **carapace** (combi portée), pas le statut : elle reste
+  ouverte après le reclassement.
+- PERCO sert un café « un à la fois » sans limite après la grève ; le papier reste dans
+  le bac de la photocopieuse ; le tampon ANNULÉ n'est jamais consommé.
+- L'éclat fait avancer l'horloge autant de fois que nécessaire (le guichet referme
+  après chaque passage, sans perte).
+- Invariants `repair.ts` à prévoir : `st_case_a` ⇒ pas de `copies_dossier` ;
+  `st_dossier_trouve` ∧ ¬`st_eclat2` ⇒ pas de `badge` ; `st_eclat2` ⇒ `badge` ∧
+  `permis` (avant 46) ; `st_ficus` ⇒ pas de `plante` ; `st_formulaire` ⇒ `formulaire`
+  jusqu'à `st_dossier_depose`.
 
-## Reste à faire (hors MVP)
+## 7. Structure en actes (résumé)
 
-- Plans d'arrivée filmés pour la galerie et le temple (seul le Nid a son `intro`).
-- Portrait parlant du Scribe (planche idle/talk au layout `GENAI_SHEETS` ; portrait fixe au MVP).
-- Traduction anglaise complète du ch.1.
-- Mini-animations (PLOUF sur l'éclat, foule qui se rue) — `beats.ts`.
-- Musique propre au ch.1 (les 4 salles réutilisent `fin` / `couloir` / `labo`).
-- Icônes d'inventaire GenAI pour `fragment` (glyphe texte au MVP) et variante
-  « Josiane trempée d'eau bénite » (`GENAI_VARIANTS` ne connaît que `serpilliere_mouillee`).
-- Gros plan `coeur-eclat` : pièce 3D à part entière (pas d'entrée `CLOSEUPS` : pas de
-  travel caméra depuis le temple, retour par la flèche, pas par clic dans le vide).
-- Vraie fin ch.1 filmée (tampons animés, faille) au lieu du plan `stub` statique.
+| Acte | Lieux | Objectif visible | Durée visée |
+|---|---|---|---|
+| I « Vous êtes un animal » | sas, attente, guichet, couloir B (+ fourrière en repérage) | obtenir le formulaire, dénouer le couloir | 15–20 min |
+| II « Humain, preuves à l'appui » | archives, tampons, réclamations | case A, être reclassé | 15–20 min |
+| III « La Grève » | pause, sous-chef, tampons, archives | cases B, D, C | 20–25 min |
+| IV « Le Conseil et la Restitution » | ascenseur, Conseil, Direction, guichet, fourrière | case E, dépôt, 2e éclat, sortie | 15–20 min |
 
-## Notes design pour la suite (non codé)
+## 8. Fin du ch.1 et accroche ch.2
 
-- **Ch.2 = Station 2 bureaucratique** : paperasse, dialogues absurdes, fonctionnaires
-  caricaturaux, très longs couloirs, **zéro nettoyage**. Gary y arrive en combinaison
-  de chitine (SYLVIE la classe « animal de compagnie »), avec l'éclat contenu et
-  B.O.B., sans seau ni serpillière.
-- **Interlude futur** : mini-vaisseau très serré, énorme tableau de bord ; Gary doit
-  trouver les boutons et une destination pour s'échapper. Entre deux chapitres (ex.
-  ch.1 → ch.2). Seulement mentionné : aucune implémentation.
+**Le craquage de SYLVIE** (étape 43, Ink `st_sylvie_restitution`) : en vérifiant le
+dossier, SYLVIE lit « PLUNK, GARRY — CONTRAT RENOUVELABLE PAR PITIÉ ». Silence de
+trois secondes (les écrans clignotent). « …C'EST MOI QUI AI TAPÉ LES DEUX R. DANS
+TOUTES LES DIMENSIONS. POUR QUE VOTRE DOSSIER NE SOIT JAMAIS CLASSÉ AVEC LES AUTRES. »
+Gary ne sait pas quoi dire ; B.O.B. : « C'est la chose la plus gentille qu'une base
+de données ait jamais faite. » SYLVIE reprend aussitôt : « FORMULAIRE DE RETOUR À
+REMPLIR À L'ARRIVÉE. EN TROIS EXEMPLAIRES. »
 
-## TODO assets (combi de chitine)
+**Fin** (`# end: st_suite`, plan de fin) : le vaisseau décolle du quai ; dans le
+rétroviseur, toute la station tamponne « VU » sur ses hublots. L'éclat 2/4096 tire
+l'aiguille du navigateur vers… un grain de poussière sur le tableau de bord. B.O.B. :
+« Gary. Je crois que la prochaine dimension est **dans** le vaisseau. » Le vaisseau
+rétrécit. Carte : « FIN DU CHAPITRE 1 » → « Chapitre 2 — Dimension Miniature : tout est
+minuscule, sauf la poussière. » → « À suivre… ». Flag `st_termine`.
 
-- **Icône d'inventaire `combi_chitine`** : stub actuel = bake 3D toon
-  (`combiChitine()` dans `src/three/props.ts`, entrée `ICONS` de `Studio.ts`).
-  À remplacer par une icône GenAI `public/inventory/combi_chitine.png` (même cadrage
-  que `fragment.png`) puis ajouter `combi_chitine` à `GENAI_ICONS`.
-- **Planche GenAI « Gary en combi de chitine »** (concept sheet face/3⁄4/dos, design
-  Janék + plastron segmenté, épaulières en élytres, col à antennes, écusson orange
-  recousu) : pour le portrait parlant et les plans du ch.2. Pas d'overlay héros au ch.1.
-- Plan filmé du PLOUF / seau flottant et de Josiane en vitrine (aujourd'hui : props
-  3D conditionnés par `ch1_seau_perdu` / `ch1_josiane_coincee`, sans animation de
-  transition).
+Graine ch.4 semée en passant : le frigo de la pause, « NE PAS TOUCHER AU YAOURT DE
+M. DELAIGUE » ; le yaourt a laissé une note : « PARTI FONDER QUELQUE CHOSE. »
+
+## 9. Scaffold du run suivant
+
+Objectif : **2 salles jouables en stub** pour valider le préfixe, l'état initial, la
+mécanique d'objet à payoff différé et la présence dans /creator — sans bloquer sur l'art.
+
+**Salles** : `st-sas` (arrivée) + `st-attente` (vrai mini-puzzle : obtenir le
+ticket 9848 via B.O.B., plus la plante à payoff différé). La sortie vers `st-guichet`
+existe mais renvoie « GUICHET FERMÉ — TRAVAUX DE RÉNOVATION DU RÈGLEMENT » (`lockedText`) ;
+la sortie vers `st-fourriere` idem.
+
+| Élément | Valeur proposée |
+|---|---|
+| Fichiers | `content/scenes/st-sas.yaml`, `content/scenes/st-attente.yaml`, `content/story/st_arrivee.ink`, `content/story/st_bob.ink` (knots `st_arrivee`, `st_bob`, `st_patience`) |
+| Ids de scènes | `st-sas`, `st-attente` (stubs suivants : `st-guichet`, `st-couloir-b`, `st-fourriere`) |
+| Hotspots `st-sas` | `portique` (look ; take → `ticket_douane`), `borne` (look : statut ; `useItem tampon_annule` plus tard), `vaisseau` (look : remorqué, `if: notFlags st_vaisseau_fourriere`), `bob` (talk → `st_laisse`) |
+| Hotspots `st-attente` | `squelette` (look → `st_voit_patience`), `afficheur` (look « 9 847 »), `distributeur` (look ; `useItem ticket_douane` = fausse piste), `plante` (take → `plante`), `bob` (talk ; option aspirer si `st_voit_patience`) |
+| Flags | `st` (état), `st_arrive`, `st_vaisseau_fourriere`, `st_ticket_douane`, `st_laisse`, `st_voit_patience`, `st_ticket_9848` |
+| Objets (`items.yaml`) | `ticket_douane`, `ticket_9848`, `plante` (icônes : glyphes texte au stub) ; `look` de `badge` / `fragment` gardés par `st` |
+| État initial `ch1` | `startScene: 'st-sas'` tant que l'interlude n'existe pas ; `items: ['badge', 'fragment']`, `flags: ['st', 'ch0_termine', 'combi_portee']` |
+| Walkthrough `ch1` (stub) | `look portique` → `use portique` → `talk bob` → `go st-attente` → `look squelette` → `use plante` → `talk bob` ; fin provisoire : pas d'`endKnot` atteint (playthrough : vérifier `ticket_9848` + `plante` + `ticket_douane` en inventaire) |
+| Rendu | Pièces RoomScene 3D minimales (coque « station » réutilisant le gabarit du couloir C : paroi acier, dalle) ; squelette = prop simple ; plante = cône vert. Art YAML 2D en repli. |
+| Musique | `couloir` pour les deux ids (`SCENE_THEME`) |
+| i18n | titres de pièces + libellés FR ; `en.yaml` facultatif |
+
+Critère de fin du scaffold : `/?chapter=1` (ou `/?scene=st-sas&chapter=1&…`) → on
+ramasse le ticket de douane, on entre dans l'attente, on obtient le ticket 9848 par
+B.O.B. et la plante ; les deux objets différés (`ticket_douane`, `plante`) restent en
+inventaire ; `npm run playthrough` passe ch0 inchangé + stub ch1.
+
+## 10. Notes techniques (pour plus tard)
+
+- **Tubes pneumatiques** : simple effet de mise en scène (prop + son « FLOUP »), pas un
+  système de transport d'objets générique : chaque envoi est un `useItem` scripté.
+- **Couloir infini** : une seule pièce `st-couloir-b` ; la boucle est jouée par Ink
+  (choix de direction) + un décalage de la plante (prop conditionné par flags), pas par
+  une vraie géométrie.
+- **Gros plan `st-formulaire`** : entrée `CLOSEUPS` avec 5 cases dont l'art dépend des
+  flags `st_case_*` ; même rôle que le panneau du ch.0.
+- **Horloge** : prop avec aiguille pilotée par `st_guichet_ouvert` (temporaire : un
+  `onExit` remet le flag à faux) ; le rideau du guichet suit le même flag.
+- **Portraits** : 6 fonctionnaires → portraits fixes GenAI d'abord, planches parlantes
+  pour SYLVIE-Directrice et Delaigue ensuite.
