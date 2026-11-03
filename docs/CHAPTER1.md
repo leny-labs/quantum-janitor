@@ -9,27 +9,36 @@ voir `docs/STORY.md`). Scope : MVP jouable de bout en bout sur un chemin script�
 
 ## 1. Pitch
 
+> **Réécriture « containment » (2026-11-03, validée par Leny)** : plus de thème
+> nettoyage dans l'intrigue. Le ch.0 était un jeu de ménage ; le ch.1 fait évoluer
+> Gary : il y **perd ses outils de janitor** (Josiane, puis le Seau) et repart en
+> **combinaison de chitine**, gardien d'une faille plutôt qu'agent d'entretien.
+
 Gary s'est réveillé face contre un sol tiède et collant, au pied du trône de
 **Sa Majesté Blattaria XIV**. Pour les cafards de B-7, il est **l'Homme au Seau** de
-la prophétie : celui qui « fendra les mondes et nettoiera les dimensions ». Problème :
-le Seau, lui, est passé dans la faille avant Gary. Les cafards l'ont trouvé, l'ont
-léché (consciencieusement), et l'ont posé sur un autel. On ne touche pas au Seau
-Sacré. Sauf l'Homme au Seau. Qui doit d'abord prouver qu'il est l'Homme au Seau.
-Avec un badge qui sent le thon.
+la prophétie : « QUAND LE NID SE REPLIERA, VIENDRA L'HOMME AU SEAU. IL **TIENDRA
+L'ÉCLAT**, ET LA **FAILLE SE REFERMERA**. » Problème : le Seau est passé dans la
+faille avant Gary. Les cafards l'ont trouvé, l'ont léché (consciencieusement), et
+l'ont posé sur un autel. On ne touche pas au Seau Sacré. Sauf l'Homme au Seau. Qui
+doit d'abord prouver qu'il est l'Homme au Seau. Avec un badge qui sent le thon.
 
 Au fond de la galerie des offrandes, les cafards vénèrent « le Temple de l'Ancien
 Couloir » : un morceau de **Klepsydra-9** échoué là — le couloir C, distributeur
-compris. Coincé derrière la spirale du Distrib'Ô-Matic, à la place du sandwich, pulse
-un **éclat du Réacteur d'Improbabilité**. Le nettoyer (= le stabiliser), c'est
-récupérer le premier des 4 096 morceaux. La Reine appelle ça « LE PREMIER MONDE
-LAVÉ ». Gary appelle ça « des heures sup' non payées ».
+compris. Coincé derrière la spirale du Distrib'Ô-Matic pulse un **éclat du Réacteur
+d'Improbabilité** : un morceau d'improbabilité, une **faille** ouverte en plein nid.
+Elle **menace le nid** : les murs clignotent, le Nid se replie (la nurserie est
+aussi dans la cuisine), les cafards apparaissent en double (le Scribe est deux), la
+gravité hésite dans le Temple. Gary doit **contenir** l'éclat, sinon le nid
+s'effondre jusqu'à tenir dans une miette. Le prix : Josiane reste coincée dans le
+distributeur, et le Seau devient le réceptacle de la faille. L'Homme au Seau…
+sans seau. Encore.
 
 **Running gags mobilisés** : GARRY (le badge fait foi, littéralement : c'est le Signe
-de la prophétie) ; tout est tiède (même l'eau bénite) ; Gary est intérimaire (« je
-ne peux pas être un messie, je suis en période d'essai ») ; PLOUF (le seau sur
-l'éclat) ; le yaourt (il a quitté le seau en arrivant : « UN ÊTRE LACTÉ. IL EST PARTI
+de la prophétie) ; tout est tiède (même l'eau bénite, même la réussite) ; Gary est
+intérimaire (« je ne peux pas être un messie, je suis en période d'essai ») ; PLOUF
+(le seau sur l'éclat — un bon PLOUF, cette fois, « le PLOUF qui referme ») ; le yaourt (il a quitté le seau en arrivant : « UN ÊTRE LACTÉ. IL EST PARTI
 FONDER QUELQUE CHOSE. » — graine du ch.5 *L'Envers du Yaourt*) ; le distributeur qui
-recoince toujours quelque chose.
+recoince toujours quelque chose (cette fois : Josiane).
 
 ## 2. Vues / salles
 
@@ -42,7 +51,7 @@ le préfixe de fichier range le chapitre, l'`id` reste celui ci-dessous).
 | `nid-royal` | **Nid Royal** · B-7 · Salle du Trône | Pièce de départ. La Reine, l'autel. | `reine` (talk, useItem badge/fragment), `autel` (Seau Sacré, `if: notFlags ch1_seau_rendu`), `courtisans` (look, sprites), `bob` |
 | `galerie-des-offrandes` | **Galerie des Offrandes** · B-7 · Archives sacrées | Hub : prophétie, eau, miettes, foule. | `fresque` (look), `scribe` (Frère Élytre, talk/useItem badge), `bassin` (Bassin des Ablutions, tiède), `grenier` (Grenier aux Miettes), `foule` (bloque la sortie, `if: notFlags ch1_foule_dispersee`), `bob` |
 | `temple-couloir` | **Temple de l'Ancien Couloir** · B-7 · Fragment K9-C | Le morceau de Klepsydra-9. | `distributeur` (Distrib'Ô-Matic devenu reliquaire), `compteur` (« 0000 JOURS SANS INCIDENT »), `hublot` (le multivers en mosaïque), `lecteur` (traces de yaourt… parties), `bob` |
-| `coeur-eclat` | **Éclat du Réacteur** · Gros plan | Gros plan (comme `panneau`). | `eclat` (look/useItem seau/serpillière), `jauge` (stabilité), `gravure` (« Mk IV — 1/4096 ») |
+| `coeur-eclat` | **Éclat du Réacteur** · Gros plan | Gros plan (comme `panneau`). | `eclat` (look/useItem seau), `jauge` (stabilité), `gravure` (« Mk IV — 1/4096 — NE PAS LÉCHER »), `seau_sacre` (le Seau qui contient la faille, `if: ch1_seau_perdu`) |
 
 Navigation : `nid-royal` ⇄ `galerie-des-offrandes` ⇄ `temple-couloir` ⇄ `coeur-eclat`.
 La sortie galerie → temple a `requires: { flags: [ch1_foule_dispersee] }` ; la sortie
@@ -74,62 +83,72 @@ Musique : `themeForScene()` retombe sur `couloir` pour un id inconnu ; MVP = map
 
 Objets ch.1 : **serpillière** (Josiane) et **badge « Garry »** arrivés avec Gary,
 **seau** (rendu par la Reine, réutilise l'objet `seau` du ch.0), **éclat du réacteur**
-(`fragment`, nouvel objet). Tous les flags du chapitre sont préfixés `ch1_` ; le flag
-`ch1` marque l'état « on est dans le chapitre 1 » (sert de garde dans les textes
-partagés de `items.yaml`).
+(`fragment`, contenu), **combinaison de chitine** (`combi_chitine`, fin). Tous les
+flags du chapitre sont préfixés `ch1_` ; le flag `ch1` marque l'état « on est dans
+le chapitre 1 » (garde des textes partagés de `items.yaml`).
 
 ```
-Arrivée (nid-royal, onFirstEnter) : la Reine accueille GARRY, exige le Seau Sacré
-dans les mains de l'Homme au Seau « QUAND IL AURA PROUVÉ QU'IL EST L'HOMME AU SEAU ».
+Arrivée (nid-royal, onFirstEnter, Ink ch1_arrivee) : la Reine accueille GARRY, garde le
+Seau Sacré « JUSQU'À CE QU'IL AIT PROUVÉ QU'IL EST L'HOMME AU SEAU » ; les murs clignotent :
+la faille du Temple replie le nid.
 │
 ├─ PUZZLE 1 — Le Signe aux deux R (récupérer le Seau)
-│   1. Parler à la Reine (Ink ch1_reine) → la prophétie exige « LE SIGNE ».  [ch1_audience]
-│      L'autel est intouchable : utiliser l'autel → deux gardes cafards croisent leurs pattes.
-│   2. Galerie : regarder la fresque → « L'HOMME AU SEAU PORTERA SUR SON CŒUR
-│      LE SIGNE AUX DEUX R ». Gary regarde son badge. Oh non.                [ch1_sait_signe]
-│   3. Badge sur le Scribe (Frère Élytre) → refusé : « LE SIGNE EST TERNI.
-│      IL SENT… LE POISSON ANCIEN. » (le thon de B.O.B., ch.0)               [ch1_badge_refuse]
-│   4. Serpillière sur le bassin des ablutions → Josiane trempée d'eau
-│      bénite. Tiède. Évidemment.                                            [ch1_josiane_mouillee]
-│   5. Combiner serpillière + badge (inventaire) → badge propre,
-│      « GARRY » brille.                                                      [ch1_badge_propre]
-│   6. Badge sur le Scribe → il se prosterne, proclame l'Homme au Seau
-│      (Ink ch1_signe). La galerie entière applaudit, avec beaucoup de pattes. [ch1_signe_reconnu]
-│   7. Nid : parler à la Reine → elle rend le Seau. Il est propre (léché).
-│      Le yaourt est parti « FONDER QUELQUE CHOSE ».                         [ch1_seau_rendu] +seau
+│   1. Parler à la Reine (ch1_reine) → prophétie de la faille + exigence du Signe. [ch1_audience]
+│      L'autel est intouchable : utiliser l'autel → deux gardes croisent leurs pattes.
+│   2. Galerie (cafards en double à l'entrée) : regarder la fresque → « LE SIGNE AUX
+│      DEUX R ». Gary regarde son badge. Oh non.                             [ch1_sait_signe]
+│   3. Badge sur le Scribe → refusé : il sent « LE POISSON ANCIEN ».        [ch1_badge_refuse]
+│   4. Serpillière sur le bassin → Josiane trempée d'eau bénite. Tiède.   [ch1_josiane_mouillee]
+│   5. Combiner serpillière + badge → badge désodorisé, « GARRY » brille.   [ch1_badge_propre]
+│      (dernier usage de Josiane avant le Temple : pas de conflit)
+│   6. Badge sur le Scribe → proclamation (ch1_signe).                     [ch1_signe_reconnu]
+│   7. Nid : parler à la Reine → elle rend le Seau ; le yaourt est parti « FONDER
+│      QUELQUE CHOSE » ; « TIENS L'ÉCLAT, REFERME LA FAILLE ».          [ch1_seau_rendu] +seau
 │
-├─ PUZZLE 2 — La Foule (accéder au Temple)
-│   8. Galerie : la sortie vers le Temple est bouchée par la foule en prière.
-│      Regarder / parler à la foule → « ON NE DÉRANGE PAS LA PRIÈRE. SAUF POUR
-│      LE GOÛTER. »                                                           (indice)
-│   9. Utiliser le grenier aux miettes → « à mains nues ? Il faut un récipient. »
-│      Seau sur le grenier → seau plein de miettes saintes.                  [ch1_seau_miettes]
-│  10. Seau sur la foule → Gary vide le seau au fond de la galerie. Plouf sec.
-│      La foule se rue sur le goûter ; le passage est libre.                 [ch1_foule_dispersee]
+├─ PUZZLE 2 — La Foule (accéder au Temple)  — inchangé
+│   8. Regarder / parler à la foule → « SAUF POUR LE GOÛTER ».              (indice)
+│   9. Grenier à mains nues → non. Seau sur le grenier → miettes.          [ch1_seau_miettes]
+│  10. Seau sur la foule → goûter au fond de la galerie, passage libre.  [ch1_foule_dispersee]
 │
-└─ PUZZLE 3 — Laver le premier monde (l'éclat du réacteur)
-   11. Temple : regarder le distributeur → derrière la spirale, à la place du
-       sandwich, un éclat qui vibre d'improbabilité.                         [ch1_voit_eclat]
-   12. Serpillière sur le distributeur (même geste que le ch.0, par la trappe)
-       → l'éclat tombe et roule dans le logement de sortie. Trop chaud pour la main :
-       la moustache de Gary pousse de 3 cm quand il approche.                [ch1_eclat_tombe]
+└─ PUZZLE 3 — Tenir l'éclat, refermer la faille
+   11. Temple (la gravité hésite) : regarder le distributeur → l'éclat derrière la
+       spirale.                                                              [ch1_voit_eclat]
+   12. Serpillière sur le distributeur (Ink ch1_josiane) → l'éclat tombe dans le
+       logement de sortie… et la spirale fait un tour de plus : **Josiane reste
+       coincée** (« Josiane… on avait dit jusqu'à la retraite »). Deux fidèles
+       l'adorent déjà. Elle quitte l'inventaire.
+                              [ch1_eclat_tombe] [ch1_josiane_coincee] −serpilliere
    13. Galerie : seau sur le bassin → seau d'eau bénite tiède.               [ch1_seau_plein]
-   14. Gros plan coeur-eclat : regarder la jauge → « STABILITÉ : GARY ».
-       Seau sur l'éclat (choix ironiques, Ink ch1_plouf) → PLOUF.
-       L'éclat refroidit, se stabilise ; Gary le ramasse.     [ch1_eclat_stabilise] +fragment
-   15. Nid : éclat sur la Reine → couronnement (Ink ch1_couronnement)
-       → « LE PREMIER MONDE EST LAVÉ » → # end: ch1_suite.
+   14. Gros plan coeur-eclat : jauge « STABILITÉ : GARY ». Seau sur l'éclat (Ink
+       ch1_plouf, 3 choix ironiques) → PLOUF. Le seau aspire la chaleur, le
+       grésillement, la faille : le Nid arrête de clignoter, les doubles fusionnent.
+       L'éclat remonte, **contenu** dans une coque d'eau bénite figée : Gary le garde.
+       Le seau, lui, flotte à 3 cm du bac, existe « un peu à gauche de lui-même » :
+       il **contient la faille** et ne peut plus bouger. **Gary perd son seau.**
+                [ch1_eclat_stabilise] +fragment, puis [ch1_seau_perdu] −seau
+   15. Nid : éclat sur la Reine → couronnement (ch1_couronnement) : « GARDIEN DE LA
+       FAILLE, TENEUR D'ÉCLAT » ; procession de la **Mue Sacrée** → combinaison de
+       chitine.                                      [ch1_combi] +combi_chitine
+       → # end: ch1_suite.
 ```
 
-Le seau reste dans l'inventaire jusqu'au bout (l'Homme au Seau ne lâche plus son
-seau). L'état « vide / miettes / eau » est porté par les flags (`look` du seau
-conditionné : `ch1_seau_miettes` et pas `ch1_foule_dispersee` → miettes ;
-`ch1_seau_plein` et pas `ch1_eclat_stabilise` → eau).
+Le seau n'est plus porté jusqu'au bout : il reste au Temple comme réceptacle de la
+faille (hotspot `seau_sacre` du gros plan, prop 3D flottant + double clignotant).
+L'état « vide / miettes / eau » de son icône est porté par les flags tant que Gary
+l'a ; après `ch1_seau_perdu` l'objet a quitté l'inventaire (pas d'icône fantôme).
+Le verset 2 (« IL NE LÂCHERA PLUS SON SEAU ») est, de l'aveu du Scribe, traduit
+« à quatre-vingts pour cent » — B.O.B. : « ils l'avaient traduit à l'envers ».
 
-Réponses aux fausses pistes (au moins une par hotspot clé, comme au ch.0) : seau sur
-la Reine (« GARDE-LE, C'EST TON SEAU. ENFIN, PAS ENCORE. ») ; badge sur la foule ;
-serpillière sèche sur l'éclat (« ça étale de l'improbabilité ») ; seau vide sur
-l'éclat ; fragment sur le Scribe ; etc. `useItemDefault` sur les cafards.
+**Invariants (`src/engine/repair.ts`)** : `ch1_eclat_tombe` ⇒ `ch1_josiane_coincee` ;
+`ch1_josiane_coincee` ⇒ pas de `serpilliere` ; `ch1_eclat_stabilise` ⇒ `fragment`
+(hors fin) et `ch1_seau_perdu` ; `ch1_seau_perdu` ⇒ pas de `seau` ; `ch1_combi` ⇒
+`combi_chitine`.
+
+Réponses aux fausses pistes (au moins une par hotspot clé) : seau sur la Reine
+(« GARDE-LE, C'EST TON SEAU. ENFIN, PAS ENCORE. ») ; badge sur la foule ; seau vide
+sur l'éclat (« ça ferait clang ») ; fragment sur le Scribe ; coup de pied au
+distributeur après Josiane (« ARTICLE TOUJOURS NON DISTRIBUABLE ») ; prendre le seau
+sacré (« l'anse se décale poliment d'un univers ») ; `useItemDefault` sur les cafards.
 
 ## 4. Personnages et beats
 
@@ -144,34 +163,51 @@ l'éclat ; fragment sur le Scribe ; etc. `useItemDefault` sur les cafards.
 
 Beats de dialogue (Ink, `content/story/ch1_*.ink`) :
 
-- **`ch1_arrivee`** (onFirstEnter `nid-royal`, ou lignes `say:`) : Gary se relève ;
-  B.O.B. inventorie (« Josiane : présente. Badge : présent. Seau : absent. Dignité :
-  absente depuis longtemps. ») ; la Reine : « L'HOMME AU SEAU SANS SEAU. LA PROPHÉTIE
-  N'AVAIT PAS PRÉVU ÇA. »
+- **`ch1_arrivee`** (onFirstEnter `nid-royal`) : Gary se relève ; B.O.B. inventorie
+  (« Josiane : présente. Badge : présent. Seau : absent. ») ; la Reine : « L'HOMME AU
+  SEAU SANS SEAU. » ; les murs clignotent, « LE NID SE REPLIE SUR LUI-MÊME » ; B.O.B. :
+  « un petit bout de notre catastrophe. Elle a suivi le seau. »
 - **`ch1_reine`** : 1re audience → choix (« Je suis intérimaire » / « Vous avez vu mon
   seau ? » / « Pourquoi moi ? ») → exigence du Signe ; ensuite branche « attente » ;
   après `ch1_signe_reconnu` → remise du Seau (+ réplique yaourt) ; après le seau →
-  rappel « LE TEMPLE, GARRY ».
-- **`ch1_scribe`** : récitation de la prophétie, menu (la prophétie / les cafards et la
-  galaxie / « pourquoi deux R ? » → « UNE FAUTE DE FRAPPE DIVINE N'EST PAS UNE FAUTE »).
+  rappel « LE TEMPLE, GARRY » (symptômes du nid : trône au plafond, étage perdu).
+- **`ch1_scribe`** : récitation de la prophétie (verset 12 : « IL TIENDRA L'ÉCLAT, ET
+  LA FAILLE SE REFERMERA »), menu (la prophétie / la faille — « JE SUIS DEUX » / les
+  cafards et la galaxie / « pourquoi deux R ? »).
 - **`ch1_signe`** : badge propre → proclamation, applaudissements, `# set: ch1_signe_reconnu`.
 - **`ch1_bob`** : indices contextuels (ordre des flags ci-dessus) + `+ [« Raconte-moi
   quelque chose de déprimant. »]` version cafards (« Ils vivent 6 mois et ils ont l'air
   plus épanouis que moi. »).
-- **`ch1_plouf`** : seau sur l'éclat, 3 choix ironiques (« Avec délicatesse » / « Avec
-  professionnalisme » / « Comme d'habitude ») → tous finissent en PLOUF, `# give:
-  fragment # set: ch1_eclat_stabilise`.
-- **`ch1_couronnement`** : la Reine adoube Gary « NETTOYEUR DES MONDES » (« Je peux
-  avoir ça par écrit ? Pour la RH ? ») ; l'éclat projette sur le mur la position du
-  prochain morceau ; `# end: ch1_suite`.
+- **`ch1_josiane`** : serpillière dans le distributeur, `# set: ch1_eclat_tombe`, la
+  spirale garde Josiane, 2 choix (« Tirer plus fort » / « Négocier avec le
+  distributeur »), « Josiane… on avait dit jusqu'à la retraite », `# take:
+  serpilliere # set: ch1_josiane_coincee`.
+- **`ch1_plouf`** : seau sur l'éclat, 3 choix ironiques → PLOUF ; le seau aspire la
+  faille, le nid se calme `# set: ch1_eclat_stabilise` ; l'éclat contenu `# give:
+  fragment` ; l'anse traverse la main de Gary, « Au revoir, seau. Tiens bon. » `# take:
+  seau # set: ch1_seau_perdu` ; B.O.B. : « L'Homme au Seau. Sans seau. Encore. »
+- **`ch1_couronnement`** : la Reine constate le nid sauvé, « L'HOMME AU SEAU… SANS
+  SEAU. ENCORE. » (le seau restera au Temple, léché chaque jour) ; adoube Gary
+  « GARDIEN DE LA FAILLE, TENEUR D'ÉCLAT » (« Je peux avoir ça par écrit ? Pour la
+  RH ? ») ; procession de la **Mue Sacrée** (« IL Y A UN PEU DE MA GRAND-MÈRE DANS
+  L'ÉPAULE GAUCHE » ; Gary : « Ça compte comme équipement de protection
+  individuelle ? »), `# give: combi_chitine # set: ch1_combi` ; B.O.B. : « un cafard qui
+  aurait fait des études » ; l'éclat projette le prochain morceau (un tampon) ;
+  « IL RESTE 4 095 ÉCLATS. ET AUCUN NE SE TIENDRA TOUT SEUL. » `# end: ch1_suite`.
 - **`ch1_suite`** (joué dans l'écran de fin) : faille, écho SYLVIE brouillé, tampon
   administratif géant qui traverse l'écran ; B.O.B. : « J'ai un mauvais
-  pressentiment. Il est en trois exemplaires. » → « À suivre… ».
+  pressentiment. Il est en trois exemplaires. » ; si `ch1_combi`, SYLVIE classe la
+  combi « ANIMAL DE COMPAGNIE » ; Gary : « Pas de seau. Pas de Josiane. Une
+  combinaison en cafard et un éclat tiède. B.O.B., on y va. Et cette fois, je
+  badge. » → « À suivre… ».
 
 ## 5. Condition de fin et transition
 
 - **Fin** : `useItem: fragment` sur `reine` (avec `ch1_eclat_stabilise`) → dialogue
-  `ch1_couronnement` → tag `# end: ch1_suite`. `RoomScene.end()` lance `End` avec
+  `ch1_couronnement` (nid sauvé, Gary sacré Gardien de la Faille, combi remise) → tag
+  `# end: ch1_suite`. Plus de « premier monde lavé » : l'éclat est **contenu**, Gary
+  le garde (`fragment`, 1/4096 = premier des 4 096 morceaux à tenir), le seau reste
+  au Temple, Josiane dans le distributeur. `RoomScene.end()` lance `End` avec
   `{ knot: 'ch1_suite' }`.
 - **EndScene** : aujourd'hui câblée sur ch.0 (plan 3D de la Reine, flag
   `chapitre0_termine`). On la paramètre par knot : une table
@@ -265,7 +301,8 @@ hormis les ajouts gardés par `ch1` dans `items.yaml`.
 Écarts au design ci-dessus :
 - Sortie `temple-couloir` → `coeur-eclat` : `if: ch1_eclat_tombe` (n'apparaît qu'une
   fois l'éclat tombé) plutôt que `requires` + `lockedText`.
-- `ch1_couronnement` ne retire pas l'éclat : Gary le garde (fin = tag `# end`).
+- `ch1_couronnement` ne retire pas l'éclat : Gary le garde (fin = tag `# end`). Il
+  remet la combinaison de chitine (`combi_chitine`).
 - Fin : table `END_BY_CHAPTER` (ch0 → plan 3D `roaches` + bouton « Chapitre 1 → » ;
   ch1 → plan `stub` 2D « Station Bureaucratique ») ; le chapitre est déduit du knot de
   fin (`CHAPTERS[].endKnot`), sinon de `SaveData.chapter`.
@@ -296,3 +333,26 @@ d'une salle ch.1.
 - Gros plan `coeur-eclat` : pièce 3D à part entière (pas d'entrée `CLOSEUPS` : pas de
   travel caméra depuis le temple, retour par la flèche, pas par clic dans le vide).
 - Vraie fin ch.1 filmée (tampons animés, faille) au lieu du plan `stub` statique.
+
+## Notes design pour la suite (non codé)
+
+- **Ch.2 = Station 2 bureaucratique** : paperasse, dialogues absurdes, fonctionnaires
+  caricaturaux, très longs couloirs, **zéro nettoyage**. Gary y arrive en combinaison
+  de chitine (SYLVIE la classe « animal de compagnie »), avec l'éclat contenu et
+  B.O.B., sans seau ni serpillière.
+- **Interlude futur** : mini-vaisseau très serré, énorme tableau de bord ; Gary doit
+  trouver les boutons et une destination pour s'échapper. Entre deux chapitres (ex.
+  ch.1 → ch.2). Seulement mentionné : aucune implémentation.
+
+## TODO assets (combi de chitine)
+
+- **Icône d'inventaire `combi_chitine`** : stub actuel = bake 3D toon
+  (`combiChitine()` dans `src/three/props.ts`, entrée `ICONS` de `Studio.ts`).
+  À remplacer par une icône GenAI `public/inventory/combi_chitine.png` (même cadrage
+  que `fragment.png`) puis ajouter `combi_chitine` à `GENAI_ICONS`.
+- **Planche GenAI « Gary en combi de chitine »** (concept sheet face/3⁄4/dos, design
+  Janék + plastron segmenté, épaulières en élytres, col à antennes, écusson orange
+  recousu) : pour le portrait parlant et les plans du ch.2. Pas d'overlay héros au ch.1.
+- Plan filmé du PLOUF / seau flottant et de Josiane en vitrine (aujourd'hui : props
+  3D conditionnés par `ch1_seau_perdu` / `ch1_josiane_coincee`, sans animation de
+  transition).

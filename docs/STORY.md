@@ -52,15 +52,17 @@ bretelle, drone porte-outils sur l'épaule gauche. Modèle 3D : `gary()` dans
 | Ch. | Dimension | Idée |
 |---|---|---|
 | 0 | *Klepsydra-9* (originale) | Le Seau. Tutoriel + catastrophe. **(MVP)** |
-| 1 | **B-7 « Blattaria Prime »** | Les cafards ont hérité de la galaxie. Gary est un messie malgré lui ; la prophétie exige qu'il « nettoie les mondes ». |
-| 2 | **Station Bureaucratique** | La station où le règlement a gagné : chaque porte exige un formulaire, SYLVIE y est reine. |
+| 1 | **B-7 « Blattaria Prime »** | Les cafards ont hérité de la galaxie. Gary est un messie malgré lui ; la prophétie veut qu'il « tienne l'éclat » et referme la faille qui replie leur nid. Il y perd Josiane et le Seau, et repart en combinaison de chitine. |
+| 2 | **Station Bureaucratique** | La station où le règlement a gagné : chaque porte exige un formulaire, SYLVIE y est reine. Paperasse, fonctionnaires caricaturaux, couloirs interminables, zéro nettoyage. |
 | 3 | **Dimension Miniature** | Tout est minuscule sauf la poussière. B.O.B. devient un titan. |
 | 4 | **Klepsydra-Lux** | Version luxueuse de la station où Gary est capitaine (sa mère avait raison). Il déteste ça. |
 | 5 | **L'Envers du Yaourt** | Le yaourt conscient du lecteur de badge a fondé une civilisation lactée. Il est en colère. |
 | fin | **Le Placard Originel** | Tous les morceaux reconvergent dans le placard à balais. |
 
-Chaque chapitre : un fragment de station à « nettoyer » (= stabiliser) pour
-récupérer un morceau du réacteur.
+Chaque chapitre : un fragment de station à stabiliser / contenir pour récupérer
+un morceau du réacteur (à partir du ch.1, plus de thème ménage : Gary a perdu ses
+outils de janitor). Interlude envisagé entre deux chapitres : un mini-vaisseau très
+serré, à piloter sans savoir à quoi servent les boutons (non implémenté).
 
 ## Chapitre 0 « Le Seau » — chaîne de puzzles
 
