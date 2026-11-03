@@ -1,6 +1,8 @@
 // Types du contenu (YAML) et de l'état de jeu. Aucun import Phaser ici :
 // ce fichier est partagé avec tools/validate-content.ts.
 
+import type { PropSfx } from './propSfx';
+
 export type Rect = [x: number, y: number, w: number, h: number];
 
 /** Condition évaluée sur l'état. Tous les critères doivent être vrais. */
@@ -73,6 +75,13 @@ export interface Hotspot {
   useLabel?: string;
   /** Picto du verbe « utiliser », déduit du libellé source au chargement (avant traduction). */
   useIcon?: UseIcon;
+  /**
+   * Bruitage du « use » (engine/propSfx.ts) : click, clonk, lever, beep, dud, none.
+   * Défaut : d'après le mesh `pressable` ou le picto `press`.
+   */
+  sfx?: PropSfx;
+  /** Si vrai (hors tension, refus…), le « use » joue `dud` au lieu de `sfx`. */
+  sfxDud?: Condition;
   talk?: Interaction;
   /**
    * Verbe du clic gauche / tap court (voir engine/verbs.ts). Par défaut :

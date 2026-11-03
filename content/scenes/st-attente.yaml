@@ -57,6 +57,7 @@ hotspots:
 
   - id: distributeur
     label: Distributeur de tickets
+    sfx: clonk
     rect: [860, 180, 130, 260]
     art:
       - { rect: [870, 190, 110, 240], color: "#c0392b", stroke: "#ffffff", text: "TICKETS", size: 14 }

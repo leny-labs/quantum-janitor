@@ -19,6 +19,7 @@ art:
 hotspots:
   - id: portique
     label: Portique de scan
+    sfx: click
     useLabel: Prendre un ticket
     rect: [470, 110, 250, 370]
     art:
@@ -44,6 +45,7 @@ hotspots:
 
   - id: borne
     label: Borne SYLVIE
+    sfx: beep
     rect: [820, 190, 140, 290]
     art:
       - { rect: [840, 200, 100, 270], color: "#1f7f73", stroke: "#7fffd4" }

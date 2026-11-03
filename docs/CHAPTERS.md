@@ -52,6 +52,9 @@ objets à payoff différé (voir [`CHAPTER1.md`](CHAPTER1.md), §5).
   (`src/three/press.ts`) : petit geste (bouton qui s'enfonce, levier qui bascule) + son au clic.
 - Le `use` joue directement l'effet : `say` / `set:` simples, ou un knot Ink **linéaire**
   (répliques sans choix). Réappui : une réplique courte conditionnée par le flag posé.
+- **Tout prop physique actionnable joue un SFX** à chaque `use` (réappui, hors tension, refus
+  compris) : `sfx: click|clonk|lever|beep|none` + `sfxDud: <condition>` (→ `dud`) sur le hotspot,
+  défaut d'après le mesh `pressable` / picto `press` (`src/engine/propSfx.ts`, vérif `npm run check:sfx`).
 - `look` reste au verb coin / clic droit. Une zone générale (tableau de bord…) peut rester
   en `smart: look`.
 - Exemples : `panneau/bouton` (STABILISER : 1er appui `catastrophe`, 2e appui

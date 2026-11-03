@@ -57,6 +57,8 @@ hotspots:
 
   - id: tableau
     label: Tableau de bord
+    sfx: click
+    sfxDud: { notFlags: [iv_contact] }
     smart: look
     rect: [300, 220, 680, 150]
     look:
@@ -75,6 +77,8 @@ hotspots:
   # ── props physiques en clic direct : un hotspot par bouton (meshes : rooms/cockpit.ts) ──
   - id: bouton_npa
     label: Gros bouton « NE PAS APPUYER »
+    sfx: click
+    sfxDud: { notFlags: [iv_contact] }
     useLabel: Appuyer
     rect: [370, 262, 100, 74]
     art:
@@ -92,6 +96,8 @@ hotspots:
 
   - id: bouton_hyper
     label: Bouton « HYPERESPACE »
+    sfx: click
+    sfxDud: { notFlags: [iv_contact] }
     useLabel: Appuyer
     rect: [515, 262, 100, 74]
     art:
@@ -109,6 +115,8 @@ hotspots:
 
   - id: bouton_eject
     label: Bouton « ÉJECTION »
+    sfx: click
+    sfxDud: { notFlags: [iv_contact] }
     useLabel: Appuyer
     rect: [635, 262, 100, 74]
     art:
@@ -126,6 +134,8 @@ hotspots:
 
   - id: bouton_auto
     label: Bouton « AUTOPILOTE »
+    sfx: click
+    sfxDud: { notFlags: [iv_contact] }
     useLabel: Appuyer
     rect: [755, 262, 100, 74]
     art:
@@ -143,6 +153,8 @@ hotspots:
 
   - id: levier
     label: Levier sans étiquette
+    sfx: lever
+    sfxDud: { notFlags: [iv_contact] }
     useLabel: Tirer
     rect: [965, 370, 95, 110]
     art:
@@ -188,6 +200,8 @@ hotspots:
 
   - id: navigateur
     label: Navigateur dimensionnel
+    sfx: beep
+    sfxDud: { flags: [iv_destination] }
     smart: look
     rect: [1015, 50, 240, 196]
     if: { flags: [iv_navigateur] }
@@ -206,6 +220,8 @@ hotspots:
   # ── une ligne tactile par destination (rooms/cockpit.ts) ──
   - id: dest_miniature
     label: « DIMENSION MINIATURE »
+    sfx: beep
+    sfxDud: { flags: [iv_destination] }
     useLabel: Choisir
     rect: [1022, 88, 226, 36]
     if: { flags: [iv_navigateur] }
@@ -222,6 +238,8 @@ hotspots:
 
   - id: dest_klepsydra
     label: « KLEPSYDRA-LUX »
+    sfx: beep
+    sfxDud: { flags: [iv_destination] }
     useLabel: Choisir
     rect: [1022, 126, 226, 36]
     if: { flags: [iv_navigateur] }
@@ -238,6 +256,8 @@ hotspots:
 
   - id: dest_yaourt
     label: « L'ENVERS DU YAOURT »
+    sfx: beep
+    sfxDud: { flags: [iv_destination] }
     useLabel: Choisir
     rect: [1022, 164, 226, 36]
     if: { flags: [iv_navigateur] }
@@ -254,6 +274,8 @@ hotspots:
 
   - id: dest_station
     label: « STATION (BUREAUCRATIQUE) »
+    sfx: beep
+    sfxDud: { flags: [iv_destination] }
     useLabel: Choisir
     rect: [1022, 202, 226, 36]
     if: { flags: [iv_navigateur] }

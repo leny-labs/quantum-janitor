@@ -7,6 +7,7 @@ import { assembleInk, locateInkLine, parseContent, toActions } from '../src/engi
 import { compileInk, INK_TAG_KEYS, parseTag } from '../src/engine/ink';
 import { MOODS, isMood } from '../src/engine/mood';
 import { SMART_VALUES } from '../src/engine/verbs';
+import { PROP_SFX } from '../src/engine/propSfx';
 import { ROOM_ICONS, type Action, type ArtShape, type Condition, type GameContent, type Interaction } from '../src/engine/types';
 import { CHAPTERS } from '../src/engine/walkthrough';
 import { readFileSync } from 'node:fs';
@@ -187,6 +188,9 @@ for (const s of content.scenes.values()) {
       if (!(SMART_VALUES as readonly string[]).includes(h.smart)) err(`${hw}.smart : valeur inconnue « ${h.smart} » (${SMART_VALUES.join(', ')})`);
       else if (h.smart !== 'menu' && h.smart !== 'look' && !h[h.smart]) err(`${hw}.smart : « ${h.smart} » sans interaction correspondante`);
     }
+    if (h.sfx !== undefined && !(PROP_SFX as readonly string[]).includes(h.sfx)) err(`${hw}.sfx : valeur inconnue « ${h.sfx} » (${PROP_SFX.join(', ')})`);
+    if ((h.sfx !== undefined || h.sfxDud !== undefined) && !h.use) err(`${hw} : sfx / sfxDud sans « use »`);
+    checkCondition(h.sfxDud, `${hw}.sfxDud`);
     checkInteraction(h.useItemDefault, `${hw}.useItemDefault`);
     for (const [item, i] of Object.entries(h.useItem ?? {})) {
       if (!content.items.has(item)) err(`${hw}.useItem : objet inconnu « ${item} »`);

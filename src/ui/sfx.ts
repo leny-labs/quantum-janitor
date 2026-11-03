@@ -422,3 +422,90 @@ export function distantPlouf(): void {
   noise(a, t + 0.03, 0.6, 0.035, 700, 180);
   cosmicHarp([0, 7, 14], 62, 0.16, { dur: 0.9, vol: 0.016, shimmer: 0.004 });
 }
+
+// ── Props physiques (engine/propSfx.ts) : un son à CHAQUE actionnement ──────
+// Volontairement plus forts et plus « médium » que le thud : audibles sur des
+// haut-parleurs de portable (peu de graves), toujours via le bus SFX (réglage S / mute).
+
+/** Petit bouton : clic sec à l'enfoncement + relâchement plus léger. */
+export function click(): void {
+  const a = ctx();
+  if (!a) return;
+  const t = a.currentTime;
+  noise(a, t, 0.035, 0.42, 3800, 2200);
+  tone(a, 'square', 1900, 1100, t, 0.03, 0.07);
+  tone(a, 'sine', 420, 180, t, 0.07, 0.16);
+  // relâchement
+  noise(a, t + 0.085, 0.025, 0.22, 5200, 3400);
+  tone(a, 'square', 2400, 1800, t + 0.085, 0.02, 0.035);
+}
+
+/** Gros bouton (STABILISER, distributeur) : « CLONK » massif et métallique. */
+export function clonk(): void {
+  const a = ctx();
+  if (!a) return;
+  const t = a.currentTime;
+  tone(a, 'sine', 240, 62, t, 0.32, 0.4);
+  tone(a, 'square', 150, 85, t, 0.09, 0.12);
+  tone(a, 'triangle', 980, 860, t, 0.16, 0.06);
+  noise(a, t, 0.09, 0.4, 1600, 500);
+  noise(a, t + 0.004, 0.05, 0.2, 4500, 3000);
+  // ressort du bouton qui remonte
+  noise(a, t + 0.17, 0.03, 0.18, 3000, 2000);
+  tone(a, 'square', 700, 520, t + 0.17, 0.03, 0.04);
+}
+
+/** Levier : crans de cliquet puis « chunk » en butée. */
+export function lever(): void {
+  const a = ctx();
+  if (!a) return;
+  const t = a.currentTime;
+  for (let i = 0; i < 4; i++) {
+    noise(a, t + i * 0.04, 0.02, 0.26, 2800 - i * 180, 1800);
+    tone(a, 'square', 1300 - i * 90, 900, t + i * 0.04, 0.015, 0.035);
+  }
+  const c = t + 0.18;
+  tone(a, 'sine', 190, 52, c, 0.26, 0.38);
+  tone(a, 'square', 120, 70, c, 0.08, 0.1);
+  noise(a, c, 0.1, 0.38, 1100, 380);
+  noise(a, c + 0.003, 0.04, 0.16, 4200, 2600);
+}
+
+/** Écran tactile (navigateur, borne) : tap + double bip montant. */
+export function touchBeep(): void {
+  const a = ctx();
+  if (!a) return;
+  const t = a.currentTime;
+  noise(a, t, 0.02, 0.18, 4800, 3600);
+  tone(a, 'square', 1320, 1320, t + 0.005, 0.06, 0.06);
+  tone(a, 'sine', 1320, 1320, t + 0.005, 0.07, 0.1);
+  tone(a, 'square', 1760, 1760, t + 0.075, 0.08, 0.06);
+  tone(a, 'sine', 1760, 1760, t + 0.075, 0.09, 0.1);
+}
+
+/** Clic dans le vide (hors tension, refusé) : clic sec puis petit « bonk » mort. */
+export function dud(): void {
+  const a = ctx();
+  if (!a) return;
+  const t = a.currentTime;
+  noise(a, t, 0.03, 0.4, 3200, 1800);
+  tone(a, 'square', 1500, 900, t, 0.025, 0.06);
+  tone(a, 'square', 170, 120, t + 0.06, 0.13, 0.07);
+  tone(a, 'sine', 170, 110, t + 0.06, 0.14, 0.16);
+}
+
+const PROP_SOUNDS: Record<'click' | 'clonk' | 'lever' | 'beep' | 'dud', () => void> = { click, clonk, lever, beep: touchBeep, dud };
+const propLog: string[] = [];
+
+/** Joue le bruitage d'un prop (nom résolu par engine/propSfx.ts). */
+export function propSound(name: keyof typeof PROP_SOUNDS, id = ''): void {
+  if (import.meta.env.DEV) {
+    propLog.push(`${id}:${name}`);
+    console.debug(`[sfx] ${id} → ${name}`);
+  }
+  PROP_SOUNDS[name]();
+}
+
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  Object.assign((window as unknown as { qjSfx: object }).qjSfx, { click, clonk, lever, touchBeep, dud, propLog });
+}

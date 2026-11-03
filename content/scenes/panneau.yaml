@@ -62,6 +62,8 @@ hotspots:
 
   - id: bouton
     label: Gros bouton rouge « STABILISER »
+    sfx: clonk
+    sfxDud: { notFlags: [panneau_allume] }
     rect: [813, 312, 187, 130]
     art:
       - { rect: [820, 319, 173, 115], color: "#2a1a1a", stroke: "#ff5c7a" }

@@ -12,6 +12,7 @@
     "playthrough": "tsx tools/playthrough.ts",
     "bake:portraits": "tsx tools/bake-portraits.ts",
     "check:tap": "tsx tools/tap-check.ts",
+    "check:sfx": "tsx tools/prop-sfx-check.ts",
     "check:i18n": "tsx tools/i18n-hardcoded.ts && tsx tools/i18n-content.ts",
     "i18n": "tsx tools/i18n-content.ts"
   },
