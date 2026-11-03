@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { at, box, cyl, decal, glow, group, label, mat, mysteryTag, outline, shell, sphere, torus, type DecalMark } from './kit';
 import { t as tr, tl as trl } from '../i18n';
 import { BROW_POSES, type BrowPair } from '../engine/brows';
+import { speaking } from '../engine/speaking';
 
 /**
  * Expression d'un personnage pour le studio de portraits (frames de sprite).
@@ -751,6 +752,152 @@ export function billboard(url: string, h: number, aspect: number, o: { tint?: TH
   g.userData.sprite = sprite;
   return g;
 }
+
+/** Une frame de planche et sa durée (ms). */
+export interface ActorStep {
+  frame: number;
+  duration: number;
+}
+
+/**
+ * Boucles d'un personnage en billboard à planche : `idle` au repos, `talk`
+ * quand la boîte de dialogue le fait parler (frappe en cours), `listen`
+ * (frame fixe) entre deux répliques à lui.
+ */
+export interface ActorLoops {
+  idle: readonly ActorStep[];
+  talk?: readonly ActorStep[];
+  listen?: number;
+}
+
+/** Frame d'une boucle à l'instant `ms`. */
+function loopFrame(steps: readonly ActorStep[], ms: number): number {
+  const total = steps.reduce((a, s) => a + s.duration, 0);
+  let x = ((ms % total) + total) % total;
+  for (const s of steps) {
+    if (x < s.duration) return s.frame;
+    x -= s.duration;
+  }
+  return steps[0].frame;
+}
+
+/** Frame à afficher pour le personnage `id` à l'instant `t` (s), selon qu'il parle (engine/speaking). */
+export function actorFrame(id: string, loops: ActorLoops, t: number): number {
+  if (speaking.id === id) {
+    if (speaking.talking && loops.talk) return loopFrame(loops.talk, t * 1000);
+    if (loops.listen !== undefined) return loops.listen;
+  }
+  return loopFrame(loops.idle, t * 1000);
+}
+
+const sheetFrames = new Map<string, THREE.Texture[]>();
+
+/**
+ * Billboard GenAI à planche : `frames` cellules égales côte à côte (même cadre
+ * que l'image fixe, pieds en bas), une texture-clone par cellule (une seule
+ * copie GPU). `userData.setFrame(i)` change de cellule ; `userData.sprite` comme `billboard`.
+ */
+export function billboardSheet(url: string, frames: number, h: number, aspect: number, o: { tint?: THREE.ColorRepresentation; shadow?: number } = {}): THREE.Group {
+  let maps = sheetFrames.get(url);
+  if (!maps) {
+    const all: THREE.Texture[] = [];
+    const base = new THREE.TextureLoader().load(url, () => all.forEach((f) => (f.needsUpdate = true)));
+    base.colorSpace = THREE.SRGBColorSpace;
+    for (let i = 0; i < frames; i++) {
+      const t = base.clone();
+      t.repeat.set(1 / frames, 1);
+      t.offset.set(i / frames, 0);
+      t.anisotropy = 8;
+      all.push(t);
+    }
+    maps = all;
+    sheetFrames.set(url, maps);
+  }
+  const material = new THREE.SpriteMaterial({ map: maps[0], color: o.tint ?? '#ffffff', alphaTest: 0.12, transparent: true });
+  const sprite = new THREE.Sprite(material);
+  sprite.center.set(0.5, 0.008);
+  sprite.scale.set(h * aspect, h, 1);
+  const g = group([spriteShadow(o.shadow ?? h * aspect * 0.4), sprite]);
+  g.userData.sprite = sprite;
+  const list = maps;
+  g.userData.setFrame = (i: number) => {
+    const m = list[Math.max(0, Math.min(list.length - 1, i))];
+    if (material.map !== m) material.map = m;
+  };
+  return g;
+}
+
+/**
+ * Planches in-world (_briefs/polish-placements/genai/tools/strip.py : seules
+ * les zones qui bougent viennent des variantes GenAI, le reste est l'image fixe).
+ *   Reine / Scribe : 0 repos · 1 mandibules écartées (parle) · 2 antennes qui ondulent
+ *   Sabot : 0 repos · 1 clignement · 2 parle · 3 agacé · 4 coup de tampon
+ *   Patience (avec / sans ticket) : 0 repos · 1 mâchoire ouverte · 2 soupir (crâne penché)
+ */
+export const REINE_SHEET = `${import.meta.env.BASE_URL}props/ch1/reine-sheet.png`;
+export const SCRIBE_SHEET = `${import.meta.env.BASE_URL}props/ch1/scribe-sheet.png`;
+export const SABOT_SHEET = `${import.meta.env.BASE_URL}props/st/sabot-sheet.png`;
+export const PATIENCE_SHEET = `${import.meta.env.BASE_URL}props/st/patience-sheet.png`;
+export const PATIENCE_EMPTY_SHEET = `${import.meta.env.BASE_URL}props/st/patience-vide-sheet.png`;
+/** Cafards parlants : antennes qui ondulent au repos, mandibules qui s'écartent en parlant. */
+export const ROACH_ACTOR: ActorLoops = {
+  idle: [
+    { frame: 0, duration: 1600 },
+    { frame: 2, duration: 900 },
+    { frame: 0, duration: 2300 },
+    { frame: 2, duration: 700 },
+  ],
+  talk: [
+    { frame: 1, duration: 170 },
+    { frame: 0, duration: 120 },
+    { frame: 1, duration: 210 },
+    { frame: 0, duration: 140 },
+    { frame: 1, duration: 150 },
+    { frame: 2, duration: 160 },
+  ],
+  listen: 0,
+};
+export const SABOT_ACTOR: ActorLoops = {
+  idle: [
+    { frame: 0, duration: 1900 },
+    { frame: 1, duration: 120 },
+    { frame: 0, duration: 1400 },
+    { frame: 4, duration: 260 },
+    { frame: 0, duration: 1600 },
+    { frame: 1, duration: 110 },
+    { frame: 0, duration: 900 },
+    { frame: 4, duration: 240 },
+    { frame: 0, duration: 300 },
+    { frame: 4, duration: 240 },
+  ],
+  talk: [
+    { frame: 2, duration: 140 },
+    { frame: 3, duration: 110 },
+    { frame: 2, duration: 170 },
+    { frame: 0, duration: 100 },
+    { frame: 2, duration: 150 },
+    { frame: 3, duration: 130 },
+  ],
+  // entre deux répliques : il vous toise, agacé
+  listen: 3,
+};
+export const PATIENCE_ACTOR: ActorLoops = {
+  idle: [
+    { frame: 0, duration: 5200 },
+    { frame: 2, duration: 1600 },
+    { frame: 0, duration: 3800 },
+    { frame: 1, duration: 300 },
+    { frame: 0, duration: 2600 },
+    { frame: 2, duration: 1300 },
+  ],
+  talk: [
+    { frame: 1, duration: 180 },
+    { frame: 0, duration: 140 },
+  ],
+};
+/** Siège vide de salle d'attente (GenAI, même style que la chaise de M. Patience, 589 × 768). */
+export const SIEGE_URL = `${import.meta.env.BASE_URL}props/st/siege.png`;
+export const SIEGE_ASPECT = 589 / 768;
 
 /** Sa Majesté Blattaria XIV en pied (GenAI, 768 × 1024, _briefs/ch1/genai-fix/cutout.py). */
 export const REINE_URL = `${import.meta.env.BASE_URL}props/ch1/reine.png`;

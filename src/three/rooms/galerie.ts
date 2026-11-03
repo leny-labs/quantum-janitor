@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { at, box, cyl, glow, mat, pool, sphere, torus } from '../kit';
-import { SCRIBE_ASPECT, SCRIBE_URL, billboard, bob } from '../props';
+import { ROACH_ACTOR, SCRIBE_ASPECT, SCRIBE_SHEET, actorFrame, billboardSheet, bob } from '../props';
 import { BobVoice } from './bobvoix';
 import { candle, crowd, drip, eggLamps, hive, mist, puddle, rib, rng, shaft, vaultArch } from './hive';
 import type { RoomBuild } from './index';
@@ -81,7 +81,8 @@ export const galerie: RoomBuild = {
     const sc = s.stand(s.rect('scribe'));
     const sz = sc.z - 0.5;
     const top = s.wallAt(620, 176, sz).y;
-    const scribe = billboard(SCRIBE_URL, top, SCRIBE_ASPECT, { tint: '#fff0de', shadow: 0.5 });
+    // planche : antennes qui ondulent, mandibules qui s'écartent quand il parle
+    const scribe = billboardSheet(SCRIBE_SHEET, 3, top, SCRIBE_ASPECT, { tint: '#fff0de', shadow: 0.5 });
     scribe.position.set(sc.x - 0.05, 0, sz);
     const ss = scribe.userData.sprite as THREE.Sprite;
     const sBase = ss.scale.clone();
@@ -139,6 +140,7 @@ export const galerie: RoomBuild = {
     s.animate((time) => {
       const b = Math.sin(time * 1.4);
       ss.scale.set(sBase.x, sBase.y * (1 + b * 0.012), 1);
+      scribe.userData.setFrame(actorFrame('scribe', ROACH_ACTOR, time));
       // il hoche la tête en relisant (petit balancement)
       ss.material.rotation = Math.sin(time * 0.8) * 0.015;
     });

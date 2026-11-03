@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { at, box, cyl, glow, mat, pool, sphere, torus } from '../kit';
-import { REINE_ASPECT, REINE_URL, billboard, bob, seau } from '../props';
+import { REINE_ASPECT, REINE_SHEET, ROACH_ACTOR, actorFrame, billboardSheet, bob, seau } from '../props';
 import { BobVoice } from './bobvoix';
 import { candle, crowd, drip, eggLamps, hive, mist, puddle, rib, shaft, vaultArch } from './hive';
 import type { RoomBuild } from './index';
@@ -133,7 +133,8 @@ export const nid: RoomBuild = {
     const qz = tz + u * 0.18;
     const top = s.wallAt(680, 44, qz).y;
     const qh = top - seatY;
-    const queen = billboard(REINE_URL, qh, REINE_ASPECT, { tint: '#fff2e2', shadow: u * 0.16 });
+    // planche : antennes qui ondulent, mandibules qui s'écartent quand elle parle
+    const queen = billboardSheet(REINE_SHEET, 3, qh, REINE_ASPECT, { tint: '#fff2e2', shadow: u * 0.16 });
     queen.position.set(tx + u * 0.02, seatY, qz);
     const qs = queen.userData.sprite as THREE.Sprite;
     const qBase = qs.scale.clone();
@@ -146,6 +147,7 @@ export const nid: RoomBuild = {
       const b = Math.sin(t * 1.25);
       qs.scale.set(qBase.x * (1 + b * 0.008), qBase.y * (1 + b * 0.014), 1);
       qs.material.rotation = Math.sin(t * 0.55) * 0.012;
+      queen.userData.setFrame(actorFrame('reine', ROACH_ACTOR, t));
       aura.material.opacity = 0.36 + b * 0.06;
       gemHalo.material.opacity = 0.4 + Math.sin(t * 2.1) * 0.15;
     });

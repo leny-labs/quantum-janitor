@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import type { HeroShot } from '../Hero';
 import { at, box, cyl, glow, mat, sphere, Vignette } from '../kit';
-import { GARY_PRONE_ASPECT, GARY_PRONE_URL, REINE_ASPECT, REINE_URL, ROACH_2D, billboard, bob, roach, roachSprite, seau } from '../props';
+import { GARY_PRONE_ASPECT, GARY_PRONE_URL, REINE_ASPECT, REINE_SHEET, ROACH_2D, ROACH_ACTOR, actorFrame, billboardSheet, billboard, bob, roach, roachSprite, seau } from '../props';
 import { skyPlane, skyTexture } from './backdrop';
 
 export function endShot(width: number, height: number): HeroShot {
@@ -68,7 +68,7 @@ export function endShot(width: number, height: number): HeroShot {
 
   // la Reine et sa cour
   // Reine : sprite GenAI en pied (par défaut), ou l'ancien cafard 3D couronné (?roach2d=0)
-  const queen = ROACH_2D ? at(billboard(REINE_URL, 6.2, REINE_ASPECT, { shadow: 1.6 }), -2.2, 0, -7) : at(roach(6, true), -2.2, 0, -7, -0.35);
+  const queen = ROACH_2D ? at(billboardSheet(REINE_SHEET, 3, 6.2, REINE_ASPECT, { shadow: 1.6 }), -2.2, 0, -7) : at(roach(6, true), -2.2, 0, -7, -0.35);
   scene.add(queen);
   const court: THREE.Object3D[] = [];
   for (const [x, z, sz, ry] of [[6, -11, 3.4, -2.6], [9.5, -6.5, 2.4, -2.2], [-9, -12, 2.8, 0.5], [3, -16, 2, -1.7], [-6, -4, 1.6, 0.9]] as const) {
@@ -112,8 +112,13 @@ export function endShot(width: number, height: number): HeroShot {
     if (queenSprite && queenScale) {
       // sprite : respiration royale plutôt que des petits sauts
       queenSprite.scale.set(queenScale.x, queenScale.y * (1 + Math.sin(t * 1.3) * 0.015), 1);
+      queen.userData.setFrame?.(actorFrame('reine', ROACH_ACTOR, t));
     } else queen.position.y = Math.abs(Math.sin(t * 1.4)) * 0.06;
-    court.forEach((r, i) => (r.position.y = Math.abs(Math.sin(t * 6 + i)) * 0.08));
+    court.forEach((r, i) => {
+      r.position.y = Math.abs(Math.sin(t * 6 + i)) * 0.08;
+      // en prière ; de temps en temps un coup d'œil vers Gary (3/4)
+      if (ROACH_2D) r.userData.setPose?.(Math.sin(t * 0.37 + i * 2.3) > 0.9 ? '34' : 'worship');
+    });
     robot.rotation.y = -0.6 + Math.sin(t * 0.7) * 0.15;
   };
   tick(0);

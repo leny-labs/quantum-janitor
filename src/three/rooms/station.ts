@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
-import { PATIENCE_ASPECT, PATIENCE_EMPTY_URL, PATIENCE_URL, SABOT_ASPECT, SABOT_URL, billboard, bob } from '../props';
+import { PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, actorFrame, billboard, billboardSheet, bob } from '../props';
 import { BobVoice } from './bobvoix';
 import type { RoomBuild } from './index';
 import { against, shell, wallPanels } from './shell';
@@ -69,13 +69,31 @@ function neonTubes(s: Stage, y: number, xs: number[], z: number): void {
   }
 }
 
+/**
+ * Affiches et tampons de la Station : ordre de profondeur mur → joints → affiche, et rien devant.
+ * Les faisceaux des néons (`beam`, additifs, renderOrder 3, sans écriture de profondeur) sont
+ * devant le mur : sans ça, leurs bords tracent des lignes claires en travers du texte. L'affiche
+ * passe donc dans la file transparente (matériau cloné, opacité 1) et se dessine après eux.
+ */
+const POSTER_ORDER = 5;
+function onTop(o: THREE.Object3D, order = POSTER_ORDER): THREE.Object3D {
+  o.traverse((c) => {
+    const m = c as THREE.Mesh;
+    if (!m.material) return;
+    m.material = (m.material as THREE.Material).clone();
+    m.material.transparent = true;
+    m.renderOrder = order;
+  });
+  return o;
+}
+
 /** Affiche administrative collée au mur (bordure, en-tête coloré). */
 // z ≥ 0.05 : devant les joints de `wallPanels` (face avant à z = 0.04), sinon une barre verticale barre l'affiche
 function poster(s: Stage, rect: [number, number, number, number], text: string, head: string, z = 0.06): void {
   const f = s.fit(rect, z);
-  s.add(at(box(f.w, f.h, 0.02, '#f6efdc', { edges: true, shadow: false }), f.x, f.y, z));
-  s.add(at(plane(f.w * 0.96, f.h * 0.16, head), f.x, f.y + f.h * 0.38, z + 0.012));
-  s.add(at(label(text, f.w * 0.9, f.h * 0.66, { color: '#2a2830', bold: true }), f.x, f.y - f.h * 0.08, z + 0.013));
+  s.add(onTop(at(box(f.w, f.h, 0.02, '#f6efdc', { edges: true, shadow: false }), f.x, f.y, z)));
+  s.add(onTop(at(plane(f.w * 0.96, f.h * 0.16, head), f.x, f.y + f.h * 0.38, z + 0.012), POSTER_ORDER + 1));
+  s.add(onTop(at(label(text, f.w * 0.9, f.h * 0.66, { color: '#2a2830', bold: true }), f.x, f.y - f.h * 0.08, z + 0.013), POSTER_ORDER + 1));
 }
 
 /** Tampon « VU » encré de travers sur le mur (décor). */
@@ -83,8 +101,8 @@ function inkStamp(s: Stage, px: number, py: number, text: string, z = 0.08): voi
   const p = s.wallAt(px, py, z);
   const m = at(label(text, 0.9, 0.38, { color: '#c0392b', bold: true }), p.x, p.y, z);
   m.rotation.z = 0.25;
+  onTop(m, POSTER_ORDER + 2);
   (m.material as THREE.MeshBasicMaterial).opacity = 0.75;
-  (m.material as THREE.MeshBasicMaterial).transparent = true;
   s.add(m);
 }
 
@@ -125,8 +143,8 @@ export const stSas: RoomBuild = {
 
     // bandeau « BIENVENUE — VOTRE VISITE EST ENREGISTRÉE »
     const ban = s.fit([540, 20, 520, 60], 0.03);
-    s.add(at(box(ban.w, ban.h, 0.06, '#1f7f73'), ban.x, ban.y, 0.03));
-    s.add(at(label(tr('props.station.welcome'), ban.w * 0.95, ban.h * 0.8, { color: '#f6efdc', bold: true }), ban.x, ban.y, 0.065));
+    s.add(onTop(at(box(ban.w, ban.h, 0.06, '#1f7f73'), ban.x, ban.y, 0.03)));
+    s.add(onTop(at(label(tr('props.station.welcome'), ban.w * 0.95, ban.h * 0.8, { color: '#f6efdc', bold: true }), ban.x, ban.y, 0.065), POSTER_ORDER + 1));
     poster(s, [985, 110, 170, 110], tr('props.station.pets'), '#c0392b');
     inkStamp(s, 1070, 235, tr('props.station.stampSeen'));
 
@@ -176,18 +194,13 @@ export const stSas: RoomBuild = {
     for (const sx of [-1, 1]) booth.add(at(box(0.08, gr.h * 0.58, 1, '#8a4a1a'), sx * gr.w * 0.48, gr.h * 0.71, 0));
     const glass = at(plane(gr.w * 0.92, gr.h * 0.55, '#bfe6ff', { opacity: 0.22 }), 0, gr.h * 0.7, 0.5);
     booth.add(at(label(tr('props.station.pound'), gr.w * 0.9, gr.h * 0.12, { color: '#ffffff', bold: true }), 0, gr.h * 0.3, 0.51));
-    // M. Sabot (sprite GenAI) derrière la vitre : le comptoir lui cache les jambes ; il tamponne sans lever les yeux
-    const sabot = billboard(SABOT_URL, gr.h * 0.92, SABOT_ASPECT, { tint: '#fff4e6', shadow: 0.01 });
+    // M. Sabot (planche GenAI) derrière la vitre : le comptoir lui cache les jambes ; il cligne, tamponne,
+    // parle avec la boîte de dialogue et vous toise, agacé, entre deux répliques
+    const sabot = billboardSheet(SABOT_SHEET, 5, gr.h * 0.92, SABOT_ASPECT, { tint: '#fff4e6', shadow: 0.01 });
     sabot.position.set(0, 0, -0.15);
-    const sabotSprite = sabot.userData.sprite as THREE.Sprite;
-    const sabotScale = sabotSprite.scale.clone();
     booth.add(sabot, glass);
     s.spot('guerite', at(booth, gr.x, 0, against(gr.z, 1)));
-    s.animate((t) => {
-      // coup de tampon : petit tassement sec toutes les ~1,3 s
-      const hit = Math.sin(t * 5) > 0.75 ? 0.025 : 0;
-      sabotSprite.scale.set(sabotScale.x * (1 + hit * 0.4), sabotScale.y * (1 - hit), 1);
-    });
+    s.animate((t) => sabot.userData.setFrame(actorFrame('sabot', SABOT_ACTOR, t)));
 
     // ── porte-gobelet orphelin (resté du vaisseau) ──
     const pg = s.stand(s.rect('porte_gobelet'));
@@ -222,7 +235,7 @@ export const stSas: RoomBuild = {
   },
 };
 
-/** Chaise (px) occupée par M. Patience : la rangée 3D la saute, son sprite apporte la sienne. */
+/** Chaise (px) occupée par M. Patience : la rangée de sièges la saute, son sprite apporte la sienne. */
 const PATIENCE_CHAIR = 265;
 
 /** 2. Salle d'Attente. */
@@ -277,28 +290,30 @@ export const stAttente: RoomBuild = {
     board.add(digits, at(glow('#ff4f5a', af.w * 1.2, 0.18), 0, -af.h * 0.1, 0.1));
     s.spot('afficheur', at(board, af.x, af.y, 0.06));
 
-    // rangée de chaises vissées, le long du mur du fond
-    const seatY = 0.55;
-    const chairs: number[] = [];
-    for (let px = 75; px <= 740; px += 95) chairs.push(px);
-    for (const px of chairs) {
-      if (px === PATIENCE_CHAIR) continue; // la chaise de M. Patience fait partie de son sprite
+    // rangée de chaises vissées, le long du mur du fond : sièges GenAI (même dessin que la chaise de
+    // M. Patience, qui fait partie de son sprite), du plus loin au plus près pour un tri propre
+    const seatH = 1.12;
+    for (let px = 75; px <= 740; px += 95) {
+      if (px === PATIENCE_CHAIR) continue;
       const c = s.floorAt(px, 470);
-      const chair = new THREE.Group();
-      chair.add(at(box(0.62, 0.08, 0.6, '#3d6f9e'), 0, seatY, 0), at(box(0.62, 0.62, 0.08, '#3d6f9e'), 0, seatY + 0.34, -0.28));
-      chair.add(at(cyl(0.03, 0.03, seatY, '#8d93a0', { edges: false }), 0, seatY / 2, 0), at(box(0.5, 0.03, 0.4, '#8d93a0', { edges: false }), 0, 0.015, 0));
-      s.add(at(chair, c.x, 0, against(c.z, 0.7)));
+      s.add(at(billboard(SIEGE_URL, seatH, SIEGE_ASPECT, { tint: '#fff2de', shadow: 0.3 }), c.x, 0, against(c.z, 0.7) + 0.05));
     }
 
-    // ── M. Patience (sprite GenAI, assis sur sa propre chaise), ticket 9 848 tendu tant qu'il le tient ──
+    // ── M. Patience (planche GenAI, assis sur sa propre chaise), ticket 9 848 tendu tant qu'il le tient ──
+    // il soupire de temps en temps (crâne qui s'affaisse), la mâchoire claque parfois
     const ph = 1.72;
     const pc = s.floorAt(PATIENCE_CHAIR, 470);
     const pz = against(pc.z, 0.7) + 0.05;
-    const withTicket = billboard(PATIENCE_URL, ph, PATIENCE_ASPECT, { tint: '#fff2de', shadow: 0.38 });
-    const emptyHand = billboard(PATIENCE_EMPTY_URL, ph, PATIENCE_ASPECT, { tint: '#fff2de', shadow: 0.38 });
+    const withTicket = billboardSheet(PATIENCE_SHEET, 3, ph, PATIENCE_ASPECT, { tint: '#fff2de', shadow: 0.38 });
+    const emptyHand = billboardSheet(PATIENCE_EMPTY_SHEET, 3, ph, PATIENCE_ASPECT, { tint: '#fff2de', shadow: 0.38 });
     s.when({ notFlags: ['st_ticket_9848'] }, withTicket);
     s.when({ flags: ['st_ticket_9848'] }, emptyHand);
     s.spot('squelette', at(withTicket, pc.x + 0.12, 0, pz), at(emptyHand, pc.x + 0.12, 0, pz));
+    s.animate((t) => {
+      const f = actorFrame('patience', PATIENCE_ACTOR, t);
+      withTicket.userData.setFrame(f);
+      emptyHand.userData.setFrame(f);
+    });
 
     // ── distributeur de tickets (en rupture) ──
     const ds = s.stand(s.rect('distributeur'));
