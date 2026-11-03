@@ -630,15 +630,19 @@ function roachFrame(pose: RoachPose, facingRight: boolean): THREE.Texture {
   return t;
 }
 
-/** Disque d'ombre au sol (un sprite ne projette pas d'ombre). */
+/**
+ * Disque d'ombre au sol (un sprite ne projette pas d'ombre). Posé au-dessus des
+ * revêtements plaqués sur le sol (dalle de la station y = 0.02, bandes, bac de
+ * l'éclat…) et tiré vers la caméra en profondeur : sinon il s'enterre dessous.
+ */
 function spriteShadow(r: number, opacity = 0.38): THREE.Mesh {
   const shadow = new THREE.Mesh(
     new THREE.CircleGeometry(r, 20),
-    new THREE.MeshBasicMaterial({ color: '#12060a', transparent: true, opacity, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ color: '#12060a', transparent: true, opacity, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 }),
   );
   shadow.rotation.x = -Math.PI / 2;
   shadow.scale.set(1, 0.42, 1);
-  shadow.position.y = 0.015;
+  shadow.position.y = 0.04;
   shadow.renderOrder = 1;
   return shadow;
 }
