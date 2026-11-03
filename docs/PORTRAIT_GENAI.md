@@ -96,6 +96,17 @@ suivi), qui part du master v2 (`v2-gary-master.png`) et du masque robot v2b
 des 8 poses du calque. Garder la bande à 8 × (80 × 112) et l'ancrage 160/48, ou mettre à
 jour `PORTRAIT_OVERLAYS` en conséquence.
 
+## Gary en combi de chitine — variante de planche
+
+Dès que `combi_portee` est posé (interlude → ch.1 Station et après), la boîte de dialogue
+affiche `public/portraits/gary-combi-sheet.png` à la place de `gary-sheet.png`
+(`SHEET_VARIANTS` / `speakerSheetKey` dans `src/three/Studio.ts`). Même layout 4 × 2 @256,
+même calque robot (`gary-robot.png`, ancré sur le support d'épaule, conservé au même endroit),
+mêmes boucles. Fabrication : un seul buste GenAI (frame idle0 de la planche orange, combi
+orange remplacée par l'armure de `inventory/combi_chitine.png`), puis pour chaque frame les
+zones du visage qui bougent (yeux, bouche, barbe) sont recopiées de la planche d'origine →
+expressions identiques, corps stable d'une frame à l'autre. `gary-combi-ref.png` = idle0 + robot.
+
 ## SYLVIE — planche GenAI à humeurs + onde
 
 **Validée par Leny (2026-10-26)** : moniteur teal à liseré cyan, visage cyan (2 yeux),

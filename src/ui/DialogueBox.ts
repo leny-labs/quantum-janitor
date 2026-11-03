@@ -3,9 +3,11 @@ import { SpriteTalk, TalkingPortrait, TypewriterMouth, typewrite } from 'talking
 import type { BlinkOptions, MouthOptions, TypewriteHandle } from 'talking-portrait';
 import type { DialogueView } from '../engine/DialogueRunner';
 import { t } from '../i18n';
+import { getSession } from '../session';
+import { speaking } from '../engine/speaking';
 import { lineMood, type Mood } from '../engine/mood';
 import type { CharacterDef } from '../engine/types';
-import { PORTRAIT_MOODS, SHEET, portraitKey, portraitMood, sheetKey, sheetLoops } from '../three/Studio';
+import { PORTRAIT_MOODS, SHEET, portraitKey, portraitMood, sheetKey, sheetLoops, speakerSheetKey } from '../three/Studio';
 import { Brows, browsFor } from './Brows';
 import { drawHazard, drawPanel } from './chrome';
 import { cssToGame, isTouch, uiPx } from './input';
@@ -164,6 +166,7 @@ export class DialogueBox implements DialogueView {
     window.addEventListener('keydown', this.keyHandler);
     // le calque vit sur sa propre horloge, indépendante des boucles idle / talk
     const tick = (_t: number, dt: number) => {
+      speaking.talking = this.root.visible && this.face.talking;
       if (this.root.visible && this.overlayOn) {
         this.overlayOn.setTalking(this.face.talking);
         this.overlayOn.update(dt);
@@ -231,9 +234,10 @@ export class DialogueBox implements DialogueView {
   }
 
   private setSpeaker(speaker: CharacterDef | null, mood?: Mood): void {
+    speaking.id = speaker?.id ?? null;
     const hasPortrait = !!speaker?.portrait;
     const key = speaker ? portraitKey(speaker.id) : '';
-    const sheet = speaker ? sheetKey(speaker.id) : '';
+    const sheet = speaker ? speakerSheetKey(speaker.id, (f) => getSession().state.hasFlag(f)) : '';
     const hasSheet = hasPortrait && this.scene.textures.exists(sheet);
     const has3d = hasPortrait && (hasSheet || this.scene.textures.exists(key));
     this.portraitFrame.setVisible(hasPortrait);
@@ -521,6 +525,8 @@ export class DialogueBox implements DialogueView {
     this.advance = null;
     this.blocker.setVisible(false);
     this.root.setVisible(false);
+    speaking.id = null;
+    speaking.talking = false;
     duckMusic(false);
   }
 }

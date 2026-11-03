@@ -44,6 +44,20 @@ export const portraitKey = (id: string) => `portrait3d:${id}`;
 export const sheetKey = (id: string) => `portraitSheet:${id}`;
 /** Chemin (relatif au site) de la planche de sprites d'un personnage. */
 export const sheetUrl = (id: string) => `portraits/${id}-sheet.png`;
+/**
+ * Variantes de planche selon les flags (même layout SHEET, mêmes calques,
+ * humeurs et ancrages que la planche de base) : la première dont le flag est
+ * posé gagne. Gary passe en combi de chitine dès qu'il l'a enfilée
+ * (`combi_portee`, interlude → ch.1 et après).
+ */
+const SHEET_VARIANTS: Readonly<Record<string, readonly { flag: string; sheet: string }[]>> = {
+  gary: [{ flag: 'combi_portee', sheet: 'gary-combi' }],
+};
+/** Clé de la planche à afficher pour `id` (variante selon les flags comprise). */
+export function speakerSheetKey(id: string, hasFlag: (f: string) => boolean): string {
+  const v = SHEET_VARIANTS[id]?.find((r) => hasFlag(r.flag));
+  return sheetKey(v ? v.sheet : id);
+}
 /** Calque animé collé par-dessus la planche (ex. drone dorsal de Gary). */
 export const overlayKey = (id: string) => `portraitOverlay:${id}`;
 export const overlayUrl = (id: string) => `portraits/${id}-robot.png`;
@@ -585,6 +599,7 @@ export function renderPortraitSheets(): Record<string, HTMLCanvasElement> {
 /** Charge les planches de public/portraits/ (à appeler dans un `preload`). */
 export function preloadPortraitSheets(load: Phaser.Loader.LoaderPlugin): void {
   for (const id of PORTRAIT_IDS) if (!load.textureManager.exists(sheetKey(id))) load.image(sheetKey(id), sheetUrl(id));
+  for (const { sheet } of Object.values(SHEET_VARIANTS).flat()) if (!load.textureManager.exists(sheetKey(sheet))) load.image(sheetKey(sheet), sheetUrl(sheet));
   for (const id of Object.keys(PORTRAIT_OVERLAYS)) if (!load.textureManager.exists(overlayKey(id))) load.image(overlayKey(id), overlayUrl(id));
   for (const id of GENAI_ICONS) if (!load.textureManager.exists(iconKey(id))) load.image(iconKey(id), genaiIconUrl(id));
   for (const { icon } of Object.values(GENAI_VARIANTS).flat()) if (!load.textureManager.exists(iconKey(icon))) load.image(iconKey(icon), genaiIconUrl(icon));
