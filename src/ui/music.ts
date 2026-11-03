@@ -155,6 +155,10 @@ const SCENE_THEME: Record<string, ThemeId> = {
   'galerie-des-offrandes': 'couloir',
   'temple-couloir': 'couloir',
   'coeur-eclat': 'labo',
+  // interlude du mini-vaisseau, puis la Station Bureaucratique (ch.1)
+  'interlude-vaisseau': 'title',
+  'st-sas': 'couloir',
+  'st-attente': 'couloir',
 };
 export function themeForScene(id: string): ThemeId {
   return SCENE_THEME[id] ?? 'couloir';

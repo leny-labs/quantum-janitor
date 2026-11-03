@@ -10,6 +10,22 @@ import { CHAPTERS, chapterState, findChapter } from './engine/walkthrough';
 
 export const END_SCENE_ID = 'fin';
 
+/**
+ * Flags qui survivent à « Nouvelle partie » (stockage séparé de la sauvegarde) :
+ * `iv_vu` = interlude du vaisseau déjà vu → bouton « Passer » (docs/CHAPTERS.md §2).
+ */
+const PROGRESS_KEY = 'qj.progress';
+const PERSISTENT_FLAGS = ['iv_vu'];
+
+function readProgress(): string[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(PROGRESS_KEY) ?? '[]');
+    return Array.isArray(v) ? v.filter((f) => typeof f === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
 /** Partie en cours : contenu, état, sauvegarde, dialogues. */
 export class Session {
   readonly content: GameContent;
@@ -30,7 +46,9 @@ export class Session {
 
   /** Nouvelle partie au début d'un chapitre (ch0 par défaut), avec son état initial propre. */
   newGame(chapterId = 'ch0'): void {
-    this.attach(chapterState(findChapter(chapterId) ?? CHAPTERS[0]));
+    const s = chapterState(findChapter(chapterId) ?? CHAPTERS[0]);
+    readProgress().forEach((f) => PERSISTENT_FLAGS.includes(f) && s.flags.add(f));
+    this.attach(s);
   }
 
   /** Chapitre de la partie en cours (absent de la sauvegarde = ch0). */
@@ -75,7 +93,24 @@ export class Session {
         this.activeScene?.events.emit('ink-shake');
       },
     });
-    this.detachSave = this.save.autoSave(state);
+    const autosave = this.save.autoSave(state);
+    // flags persistants : notés dès qu'ils apparaissent (hors mode debug)
+    const progress = state.onChange(() => {
+      if (!this.save.enabled) return;
+      const known = readProgress();
+      const fresh = PERSISTENT_FLAGS.filter((f) => state.hasFlag(f) && !known.includes(f));
+      if (fresh.length) {
+        try {
+          localStorage.setItem(PROGRESS_KEY, JSON.stringify([...known, ...fresh]));
+        } catch {
+          /* stockage indisponible */
+        }
+      }
+    });
+    this.detachSave = () => {
+      autosave();
+      progress();
+    };
     repairState(state);
   }
 }

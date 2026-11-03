@@ -93,6 +93,9 @@ function checkEffect(key: string, value: string, where: string): void {
     case 'dialogue':
       note(knotsUsed, value, where);
       break;
+    case 'card':
+      if (!CARDS.includes(value)) err(`${where} : carte « ${value} » inconnue (attendues : ${CARDS.join(', ')})`);
+      break;
     case 'mood':
       if (!isMood(value)) err(`${where} : mood « ${value} » inconnu (attendus : ${MOODS.join(', ')})`);
       break;
@@ -110,7 +113,9 @@ function checkCondition(c: Condition | undefined, where: string): void {
   });
 }
 
-const ACTION_KEYS = ['if', 'say', 'mood', 'dialogue', 'take', 'give', 'unset', 'set', 'shake', 'goto', 'end', 'stop'];
+const ACTION_KEYS = ['if', 'say', 'mood', 'dialogue', 'take', 'give', 'unset', 'set', 'shake', 'card', 'goto', 'end', 'stop'];
+/** Cartes de transition connues (src/ui/ChapterCard.ts, clés i18n `card.<id>.*`). */
+const CARDS = ['ch1'];
 
 function checkInteraction(i: Interaction | undefined, where: string): void {
   if (i === undefined) return;
@@ -122,7 +127,7 @@ function checkInteraction(i: Interaction | undefined, where: string): void {
     const w = `${where}[${n}]`;
     for (const k of Object.keys(a)) if (!ACTION_KEYS.includes(k)) err(`${w} : clé d'action inconnue « ${k} »`);
     checkCondition(a.if, w);
-    for (const key of ['give', 'take', 'set', 'unset', 'goto', 'end', 'dialogue', 'mood'] as const) {
+    for (const key of ['give', 'take', 'set', 'unset', 'goto', 'end', 'dialogue', 'mood', 'card'] as const) {
       const v = a[key];
       if (typeof v === 'string') checkEffect(key, v, w);
     }

@@ -19,6 +19,7 @@ import { FuseRig } from '../three/rooms/fusible';
 import { LecteurRig } from '../three/rooms/lecteur';
 import { VendingRig } from '../three/rooms/vending';
 import { makeButton } from '../ui/Button';
+import { showChapterCard } from '../ui/ChapterCard';
 import { DialogueBox } from '../ui/DialogueBox';
 import { HoverLabel } from '../ui/HoverLabel';
 import { ProgressCue } from '../ui/ProgressCue';
@@ -70,6 +71,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   private busy = false;
   /** Plan d'arrivée en cours de travel : coupe sèche vers la vue de la pièce. */
   private skipCine: (() => void) | null = null;
+  /** Carte de transition affichée (écran noir) : la pièce suivante apparaît au prochain `goto`. */
+  private reveal: (() => Promise<void>) | null = null;
 
   constructor() {
     super('Room');
@@ -81,6 +84,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const { state, content } = this.session;
     this.busy = false;
     this.skipCine = null;
+    this.reveal = null;
     state.selectedItem = null;
     this.input.mouse?.disableContextMenu();
 
@@ -281,6 +285,10 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       if (this.sys.isActive()) {
         this.dialogueBox.close();
         this.refresh();
+        // carte restée noire sans pièce derrière (séquence interrompue) : jamais d'écran mort
+        const reveal = this.reveal;
+        this.reveal = null;
+        void reveal?.();
       }
     }
   }
@@ -673,11 +681,36 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   async goto(scene: string): Promise<void> {
     this.dialogueBox.close();
     const first = await this.scenes.goto(scene);
+    const reveal = this.reveal;
+    this.reveal = null;
+    if (reveal) {
+      playMusic(themeForScene(scene));
+      await reveal();
+    }
     await this.enter(first);
+  }
+
+  /** Carte de transition (titre du chapitre 1…) ; l'autosave a déjà le chapitre courant. */
+  async card(id: string): Promise<void> {
+    this.dialogueBox.close();
+    if (id !== 'ch1') return console.warn(`[card] carte inconnue « ${id} »`);
+    this.reveal = await showChapterCard(this, {
+      kicker: t('card.ch1.kicker'),
+      title: t('card.ch1.title'),
+      tagline: t('card.ch1.tagline'),
+      foot: t('card.ch1.foot'),
+      stamp: t('card.ch1.stamp'),
+    });
   }
 
   async end(knot: string): Promise<void> {
     this.dialogueBox.close();
+    // déjà au noir derrière une carte de transition : directement l'écran suivant
+    if (this.reveal) {
+      this.reveal = null;
+      this.scene.start('End', { knot, fromCard: true });
+      return;
+    }
     const cam = this.cameras.main;
     cam.shake(1800, 0.03);
     cam.flash(600, 255, 255, 255);

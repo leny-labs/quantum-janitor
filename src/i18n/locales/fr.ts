@@ -72,6 +72,12 @@ export const fr = {
     word2: 'JANITOR',
     chapter: 'CHAPITRE 0',
     chapterName: '« Le Seau »',
+    /** Cartouche quand la sauvegarde en cours est au chapitre 1. */
+    ch1: {
+      chapter: 'CHAPITRE 1',
+      chapterName: '« La Station Bureaucratique »',
+      pitch: 'Gary Plunk, classé animal de compagnie. Un éclat tiède.\nUn formulaire B-7/12. En trois exemplaires.',
+    },
     pitch: 'Gary Plunk, agent d’entretien intérimaire. Un seau. Un réacteur.\nAucune formation. Formation obligatoire.',
     resume: 'Reprendre le service',
     resumeKicker: 'VOTRE CLONE PRÉCÉDENT VOUS ATTEND',
@@ -164,10 +170,29 @@ export const fr = {
       stamp: 'REÇU',
       next: 'FIN DU CHAPITRE 0 · PROCHAIN ARRÊT : LA STATION BUREAUCRATIQUE',
       thanks: "Merci d'avoir joué le chapitre 0. Faille refermée, éclat contenu : 1/4096.",
+      /** Tampon de l'aspiration dans la faille (bouton « Chapitre 1 → »). */
+      transfer: 'TRANSFÉRÉ',
+    },
+    /** Fin provisoire du chapitre 1 (stub : la suite de la Station n'existe pas encore). */
+    ch1: {
+      location: 'STATION BUREAUCRATIQUE  ·  SAS D’ARRIVÉE',
+      jurisdiction: 'JURIDICTION : TOUTES · GUICHET OUVERT DE 10 H 12 À 10 H 14',
+      stub: 'GUICHET FERMÉ\nFORMULAIRE B-7/12 MANQUANT',
+      stamp: 'EN ATTENTE',
+      toBeContinued: 'LA SUITE ARRIVE…',
+      next: 'LA SUITE DU CHAPITRE 1 EST EN COURS DE TRAITEMENT',
+      thanks: 'Merci d’avoir joué les premières salles de la Station. Votre dossier est complet à 2 %.',
     },
   },
   /** Cartes de transition (src/ui/ChapterCard.ts, docs/CHAPTERS.md §2). */
   card: {
+    ch1: {
+      kicker: 'CHAPITRE 1',
+      title: 'La Station Bureaucratique',
+      tagline: 'Le règlement a gagné. Veuillez prendre un ticket.',
+      foot: 'FORMULAIRE B-7/12 · À REMPLIR EN TROIS EXEMPLAIRES · AUX HEURES D’OUVERTURE',
+      stamp: 'TAMPONNÉ',
+    },
     act2: {
       kicker: 'CHAPITRE 0 · ACTE II',
       title: 'Blattaria Prime',
@@ -248,6 +273,21 @@ export const fr = {
       dial: 'PROBABLE   ·   IMPROBABLE   ·   GARY',
       button: 'STABILISER',
       buttonNote: '(ne pas appuyer sans raison)',
+    },
+    /** Interlude : la Capsule de Service CS-07 (rooms/cockpit.ts). */
+    cockpit: {
+      plate: 'CAPSULE DE SERVICE CS-07\nÉQUIPAGE PRÉVU : 12 · PLACES : 1\nINSTALLÉE PAR LE MOINS-DISANT',
+      dontPush: 'NE PAS APPUYER',
+      hyper: 'HYPERESPACE',
+      eject: 'ÉJECTION',
+      auto: 'AUTOPILOTE',
+      off: '— VEILLE —',
+      hello: 'BONJOUR, GARRY',
+      contact: 'CONTACT',
+      nav: 'NAVIGATEUR DIMENSIONNEL',
+      navList: '▸ DIMENSION MINIATURE\n▸ KLEPSYDRA-LUX\n▸ L’ENVERS DU YAOURT\n▸ STATION (BUREAUCRATIQUE)',
+      accepted: 'DESTINATION ACCEPTÉE',
+      receptacle: 'IMPROBABILITÉ\n(OPTIONNEL)',
     },
     introStation: 'KLEPSYDRA-9',
   },

@@ -12,12 +12,16 @@ import { DialogueRunner, type DialogueView } from './DialogueRunner';
 import { GameState } from './GameState';
 import type { GameContent, Interaction, SaveData } from './types';
 
+/**
+ * `pick` : choix Ink à prendre, dans l'ordre, pendant l'étape (index 0-basés) ; au-delà,
+ * le curseur cyclique habituel. Indispensable pour les menus en boucle (interlude).
+ */
 export type WalkStep =
   | { section: string }
-  | { look: string }
-  | { use: string }
-  | { talk: string }
-  | { useItem: [item: string, hotspot: string] }
+  | { look: string; pick?: number[] }
+  | { use: string; pick?: number[] }
+  | { talk: string; pick?: number[] }
+  | { useItem: [item: string, hotspot: string]; pick?: number[] }
   | { combine: [a: string, b: string] }
   | { go: string };
 
@@ -141,6 +145,29 @@ export const CHAPTERS: ChapterDef[] = [
       { useItem: ['fragment', 'reine'] },
     ],
   },
+  {
+    id: 'ch1',
+    title: 'Chapitre 1 : La Station Bureaucratique',
+    // interlude du mini-vaisseau (docs/INTERLUDE_VAISSEAU.md), puis la Station (scènes `st-*`)
+    startScene: 'interlude-vaisseau',
+    from: 'ch0',
+    // ch.0 fini : éclat contenu, combi de chitine (enfilée dans l'interlude), badge ; B.O.B. suit
+    initial: { items: ['badge', 'fragment', 'combi_chitine'], flags: ['st', 'ch0_termine', 'chapitre0_termine', 'bob_suit'] },
+    // fin provisoire du stub (sortie fermée faute de formulaire) ; deviendra `st_suite`
+    endKnot: 'st_stub_fin',
+    steps: [
+      { section: 'Interlude — la Capsule de Service CS-07' },
+      { look: 'pare_brise' },
+      { useItem: ['badge', 'contact'] },
+      { useItem: ['combi_chitine', 'siege'] },
+      { talk: 'bob' },
+      // NE PAS APPUYER, AUTOPILOTE, puis le levier sans étiquette
+      { use: 'tableau', pick: [0, 2, 2] },
+      // Dimension Miniature (refusée), puis la Station
+      { use: 'navigateur', pick: [0, 2] },
+      { useItem: ['fragment', 'reacteur'] },
+    ],
+  },
 ];
 
 export function findChapter(id: string | undefined): ChapterDef | undefined {
@@ -224,13 +251,17 @@ export async function walkChapter(content: GameContent, chapter: ChapterDef, opt
   /** Coupure d'acte atteinte pendant l'étape courante. */
   let pendingAct: ActDef | null = null;
   let choiceCursor = 0;
+  /** Choix imposés de l'étape courante (`WalkStep.pick`). */
+  let picks: number[] = [];
 
   const view: DialogueView = {
     async showLine(sp, text) {
       log(`  ${sp && sp.id !== 'narrateur' ? sp.name + ' : ' : ''}${text}`);
     },
     async showChoices(choices) {
-      const i = choiceCursor++ % choices.length;
+      const forced = picks.shift();
+      if (forced !== undefined && forced >= choices.length) throw new Error(`choix imposé ${forced} absent (${choices.length} choix : ${choices.join(' | ')})`);
+      const i = forced ?? choiceCursor++ % choices.length;
       log(`  > [${choices[i]}]`);
       return i;
     },
@@ -305,6 +336,7 @@ export async function walkChapter(content: GameContent, chapter: ChapterDef, opt
       continue;
     }
     before = state.toSave();
+    picks = 'pick' in s && s.pick ? [...s.pick] : [];
     let label: string;
     if ('look' in s) {
       label = `regarder ${s.look}`;

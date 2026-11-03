@@ -1,0 +1,171 @@
+# Interlude ch.0 → ch.1 : la Capsule de Service CS-07 (docs/INTERLUDE_VAISSEAU.md).
+# Rendu 3D : src/three/rooms/cockpit.ts. `art:` = repli 2D.
+# Ordre : siège (combi) et contact (badge) libres ; puis tableau → navigateur → réceptacle.
+id: interlude-vaisseau
+title: Capsule de Service CS-07
+sector: Interlude · Faille B-7 → ???
+icon: console
+background: "#120c1e"
+
+onFirstEnter:
+  - dialogue: iv_arrivee
+# filet : rechargement après le saut (iv_saut posé) → on repart directement à la Station
+onEnter:
+  - if: { flags: [iv_saut] }
+    card: ch1
+    end: st_stub_fin
+
+art:
+  - { rect: [0, 0, 1280, 580], color: "#1b1430" }
+  - { rect: [500, 40, 280, 150], color: "#3a1050", stroke: "#b56cff" }        # pare-brise
+  - { rect: [0, 210, 1280, 190], color: "#2a3140", stroke: "#7fffd4" }        # tableau de bord
+  - { text: "60 BOUTONS · 14 LEVIERS · 3 VOLANTS", at: [640, 300], size: 18, color: "#ffd166" }
+
+hotspots:
+  - id: pare_brise
+    label: Pare-brise
+    smart: look
+    rect: [500, 40, 280, 150]
+    look:
+      - say: "Un pare-brise de la taille d'une boîte à chaussures. Derrière, la faille ondule, violette, comme un rideau de douche cosmique."
+      - if: { notFlags: [iv_destination] }
+        say: "bob: On ne voit rien, Gary. C'est le principe d'une faille : on ne sait pas ce qu'il y a derrière. Comme un tiroir de bureau."
+        mood: suspicious
+      - if: { flags: [iv_destination] }
+        say: "Au fond de la faille, des rangées de guichets à perte de vue. Ils clignotent tous en même temps. « FERMÉ »."
+
+  - id: siege
+    label: Siège-carapace
+    rect: [40, 300, 260, 280]
+    if: { notFlags: [iv_assis] }
+    art:
+      - { rect: [60, 330, 220, 240], color: "#6b3a12", stroke: "#c9a13a" }
+      - { text: "SIÈGE", at: [170, 450], size: 18, color: "#ffd166" }
+    look: "Un siège moulé en forme de carapace. Pour un cafard, c'est un fauteuil club. Pour moi, c'est une coquille d'œuf avec un dossier."
+    use:
+      - say: "narrateur: Gary essaie de s'asseoir. Le siège le recrache poliment. Il refuse tout ce qui n'a pas d'exosquelette."
+      - say: "Il veut un cafard. J'ai un costume de cafard. Le règlement intérieur est clair, pour une fois."
+    useItem:
+      combi_chitine:
+        - take: combi_chitine
+        - dialogue: iv_siege
+      badge: "Badger un siège ? J'ai badgé beaucoup de choses dans ma vie. Pas encore un siège. Pas aujourd'hui."
+      fragment: "L'éclat sur le siège ? Il serait capable de s'asseoir à ma place. Et de mieux piloter."
+
+  - id: tableau
+    label: Tableau de bord
+    useLabel: Appuyer
+    rect: [300, 220, 680, 150]
+    art:
+      - { circle: [420, 300, 26], color: "#ff4f5a", stroke: "#ffffff", text: "NE PAS\nAPPUYER", size: 9 }
+      - { rect: [520, 280, 90, 40], color: "#3d7dd8", stroke: "#ffffff", text: "HYPER", size: 12 }
+      - { rect: [640, 280, 90, 40], color: "#ff8c42", stroke: "#ffffff", text: "ÉJECT.", size: 12 }
+      - { rect: [760, 280, 90, 40], color: "#7fffd4", stroke: "#ffffff", text: "AUTO", size: 12 }
+      - { rect: [890, 250, 18, 90], color: "#c9ced6", stroke: "#ffffff" }
+    look:
+      - say: "Soixante boutons, quatorze leviers, trois volants. Un tableau de bord prévu pour douze, installé par le moins-disant dans une capsule pour un."
+      - if: { notFlags: [iv_contact] }
+        say: "Tout est éteint. À droite, une fente marquée « CONTACT ». Le reste attend qu'on le réveille."
+      - if: { flags: [iv_contact], notFlags: [iv_navigateur] }
+        say: "Chaque bouton a une étiquette rigolote. Sauf un levier, tout seul, tout gris. C'est toujours celui-là qu'il faut, dans les manuels."
+    use:
+      - if: { notFlags: [iv_contact] }
+        say: "Rien. Aucune lumière. Les soixante boutons font « clic » dans le vide, comme un clavier de démonstration."
+        stop: true
+      - dialogue: iv_boutons
+    useItemDefault: "Je ne vais pas coincer ça entre deux boutons. Le dernier qui a fait ça, c'est le porte-gobelet, et regardez où il en est."
+
+  - id: contact
+    label: Fente « CONTACT »
+    rect: [1000, 250, 120, 90]
+    art:
+      - { rect: [1010, 270, 100, 50], color: "#14102a", stroke: "#ffd166", text: "CONTACT", size: 13 }
+    look:
+      - if: { notFlags: [iv_contact] }
+        say: "Une fente étiquetée « CONTACT ». Elle a exactement la largeur d'un badge. Et l'air d'en attendre un depuis longtemps."
+        stop: true
+      - say: "Mon badge est dans la fente. L'écran me dit toujours « BONJOUR, GARRY ». Il le dira jusqu'à la fin des temps."
+    use:
+      - if: { notFlags: [iv_contact] }
+        say: "Je mets le doigt dedans ? Non. On ne met jamais le doigt dans une fente de contact. Règlement n°2."
+        stop: true
+      - say: "Je laisse le badge. Si je l'enlève, tout s'éteint et le volant boude."
+    useItem:
+      badge:
+        - if: { flags: [iv_contact] }
+          say: "Il est déjà dedans. Il a l'air bien. Il a trouvé sa place, lui."
+          stop: true
+        - dialogue: iv_contact
+      fragment: "L'éclat dans la fente « CONTACT » ? Ça ferait contact, oui. Avec tout l'univers. En même temps."
+      combi_chitine: "La combi ne rentre pas dans la fente. Rien de ce qui a des antennes ne rentre dans une fente. C'est une loi de la nature."
+
+  - id: navigateur
+    label: Navigateur dimensionnel
+    useLabel: Choisir
+    rect: [1020, 60, 220, 160]
+    if: { flags: [iv_navigateur] }
+    art:
+      - { rect: [1030, 70, 200, 140], color: "#0e2a2a", stroke: "#7fffd4", text: "DESTINATION ?", size: 15 }
+    look:
+      - say: "« NAVIGATEUR DIMENSIONNEL ». Quatre destinations. L'écran a un fond d'écran : une plage. Il n'y a pas de plage dans le multivers. J'ai vérifié."
+      - if: { flags: [iv_destination] }
+        say: "« STATION (BUREAUCRATIQUE) — DESTINATION ACCEPTÉE ». En dessous : « TEMPS D'ATTENTE ESTIMÉ : OUI »."
+    use:
+      - if: { flags: [iv_destination] }
+        say: "La destination est verrouillée. Pour la changer, il faut un formulaire. Évidemment."
+        stop: true
+      - dialogue: iv_destination
+
+  - id: reacteur
+    label: Réceptacle « IMPROBABILITÉ (OPTIONNEL) »
+    rect: [560, 380, 160, 100]
+    if: { flags: [iv_destination] }
+    art:
+      - { circle: [640, 430, 40], color: "#b56cff", alpha: 0.5, stroke: "#ffffff" }
+      - { text: "IMPROBABILITÉ\n(OPTIONNEL)", at: [640, 470], size: 11, color: "#ffffff" }
+    look: "Un petit réceptacle rond, étiqueté « IMPROBABILITÉ (OPTIONNEL) ». Il a exactement la forme d'un éclat de réacteur. Quelle coïncidence improbable."
+    use: "Il est vide. Il lui faut de l'improbabilité. J'en connais une, tiède, dans ma poche."
+    useItem:
+      fragment:
+        - if: { notFlags: [iv_assis] }
+          say: "bob: Pas debout, Gary ! On saute dans une faille, pas dans un bus. Assieds-toi d'abord. Dans le siège. Avec la combi."
+          mood: surprised
+          stop: true
+        - dialogue: iv_saut
+        - card: ch1
+        - end: st_stub_fin
+      badge: "Le badge est déjà au contact. Il ne peut pas être partout. Moi non plus, d'ailleurs, ça me repose."
+
+  - id: bob
+    label: B.O.B.
+    rect: [760, 420, 210, 150]
+    art:
+      - { rect: [780, 470, 170, 60], color: "#7c8794", stroke: "#ffffff" }
+      - { circle: [830, 495, 7], color: "#ffffff" }
+      - { circle: [900, 495, 7], color: "#ffffff" }
+    look: "B.O.B., sur mes genoux. Le porte-gobelet sur la tête. Il ne l'enlève pas. Il dit que ça lui fait un chapeau."
+    talk:
+      - dialogue: iv_bob
+    useItemDefault:
+      - say: "bob: Garde ça, Gary. Ici, j'ai un chapeau et un pilote. Je n'ai besoin de rien d'autre."
+        mood: love
+
+  # flag persistant `iv_vu` (Session) : l'interlude déjà vu peut se passer
+  - id: passer
+    label: Passer l'interlude
+    useLabel: Passer
+    rect: [1110, 500, 160, 70]
+    if: { flags: [iv_vu], notFlags: [iv_saut] }
+    art:
+      - { rect: [1120, 510, 140, 50], color: "#14102a", stroke: "#7fffd4", text: "PASSER ▸▸", size: 16 }
+    look: "J'ai déjà fait ce vol. Je connais les boutons. Je connais le yaourt. Je peux sauter directement."
+    use:
+      - take: combi_chitine
+      - set: combi_portee
+      - set: iv_assis
+      - set: iv_contact
+      - set: iv_navigateur
+      - set: iv_destination
+      - set: iv_saut
+      - card: ch1
+      - end: st_stub_fin

@@ -22,7 +22,7 @@ export interface CardOpts {
 }
 
 /** Texture de halo radial (blanc → transparent), créée une fois. */
-function glowTexture(scene: Phaser.Scene): string {
+export function glowTexture(scene: Phaser.Scene): string {
   const key = 'card-glow';
   if (scene.textures.exists(key)) return key;
   const tex = scene.textures.createCanvas(key, 512, 512);
@@ -37,10 +37,45 @@ function glowTexture(scene: Phaser.Scene): string {
   return key;
 }
 
+/** Tampon administratif encré (cadre double + texte), invisible et agrandi : prêt à `slamStamp`. */
+export function stampObject(scene: Phaser.Scene, x: number, y: number, text: string, color = '#ff4f9a', size = 40): Phaser.GameObjects.Container {
+  const label = scene.add.text(0, 0, text, { fontFamily: DISPLAY, fontSize: `${size}px`, color }).setOrigin(0.5).setLetterSpacing(4);
+  const frame = scene.add.graphics();
+  const w = label.width + size * 1.2;
+  const h = label.height + size * 0.65;
+  frame.lineStyle(size * 0.15, hex(color), 1);
+  frame.strokeRoundedRect(-w / 2, -h / 2, w, h, 10);
+  frame.lineStyle(size * 0.05, hex(color), 0.8);
+  frame.strokeRoundedRect(-w / 2 + 8, -h / 2 + 8, w - 16, h - 16, 6);
+  return scene.add.container(x, y, [frame, label]).setAngle(-12).setAlpha(0).setScale(2.4);
+}
+
+/** Abat le tampon : chute rapide, CLONK, petite secousse (sauf `prefers-reduced-motion`). */
+export function slamStamp(scene: Phaser.Scene, stamp: Phaser.GameObjects.Container): Promise<void> {
+  return new Promise((resolve) =>
+    scene.tweens.add({
+      targets: stamp,
+      alpha: 0.92,
+      scale: 1,
+      duration: 170,
+      ease: 'Quad.easeIn',
+      onComplete: () => {
+        stampClonk();
+        if (!reducedMotion()) scene.cameras.main.shake(120, 0.008);
+        resolve();
+      },
+    }),
+  );
+}
+
 const reducedMotion = (): boolean => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches; // i18n-ignore
 
-/** Affiche la carte au-dessus de tout (depth 3000) ; résout une fois le fondu sortant terminé (la carte reste noire). */
-export function showChapterCard(scene: Phaser.Scene, opts: CardOpts): Promise<void> {
+/**
+ * Affiche la carte au-dessus de tout (depth 3000) ; résout une fois le texte effacé, l'écran
+ * restant noir. La valeur résolue `reveal()` fait apparaître (fondu 800 ms) ce qui a été
+ * installé dessous entre-temps (pièce d'arrivée) ; inutile si la scène Phaser change.
+ */
+export function showChapterCard(scene: Phaser.Scene, opts: CardOpts): Promise<() => Promise<void>> {
   const calm = reducedMotion();
   const hold = (opts.hold ?? 2500) * (calm ? 2 : 1);
   const depth = 3000;
@@ -86,20 +121,14 @@ export function showChapterCard(scene: Phaser.Scene, opts: CardOpts): Promise<vo
     : null;
 
   // tampon (carte titre) : arrive de haut, gros, s'écrase avec un CLONK
-  let stamp: Phaser.GameObjects.Container | null = null;
-  if (opts.stamp) {
-    const label = scene.add.text(0, 0, opts.stamp, { fontFamily: DISPLAY, fontSize: '40px', color: '#ff4f9a' }).setOrigin(0.5).setLetterSpacing(4);
-    const frame = scene.add.graphics();
-    const w = label.width + 48;
-    const h = label.height + 26;
-    frame.lineStyle(6, hex('#ff4f9a'), 1);
-    frame.strokeRoundedRect(-w / 2, -h / 2, w, h, 10);
-    frame.lineStyle(2, hex('#ff4f9a'), 0.8);
-    frame.strokeRoundedRect(-w / 2 + 8, -h / 2 + 8, w - 16, h - 16, 6);
-    stamp = add(scene.add.container(W * 0.74, 470, [frame, label]).setAngle(-12).setAlpha(0).setScale(2.4));
-  }
+  const stamp = opts.stamp ? add(stampObject(scene, W * 0.74, 470, opts.stamp)) : null;
 
-  return new Promise<void>((resolve) => {
+  const reveal = () =>
+    new Promise<void>((done) => {
+      if (!bg.active) return done();
+      scene.tweens.add({ targets: bg, fillAlpha: 0, duration: 800, onComplete: () => (bg.destroy(), done()) });
+    });
+  return new Promise((resolve) => {
     let done = false;
     let canSkip = false;
     const finish = () => {
@@ -114,7 +143,7 @@ export function showChapterCard(scene: Phaser.Scene, opts: CardOpts): Promise<vo
           breathe.stop();
           content.forEach((o) => o.destroy());
           stamp?.destroy();
-          resolve();
+          resolve(reveal);
         },
       });
     };
@@ -135,19 +164,7 @@ export function showChapterCard(scene: Phaser.Scene, opts: CardOpts): Promise<vo
     if (!opts.stamp) scene.time.delayedCall(900, () => distantPlouf());
     if (stamp) {
       const s = stamp;
-      scene.time.delayedCall(1500, () => {
-        scene.tweens.add({
-          targets: s,
-          alpha: 0.92,
-          scale: 1,
-          duration: 170,
-          ease: 'Quad.easeIn',
-          onComplete: () => {
-            stampClonk();
-            if (!calm) scene.cameras.main.shake(120, 0.008);
-          },
-        });
-      });
+      scene.time.delayedCall(1500, () => void slamStamp(scene, s));
     }
     scene.time.delayedCall(1300 + hold, finish);
   });

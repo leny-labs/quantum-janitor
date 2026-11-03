@@ -418,13 +418,15 @@ export class TitleScene extends Phaser.Scene {
     // cartouche « chapitre »
     const y = 386;
     const g = this.add.graphics();
-    drawPanel(g, x + 4, y, 372, 46, { fill: COLORS.ink, fillAlpha: 0.7, edge: hex(COLORS.hover), cut: 12, glow: false });
+    // cartouche : le chapitre de la partie en cours (sauvegarde) ; sinon le ch.0
+    const ch1 = getSession().save.read()?.chapter === 'ch1' && !getSession().debug.active;
+    const chapter = this.add.text(x + 26, y + 23, ch1 ? t('title.ch1.chapter') : t('title.chapter'), { fontFamily: FONT, fontSize: '15px', fontStyle: '700', color: COLORS.hover }).setOrigin(0, 0.5).setLetterSpacing(3);
+    const name = this.add.text(chapter.x + chapter.width + 16, y + 23, ch1 ? t('title.ch1.chapterName') : t('title.chapterName'), { fontFamily: FONT, fontSize: '24px', fontStyle: 'italic 500', color: COLORS.text }).setOrigin(0, 0.5);
+    drawPanel(g, x + 4, y, Math.max(372, name.x + name.width + 22 - x - 4), 46, { fill: COLORS.ink, fillAlpha: 0.7, edge: hex(COLORS.hover), cut: 12, glow: false });
     g.fillStyle(hex(COLORS.hover), 1);
     g.fillRect(x + 4, y + 8, 5, 30);
-    const chapter = this.add.text(x + 26, y + 23, t('title.chapter'), { fontFamily: FONT, fontSize: '15px', fontStyle: '700', color: COLORS.hover }).setOrigin(0, 0.5).setLetterSpacing(3);
-    this.add.text(chapter.x + chapter.width + 16, y + 23, t('title.chapterName'), { fontFamily: FONT, fontSize: '24px', fontStyle: 'italic 500', color: COLORS.text }).setOrigin(0, 0.5);
     this.add
-      .text(x + 4, y + 62, t('title.pitch'), {
+      .text(x + 4, y + 62, ch1 ? t('title.ch1.pitch') : t('title.pitch'), {
         fontFamily: FONT,
         fontSize: '16px',
         color: COLORS.dim,

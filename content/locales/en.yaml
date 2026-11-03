@@ -115,6 +115,21 @@ keys:
   character.reine.name: Her Majesty Blattaria XIV
   character.scribe.name: Brother Elytron, Grand Scribe
 
+  # interlude : la Capsule de Service CS-07
+  scene.interlude-vaisseau.title: Service pod CS-07
+  scene.interlude-vaisseau.sector: Interlude · Rift B-7 → ???
+  scene.interlude-vaisseau.hotspot.pare_brise.label: Windscreen
+  scene.interlude-vaisseau.hotspot.siege.label: Carapace seat
+  scene.interlude-vaisseau.hotspot.tableau.label: Dashboard
+  scene.interlude-vaisseau.hotspot.tableau.useLabel: Press
+  scene.interlude-vaisseau.hotspot.contact.label: “IGNITION” slot
+  scene.interlude-vaisseau.hotspot.navigateur.label: Dimensional navigator
+  scene.interlude-vaisseau.hotspot.navigateur.useLabel: Choose
+  scene.interlude-vaisseau.hotspot.reacteur.label: “IMPROBABILITY (OPTIONAL)” receptacle
+  scene.interlude-vaisseau.hotspot.bob.label: B.O.B.
+  scene.interlude-vaisseau.hotspot.passer.label: Skip the interlude
+  scene.interlude-vaisseau.hotspot.passer.useLabel: Skip
+
 ink:
   # bob.ink — B.O.B. en compagnon (exemple de traduction de dialogue Ink)
   "Le lecteur de badge du labo est couvert de yaourt. Il te faudrait une serpillière. Mouillée. Une serpillière sèche, c'est de la philosophie, pas du ménage.": "The lab's badge reader is covered in yoghurt. You'd need a mop. A wet one. A dry mop is philosophy, not cleaning."

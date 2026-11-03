@@ -118,6 +118,9 @@ export class DialogueRunner {
       case 'end':
         deferred.push({ end: value });
         break;
+      case 'card':
+        deferred.push({ card: value });
+        break;
       default:
         console.warn(`Tag Ink inconnu : #${raw}`);
     }

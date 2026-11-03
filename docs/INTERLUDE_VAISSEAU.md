@@ -5,7 +5,10 @@
 
 Voir [`CHAPTERS.md`](CHAPTERS.md) §2 (grammaire des transitions) et §3.7 (EndScene),
 le chapitre d'avant [`CHAPTER0_BLATTARIA.md`](CHAPTER0_BLATTARIA.md) et celui d'après
-[`CHAPTER1.md`](CHAPTER1.md). Statut : **design** (rien n'est codé).
+[`CHAPTER1.md`](CHAPTER1.md). Statut : **stub jouable** (§5) — `content/scenes/interlude-vaisseau.yaml`,
+`content/story/interlude_vaisseau.ink`, pièce 3D `src/three/rooms/cockpit.ts`, carte titre via l'action
+`card: ch1` (YAML) / `# card: ch1` (Ink) → `src/ui/ChapterCard.ts`. Entrée depuis la fin du ch.0 :
+bouton « Chapitre 1 → » = aspiration dans la faille + tampon « TRANSFÉRÉ » (`EndScene.transfer`).
 
 ## 1. Rôle
 

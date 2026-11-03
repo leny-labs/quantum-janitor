@@ -4,13 +4,12 @@
 // vrai moteur ; « Jouer ici » l'écrit via SaveSystem puis ouvre /?resume=1.
 //
 // Transition entre chapitres (ChapterDef.from, engine/walkthrough.ts → chapterPrelude) :
-// /creator?ch=ch1 commence par une section « ↪ Transition ch.0 → ch.1 » :
+// /creator?ch=ch1 (Station Bureaucratique) commence par « ↪ Transition ch.0 → ch.1 » :
 //   ↪ fin ch.0 : « Jouer ici » = sauvegarde ch.0 terminée + ?resume=1 → écran de fin
-//     (« À suivre… ») et ses boutons ; « Chapitre 1 → » lance le ch.1 comme dans le jeu.
-//     « URL » = ?scene=fin (rejoue aussi le cliffhanger, sauvegarde intacte).
-//   ▶ lancement ch.1 : état initial, Nid jamais visité → plan d'arrivée filmé (intro).
-//     « URL » = ?scene=nid-royal&chapter=1&…&cine=1.
-//   #0 début : direct au Nid, intro déjà vue (comme avant).
+//     (« À suivre… ») ; « Chapitre 1 → » = aspiration dans la faille puis l'interlude.
+//     « URL » = ?scene=fin (rejoue aussi le cliffhanger ch1_suite, sauvegarde intacte).
+//   ▶ lancement ch.1 : état initial, interlude du vaisseau jamais visité (intro filmée).
+//   #0 début : direct dans le cockpit, intro déjà vue.
 // Sur ch0, le checkpoint FIN porte un lien « → suite : transition ch.1 ».
 // ch0 = acte I Klepsydra + acte II Blattaria : la coupure d'acte (cliffhanger cafards → Nid Royal)
 // est une entrée « ↪ » (kind `act`, ancre #acte-2) ; « Jouer ici » rejoue l'intro du Nid.

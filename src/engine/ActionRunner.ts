@@ -9,6 +9,8 @@ export interface ActionHost {
   goto(scene: string): Promise<void>;
   end(knot: string): Promise<void>;
   shake(): void;
+  /** Carte de transition (sans rendu : rien). La pièce suivante est révélée au `goto` qui suit. */
+  card?(id: string): Promise<void>;
 }
 
 /** Exécute séquentiellement les actions décrites dans le YAML. */
@@ -35,6 +37,7 @@ export class ActionRunner {
       if (a.unset) this.state.unsetFlag(a.unset);
       if (a.set) this.state.setFlag(a.set);
       if (a.shake) this.host.shake();
+      if (a.card) await this.host.card?.(a.card);
       if (a.goto) await this.host.goto(a.goto);
       if (a.end) {
         await this.host.end(a.end);

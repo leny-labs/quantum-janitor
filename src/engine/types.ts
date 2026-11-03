@@ -13,7 +13,7 @@ export interface Condition {
 
 /**
  * Une étape d'interaction. Plusieurs clés peuvent coexister ; elles sont
- * exécutées dans l'ordre : say → dialogue → take → give → unset → set → shake → goto → end.
+ * exécutées dans l'ordre : say → dialogue → take → give → unset → set → shake → card → goto → end.
  * Si `if` est faux, l'étape est ignorée. `stop: true` interrompt la séquence.
  */
 export interface Action {
@@ -27,6 +27,8 @@ export interface Action {
   unset?: string;
   set?: string;
   shake?: boolean;
+  /** Carte de transition plein écran (`ch1` = carte titre du chapitre 1, src/ui/ChapterCard.ts) ; jouée avant `goto`. */
+  card?: string;
   goto?: string;
   end?: string;
   stop?: boolean;

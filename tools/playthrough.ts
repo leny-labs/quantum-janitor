@@ -74,6 +74,15 @@ async function main() {
         for (const kept of ['fragment', 'combi_chitine']) if (!state.hasItem(kept)) throw new Error(`« ${kept} » absent de l'inventaire à la fin`);
         if (!state.hasFlag('ch1_combi')) throw new Error('flag ch1_combi absent à la fin');
       }
+      if (chapter.id === 'ch1') {
+        // interlude : la combi est enfilée (elle quitte l'inventaire), l'éclat et le badge restent
+        const jump = checkpoints.find((c) => c.label === 'utiliser fragment sur reacteur');
+        if (!jump) throw new Error('saut de l\'interlude non joué');
+        for (const f of ['combi_portee', 'iv_saut', 'iv_vu']) if (!jump.save.flags.includes(f)) throw new Error(`interlude : flag ${f} absent après le saut`);
+        if (jump.save.items.includes('combi_chitine')) throw new Error('interlude : la combi devait être enfilée (hors inventaire)');
+        for (const kept of ['fragment', 'badge']) if (!jump.save.items.includes(kept)) throw new Error(`interlude : « ${kept} » perdu`);
+        if (state.hasFlag('ch1')) throw new Error('la Station ne doit jamais poser le flag ch1 (acte Blattaria)');
+      }
       if (ended !== chapter.endKnot) throw new Error(`fin non atteinte (ended=${ended})`);
       console.log(`\n✓ ${chapter.title} terminé — cliffhanger « ${ended} » atteint (${checkpoints.length} checkpoints).`);
       console.log(`  flags : ${[...state.flags].join(', ')}`);

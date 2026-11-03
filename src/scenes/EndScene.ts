@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { getSession } from '../session';
 import { CHAPTERS, enterAct, findAct } from '../engine/walkthrough';
-import { showChapterCard } from '../ui/ChapterCard';
+import { glowTexture, showChapterCard, slamStamp, stampObject } from '../ui/ChapterCard';
+import { riftCue } from '../ui/sfx';
 import { t } from '../i18n';
 import { makeButton } from '../ui/Button';
 import { HeroView } from '../three/Hero';
@@ -20,6 +21,8 @@ interface EndData {
    * puis carte d'acte et entrée dans l'acte, sans écran de fin ni menu.
    */
   act?: string;
+  /** Arrivée depuis une carte de transition (écran déjà noir) : fondu depuis le noir. */
+  fromCard?: boolean;
 }
 
 /**
@@ -30,13 +33,16 @@ interface EndData {
 const END_BY_CHAPTER: Record<string, { flag: string; shot: 'roaches' | 'stub'; next?: string; hook?: string[] }> = {
   // la faille du Nid est franchie. TOUTES les sorties du Nid (couronnement `# end: ch1_suite`,
   // sortie « La Faille » `to: fin`, Reine avec la combi) arrivent ici.
-  ch0: { flag: 'ch0_termine', shot: 'stub', hook: ['go_station2', 'fin_ch0'] },
+  ch0: { flag: 'ch0_termine', shot: 'stub', next: 'ch1', hook: ['go_station2', 'fin_ch0'] },
+  // fin provisoire du stub de la Station (`st_stub_fin`) : pas encore `st_termine`
+  ch1: { flag: 'st_stub_termine', shot: 'stub' },
 };
 
 /** Cliffhanger du chapitre (ch.0 : la dimension des cafards), puis « À suivre… ». */
 export class EndScene extends Phaser.Scene {
   private hero: HeroView | null = null;
   private chapter = 'ch0';
+  private transferring = false;
 
   constructor() {
     super('End');
@@ -45,6 +51,7 @@ export class EndScene extends Phaser.Scene {
   async create(data: EndData): Promise<void> {
     const session = getSession();
     session.activeScene = this;
+    this.transferring = false;
     if (data.act) return this.actBreak(data.act, data.knot);
     const { state } = session;
     // le knot de fin désigne le chapitre ; sinon (reprise d'une partie finie) celui de la sauvegarde
@@ -64,7 +71,8 @@ export class EndScene extends Phaser.Scene {
     const knot = data.knot;
 
     if (!data.final && knot) {
-      this.cameras.main.fadeIn(1400, 255, 255, 255);
+      if (data.fromCard) this.cameras.main.fadeIn(900, 0, 0, 0);
+      else this.cameras.main.fadeIn(1400, 255, 255, 255);
       await new Promise((r) => this.time.delayedCall(1500, r));
       const box = new DialogueBox(this);
       const deferred = await session.dialogue.run(knot, box);
@@ -118,8 +126,9 @@ export class EndScene extends Phaser.Scene {
     this.drawLocation(t('end.location'), t('end.jurisdiction'));
   }
 
-  /** Fin du ch.0 : la faille du Nid s'ouvre sur la Station Bureaucratique (plan 2D). */
+  /** Fin du ch.0 : la faille du Nid s'ouvre sur la Station Bureaucratique (plan 2D) ; fin du stub ch.1 : le guichet fermé. */
   private drawBureaucracyStub(): void {
+    const ch1 = this.chapter === 'ch1';
     const g = this.add.graphics();
     g.fillGradientStyle(0x1a0830, 0x1a0830, 0x6b5a3a, 0x6b5a3a, 1);
     g.fillRect(0, 0, W, H);
@@ -135,25 +144,94 @@ export class EndScene extends Phaser.Scene {
         g.fillRect(i * w + w * 0.3, y + 12, w * 0.4, 8);
       }
     }
-    // la faille
-    g.lineStyle(5, 0xff8ab8, 0.9);
-    g.beginPath();
-    g.moveTo(W / 2 - 10, 100);
-    [[W / 2 + 30, 160], [W / 2 - 25, 220], [W / 2 + 15, 260]].forEach(([x, y]) => g.lineTo(x, y));
-    g.strokePath();
+    // la faille (fin du ch.0) : elle pulse et grésille, prête à aspirer
+    if (!ch1) {
+      const rift = this.add.graphics();
+      const pts = [[W / 2 - 10, 100], [W / 2 + 30, 160], [W / 2 - 25, 220], [W / 2 + 15, 260]];
+      const paint = (k: number) => {
+        rift.clear();
+        rift.lineStyle(14 + k * 8, 0xb56cff, 0.18);
+        rift.beginPath();
+        rift.moveTo(pts[0][0], pts[0][1]);
+        pts.slice(1).forEach(([x, y]) => rift.lineTo(x, y));
+        rift.strokePath();
+        rift.lineStyle(5, 0xff8ab8, 0.9);
+        rift.beginPath();
+        rift.moveTo(pts[0][0], pts[0][1]);
+        pts.slice(1).forEach(([x, y]) => rift.lineTo(x + (Math.random() - 0.5) * k * 3, y));
+        rift.strokePath();
+      };
+      const pulse = { k: 0 };
+      this.tweens.add({ targets: pulse, k: 1, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', onUpdate: () => paint(pulse.k) });
+      paint(0);
+    }
     this.add
-      .text(W / 2, 175, t('end.ch0.stub'), { fontFamily: FONT, fontSize: '26px', fontStyle: '700', color: '#ffd166', align: 'center' })
+      .text(W / 2, 175, t(ch1 ? 'end.ch1.stub' : 'end.ch0.stub'), { fontFamily: FONT, fontSize: '26px', fontStyle: '700', color: '#ffd166', align: 'center' })
       .setOrigin(0.5)
       .setLetterSpacing(3)
       .setStroke('#07050f', 6);
     // le tampon géant
     this.add
-      .text(W * 0.84, 150, t('end.ch0.stamp'), { fontFamily: DISPLAY, fontSize: '52px', color: '#ff4f9a' })
+      .text(W * (ch1 ? 0.8 : 0.84), 150, t(ch1 ? 'end.ch1.stamp' : 'end.ch0.stamp'), { fontFamily: DISPLAY, fontSize: '52px', color: '#ff4f9a' })
       .setOrigin(0.5)
       .setAngle(-14)
       .setAlpha(0.85)
       .setStroke('#ff4f9a', 3);
-    this.drawLocation(t('end.ch0.location'), t('end.ch0.jurisdiction'));
+    if (ch1) this.drawLocation(t('end.ch1.location'), t('end.ch1.jurisdiction'));
+    else this.drawLocation(t('end.ch0.location'), t('end.ch0.jurisdiction'));
+  }
+
+  /**
+   * Transition fin du ch.0 → interlude (pas de coupure sèche) : la faille aspire l'écran
+   * (halo violet, traînées vers le centre, zoom et rotation), souffle + harpe cosmique, éclair,
+   * tampon « TRANSFÉRÉ » (CLONK), fondu au noir, puis `go` (la pièce suivante s'ouvre du noir).
+   */
+  private transfer(go: () => void): void {
+    if (this.transferring) return;
+    this.transferring = true;
+    this.input.enabled = false;
+    const cam = this.cameras.main;
+    const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches; // i18n-ignore
+    riftCue();
+    const cx = W / 2;
+    const cy = 190;
+    const vortex = this.add.image(cx, cy, glowTexture(this)).setTint(0xb56cff).setBlendMode(Phaser.BlendModes.ADD).setDepth(1500).setScale(0.1).setAlpha(0.9);
+    const core = this.add.image(cx, cy, glowTexture(this)).setTint(0xffd6ff).setBlendMode(Phaser.BlendModes.ADD).setDepth(1501).setScale(0.04);
+    this.tweens.add({ targets: vortex, scale: 6, duration: 1700, ease: 'Cubic.easeIn' });
+    this.tweens.add({ targets: core, scale: 3.5, duration: 1700, ease: 'Expo.easeIn' });
+    // traînées aspirées vers la faille
+    for (let i = 0; i < 70; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const r = 380 + Math.random() * 520;
+      const streak = this.add
+        .rectangle(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 40 + Math.random() * 90, 2 + Math.random() * 2, Math.random() < 0.5 ? 0xff8ab8 : 0xb56cff, 0.85)
+        .setRotation(a)
+        .setDepth(1502)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setAlpha(0);
+      this.tweens.add({ targets: streak, x: cx, y: cy, scaleX: 0.1, alpha: { from: 0.9, to: 0 }, duration: 600 + Math.random() * 700, delay: Math.random() * 1100, ease: 'Quad.easeIn' });
+    }
+    if (!calm) {
+      cam.zoomTo(1.45, 1700, 'Cubic.easeIn');
+      cam.rotateTo(0.22, false, 1700, 'Cubic.easeIn');
+    }
+    this.time.delayedCall(1700, () => {
+      cam.flash(350, 255, 230, 255);
+      cam.setZoom(1).setRotation(0);
+      vortex.setScale(9).setAlpha(0.55);
+      const stamp = stampObject(this, W / 2, H / 2, t('end.ch0.transfer'), '#ff4f9a', 64).setDepth(1600);
+      this.time.delayedCall(250, () =>
+        void slamStamp(this, stamp).then(() =>
+          this.time.delayedCall(700, () => {
+            cam.fadeOut(700, 0, 0, 0);
+            cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+              this.input.enabled = true;
+              go();
+            });
+          }),
+        ),
+      );
+    });
   }
 
   private drawLocation(label: string, jurisdiction: string): void {
@@ -179,7 +257,7 @@ export class EndScene extends Phaser.Scene {
     drawHazard(bands, 0, 196, W, 8);
     drawHazard(bands, 0, 470, W, 8);
     const title = this.add
-      .text(W / 2, 290, t('end.toBeContinued'), { fontFamily: DISPLAY, fontSize: '110px', color: '#ffffff', padding: { x: 4, y: 8 } })
+      .text(W / 2, 290, this.chapter === 'ch1' ? t('end.ch1.toBeContinued') : t('end.toBeContinued'), { fontFamily: DISPLAY, fontSize: this.chapter === 'ch1' ? '82px' : '110px', color: '#ffffff', padding: { x: 4, y: 8 } })
       .setOrigin(0.5)
       .setDepth(1001)
       .setAlpha(0);
@@ -190,13 +268,13 @@ export class EndScene extends Phaser.Scene {
     grad.addColorStop(1, '#ff4f9a');
     title.setFill(grad).setStroke('#07050f', 10).setShadow(0, 10, 'rgba(255,79,154,0.55)', 26, true, true);
     const sub = this.add
-      .text(W / 2, 385, this.chapter === 'ch0' ? t('end.ch0.next') : t('end.next'), { fontFamily: FONT, fontSize: '22px', fontStyle: '600', color: COLORS.hover })
+      .text(W / 2, 385, this.chapter === 'ch0' ? t('end.ch0.next') : this.chapter === 'ch1' ? t('end.ch1.next') : t('end.next'), { fontFamily: FONT, fontSize: '22px', fontStyle: '600', color: COLORS.hover })
       .setOrigin(0.5)
       .setLetterSpacing(3)
       .setDepth(1001)
       .setAlpha(0);
     const thanks = this.add
-      .text(W / 2, 425, this.chapter === 'ch0' ? t('end.ch0.thanks') : t('end.thanks'), { fontFamily: FONT, fontSize: '17px', color: COLORS.dim })
+      .text(W / 2, 425, this.chapter === 'ch0' ? t('end.ch0.thanks') : this.chapter === 'ch1' ? t('end.ch1.thanks') : t('end.thanks'), { fontFamily: FONT, fontSize: '17px', color: COLORS.dim })
       .setOrigin(0.5)
       .setDepth(1001)
       .setAlpha(0);
@@ -222,7 +300,8 @@ export class EndScene extends Phaser.Scene {
         kicker: t('end.replayKicker'),
       }).setDepth(1001);
       if (next) {
-        makeButton(this, W / 2 + 16 - dx / 2 + 282, 560, t('end.nextChapter'), play(next), {
+        // vers le chapitre suivant : aspiration dans la faille, tampon « TRANSFÉRÉ », puis l'interlude
+        makeButton(this, W / 2 + 16 - dx / 2 + 282, 560, t('end.nextChapter'), () => this.transfer(play(next)), {
           align: 'left',
           size: 20,
           primary: true,

@@ -2,6 +2,7 @@
 // Une scène YAML sans entrée ici retombe sur le rendu 2D (`art` du YAML).
 import type { SceneDef } from '../../engine/types';
 import type { CameraSpec, ShotSpec, Stage } from '../Stage';
+import { cockpit } from './cockpit';
 import { couloir } from './couloir';
 import { eclat } from './eclat';
 import { galerie } from './galerie';
@@ -35,6 +36,8 @@ export const ROOMS: Record<string, RoomBuild> = {
   'galerie-des-offrandes': galerie,
   'temple-couloir': temple,
   'coeur-eclat': eclat,
+  // interlude ch.0 → ch.1 « la Capsule de Service CS-07 »
+  'interlude-vaisseau': cockpit,
 };
 
 /**
