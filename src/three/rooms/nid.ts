@@ -128,11 +128,13 @@ export const nid: RoomBuild = {
       s.add(at(drape(u * 0.62, rodY + 0.1, sx), tx + sx * u * 0.78, 0, dz));
     }
 
-    // la Reine : sprite GenAI en pied sur l'estrade, devant le dossier
-    const top = s.wallAt(680, 44, tz).y;
+    // la Reine : sprite GenAI en pied sur la marche haute, devant l'assise et les
+    // pommeaux (z ≥ +0.17u) — plus en arrière, l'assise et le coussin mangent tarses et cape
+    const qz = tz + u * 0.18;
+    const top = s.wallAt(680, 44, qz).y;
     const qh = top - seatY;
     const queen = billboard(REINE_URL, qh, REINE_ASPECT, { tint: '#fff2e2', shadow: u * 0.16 });
-    queen.position.set(tx + u * 0.02, seatY + u * 0.02, tz + u * 0.04);
+    queen.position.set(tx + u * 0.02, seatY, qz);
     const qs = queen.userData.sprite as THREE.Sprite;
     const qBase = qs.scale.clone();
     // contre-jour chaud derrière la Reine : sa silhouette se détache du dossier

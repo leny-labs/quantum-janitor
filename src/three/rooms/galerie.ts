@@ -41,7 +41,8 @@ export const galerie: RoomBuild = {
     s.add(
       rib(-9.8, 3.4, 8.4, 3.2, 0.55, '#2e1408', 0.8),
       rib(9.8, 3.4, 8.4, -3.2, 0.55, '#2e1408', 0.8),
-      rib(-0.9, 0.5, 7.4, -1.6, 0.26, '#3a1a0c', 0.4),
+      // côte de paroi derrière le Scribe : collée au mur, sinon elle passe devant sa plume
+      rib(-0.9, 0.1, 7.4, -1.6, 0.26, '#3a1a0c', 0.3),
     );
     for (const [x, y, z, len, r] of [
       [-2.2, 6.9, 1.0, 1.0, 0.12],
