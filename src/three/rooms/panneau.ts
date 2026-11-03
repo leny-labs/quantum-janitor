@@ -113,18 +113,18 @@ export function consolePanel(s: Stage): ConsolePanel {
   const bt = fitted(s.rect('bouton'));
   const housing = new THREE.Group();
   housing.add(plate(bt.w * 0.92, bt.h * 0.88, '#2a1a1a', '#ff5c7a'));
-  const ring = new THREE.Mesh(new THREE.RingGeometry(bt.h * 0.36, bt.h * 0.44, 32), mat('#ffffff', { map: stripeTexture('#ffd166', '#1a1a1a', 12) }));
-  ring.position.set(0, bt.h * 0.04, 0.051);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(bt.h * 0.27, bt.h * 0.34, 32), mat('#ffffff', { map: stripeTexture('#ffd166', '#1a1a1a', 12) }));
+  ring.position.set(0, bt.h * 0.05, 0.051);
   ring.receiveShadow = true;
   housing.add(ring);
-  const cap = cyl(bt.h * 0.3, bt.h * 0.33, 0.18, '#d62839', { seg: 24 });
+  const cap = cyl(bt.h * 0.23, bt.h * 0.25, 0.18, '#d62839', { seg: 24 });
   cap.rotation.x = Math.PI / 2;
-  const btn = at(new THREE.Group().add(cap, at(label(tr('props.panneau.button'), bt.h * 0.5, bt.h * 0.13, { color: '#ffffff', bold: true }), 0, 0, 0.1)), 0, bt.h * 0.04, 0.14);
+  const btn = at(new THREE.Group().add(cap, at(label(tr('props.panneau.button'), bt.h * 0.42, bt.h * 0.11, { color: '#ffffff', bold: true }), 0, 0, 0.1)), 0, bt.h * 0.05, 0.14);
   // clic direct : le bouton s'enfonce (pivot dédié, le pouls ci-dessous anime `btn`)
   const push = new THREE.Group().add(btn);
   pressable(s, 'bouton', push, 'button', -0.12);
-  housing.add(push, at(torus(bt.h * 0.33, 0.02, '#ffffff'), 0, bt.h * 0.04, 0.08));
-  housing.add(at(label(tr('props.panneau.buttonNote'), bt.w * 0.8, bt.h * 0.1, { color: '#ff99aa' }), 0, -bt.h * 0.38, 0.06));
+  housing.add(push, at(torus(bt.h * 0.25, 0.02, '#ffffff'), 0, bt.h * 0.05, 0.08));
+  housing.add(at(label(tr('props.panneau.buttonNote'), bt.w * 0.78, bt.h * 0.08, { color: '#ff99aa' }), 0, -bt.h * 0.36, 0.06));
   on(s.rect('bouton'), 0.02, housing, undefined, 'bouton');
   const ready = glow('#ff5c7a', bt.h * 1.3, 0.4);
   on(s.rect('bouton'), 0.3, ready, FULL);

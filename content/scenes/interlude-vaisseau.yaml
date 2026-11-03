@@ -203,10 +203,10 @@ hotspots:
     sfx: beep
     sfxDud: { flags: [iv_destination] }
     smart: look
-    rect: [1015, 50, 240, 196]
+    rect: [1042, 56, 216, 190]
     if: { flags: [iv_navigateur] }
     art:
-      - { rect: [1025, 58, 220, 180], color: "#0e2a2a", stroke: "#7fffd4", text: "DESTINATION ?", size: 15 }
+      - { rect: [1049, 63, 202, 176], color: "#0e2a2a", stroke: "#7fffd4", text: "DESTINATION ?", size: 15 }
     look:
       - say: "« NAVIGATEUR DIMENSIONNEL ». Quatre destinations. L'écran a un fond d'écran : une plage. Il n'y a pas de plage dans le multivers. J'ai vérifié."
       - if: { flags: [iv_destination] }
@@ -223,7 +223,7 @@ hotspots:
     sfx: beep
     sfxDud: { flags: [iv_destination] }
     useLabel: Choisir
-    rect: [1022, 88, 226, 36]
+    rect: [1047, 88, 204, 36]
     if: { flags: [iv_navigateur] }
     look: "« DIMENSION MINIATURE ». Grisée. Tout est minuscule là-bas, paraît-il. Sauf la paperasse."
     use:
@@ -241,7 +241,7 @@ hotspots:
     sfx: beep
     sfxDud: { flags: [iv_destination] }
     useLabel: Choisir
-    rect: [1022, 126, 226, 36]
+    rect: [1047, 126, 204, 36]
     if: { flags: [iv_navigateur] }
     look: "« KLEPSYDRA-LUX ». Grisée. Une version de luxe de ma station. Avec, j'imagine, un placard à balais plus grand."
     use:
@@ -259,7 +259,7 @@ hotspots:
     sfx: beep
     sfxDud: { flags: [iv_destination] }
     useLabel: Choisir
-    rect: [1022, 164, 226, 36]
+    rect: [1047, 164, 204, 36]
     if: { flags: [iv_navigateur] }
     look: "« L'ENVERS DU YAOURT ». Grisée, et un peu humide. Je préfère ne pas toucher. Enfin, je préfère, mais je vais toucher."
     use:
@@ -277,7 +277,7 @@ hotspots:
     sfx: beep
     sfxDud: { flags: [iv_destination] }
     useLabel: Choisir
-    rect: [1022, 202, 226, 36]
+    rect: [1047, 202, 204, 36]
     if: { flags: [iv_navigateur] }
     look: "« STATION (BUREAUCRATIQUE) ». La seule qui clignote. L'air de dire « moi, je ne juge pas »."
     use:

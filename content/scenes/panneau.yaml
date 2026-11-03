@@ -64,12 +64,12 @@ hotspots:
     label: Gros bouton rouge « STABILISER »
     sfx: clonk
     sfxDud: { notFlags: [panneau_allume] }
-    rect: [813, 312, 187, 130]
+    rect: [848, 318, 168, 124]
     art:
-      - { rect: [820, 319, 173, 115], color: "#2a1a1a", stroke: "#ff5c7a" }
-      - { circle: [907, 373, 40], color: "#d62839", stroke: "#ffffff" }
-      - { text: "STABILISER", at: [907, 373], size: 11, color: "#ffffff" }
-      - { text: "(ne pas appuyer sans raison)", at: [907, 424], size: 8, color: "#ff99aa" }
+      - { rect: [855, 324, 154, 112], color: "#2a1a1a", stroke: "#ff5c7a" }
+      - { circle: [932, 374, 30], color: "#d62839", stroke: "#ffffff" }
+      - { text: "STABILISER", at: [932, 374], size: 11, color: "#ffffff" }
+      - { text: "(ne pas appuyer sans raison)", at: [932, 424], size: 8, color: "#ff99aa" }
     look:
       - if: { flags: [reacteur_rit] }
         say: "B.O.B. a dit de ne pas rappuyer. Le bouton, lui, clignote. Je sais lequel des deux je vais écouter."
