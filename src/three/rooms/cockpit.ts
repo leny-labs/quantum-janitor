@@ -400,7 +400,10 @@ export const cockpit: RoomBuild = {
 
     // ── B.O.B., sur les genoux de Gary, le porte-gobelet sur la tête ──
     const bb = s.stand(s.rect('bob'));
-    const robot = at(bob(bb.w * 0.78), bb.x, 0, bb.z, -0.2);
+    // face caméra : tourné vers le centre de la cabine et cabré vers l'objectif
+    // (caméra plongeante) pour que les yeux restent bien au-dessus du HUD
+    const robot = at(bob(bb.w * 0.78), bb.x, 0, bb.z, -0.35);
+    robot.rotation.x = -0.28;
     const cupHolder = at(cyl(bb.w * 0.1, bb.w * 0.08, bb.w * 0.12, '#c9ced6', { seg: 14 }), 0, bb.w * 0.27, 0);
     robot.add(cupHolder);
     s.spot('bob', robot);

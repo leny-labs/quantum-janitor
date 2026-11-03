@@ -308,11 +308,11 @@ hotspots:
 
   - id: bob
     label: B.O.B.
-    rect: [760, 420, 210, 150]
+    rect: [760, 370, 210, 150]
     art:
-      - { rect: [780, 470, 170, 60], color: "#7c8794", stroke: "#ffffff" }
-      - { circle: [830, 495, 7], color: "#ffffff" }
-      - { circle: [900, 495, 7], color: "#ffffff" }
+      - { rect: [780, 420, 170, 60], color: "#7c8794", stroke: "#ffffff" }
+      - { circle: [830, 445, 7], color: "#ffffff" }
+      - { circle: [900, 445, 7], color: "#ffffff" }
     look: "B.O.B., sur mes genoux. Le porte-gobelet sur la tête. Il ne l'enlève pas. Il dit que ça lui fait un chapeau."
     talk:
       - dialogue: iv_bob
