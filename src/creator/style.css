@@ -34,3 +34,8 @@ dt { color: var(--dim); }
 dd { margin: 0; word-break: break-word; }
 .row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .note { color: var(--dim); font-size: 12px; margin-top: 10px; }
+h3.transition { color: #ff8ab8; }
+li.cp.transition, li.cp.launch { border-left-color: #ff8ab8; }
+li.cp.transition::before, li.cp.launch::before { background: #ff8ab8; }
+li.cp.transition .idx, li.cp.launch .idx { color: #ff8ab8; font-weight: 700; }
+button.link { background: none; border-style: dashed; color: #ff8ab8; }

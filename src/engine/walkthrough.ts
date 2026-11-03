@@ -26,6 +26,12 @@ export interface ChapterDef {
   initial?: { items?: string[]; flags?: string[] };
   /** Knot de fin attendu (cliffhanger). */
   endKnot: string;
+  /**
+   * Chapitre précédent dont l'écran de fin lance celui-ci (bouton « Chapitre N → »,
+   * `END_BY_CHAPTER[from].next` dans EndScene) : /creator affiche cette transition en
+   * tête de timeline (voir `chapterPrelude`).
+   */
+  from?: string;
   steps: WalkStep[];
 }
 
@@ -71,6 +77,7 @@ export const CHAPTERS: ChapterDef[] = [
     id: 'ch1',
     title: 'Chapitre 1 : Blattaria Prime',
     startScene: 'nid-royal',
+    from: 'ch0',
     // arrivé par la faille avec Josiane et le badge ; le Seau est passé avant lui
     initial: { items: ['serpilliere', 'badge'], flags: ['ch1', 'chapitre0_termine'] },
     endKnot: 'ch1_suite',
@@ -140,6 +147,11 @@ export interface Checkpoint {
   gained: string[];
   lost: string[];
   save: SaveData;
+  /**
+   * Entrées d'avant-chapitre de /creator (hors solution) : `transition` = écran de fin du
+   * chapitre précédent ; `launch` = lancement réel du chapitre (intro d'arrivée à jouer).
+   */
+  kind?: 'transition' | 'launch';
 }
 
 export interface WalkOptions {
@@ -270,4 +282,44 @@ export async function walkChapter(content: GameContent, chapter: ChapterDef, opt
   }
 
   return { checkpoints, state, ended };
+}
+
+/**
+ * Entrées d'avant-chapitre pour /creator, avant le checkpoint « début » : la **transition**
+ * (instantané final du chapitre `from` : écran de fin, « À suivre… », bouton « Chapitre N → »)
+ * puis le **lancement** (état initial du chapitre, pièce jamais visitée → l'intro d'arrivée
+ * `onFirstEnter` sera jouée, comme après le clic sur le bouton). Vide sans `from`.
+ * Volontairement hors de `walkChapter` : les checkpoints de la solution (playthrough) ne changent pas.
+ */
+export async function chapterPrelude(content: GameContent, chapter: ChapterDef): Promise<Checkpoint[]> {
+  const prev = findChapter(chapter.from);
+  if (!prev) return [];
+  const { checkpoints, ended } = await walkChapter(content, prev);
+  const last = checkpoints[checkpoints.length - 1];
+  if (!last || ended !== prev.endKnot) throw new Error(`fin de ${prev.id} non atteinte (ended=${ended})`);
+  const section = `↪ Transition ${prev.id.replace(/^ch/, 'ch.')} → ${chapter.id.replace(/^ch/, 'ch.')}`;
+  const launch = chapterState(chapter).toSave();
+  return [
+    {
+      ...last,
+      index: 0,
+      section,
+      label: `fin ${prev.id.replace(/^ch/, 'ch.')} — « À suivre… » + bouton « Chapitre ${chapter.id.replace(/^ch/, '')} → »`,
+      newFlags: [],
+      gained: [],
+      lost: [],
+      kind: 'transition',
+    },
+    {
+      index: 0,
+      section,
+      label: `lancement ${chapter.id.replace(/^ch/, 'ch.')} — intro d'arrivée (${chapter.startScene})`,
+      scene: chapter.startScene,
+      newFlags: launch.flags.filter((f) => !last.save.flags.includes(f)),
+      gained: launch.items.filter((i) => !last.save.items.includes(i)),
+      lost: last.save.items.filter((i) => !launch.items.includes(i)),
+      save: launch,
+      kind: 'launch',
+    },
+  ];
 }

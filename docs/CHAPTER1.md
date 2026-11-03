@@ -298,6 +298,20 @@ hormis les ajouts gardés par `ch1` dans `items.yaml`.
 | `/creator?ch=ch1` → « Jouer ici » | checkpoint du ch.1 écrit dans la sauvegarde (avec `chapter: 'ch1'`) puis `?resume=1` |
 | `/?scene=<salle>&chapter=1&flags=…&items=…` | mode debug ; `scene=fin&chapter=1` = fin du ch.1 (les liens « URL » de /creator l'ajoutent) |
 
+**Tester la transition ch.0 → ch.1 depuis /creator** (`ChapterDef.from: 'ch0'` →
+`chapterPrelude()` dans `src/engine/walkthrough.ts`, hors solution : les comptes de
+checkpoints du playthrough ne bougent pas). `/creator?ch=ch1` commence par la section
+« ↪ Transition ch.0 → ch.1 » :
+
+| Entrée | « Jouer ici » | « URL » (sauvegarde intacte) |
+|---|---|---|
+| ↪ fin ch.0 | sauvegarde ch.0 terminée + `?resume=1` → écran « À suivre… » ; **« Chapitre 1 → »** = `newGame('ch1')`, arrivée au Nid avec le plan d'arrivée filmé | `/?scene=fin&flags=…` : rejoue aussi le cliffhanger avant les boutons |
+| ▶ lancement ch.1 | état initial, Nid jamais visité → intro `ch1_arrivee` filmée | `/?scene=nid-royal&chapter=1&flags=ch1,chapitre0_termine&items=serpilliere,badge&cine=1` |
+| #0 début (« Départ direct ») | Nid, intro déjà vue (comme avant) | `/?scene=nid-royal&chapter=1&…` |
+
+Sur `/creator?ch=ch0`, le checkpoint FIN porte « → suite : transition ch.1 »
+(`/creator?ch=ch1#transition`).
+
 Écarts au design ci-dessus :
 - Sortie `temple-couloir` → `coeur-eclat` : `if: ch1_eclat_tombe` (n'apparaît qu'une
   fois l'éclat tombé) plutôt que `requires` + `lockedText`.
