@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { t as tr } from '../../i18n';
 import { at, box, cyl, glow, label, plane, pool, sphere, torus } from '../kit';
-import { bob, combiChitine } from '../props';
+import { bob } from '../props';
 import { BobVoice } from './bobvoix';
 import type { RoomBuild } from './index';
 
@@ -134,6 +134,11 @@ export const cockpit: RoomBuild = {
     s.add(panel);
     panel.add(at(box(band.w, band.h * 1.15, 0.24, '#353c4c'), 0, 0, -0.12));
     panel.add(at(box(band.w, 0.1, 0.34, '#1f2430'), 0, band.h * 0.58, -0.05));
+    // écran central et fente CONTACT : zones réservées, aucun petit bouton ne mord dessus
+    const sc = s.fitIn([548, 212, 264, 56], panel);
+    const ct = s.fitIn(s.rect('contact'), panel);
+    const keepOut = [sc, ct].map((r) => ({ x: r.x, y: r.y, hw: r.w / 2 + 0.14, hh: r.h / 2 + 0.1 }));
+    const blocked = (x: number, y: number) => keepOut.some((k) => Math.abs(x - k.x) < k.hw && Math.abs(y - k.y) < k.hh);
     // soixante boutons, rangées régulières : sombres à l'arrêt, ils clignotent une fois le contact mis
     const COLORS = ['#ff4f5a', '#ffd166', '#7fffd4', '#3d7dd8', '#ff8c42', '#c77dff'];
     const lit: THREE.Mesh[] = [];
@@ -142,7 +147,7 @@ export const cockpit: RoomBuild = {
         const x = -band.w * 0.46 + i * (band.w * 0.92 / 14) + (row % 2) * 0.08;
         const y = band.h * 0.38 - row * band.h * 0.15;
         // laisse de la place aux gros boutons du centre
-        if (Math.abs(x) < band.w * 0.2 && row > 0) continue;
+        if ((Math.abs(x) < band.w * 0.2 && row > 0) || blocked(x, y)) continue;
         const c = COLORS[(row * 7 + i * 3) % COLORS.length];
         panel.add(at(box(0.16, 0.1, 0.05, '#20242e', { edges: false }), x, y, 0.02));
         const b = at(box(0.12, 0.07, 0.04, c, { glow: true, edges: false }), x, y, 0.05);
@@ -186,11 +191,16 @@ export const cockpit: RoomBuild = {
       wheels.push(w);
       panel.add(w);
     }
-    // écran central : « BONJOUR, GARRY » au contact, veille sinon
-    const sc = s.fitIn([570, 228, 220, 44], panel);
-    const screenOff = at(label(tr('props.cockpit.off'), sc.w, sc.h, { color: '#3a4a5a', bg: '#0a0e14', bold: true }), sc.x, sc.y, 0.03);
-    const screenOn = at(label(tr('props.cockpit.hello'), sc.w, sc.h, { color: '#7fffd4', bg: '#04140f', bold: true }), sc.x, sc.y, 0.031);
-    panel.add(screenOff, screenOn);
+    // écran central : « BONJOUR, GARRY » au contact, veille sinon — cadre, dalle, texte centré avec marges
+    panel.add(at(box(sc.w, sc.h, 0.05, '#1f2430'), sc.x, sc.y, 0.02));
+    const glassOff = at(plane(sc.w * 0.92, sc.h * 0.78, '#0a0e14'), sc.x, sc.y, 0.05);
+    const glassOn = at(plane(sc.w * 0.92, sc.h * 0.78, '#04140f'), sc.x, sc.y, 0.05);
+    const screenOff = at(label(tr('props.cockpit.off'), sc.w * 0.8, sc.h * 0.52, { color: '#3a4a5a', bold: true }), sc.x, sc.y, 0.056);
+    const screenOn = at(label(tr('props.cockpit.hello'), sc.w * 0.84, sc.h * 0.56, { color: '#7fffd4', bold: true }), sc.x, sc.y, 0.057);
+    const screenGlow = at(glow('#7fffd4', sc.w * 1.1, 0.16), sc.x, sc.y, 0.07);
+    panel.add(glassOff, glassOn, screenOff, screenOn, screenGlow);
+    s.when(DARK, glassOff);
+    s.when(CONTACT, glassOn, screenGlow);
     s.when(DARK, screenOff);
     s.when(CONTACT, screenOn);
     s.animate((t) => {
@@ -206,7 +216,6 @@ export const cockpit: RoomBuild = {
     });
 
     // ── fente « CONTACT » ──
-    const ct = s.fitIn(s.rect('contact'), panel);
     const slot = new THREE.Group();
     slot.add(at(box(ct.w * 0.8, ct.h * 0.5, 0.08, '#14102a'), 0, 0, 0), at(box(ct.w * 0.55, ct.h * 0.07, 0.1, '#000000', { edges: false }), 0, ct.h * 0.05, 0.01));
     slot.add(at(label(tr('props.cockpit.contact'), ct.w * 0.75, ct.h * 0.18, { color: '#ffd166', bold: true }), 0, -ct.h * 0.17, 0.05));
@@ -251,9 +260,7 @@ export const cockpit: RoomBuild = {
       seat.add(seg);
     }
     seat.add(at(box(st.w * 0.7, st.h * 0.12, st.w * 0.5, '#4a2810'), 0, st.h * 0.12, st.w * 0.15));
-    const suit = at(combiChitine(st.h * 0.62), 0, st.h * 0.18, st.w * 0.32);
-    suit.rotation.x = -0.15;
-    seat.add(suit);
+    // pas de combi posée ici : la Mue Sacrée est dans l'inventaire (icône GenAI), Gary l'enfile en l'utilisant sur le siège
     s.spot('siege', at(seat, st.x, 0, st.z, 0.35));
 
     // ── B.O.B., sur les genoux de Gary, le porte-gobelet sur la tête ──

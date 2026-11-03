@@ -12,7 +12,7 @@ import Phaser from 'phaser';
 import * as THREE from 'three';
 import { at, cyl, glow } from './kit';
 import type { Mood } from '../engine/mood';
-import { badge, bob, combiChitine, fusible, gary, roach, sandwich, seau, serpilliere, setFace, sylvie, type FacePose } from './props';
+import { badge, bob, fusible, gary, roach, sandwich, seau, serpilliere, setFace, sylvie, type FacePose } from './props';
 
 export const iconKey = (id: string) => `icon3d:${id}`;
 /** Icônes d'inventaire GenAI (public/inventory/) : priment sur le bake 3D sous la même clé. */
@@ -143,8 +143,7 @@ const ICONS: Record<string, Pose> = {
   badge: { build: () => badge(0.8), look: [0, 0.3, 0], dist: 1.9, yaw: -0.35, pitch: 0.12, rim: '#7fffd4' },
   sandwich: { build: () => sandwich(1), look: [0, 0.12, 0], dist: 2.1, pitch: 0.75, rim: '#ff8ab8' },
   fusible: { build: () => fusible(1.1), look: [0, 0, 0], dist: 2, yaw: -0.3, pitch: 0.35, rim: '#ff5c7a' },
-  // ch.1 : stub 3D en attendant l'icône GenAI (TODO docs/CHAPTER1.md)
-  combi_chitine: { build: () => combiChitine(1.5), look: [0, 0.8, 0], dist: 3.4, yaw: 0.35, pitch: 0.12, rim: '#ffd166' },
+  // combi_chitine : icône GenAI uniquement (GENAI_ICONS), jamais de bake 3D
   // ch.1 « La Station Bureaucratique » : icônes 3D (rooms/station.ts)
   ticket_douane: { build: () => ticket(1, 'D-0001', '#1f7f73'), look: [0, 0, 0], dist: 1.5, yaw: -0.3, pitch: 0.15, rim: '#7fffd4' },
   ticket_9848: { build: () => ticket(1, '9848', '#ffd166'), look: [0, 0, 0], dist: 1.5, yaw: 0.3, pitch: 0.15, rim: '#ffd166' },
