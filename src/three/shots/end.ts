@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import type { HeroShot } from '../Hero';
 import { at, box, cyl, glow, mat, sphere, Vignette } from '../kit';
-import { REINE_ASPECT, REINE_URL, ROACH_2D, billboard, bob, gary, roach, roachSprite, seau } from '../props';
+import { GARY_PRONE_ASPECT, GARY_PRONE_URL, REINE_ASPECT, REINE_URL, ROACH_2D, billboard, bob, roach, roachSprite, seau } from '../props';
 import { skyPlane, skyTexture } from './backdrop';
 
 export function endShot(width: number, height: number): HeroShot {
@@ -79,10 +79,9 @@ export function endShot(width: number, height: number): HeroShot {
   }
 
   // Gary à plat ventre, B.O.B. à côté, le Seau renversé
-  const g = gary(1.4);
-  g.rotation.x = -Math.PI / 2 + 0.15;
-  g.position.set(0.6, 0.35, 2.4);
-  g.rotation.z = 0.3;
+  // Gary : sprite GenAI allongé de profil (tête à gauche), posé au sol comme la Reine
+  const g = at(billboard(GARY_PRONE_URL, 1.1, GARY_PRONE_ASPECT, { tint: '#ffe6dc', shadow: 1.25 }), 0.45, 0, 2.4);
+  (g.children[0] as THREE.Mesh).scale.set(1, 0.32, 1);
   scene.add(g);
   const robot = at(bob(1.1), 2.6, 0, 2.8, -0.6);
   scene.add(robot);

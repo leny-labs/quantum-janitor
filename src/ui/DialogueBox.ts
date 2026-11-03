@@ -59,6 +59,8 @@ const FACES: Record<string, { mouth: MouthOptions; blink?: BlinkOptions }> = {
   // cafards : mandibules + palpes seulement, jamais de bouche (largeur 0 = rien dessiné)
   reine: { mouth: { width: 0, showClosed: false }, blink: { enabled: false } },
   scribe: { mouth: { width: 0, showClosed: false }, blink: { enabled: false } },
+  // M. Sabot (portrait GenAI fixe) : bouche sous la moustache réglementaire, fermée au repos (dessinée par l'image)
+  sabot: { mouth: { x: 0.51, y: 0.515, width: 0.1, showClosed: false, style: { lipColor: '#7a3a30' } }, blink: { enabled: false } },
 };
 
 /** Boîte de dialogue : portrait 3D, cartouche de nom, texte, choix. */

@@ -758,6 +758,16 @@ export const REINE_ASPECT = 768 / 1024;
 /** Frère Élytre, Grand Scribe, en pied (GenAI, 637 × 1024, _briefs/ch1/genai-fix/cutout.py). */
 export const SCRIBE_URL = `${import.meta.env.BASE_URL}props/ch1/scribe.png`;
 export const SCRIBE_ASPECT = 637 / 1024;
+/** Gary à plat ventre (cliffhanger B-7), vu de profil, tête à gauche (GenAI, 1024 × 397, _briefs/ch1/genai-fix/cutout.py). */
+export const GARY_PRONE_URL = `${import.meta.env.BASE_URL}props/ch1/gary-a-plat.png`;
+export const GARY_PRONE_ASPECT = 1024 / 397;
+/** M. Jean-Claude Sabot, agent de fourrière, tampon levé (GenAI, 772 × 1024). */
+export const SABOT_URL = `${import.meta.env.BASE_URL}props/st/sabot.png`;
+export const SABOT_ASPECT = 772 / 1024;
+/** M. Patience assis sur sa chaise, ticket 9 848 tendu ; variante main vide (même cadre) une fois le ticket pris. */
+export const PATIENCE_URL = `${import.meta.env.BASE_URL}props/st/patience.png`;
+export const PATIENCE_EMPTY_URL = `${import.meta.env.BASE_URL}props/st/patience-vide.png`;
+export const PATIENCE_ASPECT = 792 / 1024;
 
 /** Texture de la plaque « Règlement n°1 » : émail bleu nuit, bandeau rouge, gravure ambre. */
 function reglementTexture(aspect: number): THREE.CanvasTexture {

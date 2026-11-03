@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
-import { bob } from '../props';
+import { PATIENCE_ASPECT, PATIENCE_EMPTY_URL, PATIENCE_URL, SABOT_ASPECT, SABOT_URL, billboard, bob } from '../props';
 import { BobVoice } from './bobvoix';
 import type { RoomBuild } from './index';
 import { against, shell, wallPanels } from './shell';
@@ -175,20 +175,18 @@ export const stSas: RoomBuild = {
     for (const sx of [-1, 1]) booth.add(at(box(0.08, gr.h * 0.58, 1, '#8a4a1a'), sx * gr.w * 0.48, gr.h * 0.71, 0));
     const glass = at(plane(gr.w * 0.92, gr.h * 0.55, '#bfe6ff', { opacity: 0.22 }), 0, gr.h * 0.7, 0.5);
     booth.add(at(label(tr('props.station.pound'), gr.w * 0.9, gr.h * 0.12, { color: '#ffffff', bold: true }), 0, gr.h * 0.3, 0.51));
-    // M. Sabot : gilet orange, casquette, il tamponne sans lever les yeux
-    const sabot = new THREE.Group();
-    sabot.add(at(cyl(0.3, 0.36, 0.7, '#ff8c42', { seg: 12 }), 0, 0, 0), at(sphere(0.22, '#e2a57e', { seg: 14 }), 0, 0.5, 0), at(cyl(0.24, 0.24, 0.08, '#2a2830', { edges: false }), 0, 0.68, 0.02));
-    // bande réfléchissante du gilet, casquette à visière, sourcils froncés, moustache réglementaire
-    sabot.add(at(cyl(0.305, 0.33, 0.06, '#e8f0ff', { edges: false, seg: 12 }), 0, 0.05, 0), at(box(0.3, 0.03, 0.18, '#2a2830', { edges: false }), 0, 0.66, 0.2));
-    for (const sx of [-1, 1]) sabot.add(at(sphere(0.03, '#1a1a1a'), sx * 0.08, 0.53, 0.2), at(box(0.09, 0.02, 0.02, '#3a2a1a', { edges: false }), sx * 0.08, 0.6, 0.2));
-    sabot.add(at(box(0.18, 0.04, 0.04, '#3a2a1a', { edges: false }), 0, 0.42, 0.21));
-    const arm = at(cyl(0.06, 0.06, 0.45, '#ff8c42', { edges: false }), 0.32, 0.1, 0.2);
-    arm.rotation.x = -1.1;
-    sabot.add(arm);
-    sabot.position.set(0, gr.h * 0.55, -0.1);
+    // M. Sabot (sprite GenAI) derrière la vitre : le comptoir lui cache les jambes ; il tamponne sans lever les yeux
+    const sabot = billboard(SABOT_URL, gr.h * 0.92, SABOT_ASPECT, { tint: '#fff4e6', shadow: 0.01 });
+    sabot.position.set(0, 0, -0.15);
+    const sabotSprite = sabot.userData.sprite as THREE.Sprite;
+    const sabotScale = sabotSprite.scale.clone();
     booth.add(sabot, glass);
     s.spot('guerite', at(booth, gr.x, 0, against(gr.z, 1)));
-    s.animate((t) => (arm.rotation.x = -1.1 + (Math.sin(t * 5) > 0.6 ? 0.4 : 0)));
+    s.animate((t) => {
+      // coup de tampon : petit tassement sec toutes les ~1,3 s
+      const hit = Math.sin(t * 5) > 0.75 ? 0.025 : 0;
+      sabotSprite.scale.set(sabotScale.x * (1 + hit * 0.4), sabotScale.y * (1 - hit), 1);
+    });
 
     // ── porte-gobelet orphelin (resté du vaisseau) ──
     const pg = s.stand(s.rect('porte_gobelet'));
@@ -212,6 +210,9 @@ export const stSas: RoomBuild = {
     s.add(sign);
   },
 };
+
+/** Chaise (px) occupée par M. Patience : la rangée 3D la saute, son sprite apporte la sienne. */
+const PATIENCE_CHAIR = 265;
 
 /** 2. Salle d'Attente. */
 export const stAttente: RoomBuild = {
@@ -270,6 +271,7 @@ export const stAttente: RoomBuild = {
     const chairs: number[] = [];
     for (let px = 75; px <= 740; px += 95) chairs.push(px);
     for (const px of chairs) {
+      if (px === PATIENCE_CHAIR) continue; // la chaise de M. Patience fait partie de son sprite
       const c = s.floorAt(px, 470);
       const chair = new THREE.Group();
       chair.add(at(box(0.62, 0.08, 0.6, '#3d6f9e'), 0, seatY, 0), at(box(0.62, 0.62, 0.08, '#3d6f9e'), 0, seatY + 0.34, -0.28));
@@ -277,46 +279,15 @@ export const stAttente: RoomBuild = {
       s.add(at(chair, c.x, 0, against(c.z, 0.7)));
     }
 
-    // ── M. Patience, squelette assis, ticket 9 848 en main ──
-    const sq = s.stand(s.rect('squelette'));
-    const bone = '#efe6cf';
-    const skel = new THREE.Group();
-    // assis : hanches à hauteur de l'assise (u × 0.36 ≈ seatY)
-    const u = Math.min(sq.h, seatY / 0.36);
-    skel.add(at(sphere(u * 0.09, bone, { seg: 14 }), 0, u * 0.82, 0)); // crâne
-    skel.add(at(sphere(u * 0.02, '#2a2830'), -u * 0.03, u * 0.83, u * 0.08), at(sphere(u * 0.02, '#2a2830'), u * 0.03, u * 0.83, u * 0.08));
-    const jaw = at(box(u * 0.08, u * 0.025, u * 0.06, bone), 0, u * 0.74, u * 0.03);
-    jaw.rotation.x = 0.25;
-    skel.add(jaw, at(cyl(u * 0.015, u * 0.015, u * 0.08, bone, { edges: false }), 0, u * 0.69, 0));
-    for (let i = 0; i < 4; i++) {
-      const rib = at(torus(u * (0.08 - i * 0.008), u * 0.008, bone), 0, u * (0.6 - i * 0.05), 0);
-      rib.rotation.x = Math.PI / 2;
-      rib.scale.set(1, 0.7, 1);
-      skel.add(rib);
-    }
-    skel.add(at(cyl(u * 0.012, u * 0.012, u * 0.3, bone, { edges: false }), 0, u * 0.5, -u * 0.02));
-    // costume trois-pièces poussiéreux et chapeau sur les genoux
-    const suit = at(cyl(u * 0.1, u * 0.12, u * 0.28, '#3a3842', { seg: 10 }), 0, u * 0.5, -u * 0.04);
-    skel.add(suit);
-    for (const sx of [-1, 1]) {
-      const femur = at(cyl(u * 0.02, u * 0.02, u * 0.22, '#3a3842', { edges: false }), sx * u * 0.06, u * 0.36, u * 0.1);
-      femur.rotation.x = Math.PI / 2;
-      const tibia = at(cyl(u * 0.016, u * 0.016, u * 0.3, bone, { edges: false }), sx * u * 0.06, u * 0.18, u * 0.21);
-      skel.add(femur, tibia);
-    }
-    skel.add(at(cyl(u * 0.09, u * 0.11, u * 0.05, '#2a2830', { seg: 14 }), -u * 0.03, u * 0.4, u * 0.14));
-    // bras droit tendu, ticket entre les phalanges
-    const armR = at(cyl(u * 0.012, u * 0.012, u * 0.26, bone, { edges: false }), u * 0.13, u * 0.52, u * 0.06);
-    armR.rotation.z = 0.5;
-    armR.rotation.x = -0.6;
-    skel.add(armR, at(sphere(u * 0.025, bone), u * 0.19, u * 0.42, u * 0.15));
-    const held = at(ticket(u * 0.14, '9848', '#ffd166'), u * 0.21, u * 0.45, u * 0.17);
-    held.rotation.set(-0.3, -0.3, 0.2);
-    skel.add(held);
-    s.when({ notFlags: ['st_ticket_9848'] }, held);
-    s.spot('squelette', at(skel, sq.x, 0, against(sq.z, 0.7)));
-    // toile d'araignée entre le chapeau et la chaise : 41 ans
-    s.add(at(glow('#ffffff', u * 0.25, 0.12), sq.x - u * 0.12, u * 0.3, against(sq.z, 0.7) + u * 0.1));
+    // ── M. Patience (sprite GenAI, assis sur sa propre chaise), ticket 9 848 tendu tant qu'il le tient ──
+    const ph = 1.72;
+    const pc = s.floorAt(PATIENCE_CHAIR, 470);
+    const pz = against(pc.z, 0.7) + 0.05;
+    const withTicket = billboard(PATIENCE_URL, ph, PATIENCE_ASPECT, { tint: '#fff2de', shadow: 0.38 });
+    const emptyHand = billboard(PATIENCE_EMPTY_URL, ph, PATIENCE_ASPECT, { tint: '#fff2de', shadow: 0.38 });
+    s.when({ notFlags: ['st_ticket_9848'] }, withTicket);
+    s.when({ flags: ['st_ticket_9848'] }, emptyHand);
+    s.spot('squelette', at(withTicket, pc.x + 0.12, 0, pz), at(emptyHand, pc.x + 0.12, 0, pz));
 
     // ── distributeur de tickets (en rupture) ──
     const ds = s.stand(s.rect('distributeur'));

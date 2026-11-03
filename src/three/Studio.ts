@@ -51,9 +51,9 @@ export const overlayUrl = (id: string) => `portraits/${id}-robot.png`;
  * Portraits GenAI sans modèle 3D : PNG fixe chargé sous `portraitKey(id)` (repli)
  * + planche `sheetUrl(id)` au layout SHEET, qui prime dès qu'elle est chargée
  * (Frère Élytre : _briefs/ch1/genai-fix/faces.py — mandibules qui s'écartent en
- * parlant, jamais de bouche).
+ * parlant, jamais de bouche). M. Sabot : portrait fixe seul (pas encore de planche).
  */
-const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png' };
+const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png', sabot: 'portraits/sabot-portrait.png' };
 
 /** Une frame de planche : expression + micro-mouvement du buste. */
 interface SheetFrame extends FacePose {
@@ -591,7 +591,7 @@ export function preloadPortraitSheets(load: Phaser.Loader.LoaderPlugin): void {
   for (const { icon } of Object.values(GENAI_VARIANTS).flat()) if (!load.textureManager.exists(iconKey(icon))) load.image(iconKey(icon), genaiIconUrl(icon));
   for (const [id, url] of Object.entries(GENAI_PORTRAITS)) {
     if (!load.textureManager.exists(portraitKey(id))) load.image(portraitKey(id), url);
-    if (!load.textureManager.exists(sheetKey(id))) load.image(sheetKey(id), sheetUrl(id));
+    if (GENAI_SHEETS.has(id) && !load.textureManager.exists(sheetKey(id))) load.image(sheetKey(id), sheetUrl(id));
   }
 }
 
