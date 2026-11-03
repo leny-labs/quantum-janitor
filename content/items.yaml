@@ -63,6 +63,9 @@ items:
     name: Badge « Garry »
     icon: { color: "#e0e0e0", glyph: "ID" }
     look:
+      - if: { flags: [st] }
+        say: "« GARRY PLUNK — Agent d'entretien (intérim) ». Deux R. Ici, il ne prouve rien : le portique dit que les animaux n'ont pas de badge. Moi, je dis que les animaux n'ont pas de RH."
+        stop: true
       - if: { flags: [ch1_badge_propre] }
         say: "« GARRY PLUNK ». Propre, brillant, sacré. Le Signe aux deux R. La RH serait fière. Non. La RH ne ressent rien."
         stop: true
@@ -87,8 +90,14 @@ items:
   - id: fragment
     name: Éclat du Réacteur (1/4096)
     icon: { color: "#b56cff", glyph: "1/4096" }
-    look: "Un éclat du Réacteur d'Improbabilité, gravé « Mk IV — 1/4096 ». Contenu dans une coque d'eau bénite figée, tiède. Il ronronne. Il ne fuit plus. Plus que 4 095. Et je n'ai plus de seau."
+    look:
+      - if: { flags: [st] }
+        say: "L'éclat 1/4096, dans la poche de poitrine de la combi. Tiède. Depuis qu'on est à la Station, il ronronne vers le fond du bâtiment. Vers le n° 2, je parie."
+        stop: true
+      - say: "Un éclat du Réacteur d'Improbabilité, gravé « Mk IV — 1/4096 ». Contenu dans une coque d'eau bénite figée, tiède. Il ronronne. Il ne fuit plus. Plus que 4 095. Et je n'ai plus de seau."
     combine:
+      ticket_douane: "Coller l'éclat sur le ticket ? Il deviendrait un ticket improbable. Le portique en ferait une syncope."
+
       seau: "Il a déjà pris son bain. Un deuxième PLOUF, et il risque d'y prendre goût."
       combi_chitine: "Je le range dans la poche de poitrine de la combi. Elle a une poche de poitrine. Les cafards pensent à tout. Il en ressort tout seul. Bon."
 
@@ -99,3 +108,29 @@ items:
     look: "La Mue Sacrée : une combinaison de chitine tissée avec trois générations de mues royales. Plastron segmenté, épaulières en élytres, antennes décoratives. Elle résiste au vide, au feu, à l'improbabilité et à la honte. Il y a un peu de grand-mère dans l'épaule gauche."
     combine:
       badge: "J'accroche le badge sur le plastron. « GARRY », sur une armure de cafard. La RH n'a pas de formulaire pour ça. Pas encore."
+
+  # ch.1 « La Station Bureaucratique » (docs/CHAPTER1.md §5)
+  # payoff différé : présenté à la fourrière avec le permis de la Direction (fin du ch.1)
+  - id: ticket_douane
+    name: Ticket de douane
+    icon: { color: "#f2e6c2", glyph: "D-0001" }
+    look: "« TICKET D'ENTRÉE n° D-0001 — À PRÉSENTER À LA SORTIE ». La fourrière le réclame, avec un « permis de la Direction ». Je le garde. Précieusement. (À suivre.)"
+    combine:
+      ticket_9848: "Deux tickets ne font pas un rendez-vous. Je l'ai appris à mes dépens. Deux fois."
+      plante: "Accrocher le ticket au ficus ? Il en ferait un sapin de Noël administratif. On n'est pas en décembre. On n'est même pas sûr d'être un jour."
+
+  - id: ticket_9848
+    name: Ticket n° 9848
+    icon: { color: "#ffd166", glyph: "9848" }
+    look: "Le ticket de M. Patience. « 9 848 ». L'afficheur en est au 9 847. Nous sommes les suivants. Depuis quarante et un ans, mais les suivants."
+    combine:
+      ticket_douane: "Deux tickets ne font pas un rendez-vous. Je l'ai appris à mes dépens. Deux fois."
+
+  # payoff différé : repère dans le couloir infini B, puis membre honoraire du Conseil (quorum)
+  - id: plante
+    name: M. Ficus (plante en plastique)
+    icon: { color: "#3e8f4a", glyph: "FICUS" }
+    look: "M. Ficus. En plastique. Étiquette : « MEMBRE HON. DU C... ». Du quoi ? Du Club ? Du Comité ? Du Conseil ? Il ne dit rien. Il a des principes. (À suivre.)"
+    combine:
+      ticket_douane: "Accrocher le ticket au ficus ? Il en ferait un sapin de Noël administratif. On n'est pas en décembre. On n'est même pas sûr d'être un jour."
+      fragment: "L'éclat sur le ficus ? Il pourrait se mettre à pousser. Ou à voter. Gardons ça pour plus tard."

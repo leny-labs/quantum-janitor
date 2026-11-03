@@ -379,6 +379,24 @@ ramasse le ticket de douane, on entre dans l'attente, on obtient le ticket 9848 
 B.O.B. et la plante ; les deux objets différés (`ticket_douane`, `plante`) restent en
 inventaire ; `npm run playthrough` passe ch0 inchangé + stub ch1.
 
+### 9.1 Implémenté (stub jouable)
+
+- `/?chapter=1` : interlude du vaisseau (`interlude-vaisseau`), carte titre tamponnée, puis
+  `st-sas` (intro filmée sur le portique, `st_arrivee`) et `st-attente`. Pièces 3D :
+  `src/three/rooms/station.ts` (`stSas`, `stAttente`) ; Ink : `st_arrivee.ink` (knots
+  `st_arrivee`, `st_laisse`, `st_sabot`, `st_patience`), `st_bob.ink`, `st_fin.ink`.
+- **Sas** : `portique` (prendre → `ticket_douane`), `borne` (→ `st_voit_borne`), `guerite`
+  (M. Sabot, fonctionnaire de la fourrière : « ticket d'entrée + permis de la Direction », objectif
+  final semé), `bob` (indices, puis « Tiens-moi en laisse » → `st_laisse`), `porte_gobelet`.
+- **Attente** (mini-puzzle) : `afficheur` (9 847, `st_voit_afficheur`) + `squelette` (regarder →
+  `st_voit_patience`, utiliser → `st_main_serree`) → B.O.B. (`st_patience`, indices gradués)
+  aspire le ticket 9848 ; fausse piste `ticket_douane` sur le `distributeur` ; `plante` (M. Ficus).
+- **Fin provisoire** : la sortie `vers_guichet` (`requires: ticket_9848`, `to: fin`) joue
+  `st_stub_fin` (Mme Guichard, rideau baissé, formulaire B-7/12 manquant) → écran « LA SUITE
+  ARRIVE… » avec Menu / Rejouer. `ChapterDef.endKnot` du ch1 = `st_stub_fin` (→ `st_suite` plus tard).
+- Objets différés en poche à la fin du stub : `ticket_douane`, `plante` (« À suivre » dans leur
+  `look`). Pas de salle vide : `st-guichet`, `st-couloir-b`, `st-fourriere`… restent dans ce document.
+
 ## 10. Notes techniques (pour plus tard)
 
 - **Tubes pneumatiques** : simple effet de mise en scène (prop + son « FLOUP »), pas un

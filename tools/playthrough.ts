@@ -82,6 +82,11 @@ async function main() {
         if (jump.save.items.includes('combi_chitine')) throw new Error('interlude : la combi devait être enfilée (hors inventaire)');
         for (const kept of ['fragment', 'badge']) if (!jump.save.items.includes(kept)) throw new Error(`interlude : « ${kept} » perdu`);
         if (state.hasFlag('ch1')) throw new Error('la Station ne doit jamais poser le flag ch1 (acte Blattaria)');
+        // stub de la Station : objets à payoff différé gardés jusqu'à la fin provisoire
+        for (const kept of ['ticket_douane', 'plante', 'ticket_9848', 'fragment', 'badge']) if (!state.hasItem(kept)) throw new Error(`Station : « ${kept} » absent à la fin du stub`);
+        const decoy = checkpoints.find((c) => c.label === 'utiliser ticket_douane sur distributeur');
+        if (!decoy?.save.items.includes('ticket_douane')) throw new Error('fausse piste : le distributeur ne doit pas garder le ticket de douane');
+        for (const f of ['st_arrive', 'st_laisse', 'st_ticket_9848']) if (!state.hasFlag(f)) throw new Error(`Station : flag ${f} absent`);
       }
       if (ended !== chapter.endKnot) throw new Error(`fin non atteinte (ended=${ended})`);
       console.log(`\n✓ ${chapter.title} terminé — cliffhanger « ${ended} » atteint (${checkpoints.length} checkpoints).`);

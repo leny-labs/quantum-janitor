@@ -13,8 +13,8 @@
 |---|---|---|---|---|
 | **Ch.0 « Le Seau »**, acte I | *Klepsydra-9* — tutoriel + catastrophe (placard, couloir, labo, panneau) | ch.0 | `ch0` | jouable |
 | **Ch.0 « Le Seau »**, acte II | *Blattaria Prime* (B-7) — prophétie, Josiane et le Seau perdus, combi de chitine | ch.1 | `ch0` (scènes/flags/knots `ch1-*` / `ch1_*` conservés) | jouable |
-| *Interlude* | Mini-vaisseau : cockpit serré, boutons absurdes, choix de destination | — (« interlude envisagé ») | début de `ch1` | à faire |
-| **Ch.1 « La Station Bureaucratique »** | Le règlement a gagné. Paperasse, fonctionnaires, couloirs infinis, 13 lieux | ch.2 | `ch1` (scènes `st-*`, flags `st_*`, knots `st_*`) | design |
+| *Interlude* | Mini-vaisseau : cockpit serré, boutons absurdes, choix de destination | — (« interlude envisagé ») | début de `ch1` | stub jouable |
+| **Ch.1 « La Station Bureaucratique »** | Le règlement a gagné. Paperasse, fonctionnaires, couloirs infinis, 13 lieux | ch.2 | `ch1` (scènes `st-*`, flags `st_*`, knots `st_*`) | stub jouable (2 salles) |
 | Ch.2 | *Dimension Miniature* | ch.3 | `ch2` | idée |
 | Ch.3 | *Klepsydra-Lux* | ch.4 | `ch3` | idée |
 | Ch.4 | *L'Envers du Yaourt* | ch.5 | `ch4` | idée |

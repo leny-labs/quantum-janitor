@@ -13,7 +13,7 @@ onFirstEnter:
 onEnter:
   - if: { flags: [iv_saut] }
     card: ch1
-    end: st_stub_fin
+    goto: st-sas
 
 art:
   - { rect: [0, 0, 1280, 580], color: "#1b1430" }
@@ -133,7 +133,7 @@ hotspots:
           stop: true
         - dialogue: iv_saut
         - card: ch1
-        - end: st_stub_fin
+        - goto: st-sas
       badge: "Le badge est déjà au contact. Il ne peut pas être partout. Moi non plus, d'ailleurs, ça me repose."
 
   - id: bob
@@ -168,4 +168,4 @@ hotspots:
       - set: iv_destination
       - set: iv_saut
       - card: ch1
-      - end: st_stub_fin
+      - goto: st-sas

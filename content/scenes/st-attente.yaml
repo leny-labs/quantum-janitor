@@ -1,0 +1,118 @@
+# Chapitre 1 « La Station Bureaucratique » — 2. Salle d'Attente (docs/CHAPTER1.md §4, §9).
+# Rendu 3D : src/three/rooms/station.ts (stAttente). `art:` = repli 2D.
+# Mini-puzzle : l'afficheur (9 847), M. Patience et son ticket 9 848 (main serrée), B.O.B. aspire
+# le ticket ; fausse piste au distributeur. M. Ficus (plante) : payoff différé (couloir B, Conseil).
+# Sortie vers le guichet = fin du stub (`to: fin` → st_stub_fin) une fois le ticket en poche.
+id: st-attente
+title: Salle d'Attente
+sector: Station Bureaucratique · Niveau 0 · Patientez
+icon: corridor
+background: "#2e2c26"
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#4a4436" }
+  - { rect: [0, 0, 1280, 470], color: "#b8b08f" }
+
+hotspots:
+  - id: afficheur
+    label: Afficheur « NOUS SERVONS LE N° »
+    smart: look
+    rect: [500, 40, 280, 100]
+    art:
+      - { rect: [510, 50, 260, 80], color: "#140a0a", stroke: "#ff4f5a", text: "9 847", size: 34 }
+    look:
+      - say: "« NOUS SERVONS LE NUMÉRO : 9 847 ». Les chiffres sont gravés à même la diode. Quelqu'un a compris que ça ne changerait plus."
+        set: st_voit_afficheur
+    use: "Je tapote l'afficheur. Il clignote, par politesse. 9 847. On ne brusque pas un afficheur."
+
+  - id: squelette
+    label: M. Patience
+    rect: [225, 320, 125, 165]
+    art:
+      - { circle: [265, 260, 26], color: "#efe6cf", stroke: "#3a3842" }
+      - { rect: [235, 290, 60, 110], color: "#efe6cf", stroke: "#3a3842" }
+      - { rect: [300, 330, 30, 20], color: "#ffffff", text: "9848", size: 9 }
+    look:
+      - say: "Un squelette, assis bien droit sur une chaise vissée. Costume trois-pièces, chapeau sur les genoux. Une étiquette autour du cou : « M. PATIENCE — USAGER »."
+        set: st_voit_patience
+      - if: { notFlags: [st_ticket_9848] }
+        say: "Dans sa main droite, serré entre deux phalanges, un ticket : « 9 848 ». Il attendait d'être le suivant. Il l'est toujours."
+      - if: { flags: [st_ticket_9848] }
+        say: "Ses doigts sont retombés sur ses genoux. Il a l'air soulagé. On lui a enfin dit qu'il pouvait partir."
+    use:
+      - if: { flags: [st_ticket_9848] }
+        say: "Je lui ai déjà pris son ticket. Je ne vais pas lui prendre son chapeau. Il y a des limites. Je viens de les découvrir."
+        stop: true
+      - say: "narrateur: Gary tire doucement sur le ticket. Les phalanges ne bougent pas d'un millimètre. Quarante et un ans de patience, ça fait une sacrée poigne."
+        set: st_main_serree
+      - say: "Il ne lâche rien. Pas avec des doigts, en tout cas. Il faudrait quelque chose de plus... aspirant."
+    talk:
+      - say: "Bonjour, monsieur. Vous attendez depuis longtemps ?"
+      - say: "narrateur: M. Patience ne répond pas. Sa mâchoire, légèrement décrochée, a l'air de dire « à qui le dites-vous »."
+        set: st_voit_patience
+    useItem:
+      ticket_douane: "Lui proposer un échange ? Un ticket de douane contre son 9 848 ? Il ne fait pas d'échange. Il n'a même jamais fait la queue ailleurs."
+      plante: "Je lui laisse M. Ficus pour lui tenir compagnie ? ...Non. M. Ficus vient avec moi. Je le sens. Il a un rôle à jouer."
+      badge: "« GARRY PLUNK ». Il ne regarde même pas. Il en a vu passer, des badges, en quarante et un ans."
+
+  - id: distributeur
+    label: Distributeur de tickets
+    rect: [860, 180, 130, 260]
+    art:
+      - { rect: [870, 190, 110, 240], color: "#c0392b", stroke: "#ffffff", text: "TICKETS", size: 14 }
+    look: "Un distributeur de tickets rouge. Écran : « RUPTURE — FORMULAIRE DE RÉAPPROVISIONNEMENT DISPONIBLE AU GUICHET ». Le guichet, pour lequel il faut un ticket."
+    use:
+      - say: "narrateur: Gary appuie sur le gros bouton. Le distributeur mouline, vrombit, et sort... un ticket blanc, vierge, qui dit « NUMÉRO EN ATTENTE DE NUMÉROTATION »."
+      - say: "Il le ravale aussitôt. Il a honte, je crois."
+    useItem:
+      ticket_douane:
+        - say: "narrateur: Le distributeur avale le ticket de douane, le goûte, et le recrache avec dédain. « TICKET NON RECONNU : CECI N'EST PAS UNE ATTENTE, CECI EST UNE DOUANE »."
+        - say: "Il y a une hiérarchie des tickets. Je l'ignorais. Je suis tout en bas, avec mon ticket de douane."
+      fragment: "L'éclat dans le distributeur ? Il en sortirait un ticket « ∞ ». Et on attendrait encore plus longtemps."
+
+  - id: plante
+    label: Plante en plastique
+    useLabel: Prendre
+    rect: [1030, 270, 130, 210]
+    if: { notItems: [plante] }
+    art:
+      - { rect: [1070, 420, 50, 50], color: "#8a5a3a" }
+      - { circle: [1095, 360, 55], color: "#3e8f4a" }
+    look: "Un ficus en plastique, dans un pot. Étiquette : « M. FICUS — MEMBRE HON. DU C... ». La fin est effacée. Quelqu'un l'a beaucoup caressé. Il a l'air important. Pour une plante en plastique."
+    use:
+      - give: plante
+      - say: "narrateur: Gary prend M. Ficus sous le bras. Le pot est vissé au sol ; il ne le prend pas, seulement la plante. Elle se laisse faire. Elle est en plastique, comme tout le monde ici."
+      - say: "Je ne sais pas pourquoi. J'ai le sentiment qu'il me servira. Plus tard. Beaucoup plus tard. Les plantes en plastique, ça a de la mémoire."
+    useItem:
+      fragment: "L'éclat sur le ficus ? Il pourrait se mettre à pousser. Ou à voter. On n'a pas le temps pour l'un ni pour l'autre."
+
+  - id: bob
+    label: B.O.B.
+    rect: [600, 470, 170, 100]
+    art:
+      - { rect: [615, 490, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+    look: "B.O.B. tient toujours ma laisse, du bout de l'antenne. Il fixe M. Patience avec respect. Et un peu d'appétit, je crois."
+    talk:
+      - dialogue: st_patience
+    useItem:
+      ticket_9848: "bob: Il est à nous, maintenant. Ne le perds pas, Gary. On n'aspire pas deux fois le même mort."
+      plante: "bob: M. Ficus ? Je ne l'aspire pas. Il a une étiquette. Les choses qui ont une étiquette, ici, sont plus importantes que nous."
+    useItemDefault:
+      - say: "bob: Je suis ton propriétaire, pas ta poubelle. Enfin. Pas aujourd'hui."
+        mood: sad
+
+exits:
+  - id: vers_sas
+    label: Sas d'Arrivée
+    to: st-sas
+    dir: left
+    rect: [10, 140, 100, 320]
+  # fin provisoire du stub : `to: fin` = st_stub_fin (le guichet est fermé, formulaire manquant)
+  - id: vers_guichet
+    label: Guichet d'Accueil
+    to: fin
+    dir: right
+    rect: [1170, 140, 100, 320]
+    requires: { items: [ticket_9848] }
+    lockedText:
+      - say: "Une pancarte sur la porte du guichet : « MUNISSEZ-VOUS D'UN TICKET AVANT DE VOUS PRÉSENTER ». Je n'en ai pas. Enfin, pas le bon."

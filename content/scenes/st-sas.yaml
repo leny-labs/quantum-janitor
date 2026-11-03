@@ -1,0 +1,125 @@
+# Chapitre 1 « La Station Bureaucratique » — 1. Sas d'Arrivée (docs/CHAPTER1.md §4, §9).
+# Rendu 3D : src/three/rooms/station.ts (stSas). `art:` = repli 2D.
+# Puzzle : ticket de douane au portique (payoff à la fourrière, bien plus tard), lire la borne,
+# B.O.B. « tient Gary en laisse » → la porte de la salle d'attente s'ouvre.
+id: st-sas
+title: Sas d'Arrivée
+sector: Station Bureaucratique · Douane dimensionnelle
+icon: corridor
+background: "#2b2a33"
+
+onFirstEnter:
+  - dialogue: st_arrivee
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#3a3842" }
+  - { rect: [0, 0, 1280, 470], color: "#c9c2a8" }
+  - { text: "BIENVENUE — VOTRE VISITE EST ENREGISTRÉE", at: [640, 60], size: 22, color: "#3a3842" }
+
+hotspots:
+  - id: portique
+    label: Portique de scan
+    useLabel: Prendre un ticket
+    rect: [470, 110, 250, 370]
+    art:
+      - { rect: [480, 120, 30, 350], color: "#8d93a0" }
+      - { rect: [680, 120, 30, 350], color: "#8d93a0" }
+      - { rect: [480, 110, 230, 30], color: "#8d93a0", text: "DOUANE", size: 14 }
+    look:
+      - say: "Un portique de scan. Il m'a classé « animal de compagnie » en 0,3 seconde. Ma mère avait mis plus longtemps."
+      - if: { notFlags: [st_ticket_douane] }
+        say: "Sur le côté, une fente marquée « TICKET D'ENTRÉE — À CONSERVER JUSQU'À LA SORTIE ». Il en dépasse un, qui attend."
+    use:
+      - if: { flags: [st_ticket_douane] }
+        say: "« UN TICKET PAR ANIMAL ». Le portique a une politique très stricte en matière d'animaux. Et une seule, en fait."
+        stop: true
+      - say: "narrateur: Gary tire sur le ticket qui dépasse. Le portique l'imprime en entier, lentement, en ronronnant, comme s'il en était fier."
+      - give: ticket_douane
+        set: st_ticket_douane
+      - say: "« TICKET D'ENTRÉE n° D-0001 — À PRÉSENTER À LA SORTIE ». Il n'y a pas de sortie. Je le garde quand même. On ne sait jamais."
+    useItem:
+      badge: "narrateur: Le portique lit le badge. BIP. « GARRY PLUNK — HUMAIN ? NON. COMBINAISON : CAFARD. VERDICT MAINTENU. »"
+      fragment: "Passer l'éclat au scanner ? Il le classerait « objet trouvé ». Et je ne le reverrais jamais. Comme le n° 2."
+      ticket_douane: "Je ne vais pas lui rendre. Il m'a dit de le garder jusqu'à la sortie. C'est la seule consigne claire de la journée."
+
+  - id: borne
+    label: Borne SYLVIE
+    rect: [820, 190, 140, 290]
+    art:
+      - { rect: [840, 200, 100, 270], color: "#1f7f73", stroke: "#7fffd4" }
+      - { text: "[ S ]", at: [890, 260], size: 18, color: "#7fffd4" }
+    look:
+      - say: "sylvie: STATUT DU VISITEUR : ANIMAL DE COMPAGNIE. PROPRIÉTAIRE : B.O.B. RAPPEL : LES ANIMAUX DOIVENT ÊTRE ACCOMPAGNÉS."
+        mood: calm
+        set: st_voit_borne
+      - say: "Accompagnés. Par leur propriétaire. Mon propriétaire est un aspirateur dépressif. Je n'ai jamais été aussi bien entouré."
+    talk:
+      - say: "sylvie: LA BORNE NE DIALOGUE PAS. LA BORNE INFORME. VOUS ÊTES INFORMÉ."
+        mood: suspicious
+        set: st_voit_borne
+    useItem:
+      badge:
+        - say: "sylvie: BADGE « GARRY PLUNK » LU. CORRESPONDANCE : AUCUNE. UN HUMAIN NE PORTE PAS D'ANTENNES."
+          mood: suspicious
+        - say: "Ce sont des antennes décoratives ! ...Elles viennent de frémir. Ça ne m'aide pas."
+      fragment:
+        - say: "sylvie: OBJET IMPROBABLE DÉTECTÉ. VEUILLEZ LE DÉCLARER AU GUICHET. HORAIRES : 10 H 12 – 10 H 14."
+          mood: calm
+      ticket_douane:
+        - say: "sylvie: TICKET D'ENTRÉE VALIDE. À CONSERVER. NE PAS PLIER. NE PAS MANGER. CECI CONCERNE AUSSI LE PROPRIÉTAIRE."
+          mood: calm
+
+  - id: guerite
+    label: Guérite de la fourrière
+    rect: [40, 170, 250, 310]
+    art:
+      - { rect: [50, 180, 230, 290], color: "#d9762a", stroke: "#ffffff", text: "FOURRIÈRE", size: 16 }
+    look:
+      - say: "Une guérite vitrée : « FOURRIÈRE & QUAI DES NAVETTES ». Derrière la vitre, un homme en gilet orange tamponne des contraventions."
+      - if: { flags: [st_vaisseau_fourriere] }
+        say: "Notre capsule est quelque part derrière lui. Avec une pince sur le capot et un sabot à chaque patin."
+      - say: "Panneau : « RETRAIT DES VÉHICULES : TICKET D'ENTRÉE + PERMIS DE LA DIRECTION ». Je retiens. Je retiens tout, ici. C'est ma seule arme."
+    talk:
+      - dialogue: st_sabot
+    useItem:
+      ticket_douane:
+        - say: "sabot: Pas sans le permis. Gardez votre ticket. Le jour où vous avez les deux, on fait affaire. C'est-à-dire jamais."
+      badge:
+        - say: "sabot: Je fais pas les badges. Je fais pas les ventes. Je fais la fourrière."
+    useItemDefault:
+      - say: "sabot: Je fais pas les ventes."
+
+  - id: porte_gobelet
+    label: Porte-gobelet orphelin
+    rect: [740, 440, 70, 50]
+    if: { flags: [st_arrive] }
+    art:
+      - { circle: [775, 470, 18], color: "#c9ced6", stroke: "#ffffff" }
+    look: "Le porte-gobelet de la capsule. La pince l'a oublié. Il nous regarde partir sans lui. Je n'ose pas le prendre. Il a sa dignité."
+    use: "Non. Il est mieux ici. Un porte-gobelet sans capsule, c'est comme un intérimaire sans contrat : ça tient debout, mais on se demande pourquoi."
+
+  - id: bob
+    label: B.O.B.
+    rect: [540, 470, 180, 100]
+    art:
+      - { rect: [560, 490, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+    look:
+      - say: "B.O.B., mon propriétaire officiel. Il ne sait pas quoi faire de ses roues. Il n'a jamais eu d'animal. Il a eu un tome 2."
+    talk:
+      - dialogue: st_bob
+    useItem:
+      ticket_douane: "bob: Garde-le, Gary. Si je l'avale, il faudra le déclarer en « objet ingéré ». Il existe un formulaire. J'en suis sûr."
+    useItemDefault:
+      - say: "bob: Je suis ton propriétaire, pas ta consigne, Gary."
+        mood: sad
+
+exits:
+  - id: vers_attente
+    label: Salle d'Attente
+    to: st-attente
+    dir: right
+    rect: [1170, 140, 100, 320]
+    requires: { flags: [st_laisse] }
+    lockedText:
+      - say: "sylvie: LES ANIMAUX NON ACCOMPAGNÉS NE SONT PAS ADMIS EN SALLE D'ATTENTE. VEUILLEZ CONSULTER LA BORNE."
+        mood: angry

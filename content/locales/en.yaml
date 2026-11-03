@@ -103,7 +103,7 @@ keys:
   item.sandwich.glyph: SAND
   item.fusible.name: Fuse 7B
   item.fragment.name: Reactor shard (1/4096)
-  item.fragment.look: "A shard of the Improbability Reactor, engraved “Mk IV — 1/4096”. Contained in a shell of set holy water, lukewarm. It purrs. It no longer leaks. Only 4,095 to go. And I don't have a bucket any more."
+  item.fragment.look.1: "A shard of the Improbability Reactor, engraved “Mk IV — 1/4096”. Contained in a shell of set holy water, lukewarm. It purrs. It no longer leaks. Only 4,095 to go. And I don't have a bucket any more."
   item.combi_chitine.name: Chitin suit
   item.combi_chitine.glyph: CHITIN
   item.combi_chitine.look: "The Sacred Moult: a chitin suit woven from three generations of royal moults. Segmented breastplate, elytra pauldrons, decorative antennae. Resistant to vacuum, fire, improbability and shame. There's a bit of grandmother in the left shoulder."
@@ -129,6 +129,32 @@ keys:
   scene.interlude-vaisseau.hotspot.bob.label: B.O.B.
   scene.interlude-vaisseau.hotspot.passer.label: Skip the interlude
   scene.interlude-vaisseau.hotspot.passer.useLabel: Skip
+
+  # ch.1 « La Station Bureaucratique » : sas d'arrivée, salle d'attente
+  scene.st-sas.title: Arrivals Airlock
+  scene.st-sas.sector: Bureaucratic Station · Dimensional customs
+  scene.st-sas.hotspot.portique.label: Scanning gate
+  scene.st-sas.hotspot.portique.useLabel: Take a ticket
+  scene.st-sas.hotspot.borne.label: SYLVIE kiosk
+  scene.st-sas.hotspot.guerite.label: Impound booth
+  scene.st-sas.hotspot.porte_gobelet.label: Orphaned cup holder
+  scene.st-sas.hotspot.bob.label: B.O.B.
+  scene.st-sas.exit.vers_attente.label: Waiting Room
+  scene.st-attente.title: Waiting Room
+  scene.st-attente.sector: Bureaucratic Station · Level 0 · Please wait
+  scene.st-attente.hotspot.afficheur.label: “NOW SERVING No.” display
+  scene.st-attente.hotspot.squelette.label: Mr Patience
+  scene.st-attente.hotspot.distributeur.label: Ticket dispenser
+  scene.st-attente.hotspot.plante.label: Plastic plant
+  scene.st-attente.hotspot.plante.useLabel: Take
+  scene.st-attente.hotspot.bob.label: B.O.B.
+  scene.st-attente.exit.vers_sas.label: Arrivals Airlock
+  scene.st-attente.exit.vers_guichet.label: Reception Desk
+  item.ticket_douane.name: Customs ticket
+  item.ticket_9848.name: Ticket No. 9848
+  item.plante.name: Mr Ficus (plastic plant)
+  character.sabot.name: Mr Jean-Claude Sabot, impound officer
+  character.guichard.name: Mrs Odile Guichard, reception desk
 
 ink:
   # bob.ink — B.O.B. en compagnon (exemple de traduction de dialogue Ink)

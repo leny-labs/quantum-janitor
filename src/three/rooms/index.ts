@@ -9,6 +9,7 @@ import { galerie } from './galerie';
 import { labo } from './labo';
 import { nid } from './nid';
 import { placard } from './placard';
+import { stAttente, stSas } from './station';
 import { temple } from './temple';
 
 export interface RoomBuild {
@@ -38,6 +39,9 @@ export const ROOMS: Record<string, RoomBuild> = {
   'coeur-eclat': eclat,
   // interlude ch.0 → ch.1 « la Capsule de Service CS-07 »
   'interlude-vaisseau': cockpit,
+  // ch.1 « La Station Bureaucratique » (scènes st-*)
+  'st-sas': stSas,
+  'st-attente': stAttente,
 };
 
 /**

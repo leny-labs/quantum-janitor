@@ -7,6 +7,7 @@
 // planches dans public/portraits/ ; un PNG présent là (bake ou remplacement
 // GenAI au même layout) prime sur le bake runtime. Les planches GenAI
 // (GENAI_SHEETS) ne sont jamais rebakées.
+import { ficus, ticket } from './rooms/station';
 import Phaser from 'phaser';
 import * as THREE from 'three';
 import { at, cyl, glow } from './kit';
@@ -144,6 +145,10 @@ const ICONS: Record<string, Pose> = {
   fusible: { build: () => fusible(1.1), look: [0, 0, 0], dist: 2, yaw: -0.3, pitch: 0.35, rim: '#ff5c7a' },
   // ch.1 : stub 3D en attendant l'icône GenAI (TODO docs/CHAPTER1.md)
   combi_chitine: { build: () => combiChitine(1.5), look: [0, 0.8, 0], dist: 3.4, yaw: 0.35, pitch: 0.12, rim: '#ffd166' },
+  // ch.1 « La Station Bureaucratique » : icônes 3D (rooms/station.ts)
+  ticket_douane: { build: () => ticket(1, 'D-0001', '#1f7f73'), look: [0, 0, 0], dist: 1.5, yaw: -0.3, pitch: 0.15, rim: '#7fffd4' },
+  ticket_9848: { build: () => ticket(1, '9848', '#ffd166'), look: [0, 0, 0], dist: 1.5, yaw: 0.3, pitch: 0.15, rim: '#ffd166' },
+  plante: { build: () => ficus(1.2), look: [0, 0.6, 0], dist: 2.4, yaw: 0.3, pitch: 0.2, rim: '#9cff57' },
 };
 
 const PORTRAITS: Record<string, Pose & { bg: [string, string] }> = {

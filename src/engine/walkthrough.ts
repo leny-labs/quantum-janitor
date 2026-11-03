@@ -166,6 +166,22 @@ export const CHAPTERS: ChapterDef[] = [
       // Dimension Miniature (refusée), puis la Station
       { use: 'navigateur', pick: [0, 2] },
       { useItem: ['fragment', 'reacteur'] },
+      { section: 'Station · le Sas d\'Arrivée (animal de compagnie)' },
+      { talk: 'bob' }, // indice vague : « tout le monde a un ticket »
+      { look: 'portique' },
+      { use: 'portique' }, // +ticket_douane (payoff différé : la fourrière, fin du ch.1)
+      { talk: 'guerite' }, // M. Sabot : « ticket d'entrée + permis de la Direction » (objectif final semé)
+      { look: 'borne' }, // « les animaux doivent être accompagnés »
+      { talk: 'bob', pick: [0] }, // « Tiens-moi en laisse, B.O.B. » → porte de l'attente
+      { go: 'st-attente' },
+      { section: 'Station · la Salle d\'Attente (M. Patience)' },
+      { look: 'afficheur' }, // 9 847
+      { look: 'squelette' }, // M. Patience tient le 9 848
+      { useItem: ['ticket_douane', 'distributeur'] }, // fausse piste : le distributeur le recrache
+      { use: 'squelette' }, // main serrée : il faut aspirer
+      { use: 'plante' }, // +plante (payoff différé : couloir infini B, puis le Conseil)
+      { talk: 'bob', pick: [0] }, // « Il n'en a plus besoin… » → éloge funèbre, +ticket_9848
+      { go: 'fin' }, // guichet fermé, formulaire B-7/12 manquant : fin provisoire du stub
     ],
   },
 ];
@@ -367,7 +383,8 @@ export async function walkChapter(content: GameContent, chapter: ChapterDef, opt
       const e = scene().exits!.find((x) => x.to === s.go && state.check(x.if));
       if (!e) throw new Error(`pas de sortie vers ${s.go} depuis ${state.scene}`);
       if (!state.check(e.requires)) throw new Error(`sortie vers ${s.go} verrouillée`);
-      await runner.run([{ goto: s.go }]);
+      // `to: fin` : franchir la sortie termine le chapitre (comme RoomScene.onClickExit)
+      await runner.run([s.go === 'fin' ? { end: chapter.endKnot } : { goto: s.go }]);
     }
     const act = pendingAct as ActDef | null;
     if (act) {

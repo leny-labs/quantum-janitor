@@ -25,6 +25,15 @@ characters:
     name: Frère Élytre, Grand Scribe
     color: "#4a3a1c"
     portrait: "✒\n(◔ ◔)"
+  # ch.1 « La Station Bureaucratique » (docs/CHAPTER1.md §3)
+  - id: sabot
+    name: M. Jean-Claude Sabot, agent de fourrière
+    color: "#d9762a"
+    portrait: "FOURRIÈRE\n(¬_¬)"
+  - id: guichard
+    name: Mme Odile Guichard, guichet d'accueil
+    color: "#8a6db0"
+    portrait: "GUICHET\n(-_-)"
   - id: narrateur
     name: ""
     color: "#000000"
