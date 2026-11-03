@@ -18,6 +18,8 @@ import { BobVoice } from '../three/rooms/bobvoix';
 import { FuseRig } from '../three/rooms/fusible';
 import { LecteurRig } from '../three/rooms/lecteur';
 import { VendingRig } from '../three/rooms/vending';
+import type { PressRig } from '../three/press';
+import { creak, thud } from '../ui/sfx';
 import { makeButton } from '../ui/Button';
 import { showChapterCard } from '../ui/ChapterCard';
 import { STATION_MAP } from '../engine/contentBrowser';
@@ -430,6 +432,10 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const fuse =
       h.id === 'fusibles' && v.kind === 'use' && state.hasFlag('sait_fusible') && !state.hasFlag('fusible_retire') ? this.room.rig<FuseRig>('fusible') : null;
     if (fuse) return void this.locked(() => this.fuse(fuse, v.action));
+    // props physiques en clic direct (three/press.ts) : le bouton s'enfonce, le levier bascule
+    const gesture = v.kind === 'use' ? this.room.rig<PressRig>('press')?.press(h.id) : null;
+    if (gesture === 'button') thud();
+    else if (gesture === 'lever') creak();
     void this.act(v.action, v.kind === 'look' ? h.id : undefined);
   }
 

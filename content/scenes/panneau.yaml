@@ -68,9 +68,17 @@ hotspots:
       - { circle: [907, 373, 40], color: "#d62839", stroke: "#ffffff" }
       - { text: "STABILISER", at: [907, 373], size: 11, color: "#ffffff" }
       - { text: "(ne pas appuyer sans raison)", at: [907, 424], size: 8, color: "#ff99aa" }
-    look: "Les gros boutons rouges veulent toujours qu'on appuie dessus. C'est leur seul but dans la vie. Je les comprends."
+    look:
+      - if: { flags: [reacteur_rit] }
+        say: "B.O.B. a dit de ne pas rappuyer. Le bouton, lui, clignote. Je sais lequel des deux je vais écouter."
+        stop: true
+      - say: "Les gros boutons rouges veulent toujours qu'on appuie dessus. C'est leur seul but dans la vie. Je les comprends."
     useLabel: Appuyer
+    # prop physique en clic direct : 1er appui = catastrophe, 2e appui (« plus fort ») = la fin de l'acte
     use:
+      - if: { flags: [reacteur_rit] }
+        dialogue: catastrophe_fort
+        stop: true
       - if: { notFlags: [panneau_allume] }
         say: "narrateur: Clic. Rien. Le panneau est hors tension."
         stop: true

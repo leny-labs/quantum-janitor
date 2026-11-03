@@ -105,6 +105,10 @@ hotspots:
       - { circle: [365, 489, 6], color: "#ffffff" }
     look: "B.O.B. tremble légèrement. Il dit que c'est le champ d'improbabilité. Je pense que c'est la peur."
     talk:
+      # le réacteur rit (1er appui sur STABILISER) : l'autre fin possible, le câlin
+      - if: { flags: [reacteur_rit] }
+        dialogue: catastrophe_calin
+        stop: true
       - dialogue: bob_compagnon
     useItemDefault:
       - say: "bob: Gary, je ne suis pas une poubelle. Enfin, si. Mais j'ai des sentiments."

@@ -49,22 +49,31 @@ sylvie: RÉSERVOIR : 100 %. COMPOSITION : EN COURS D'ANALYSE. VOUS POUVEZ APPUYE
 -> END
 
 === catastrophe ===
+// 1er appui sur STABILISER (hotspot `bouton`). Le 2e appui se fait en clic direct sur le
+// bouton (catastrophe_fort) ; le câlin, en parlant à B.O.B. dans le labo (catastrophe_calin).
 Clonk. Un clonk très satisfaisant.
 sylvie: STABILISATION EN COURS. ANALYSE DU LIQUIDE DE REFROIDISSEMENT... # mood: calm
 sylvie: COMPOSITION : EAU GRISE 71 %. DÉGRAISSANT ABSOLU 12 %. MIETTES DE THON 9 %. MATIÈRE INCONNUE 8 %. # mood: suspicious
 sylvie: MATIÈRE INCONNUE IDENTIFIÉE : IL S'AGIT D'UN YAOURT. LE YAOURT EST CONSCIENT. LE YAOURT EST EN COLÈRE. # mood: angry
-bob: Gary. Je ne suis qu'un aspirateur dépressif, pas un physicien. Mais je crois que le réacteur vient de... rire. # shake # mood: surprised
-* [« C'est normal, ça ? »]
-    gary: C'est normal, ça ?
-    sylvie: RIEN N'EST NORMAL. C'EST UN RÉACTEUR D'IMPROBABILITÉ. C'EST LITTÉRALEMENT SON TRAVAIL. # mood: angry
-* [Appuyer encore sur le bouton, plus fort]
-    gary: Si j'appuie plus fort, ça stabilise plus fort. C'est logique.
-    Clonk. Clonk. CLONK.
-    sylvie: CE N'EST PAS COMME ÇA QUE FONCTIONNENT LES BOUTONS, AGENT PLUNK. # mood: angry
-* [Prendre B.O.B. dans ses bras]
-    Gary soulève B.O.B. et le serre contre lui.
-    bob: ...C'est le plus beau jour de ma vie. Dommage que ce soit aussi le dernier. # mood: love
-- sylvie: IMPROBABILITÉ : DIX PUISSANCE TROIS... DIX PUISSANCE NEUF... DIX PUISSANCE QUARANTE... # shake # mood: angry
+bob: Gary. Je ne suis qu'un aspirateur dépressif, pas un physicien. Mais je crois que le réacteur vient de... rire. # shake # mood: surprised # set: reacteur_rit
+gary: C'est normal, ça ?
+sylvie: RIEN N'EST NORMAL. C'EST UN RÉACTEUR D'IMPROBABILITÉ. C'EST LITTÉRALEMENT SON TRAVAIL. # mood: angry
+bob: Gary. Surtout, ne rappuie pas sur ce bouton. Si tu as besoin d'occuper tes mains, tu peux me prendre dans tes bras. Je dis ça comme ça. # mood: sad
+-> END
+
+=== catastrophe_fort ===
+gary: Si j'appuie plus fort, ça stabilise plus fort. C'est logique.
+Clonk. Clonk. CLONK.
+sylvie: CE N'EST PAS COMME ÇA QUE FONCTIONNENT LES BOUTONS, AGENT PLUNK. # mood: angry
+-> catastrophe_fin
+
+=== catastrophe_calin ===
+Gary soulève B.O.B. et le serre contre lui.
+bob: ...C'est le plus beau jour de ma vie. Dommage que ce soit aussi le dernier. # mood: love
+-> catastrophe_fin
+
+=== catastrophe_fin ===
+sylvie: IMPROBABILITÉ : DIX PUISSANCE TROIS... DIX PUISSANCE NEUF... DIX PUISSANCE QUARANTE... # shake # mood: angry
 sylvie: ERREUR. NOMBRE TROP RIGOLO POUR ÊTRE AFFICHÉ. # mood: love
 Quelque part, très loin, un univers entier éternue.
 La station se fend en deux. Puis en quatre. Puis en autant de morceaux que de réalités, chacun avec sa version de Gary. # shake

@@ -1,6 +1,8 @@
 # Interlude ch.0 → ch.1 : la Capsule de Service CS-07 (docs/INTERLUDE_VAISSEAU.md).
 # Rendu 3D : src/three/rooms/cockpit.ts. `art:` = repli 2D.
-# Ordre : siège (combi) et contact (badge) libres ; puis tableau → navigateur → réceptacle.
+# Ordre : siège (combi) et contact (badge) libres ; puis levier → destination → réceptacle.
+# Props physiques en clic direct (docs/CHAPTERS.md §conventions) : chaque gros bouton, le levier
+# et chaque destination du navigateur ont leur hotspot, aligné sur son mesh 3D — pas de menu.
 id: interlude-vaisseau
 title: Capsule de Service CS-07
 sector: Interlude · Faille B-7 → ???
@@ -17,7 +19,7 @@ onEnter:
 
 art:
   - { rect: [0, 0, 1280, 580], color: "#1b1430" }
-  - { rect: [500, 40, 280, 150], color: "#3a1050", stroke: "#b56cff" }        # pare-brise
+  - { rect: [370, 16, 580, 180], color: "#3a1050", stroke: "#b56cff" }        # pare-brise panoramique
   - { rect: [0, 210, 1280, 190], color: "#2a3140", stroke: "#7fffd4" }        # tableau de bord
   - { text: "60 BOUTONS · 14 LEVIERS · 3 VOLANTS", at: [640, 300], size: 18, color: "#ffd166" }
 
@@ -25,9 +27,10 @@ hotspots:
   - id: pare_brise
     label: Pare-brise
     smart: look
-    rect: [500, 40, 280, 150]
+    rect: [370, 16, 580, 180]
     look:
-      - say: "Un pare-brise de la taille d'une boîte à chaussures. Derrière, la faille ondule, violette, comme un rideau de douche cosmique."
+      - say: "Un pare-brise panoramique. Le seul truc bien fait de la capsule : il a dû tomber d'un autre vaisseau, et personne ne l'a réclamé."
+      - say: "Derrière, le ciel intersidéral, des étoiles par milliards. Et au milieu, la faille qui ondule, violette, comme un rideau de douche cosmique."
       - if: { notFlags: [iv_destination] }
         say: "bob: On ne voit rien, Gary. C'est le principe d'une faille : on ne sait pas ce qu'il y a derrière. Comme un tiroir de bureau."
         mood: suspicious
@@ -54,14 +57,8 @@ hotspots:
 
   - id: tableau
     label: Tableau de bord
-    useLabel: Appuyer
+    smart: look
     rect: [300, 220, 680, 150]
-    art:
-      - { circle: [420, 300, 26], color: "#ff4f5a", stroke: "#ffffff", text: "NE PAS\nAPPUYER", size: 9 }
-      - { rect: [520, 280, 90, 40], color: "#3d7dd8", stroke: "#ffffff", text: "HYPER", size: 12 }
-      - { rect: [640, 280, 90, 40], color: "#ff8c42", stroke: "#ffffff", text: "ÉJECT.", size: 12 }
-      - { rect: [760, 280, 90, 40], color: "#7fffd4", stroke: "#ffffff", text: "AUTO", size: 12 }
-      - { rect: [890, 250, 18, 90], color: "#c9ced6", stroke: "#ffffff" }
     look:
       - say: "Soixante boutons, quatorze leviers, trois volants. Un tableau de bord prévu pour douze, installé par le moins-disant dans une capsule pour un."
       - if: { notFlags: [iv_contact] }
@@ -72,7 +69,97 @@ hotspots:
       - if: { notFlags: [iv_contact] }
         say: "Rien. Aucune lumière. Les soixante boutons font « clic » dans le vide, comme un clavier de démonstration."
         stop: true
-      - dialogue: iv_boutons
+      - say: "Je ne vais pas m'allonger sur tout le tableau. Je vise un bouton. Un seul. Comme un professionnel."
+    useItemDefault: "Je ne vais pas coincer ça entre deux boutons. Le dernier qui a fait ça, c'est le porte-gobelet, et regardez où il en est."
+
+  # ── props physiques en clic direct : un hotspot par bouton (meshes : rooms/cockpit.ts) ──
+  - id: bouton_npa
+    label: Gros bouton « NE PAS APPUYER »
+    useLabel: Appuyer
+    rect: [370, 262, 100, 74]
+    art:
+      - { circle: [420, 300, 26], color: "#ff4f5a", stroke: "#ffffff", text: "NE PAS\nAPPUYER", size: 9 }
+    look: "« NE PAS APPUYER ». Un bouton rouge, rond, brillant, avec une consigne. C'est la définition exacte d'une invitation."
+    use:
+      - if: { notFlags: [iv_contact] }
+        say: "Clic. Rien. Même les boutons interdits ont besoin de courant."
+        stop: true
+      - if: { flags: [iv_ascenseur] }
+        say: "Je rappuie. La musique d'ascenseur ne s'arrête pas. Elle gagne juste un peu d'assurance."
+        stop: true
+      - dialogue: iv_btn_ascenseur
+    useItemDefault: "Je ne vais pas appuyer avec ça. J'ai un doigt. Il est fait pour ça. C'est sa seule compétence reconnue."
+
+  - id: bouton_hyper
+    label: Bouton « HYPERESPACE »
+    useLabel: Appuyer
+    rect: [515, 262, 100, 74]
+    art:
+      - { rect: [520, 280, 90, 40], color: "#3d7dd8", stroke: "#ffffff", text: "HYPER", size: 12 }
+    look: "« HYPERESPACE ». Un bouton bleu, très sûr de lui. Les boutons sûrs d'eux, je m'en méfie."
+    use:
+      - if: { notFlags: [iv_contact] }
+        say: "Clic. Rien. L'hyperespace attendra le contact, comme tout le monde."
+        stop: true
+      - if: { flags: [iv_hyper] }
+        say: "L'allume-cigare ressort, toujours brûlant. Toujours inutile. Toujours prévu par le règlement."
+        stop: true
+      - dialogue: iv_btn_hyper
+    useItemDefault: "Je ne vais pas appuyer avec ça. J'ai un doigt. Il est fait pour ça. C'est sa seule compétence reconnue."
+
+  - id: bouton_eject
+    label: Bouton « ÉJECTION »
+    useLabel: Appuyer
+    rect: [635, 262, 100, 74]
+    art:
+      - { rect: [640, 280, 90, 40], color: "#ff8c42", stroke: "#ffffff", text: "ÉJECT.", size: 12 }
+    look: "« ÉJECTION ». Dans une capsule d'un mètre vingt, je me demande bien ce qu'on éjecte. Moi, probablement."
+    use:
+      - if: { notFlags: [iv_contact] }
+        say: "Clic. Rien. Heureusement, peut-être."
+        stop: true
+      - if: { flags: [iv_eject] }
+        say: "Clic. Il n'y a plus rien à éjecter. Le bouton a l'air déçu. Moi aussi, un peu."
+        stop: true
+      - dialogue: iv_btn_eject
+    useItemDefault: "Je ne vais pas appuyer avec ça. J'ai un doigt. Il est fait pour ça. C'est sa seule compétence reconnue."
+
+  - id: bouton_auto
+    label: Bouton « AUTOPILOTE »
+    useLabel: Appuyer
+    rect: [755, 262, 100, 74]
+    art:
+      - { rect: [760, 280, 90, 40], color: "#7fffd4", stroke: "#ffffff", text: "AUTO", size: 12 }
+    look: "« AUTOPILOTE ». Le plus beau mot du tableau de bord. Il promet que quelqu'un d'autre va s'en occuper."
+    use:
+      - if: { notFlags: [iv_contact] }
+        say: "Clic. Rien. L'autopilote dort. Je le comprends."
+        stop: true
+      - if: { flags: [iv_auto] }
+        say: "Le clapet se rouvre. Le post-it est toujours là : « L'autopilote, c'est vous :'( ». Il n'a pas changé d'avis."
+        stop: true
+      - dialogue: iv_btn_auto
+    useItemDefault: "Je ne vais pas appuyer avec ça. J'ai un doigt. Il est fait pour ça. C'est sa seule compétence reconnue."
+
+  - id: levier
+    label: Levier sans étiquette
+    useLabel: Tirer
+    rect: [965, 370, 95, 110]
+    art:
+      - { rect: [1001, 390, 18, 80], color: "#c9ced6", stroke: "#ffffff" }
+    look:
+      - if: { flags: [iv_navigateur] }
+        say: "Le levier gris est baissé. Il a fait son travail. Il a droit à une pause, comme tout le monde. Sauf moi."
+        stop: true
+      - say: "Un levier gris, sans étiquette, entre treize leviers à blagues. Il ne cherche pas à plaire. C'est louche. C'est sûrement le bon."
+    use:
+      - if: { notFlags: [iv_contact] }
+        say: "Le levier ne bouge pas. Sans contact, même les leviers font grève."
+        stop: true
+      - if: { flags: [iv_navigateur] }
+        say: "Il est déjà baissé. Je ne vais pas le baisser plus. Il est au bout de sa carrière."
+        stop: true
+      - dialogue: iv_levier
     useItemDefault: "Je ne vais pas coincer ça entre deux boutons. Le dernier qui a fait ça, c'est le porte-gobelet, et regardez où il en est."
 
   - id: contact
@@ -101,11 +188,11 @@ hotspots:
 
   - id: navigateur
     label: Navigateur dimensionnel
-    useLabel: Choisir
-    rect: [1020, 60, 220, 160]
+    smart: look
+    rect: [1015, 50, 240, 196]
     if: { flags: [iv_navigateur] }
     art:
-      - { rect: [1030, 70, 200, 140], color: "#0e2a2a", stroke: "#7fffd4", text: "DESTINATION ?", size: 15 }
+      - { rect: [1025, 58, 220, 180], color: "#0e2a2a", stroke: "#7fffd4", text: "DESTINATION ?", size: 15 }
     look:
       - say: "« NAVIGATEUR DIMENSIONNEL ». Quatre destinations. L'écran a un fond d'écran : une plage. Il n'y a pas de plage dans le multivers. J'ai vérifié."
       - if: { flags: [iv_destination] }
@@ -114,7 +201,68 @@ hotspots:
       - if: { flags: [iv_destination] }
         say: "La destination est verrouillée. Pour la changer, il faut un formulaire. Évidemment."
         stop: true
-      - dialogue: iv_destination
+      - say: "C'est tactile. Je touche la destination qui me plaît. Enfin, celle qui voudra bien de moi."
+
+  # ── une ligne tactile par destination (rooms/cockpit.ts) ──
+  - id: dest_miniature
+    label: « DIMENSION MINIATURE »
+    useLabel: Choisir
+    rect: [1022, 88, 226, 36]
+    if: { flags: [iv_navigateur] }
+    look: "« DIMENSION MINIATURE ». Grisée. Tout est minuscule là-bas, paraît-il. Sauf la paperasse."
+    use:
+      - if: { flags: [iv_destination] }
+        say: "La destination est verrouillée. Pour la changer, il faut un formulaire. Évidemment."
+        stop: true
+      - if: { flags: [iv_refus_miniature] }
+        say: "sylvie: ACCÈS TOUJOURS REFUSÉ. LE FORMULAIRE MANQUE TOUJOURS. C'EST CONSTANT, AU MOINS."
+        mood: suspicious
+        stop: true
+      - dialogue: iv_dest_miniature
+
+  - id: dest_klepsydra
+    label: « KLEPSYDRA-LUX »
+    useLabel: Choisir
+    rect: [1022, 126, 226, 36]
+    if: { flags: [iv_navigateur] }
+    look: "« KLEPSYDRA-LUX ». Grisée. Une version de luxe de ma station. Avec, j'imagine, un placard à balais plus grand."
+    use:
+      - if: { flags: [iv_destination] }
+        say: "La destination est verrouillée. Pour la changer, il faut un formulaire. Évidemment."
+        stop: true
+      - if: { flags: [iv_refus_klepsydra] }
+        say: "sylvie: TOUJOURS PAS CAPITAINE. ...PAS ENCORE."
+        mood: love
+        stop: true
+      - dialogue: iv_dest_klepsydra
+
+  - id: dest_yaourt
+    label: « L'ENVERS DU YAOURT »
+    useLabel: Choisir
+    rect: [1022, 164, 226, 36]
+    if: { flags: [iv_navigateur] }
+    look: "« L'ENVERS DU YAOURT ». Grisée, et un peu humide. Je préfère ne pas toucher. Enfin, je préfère, mais je vais toucher."
+    use:
+      - if: { flags: [iv_destination] }
+        say: "La destination est verrouillée. Pour la changer, il faut un formulaire. Évidemment."
+        stop: true
+      - if: { flags: [iv_refus_yaourt] }
+        say: "bob: Gary. J'ai dit non. Mon non a des roulettes, mais c'est un non."
+        mood: surprised
+        stop: true
+      - dialogue: iv_dest_yaourt
+
+  - id: dest_station
+    label: « STATION (BUREAUCRATIQUE) »
+    useLabel: Choisir
+    rect: [1022, 202, 226, 36]
+    if: { flags: [iv_navigateur] }
+    look: "« STATION (BUREAUCRATIQUE) ». La seule qui clignote. L'air de dire « moi, je ne juge pas »."
+    use:
+      - if: { flags: [iv_destination] }
+        say: "La destination est verrouillée. Pour la changer, il faut un formulaire. Évidemment."
+        stop: true
+      - dialogue: iv_dest_station
 
   - id: reacteur
     label: Réceptacle « IMPROBABILITÉ (OPTIONNEL) »

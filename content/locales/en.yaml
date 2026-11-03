@@ -121,10 +121,26 @@ keys:
   scene.interlude-vaisseau.hotspot.pare_brise.label: Windscreen
   scene.interlude-vaisseau.hotspot.siege.label: Carapace seat
   scene.interlude-vaisseau.hotspot.tableau.label: Dashboard
-  scene.interlude-vaisseau.hotspot.tableau.useLabel: Press
+  scene.interlude-vaisseau.hotspot.bouton_npa.label: Big “DO NOT PRESS” button
+  scene.interlude-vaisseau.hotspot.bouton_npa.useLabel: Press
+  scene.interlude-vaisseau.hotspot.bouton_hyper.label: “HYPERSPACE” button
+  scene.interlude-vaisseau.hotspot.bouton_hyper.useLabel: Press
+  scene.interlude-vaisseau.hotspot.bouton_eject.label: “EJECT” button
+  scene.interlude-vaisseau.hotspot.bouton_eject.useLabel: Press
+  scene.interlude-vaisseau.hotspot.bouton_auto.label: “AUTOPILOT” button
+  scene.interlude-vaisseau.hotspot.bouton_auto.useLabel: Press
+  scene.interlude-vaisseau.hotspot.levier.label: Unlabelled lever
+  scene.interlude-vaisseau.hotspot.levier.useLabel: Pull
+  scene.interlude-vaisseau.hotspot.dest_miniature.label: “MINIATURE DIMENSION”
+  scene.interlude-vaisseau.hotspot.dest_miniature.useLabel: Choose
+  scene.interlude-vaisseau.hotspot.dest_klepsydra.label: “KLEPSYDRA-LUX”
+  scene.interlude-vaisseau.hotspot.dest_klepsydra.useLabel: Choose
+  scene.interlude-vaisseau.hotspot.dest_yaourt.label: “THE FAR SIDE OF THE YOGHURT”
+  scene.interlude-vaisseau.hotspot.dest_yaourt.useLabel: Choose
+  scene.interlude-vaisseau.hotspot.dest_station.label: “STATION (BUREAUCRATIC)”
+  scene.interlude-vaisseau.hotspot.dest_station.useLabel: Choose
   scene.interlude-vaisseau.hotspot.contact.label: “IGNITION” slot
   scene.interlude-vaisseau.hotspot.navigateur.label: Dimensional navigator
-  scene.interlude-vaisseau.hotspot.navigateur.useLabel: Choose
   scene.interlude-vaisseau.hotspot.reacteur.label: “IMPROBABILITY (OPTIONAL)” receptacle
   scene.interlude-vaisseau.hotspot.bob.label: B.O.B.
   scene.interlude-vaisseau.hotspot.passer.label: Skip the interlude

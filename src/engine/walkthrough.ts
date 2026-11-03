@@ -109,7 +109,8 @@ export const CHAPTERS: ChapterDef[] = [
       { talk: 'bob' },
       { useItem: ['seau', 'trappe'] },
       { go: 'panneau' },
-      { use: 'bouton' },
+      { use: 'bouton' }, // le réacteur rit (reacteur_rit)
+      { use: 'bouton' }, // clic direct « plus fort » : Clonk. Clonk. CLONK. → cliffhanger cafards
       { section: 'Acte II · Puzzle 1 : le Signe aux deux R' },
       { talk: 'reine' },
       { use: 'autel' }, // refusé : les gardes
@@ -161,10 +162,13 @@ export const CHAPTERS: ChapterDef[] = [
       { useItem: ['badge', 'contact'] },
       { useItem: ['combi_chitine', 'siege'] },
       { talk: 'bob' },
-      // NE PAS APPUYER, AUTOPILOTE, puis le levier sans étiquette
-      { use: 'tableau', pick: [0, 2, 2] },
-      // Dimension Miniature (refusée), puis la Station
-      { use: 'navigateur', pick: [0, 2] },
+      // boutons du tableau de bord en clic direct : NE PAS APPUYER, AUTOPILOTE, puis le levier sans étiquette
+      { use: 'bouton_npa' },
+      { use: 'bouton_auto' },
+      { use: 'levier' },
+      // destinations du navigateur en clic direct : Dimension Miniature (refusée), puis la Station
+      { use: 'dest_miniature' },
+      { use: 'dest_station' },
       { useItem: ['fragment', 'reacteur'] },
       { section: 'Station · le Sas d\'Arrivée (animal de compagnie)' },
       { talk: 'bob' }, // indice vague : « tout le monde a un ticket »

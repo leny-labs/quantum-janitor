@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import type { Condition, Rect } from '../../engine/types';
 import { at, box, cyl, glow, label, mat, plane, sphere, stripeTexture, torus } from '../kit';
 import { fusible } from '../props';
+import { pressable } from '../press';
 import type { CameraSpec, Stage } from '../Stage';
 import { t as tr } from '../../i18n';
 
@@ -119,7 +120,10 @@ export function consolePanel(s: Stage): ConsolePanel {
   const cap = cyl(bt.h * 0.3, bt.h * 0.33, 0.18, '#d62839', { seg: 24 });
   cap.rotation.x = Math.PI / 2;
   const btn = at(new THREE.Group().add(cap, at(label(tr('props.panneau.button'), bt.h * 0.5, bt.h * 0.13, { color: '#ffffff', bold: true }), 0, 0, 0.1)), 0, bt.h * 0.04, 0.14);
-  housing.add(btn, at(torus(bt.h * 0.33, 0.02, '#ffffff'), 0, bt.h * 0.04, 0.08));
+  // clic direct : le bouton s'enfonce (pivot dédié, le pouls ci-dessous anime `btn`)
+  const push = new THREE.Group().add(btn);
+  pressable(s, 'bouton', push, 'button', -0.12);
+  housing.add(push, at(torus(bt.h * 0.33, 0.02, '#ffffff'), 0, bt.h * 0.04, 0.08));
   housing.add(at(label(tr('props.panneau.buttonNote'), bt.w * 0.8, bt.h * 0.1, { color: '#ff99aa' }), 0, -bt.h * 0.38, 0.06));
   on(s.rect('bouton'), 0.02, housing, undefined, 'bouton');
   const ready = glow('#ff5c7a', bt.h * 1.3, 0.4);
