@@ -162,7 +162,7 @@ export const fr = {
       stub: 'STATION BUREAUCRATIQUE\nFORMULAIRE EN COURS DE TRAITEMENT',
       stamp: 'REÇU',
       next: 'PROCHAINEMENT — CHAPITRE 2 : « LA STATION BUREAUCRATIQUE »',
-      thanks: "Merci d'avoir joué le chapitre 1. Premier monde lavé : 1/4096.",
+      thanks: "Merci d'avoir joué le chapitre 1. Faille refermée, éclat contenu : 1/4096.",
     },
   },
   /** Textes peints dans les décors 3D (affiches, étiquettes, écrans). */

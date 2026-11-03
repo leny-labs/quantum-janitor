@@ -30,7 +30,16 @@ async function main() {
       if (sandwich && !sandwich.save.items.includes('badge')) throw new Error('pas de badge après le sandwich');
       // ch.1 : l'éclat du Réacteur doit être dans l'inventaire avant le couronnement
       const plouf = checkpoints.find((c) => c.label === 'utiliser seau sur eclat');
-      if (chapter.id === 'ch1' && !plouf?.save.items.includes('fragment')) throw new Error('pas d\'éclat (fragment) après le PLOUF');
+      if (chapter.id === 'ch1') {
+        if (!plouf?.save.items.includes('fragment')) throw new Error('pas d\'éclat (fragment) après le PLOUF');
+        if (plouf.save.items.includes('seau') || !plouf.save.flags.includes('ch1_seau_perdu')) throw new Error('le seau devait rester au Temple après le PLOUF');
+        const josiane = checkpoints.find((c) => c.label === 'utiliser serpilliere sur distributeur');
+        if (josiane?.save.items.includes('serpilliere') || !josiane?.save.flags.includes('ch1_josiane_coincee')) throw new Error('Josiane devait rester coincée dans le distributeur');
+        // fin : ni seau ni Josiane, l'éclat contenu et la combi de chitine
+        for (const gone of ['seau', 'serpilliere']) if (state.hasItem(gone)) throw new Error(`« ${gone} » encore dans l'inventaire à la fin`);
+        for (const kept of ['fragment', 'combi_chitine']) if (!state.hasItem(kept)) throw new Error(`« ${kept} » absent de l'inventaire à la fin`);
+        if (!state.hasFlag('ch1_combi')) throw new Error('flag ch1_combi absent à la fin');
+      }
       if (ended !== chapter.endKnot) throw new Error(`fin non atteinte (ended=${ended})`);
       console.log(`\n✓ ${chapter.title} terminé — cliffhanger « ${ended} » atteint (${checkpoints.length} checkpoints).`);
       console.log(`  flags : ${[...state.flags].join(', ')}`);

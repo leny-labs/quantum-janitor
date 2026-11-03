@@ -30,12 +30,14 @@ hotspots:
       - say: "Un cafard de la taille d'une navette de fret, avec une couronne. La couronne est trop petite. Personne n'ose le lui dire. Moi non plus."
       - if: { flags: [ch1_seau_rendu], notFlags: [ch1_eclat_stabilise] }
         say: "Elle me regarde comme ma mère me regardait le jour de ma remise de diplôme. Je n'ai pas eu de diplôme."
+      - if: { notFlags: [ch1_eclat_stabilise] }
+        say: "narrateur: Derrière le trône, un pan de mur clignote, disparaît, revient. Personne ne commente. Ici, c'est devenu la météo."
     talk:
       - dialogue: ch1_reine
     useItem:
       fragment:
         - if: { notFlags: [ch1_eclat_stabilise] }
-          say: "reine: CET ÉCLAT EST INSTABLE, GARRY. ON NE PRÉSENTE PAS UN MONDE SALE À SA REINE."
+          say: "reine: CET ÉCLAT SAIGNE ENCORE DE L'IMPROBABILITÉ, GARRY. CONTIENS-LE D'ABORD. MES MURS VIENNENT DE CLIGNOTER."
           stop: true
         - dialogue: ch1_couronnement
       seau:
@@ -71,7 +73,7 @@ hotspots:
       - say: "reine: ON NE TOUCHE PAS AU SEAU SACRÉ. SAUF L'HOMME AU SEAU. QUI DOIT D'ABORD PROUVER QU'IL EST L'HOMME AU SEAU."
       - say: "C'est mon seau. J'ai la preuve d'achat. Non. C'est le seau de la station. Bon."
     useItem:
-      serpilliere: "Je ne vais pas faire le ménage sur un autel. Pas sans fiche de poste."
+      serpilliere: "Serpiller un autel ? Pas sans fiche de poste. Et pas devant les gardes."
       badge: "Les gardes regardent le badge, puis moi, puis le badge. « LE SCRIBE », disent-ils. Tout le monde ici renvoie au Scribe."
 
   - id: courtisans

@@ -155,7 +155,7 @@ export const en: PartialCatalog = {
       stub: 'BUREAUCRATIC STATION\nFORM BEING PROCESSED',
       stamp: 'RECEIVED',
       next: 'COMING SOON — CHAPTER 2: “THE BUREAUCRATIC STATION”',
-      thanks: 'Thanks for playing chapter 1. First world washed: 1/4096.',
+      thanks: 'Thanks for playing chapter 1. Rift sealed, shard contained: 1/4096.',
     },
   },
   props: {

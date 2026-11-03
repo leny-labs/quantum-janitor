@@ -9,7 +9,7 @@
 - not has_flag("ch1_badge_refuse") && not has_flag("ch1_badge_propre"):
     bob: Le Signe aux deux R. Ton badge, Gary. Montre-le au Grand Scribe. Avec assurance. Enfin, avec ce que tu as. # mood: suspicious
 - not has_flag("ch1_badge_propre") && not has_flag("ch1_josiane_mouillee"):
-    bob: Ton badge sent le thon. C'est ma faute. Il faudrait le laver. Josiane, un peu d'eau... Le bassin des ablutions, par exemple. # mood: sad
+    bob: Ton badge sent le thon. C'est ma faute. Il faudrait le frotter. Josiane, un peu d'eau... Le bassin des ablutions, par exemple. # mood: sad
 - not has_flag("ch1_badge_propre"):
     bob: Josiane est trempée, le badge sent le poisson. Frotte l'un avec l'autre, Gary. C'est ton métier. # mood: suspicious
 - not has_flag("ch1_signe_reconnu"):
@@ -23,13 +23,13 @@
 - not has_flag("ch1_voit_eclat"):
     bob: Le Temple de l'Ancien Couloir, c'est notre couloir C. Regarde le distributeur. Il coince toujours quelque chose. # mood: calm
 - not has_flag("ch1_eclat_tombe"):
-    bob: L'éclat est coincé derrière la spirale. Comme le sandwich. Tu sais ce qui marche, Gary. Le manche. La trappe. Josiane. # mood: suspicious
+    bob: L'éclat est coincé derrière la spirale. Comme le sandwich. Tu sais ce qui marche, Gary. Le manche. La trappe. Josiane. Je ne vois aucun risque. Je ne vois jamais rien venir, remarque. # mood: suspicious
 - not has_flag("ch1_seau_plein"):
-    bob: L'éclat est brûlant. Il faut le refroidir. Un seau. De l'eau. Le bassin de la galerie. Cette fois, c'est même de l'eau propre. Enfin, bénite. # mood: calm
+    bob: L'éclat crache de l'improbabilité, et Josiane n'est plus là pour personne. Il faut le calmer. Un seau. De l'eau. Le bassin de la galerie. De l'eau bénite. Ça ne peut pas faire de mal à une faille. Je crois. # mood: calm
 - not has_flag("ch1_eclat_stabilise"):
-    bob: Ton seau est plein, l'éclat est brûlant. Tu sais ce qu'il te reste à faire. Tu l'as déjà fait une fois. C'est comme ça qu'on est arrivés ici. # mood: sad
+    bob: Ton seau est plein, l'éclat saigne de l'improbabilité. Tu sais ce qu'il te reste à faire. Tu l'as déjà fait une fois. C'est comme ça qu'on est arrivés ici. # mood: sad
 - else:
-    bob: L'éclat est stable. Apporte-le à la Reine, Gary. Et demande-lui un reçu. Pour la RH. # mood: calm
+    bob: L'éclat est contenu, ton seau tient la faille. Apporte l'éclat à la Reine, Gary. Et demande-lui un reçu. Pour la RH. # mood: calm
 }
 + [« Raconte-moi quelque chose de déprimant. »]
     gary: Raconte-moi quelque chose de déprimant, B.O.B.

@@ -22,8 +22,9 @@ hotspots:
       - { text: "≋ ≋ ≋", at: [640, 260], size: 22, color: "#ff8ab8" }
     look:
       - say: "L'éclat. Il vibre, il chauffe, il fredonne. Quand je le regarde trop longtemps, je me souviens de choses qui ne me sont jamais arrivées."
+      - say: "Autour de lui, l'air se plie. Les bougies du bac existent en deux exemplaires. C'est lui, la faille. Ou le bouchon de la faille. Un bouchon qui fuit."
       - if: { notFlags: [ch1_seau_plein] }
-        say: "Il faut le refroidir. Avec un seau. Plein. D'un liquide. Mon domaine d'expertise, en somme."
+        say: "Il faut le calmer. Avec un seau. Plein. D'un liquide. Mon domaine d'expertise, en somme."
     use:
       - say: "narrateur: Gary tend la main. Sa moustache pousse d'un centimètre de plus. Il retire la main."
       - say: "Non. Trop chaud. Et je tiens à ma lèvre supérieure, telle qu'elle est."
@@ -33,10 +34,6 @@ hotspots:
           say: "Un seau vide sur un éclat brûlant ? Ça ferait « clang », pas « plouf ». Et c'est le plouf qui compte."
           stop: true
         - dialogue: ch1_plouf
-      serpilliere:
-        - if: { flags: [ch1_josiane_mouillee] }
-          say: "narrateur: Josiane grésille au contact. Gary la retire. Elle fume légèrement. Elle a l'air vexée."
-        - say: "Une serpillière, ça étale. Là, ça étalerait de l'improbabilité. Partout. Il faut un seau. Plein."
       badge: "Le badge fond un peu sur les bords. « GARRY » devient « GAAARRY ». Non. Je le range."
 
   - id: jauge
@@ -50,10 +47,10 @@ hotspots:
       - { if: { flags: [ch1_eclat_stabilise] }, text: "STABLE (TIÈDE)", at: [360, 230], size: 18, color: "#7fffd4" }
     look:
       - if: { flags: [ch1_eclat_stabilise] }
-        say: "« STABLE (TIÈDE) ». Le premier monde est lavé. J'aimerais que ma mère voie ça. Elle ne comprendrait rien, mais elle serait fière."
+        say: "« STABLE (TIÈDE) ». La faille est fermée, le nid tient. J'aimerais que ma mère voie ça. Elle ne comprendrait rien, mais elle serait fière."
         stop: true
       - say: "« STABILITÉ : GARY ». C'est le niveau juste au-dessus de « catastrophe ». Ou juste en dessous. Personne ne sait."
-      - say: "bob: Il est brûlant, Gary. Il faudrait le refroidir. Tu as un seau. Et tu as un passé avec les seaux. Fais-en bon usage, cette fois."
+      - say: "bob: Il fuit de partout, Gary. Il faudrait le contenir. Tu as un seau. Et tu as un passé avec les seaux. Fais-en bon usage, cette fois."
         mood: suspicious
 
   - id: gravure
@@ -62,8 +59,29 @@ hotspots:
     rect: [800, 160, 240, 120]
     art:
       - { rect: [810, 170, 220, 100], color: "#2a1a3a", stroke: "#b56cff" }
-      - { text: "RÉACTEUR D'IMPROBABILITÉ\nMk IV — 1/4096\n« NE PAS NETTOYER »", at: [920, 220], size: 13, color: "#e0b0ff" }
-    look: "« Mk IV — 1/4096. Ne pas nettoyer. » Même éparpillé dans le multivers, le règlement n°1 me poursuit."
+      - { text: "RÉACTEUR D'IMPROBABILITÉ\nMk IV — 1/4096\n« NE PAS LÉCHER »", at: [920, 220], size: 13, color: "#e0b0ff" }
+    look: "« Mk IV — 1/4096. Ne pas lécher. » Ce n'était pas écrit pour moi. Les cafards l'ont léché quand même. Par respect."
+
+  # le Seau Sacré, devenu réceptacle de la faille : il reste ici (ch1_seau_perdu)
+  - id: seau_sacre
+    label: Le Seau Sacré (contient la faille)
+    if: { flags: [ch1_seau_perdu] }
+    rect: [530, 200, 220, 250]
+    art:
+      - { circle: [640, 360, 100], color: "#b56cff", alpha: 0.18 }
+      - { rect: [590, 300, 100, 110], color: "#3d7dd8", stroke: "#e0b0ff" }
+      - { text: "SEAU", at: [640, 360], size: 18, color: "#ffffff" }
+    look:
+      - say: "Mon seau. Il flotte à trois centimètres du bac, plein d'eau bénite qui brille violet. Il existe aussi un peu à gauche de lui-même."
+      - say: "Il contient la faille. Tout seul. Sans formation. Il a toujours été plus doué que moi."
+    use:
+      - say: "narrateur: Gary tend la main vers l'anse. L'anse se décale poliment d'un univers."
+      - say: "Non. Si je le bouge, le Nid se replie. Reste là, seau. C'est toi le gardien, maintenant. Enfin, toi aussi."
+    useItem:
+      fragment: "Remettre l'éclat dans le seau ? Ils ont l'air bien, séparés. Comme certains couples."
+      badge: "« GARRY ». Le seau ne réagit pas. Lui, il m'a toujours appelé par mon vrai nom. Il ne m'a jamais appelé, en fait."
+    useItemDefault:
+      - say: "Je ne mets plus rien dans ce seau. Il est complet. Il a de l'improbabilité jusqu'à l'anse."
 
 exits:
   - id: retour_temple

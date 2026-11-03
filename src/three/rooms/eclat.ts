@@ -1,10 +1,13 @@
 import * as THREE from 'three';
 import { at, box, cyl, glow, mat, plane, pool, sphere, torus } from '../kit';
+import { seau } from '../props';
 import { candle, crowd, reactorShard, rng } from './hive';
 import type { RoomBuild } from './index';
 
 const STABLE = { flags: ['ch1_eclat_stabilise'] };
 const UNSTABLE = { notFlags: ['ch1_eclat_stabilise'] };
+/** Le Seau Sacré, resté là : il contient la faille. */
+const SEAU_PERDU = { flags: ['ch1_seau_perdu'] };
 
 /**
  * Gros plan « Éclat du Réacteur » (ch.1) : l'intérieur du bac de sortie du
@@ -81,6 +84,36 @@ export const eclat: RoomBuild = {
     water.position.set(ec.x, floorY + 0.012, ec.z);
     const steam = [0, 1, 2, 3, 4].map(() => glow('#e6f6ff', ec.w * 0.9, 0));
     s.when(STABLE, water, ...steam);
+    // ── le Seau Sacré : réceptacle de la faille, il flotte, il existe un peu à côté de lui-même ──
+    const sr = s.stand(s.rect('seau_sacre'), floorY);
+    const bucketH = sr.h * 0.62;
+    const bucket = seau(bucketH * 0.95, bucketH);
+    const brew = at(cyl(bucketH * 0.43, bucketH * 0.43, 0.02, '#c77dff', { glow: true, edges: false }), 0, bucketH * 0.78, 0);
+    bucket.add(brew);
+    const ghost = seau(bucketH * 0.95, bucketH);
+    ghost.traverse((o) => {
+      const m = (o as THREE.Mesh).material as THREE.Material | undefined;
+      if (m) {
+        (o as THREE.Mesh).material = m.clone();
+        ((o as THREE.Mesh).material as THREE.Material).transparent = true;
+        ((o as THREE.Mesh).material as THREE.Material).opacity = 0.28;
+        ((o as THREE.Mesh).material as THREE.Material).depthWrite = false;
+      }
+    });
+    const aura = glow('#c77dff', bucketH * 2.2, 0.45);
+    const bucketPool = at(pool('#c77dff', sr.w * 1.4, sr.w * 0.9, 0.4), sr.x, floorY + 0.014, sr.z);
+    s.spot('seau_sacre', bucket, ghost, aura, bucketPool);
+    s.animate((t) => {
+      const hover = 0.06 + Math.sin(t * 1.6) * 0.025;
+      bucket.position.set(sr.x, floorY + hover, sr.z);
+      bucket.rotation.y = -0.35 + Math.sin(t * 0.7) * 0.05;
+      // le double, décalé « un peu à gauche », qui clignote
+      ghost.position.set(sr.x - bucketH * 0.22 + Math.sin(t * 3.1) * 0.02, floorY + hover + 0.01, sr.z - 0.05);
+      ghost.rotation.y = bucket.rotation.y + 0.08;
+      ghost.visible = s.is(SEAU_PERDU) && Math.sin(t * 2.3) + Math.sin(t * 5.7) > -0.6;
+      aura.position.set(sr.x, floorY + hover + bucketH * 0.75, sr.z);
+      aura.material.opacity = 0.35 + Math.sin(t * 4) * 0.1;
+    });
     s.animate((t) => {
       steam.forEach((g, i) => {
         const k = (t * 0.2 + i / 5) % 1;

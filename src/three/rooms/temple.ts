@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { at, box, cyl, glow, label, mat, plane, pool, sphere, stripeTexture, tileTexture, torus, wallTexture } from '../kit';
-import { bob } from '../props';
+import { bob, serpilliere } from '../props';
 import type { Stage } from '../Stage';
 import { BobVoice } from './bobvoix';
 import { candle, crowd, drip, eggLamps, hive, mist, puddle, reactorShard, rib, rng, shaft, vaultArch } from './hive';
@@ -12,6 +12,7 @@ const GOLD = '#e0a83a';
 const WAX = '#f3e2bf';
 const STUCK = { notFlags: ['ch1_eclat_tombe'] };
 const FALLEN = { flags: ['ch1_eclat_tombe'], notFlags: ['ch1_eclat_stabilise'] };
+const JOSIANE = { flags: ['ch1_josiane_coincee'] };
 
 /**
  * Temple de l'Ancien Couloir (ch.1) : un pan du couloir C de Klepsydra-9,
@@ -257,9 +258,14 @@ function reliquary(s: Stage): void {
   const stuck = at(reactorShard(s, glassW * 0.26), -dw * 0.05, glassY - glassH * 0.12, G + 0.12);
   const fallen = at(reactorShard(s, h * 0.06), -dw * 0.05, binY - h * 0.02, dd / 2 + 0.06);
   const leak = at(glow('#c77dff', dw * 1.1, 0.22), -dw * 0.05, binY, dd / 2 + 0.2);
-  vend.add(stuck, fallen, leak);
+  // Josiane, recoincée dans la spirale centrale à la place de l'éclat, manche en travers de la vitrine
+  const josiane = at(serpilliere(glassH * 0.95), -dw * 0.05 + glassW * 0.12, glassY - glassH * 0.46, G + 0.1);
+  josiane.rotation.z = 0.42;
+  const josianeHalo = at(glow('#ffd166', glassW * 0.7, 0.18), -dw * 0.05, glassY - glassH * 0.15, G + 0.25);
+  vend.add(stuck, fallen, leak, josiane, josianeHalo);
   s.when(STUCK, stuck);
   s.when(FALLEN, fallen, leak);
+  s.when(JOSIANE, josiane, josianeHalo);
   s.spot('distributeur', at(vend, ds.x, 0, Math.max(ds.z - dd / 2, dd / 2 + 0.25)));
   // offrandes au pied : miettes, bougies, coussin
   const base = s.floorAt(290, 486);

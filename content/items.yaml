@@ -41,7 +41,7 @@ items:
           stop: true
         - say: "Gluante, lourde, et elle bourdonne. Exactement la consistance réglementaire."
           set: serpilliere_mouillee
-      # ch.1 : nettoyer le Signe aux deux R
+      # ch.1 : désodoriser le Signe aux deux R
       badge:
         - if: { notFlags: [ch1] }
           say: "Frotter mon badge avec Josiane ? Il a déjà vécu l'intérieur de B.O.B. Laissons-le tranquille."
@@ -87,6 +87,15 @@ items:
   - id: fragment
     name: Éclat du Réacteur (1/4096)
     icon: { color: "#b56cff", glyph: "1/4096" }
-    look: "Un éclat du Réacteur d'Improbabilité, gravé « Mk IV — 1/4096 ». Stabilisé, mouillé, tiède. Il ronronne. Plus que 4 095. Je vais avoir besoin d'un plus grand seau."
+    look: "Un éclat du Réacteur d'Improbabilité, gravé « Mk IV — 1/4096 ». Contenu dans une coque d'eau bénite figée, tiède. Il ronronne. Il ne fuit plus. Plus que 4 095. Et je n'ai plus de seau."
     combine:
       seau: "Il a déjà pris son bain. Un deuxième PLOUF, et il risque d'y prendre goût."
+      combi_chitine: "Je le range dans la poche de poitrine de la combi. Elle a une poche de poitrine. Les cafards pensent à tout. Il en ressort tout seul. Bon."
+
+  # ch.1 — la Mue Sacrée, remise au couronnement (ch1_combi)
+  - id: combi_chitine
+    name: Combinaison de chitine
+    icon: { color: "#7a4a1e", glyph: "CHITINE" }
+    look: "La Mue Sacrée : une combinaison de chitine tissée avec trois générations de mues royales. Plastron segmenté, épaulières en élytres, antennes décoratives. Elle résiste au vide, au feu, à l'improbabilité et à la honte. Il y a un peu de grand-mère dans l'épaule gauche."
+    combine:
+      badge: "J'accroche le badge sur le plastron. « GARRY », sur une armure de cafard. La RH n'a pas de formulaire pour ça. Pas encore."

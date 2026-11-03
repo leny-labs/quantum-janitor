@@ -8,6 +8,8 @@ onFirstEnter:
   - say: "La Galerie des Offrandes. Des miettes, des fresques, et une foule en prière. Ça ressemble à la salle de pause, avec plus de ferveur."
   - say: "bob: Gary. Il y a des miettes partout. Je crois que je suis au paradis. Ne me réveille pas."
     mood: love
+  - say: "narrateur: Un cafard passe devant Gary. Puis le même cafard. Puis le même, encore, qui s'excuse auprès du premier."
+  - say: "La faille. Elle les photocopie. Il faut que je tienne cet éclat avant qu'il y ait plus de cafards que de galaxie."
 
 art:
   - { rect: [0, 470, 1280, 110], color: "#1a110a" }
@@ -62,7 +64,7 @@ hotspots:
         - say: "Il sent le thon. Merci, B.O.B."
         - say: "bob: De rien."
           mood: sad
-      fragment: "scribe: UN ÉCLAT DU PREMIER MONDE ? NE ME LE MONTRE PAS, À MOI. MONTRE-LE À LA REINE. JE NE SUIS QU'UN FONCTIONNAIRE."
+      fragment: "scribe: L'ÉCLAT TENU ! VERSET 12, ACCOMPLI. NE ME LE MONTRE PAS, À MOI. MONTRE-LE À LA REINE. JE NE SUIS QU'UN FONCTIONNAIRE. ET JE NE SUIS PLUS QU'UN, D'AILLEURS."
       seau: "scribe: LE SEAU SACRÉ ! NE LE POSE PAS SUR MES ARCHIVES, JE VIENS DE LES CLASSER. PAR ODEUR."
     useItemDefault:
       - say: "scribe: CET OBJET N'EST MENTIONNÉ DANS AUCUN VERSET. IL N'EXISTE DONC PAS. RANGE-LE."
@@ -75,7 +77,7 @@ hotspots:
       - { rect: [785, 388, 170, 30], color: "#7fd8ff", alpha: 0.75 }
       - { text: "≈ EAU BÉNITE ≈\n(tiède)", at: [870, 440], size: 12, color: "#ffe9b0" }
     look: "Le Bassin des Ablutions. De l'eau bénite. Je trempe un doigt : tiède. Évidemment. Même les miracles sont tièdes ici."
-    use: "Je ne vais pas me laver les mains dans l'eau bénite. Enfin, si, mais pas devant tout le monde."
+    use: "Je ne vais pas me rincer les mains dans l'eau bénite. Enfin, si, mais pas devant tout le monde."
     useItem:
       serpilliere:
         - if: { flags: [ch1_josiane_mouillee] }
@@ -96,8 +98,8 @@ hotspots:
           stop: true
         - say: "narrateur: Gary remplit le Seau Sacré d'eau bénite. Un cafard en tombe en syncope de bonheur."
           set: ch1_seau_plein
-        - say: "Un seau d'eau tiède. Pour refroidir un morceau de réacteur. Mon plan est simple. Mon plan est stupide. C'est mon genre de plan."
-      badge: "Laver le Signe dans le bassin, devant tout le monde ? Il me faudrait une serpillière. Discrète. Mouillée."
+        - say: "Un seau d'eau tiède. Pour calmer un morceau de réacteur qui fuit de l'improbabilité. Mon plan est simple. Mon plan est stupide. C'est mon genre de plan."
+      badge: "Tremper le Signe dans le bassin, devant tout le monde ? Il me faudrait une serpillière. Discrète. Mouillée."
 
   - id: grenier
     label: Grenier aux Miettes
@@ -135,7 +137,7 @@ hotspots:
       - say: "Des centaines de cafards en prière. Ils bouchent le passage vers le Temple. On ne dérange pas la prière."
       - say: "narrateur: Un fidèle lève une antenne : « ON NE DÉRANGE PAS LA PRIÈRE. SAUF POUR LE GOÛTER. »"
     talk:
-      - say: "Excusez-moi ? Pardon ? Je peux passer ? C'est pour le ménage."
+      - say: "Excusez-moi ? Pardon ? Je peux passer ? C'est pour la faille. Une urgence dimensionnelle."
       - say: "narrateur: La foule bruisse. Avec beaucoup de pattes. Personne ne bouge. Quelqu'un, au fond, murmure « goûter »."
     useItem:
       seau:

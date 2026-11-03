@@ -14,6 +14,14 @@ export function repairState(state: GameState): void {
     state.give('badge');
     if (!state.hasFlag('bob_suit')) state.setFlag('bob_suit');
   }
-  // ch.1 : `ch1_plouf` stabilise l'éclat plusieurs répliques avant de le donner
+  // ch.1 : `ch1_josiane` fait tomber l'éclat plusieurs répliques avant que Josiane reste coincée
+  if (state.hasFlag('ch1_eclat_tombe') && !state.hasFlag('ch1_josiane_coincee')) state.setFlag('ch1_josiane_coincee');
+  if (state.hasFlag('ch1_josiane_coincee') && state.hasItem('serpilliere')) state.take('serpilliere');
+  // `ch1_plouf` stabilise l'éclat, le donne, puis le seau reste au Temple : jamais d'éclat
+  // manquant, jamais de seau revenu dans l'inventaire
   if (state.hasFlag('ch1_eclat_stabilise') && !state.hasItem('fragment') && !state.ended) state.give('fragment');
+  if (state.hasFlag('ch1_eclat_stabilise') && !state.hasFlag('ch1_seau_perdu')) state.setFlag('ch1_seau_perdu');
+  if (state.hasFlag('ch1_seau_perdu') && state.hasItem('seau')) state.take('seau');
+  // `ch1_couronnement` remet la combi avant la fin
+  if (state.hasFlag('ch1_combi') && !state.hasItem('combi_chitine')) state.give('combi_chitine');
 }

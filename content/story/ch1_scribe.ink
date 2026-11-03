@@ -9,7 +9,14 @@ scribe: SILENCE. JE RECOPIE LA PROPHÉTIE. POUR LA QUATRE MILLIÈME FOIS. À LA 
     gary: Vous pouvez me la réciter, cette prophétie ?
     scribe: VERSET 1 : « UN JOUR VIENDRA L'HOMME AU SEAU ». VERSET 2 : « IL NE LÂCHERA PLUS SON SEAU ».
     scribe: VERSET 7, ALINÉA B : « IL PORTERA SUR SON CŒUR LE SIGNE AUX DEUX R, ET LE SIGNE SERA PUR ».
-    scribe: VERSET 12 : « IL FENDRA LES MONDES ET NETTOIERA LES DIMENSIONS ». LE VERSET 13 EST ILLISIBLE. QUELQU'UN A RENVERSÉ DU YAOURT DESSUS.
+    scribe: VERSET 12 : « QUAND LE NID SE REPLIERA, IL TIENDRA L'ÉCLAT, ET LA FAILLE SE REFERMERA ». LE VERSET 13 EST ILLISIBLE. QUELQU'UN A RENVERSÉ DU YAOURT DESSUS.
+    gary: Et le verset 2, « il ne lâchera plus son seau », vous êtes sûr de la traduction ?
+    scribe: À QUATRE-VINGTS POUR CENT. LE PAPYRUS ÉTAIT TIÈDE.
+    -> menu
+* [La faille]
+    gary: Et cette faille, dans le Temple. C'est grave ?
+    scribe: DEPUIS QU'ELLE S'EST OUVERTE, JE RECOPIE CHAQUE VERSET DEUX FOIS. PAS PAR ZÈLE : JE SUIS DEUX. L'AUTRE EST DANS LA PIÈCE D'À CÔTÉ. IL RECOPIE PLUS VITE QUE MOI.
+    scribe: SI PERSONNE NE TIENT L'ÉCLAT, LE NID SE REPLIERA JUSQU'À TENIR DANS UNE MIETTE. NOUS AIMONS LES MIETTES. PAS À CE POINT.
     -> menu
 * [Les cafards et la galaxie]
     gary: Comment vous en êtes arrivés à... hériter de la galaxie ?

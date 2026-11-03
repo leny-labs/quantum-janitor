@@ -153,6 +153,58 @@ export function seau(w: number, h: number): THREE.Group {
   return group([body, band, rim, inside, handle]);
 }
 
+/**
+ * Combinaison de chitine (ch.1, « la Mue Sacrée ») : plastron en plaques
+ * segmentées, épaulières en élytres, col à deux antennes décoratives, jambes
+ * annelées. Origine au sol, hauteur h. Icône d'inventaire `combi_chitine`.
+ */
+export function combiChitine(h: number): THREE.Group {
+  const SHELL = '#6b3a12';
+  const DARK = '#3e1f08';
+  const AMBER = '#c9802e';
+  const GOLD = '#e0a83a';
+  const parts: THREE.Object3D[] = [];
+  // jambes annelées
+  for (const sx of [-1, 1]) {
+    for (let i = 0; i < 4; i++) {
+      const r = h * (0.07 - i * 0.004);
+      parts.push(at(cyl(r, r * 0.9, h * 0.09, i % 2 ? DARK : SHELL, { seg: 10 }), sx * h * 0.09, h * (0.05 + i * 0.1), 0));
+    }
+  }
+  // ceinture dorée
+  parts.push(at(cyl(h * 0.17, h * 0.17, h * 0.04, GOLD, { seg: 16 }), 0, h * 0.44, 0));
+  // plastron : plaques segmentées, de plus en plus larges vers les épaules
+  for (let i = 0; i < 4; i++) {
+    const plate = at(sphere(h * (0.15 + i * 0.012), i % 2 ? AMBER : SHELL, { seg: 14 }), 0, h * (0.5 + i * 0.075), h * 0.01);
+    plate.scale.set(1.15, 0.42, 0.75);
+    parts.push(plate);
+  }
+  // épaulières en élytres + bras annelés
+  for (const sx of [-1, 1]) {
+    const pad = at(sphere(h * 0.1, SHELL, { seg: 12 }), sx * h * 0.21, h * 0.76, 0);
+    pad.scale.set(1.2, 0.6, 1);
+    pad.rotation.z = sx * -0.5;
+    parts.push(pad, at(sphere(h * 0.03, GOLD, { seg: 8 }), sx * h * 0.25, h * 0.8, h * 0.07));
+    for (let i = 0; i < 3; i++) {
+      const arm = at(cyl(h * 0.045, h * 0.04, h * 0.09, i % 2 ? DARK : SHELL, { seg: 8 }), sx * h * (0.27 + i * 0.015), h * (0.66 - i * 0.09), 0);
+      arm.rotation.z = sx * 0.18;
+      parts.push(arm);
+    }
+  }
+  // col + deux antennes décoratives
+  parts.push(at(torus(h * 0.08, h * 0.022, GOLD), 0, h * 0.84, 0));
+  parts[parts.length - 1].rotation.x = Math.PI / 2;
+  for (const sx of [-1, 1]) {
+    const ant = at(cyl(h * 0.008, h * 0.005, h * 0.26, DARK, { seg: 4, edges: false }), sx * h * 0.07, h * 0.96, 0);
+    ant.rotation.z = sx * -0.45;
+    parts.push(ant, at(sphere(h * 0.018, '#ffd166', { glow: true, seg: 6 }), sx * h * 0.13, h * 1.07, 0));
+  }
+  // l'écusson orange de Gary, recousu sur la poitrine
+  parts.push(at(cyl(h * 0.035, h * 0.035, h * 0.01, '#ff8c42', { seg: 12 }), -h * 0.07, h * 0.66, h * 0.11));
+  parts[parts.length - 1].rotation.x = Math.PI / 2;
+  return group(parts);
+}
+
 /** Serpillière appuyée contre le mur (penchée vers -x). */
 export function serpilliere(h: number): THREE.Group {
   const stickH = h * 0.86;

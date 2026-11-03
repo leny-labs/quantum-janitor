@@ -90,6 +90,7 @@ keys:
   scene.coeur-eclat.hotspot.eclat.label: Reactor shard
   scene.coeur-eclat.hotspot.jauge.label: Stability gauge
   scene.coeur-eclat.hotspot.gravure.label: Engraving
+  scene.coeur-eclat.hotspot.seau_sacre.label: The Sacred Bucket (holds the rift)
   scene.coeur-eclat.exit.retour_temple.label: Back to the Temple
 
   # objets
@@ -102,6 +103,10 @@ keys:
   item.sandwich.glyph: SAND
   item.fusible.name: Fuse 7B
   item.fragment.name: Reactor shard (1/4096)
+  item.fragment.look: "A shard of the Improbability Reactor, engraved “Mk IV — 1/4096”. Contained in a shell of set holy water, lukewarm. It purrs. It no longer leaks. Only 4,095 to go. And I don't have a bucket any more."
+  item.combi_chitine.name: Chitin suit
+  item.combi_chitine.glyph: CHITIN
+  item.combi_chitine.look: "The Sacred Moult: a chitin suit woven from three generations of royal moults. Segmented breastplate, elytra pauldrons, decorative antennae. Resistant to vacuum, fire, improbability and shame. There's a bit of grandmother in the left shoulder."
 
   # personnages
   character.gary.name: Gary Plunk

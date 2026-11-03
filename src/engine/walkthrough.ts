@@ -92,16 +92,18 @@ export const CHAPTERS: ChapterDef[] = [
       { use: 'grenier' }, // à mains nues : non
       { useItem: ['seau', 'grenier'] },
       { useItem: ['seau', 'foule'] },
-      { section: 'Puzzle 3 : laver le premier monde' },
+      { section: 'Puzzle 3 : tenir l\'éclat, refermer la faille' },
       { go: 'temple-couloir' },
       { look: 'distributeur' },
-      { useItem: ['serpilliere', 'distributeur'] },
+      { useItem: ['serpilliere', 'distributeur'] }, // Josiane reste coincée
+      { look: 'distributeur' },
       { go: 'galerie-des-offrandes' },
       { useItem: ['seau', 'bassin'] },
       { go: 'temple-couloir' },
       { go: 'coeur-eclat' },
       { look: 'jauge' },
-      { useItem: ['seau', 'eclat'] },
+      { useItem: ['seau', 'eclat'] }, // le seau contient la faille et reste là
+      { look: 'seau_sacre' },
       { go: 'temple-couloir' },
       { go: 'galerie-des-offrandes' },
       { go: 'nid-royal' },

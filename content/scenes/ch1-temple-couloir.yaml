@@ -9,6 +9,8 @@ onFirstEnter:
   - say: "Le couloir C. MON couloir C. Échoué ici, couvert d'offrandes et de cire de bougie. Je l'ai serpillé tous les jours pendant trois ans, et c'est maintenant qu'il devient sacré."
   - say: "bob: (la bouche encore pleine) Il est plus propre que dans mon souvenir. Les cafards l'entretiennent. Ils ont un meilleur contrat que toi."
     mood: suspicious
+  - say: "narrateur: La gravité hésite. Une bougie tombe vers le plafond, se ravise, retombe. B.O.B. décolle de deux centimètres et n'aime pas ça."
+    shake: true
 
 art:
   - { rect: [0, 470, 1280, 110], color: "#171b28" }
@@ -36,29 +38,29 @@ hotspots:
       - { if: { notFlags: [ch1_eclat_tombe] }, circle: [290, 250, 50], color: "#b56cff", alpha: 0.25 }
       - { if: { flags: [ch1_eclat_tombe], notFlags: [ch1_eclat_stabilise] }, circle: [290, 434, 12], color: "#b56cff", stroke: "#ffffff" }
     look:
-      - if: { flags: [ch1_eclat_tombe] }
-        say: "Le reliquaire est vide. L'éclat a roulé dans le logement de sortie. Il pulse. Trop chaud pour la main."
+      - if: { flags: [ch1_josiane_coincee, ch1_eclat_stabilise] }
+        say: "Josiane, dans la vitrine, entre deux spirales. Les fidèles lui ont mis une bougie. Elle a l'air bien. Mieux que moi."
+        stop: true
+      - if: { flags: [ch1_josiane_coincee] }
+        say: "Josiane, coincée dans la spirale, à la place de l'éclat. L'éclat, lui, pulse dans le logement de sortie. Trop chaud pour la main."
         stop: true
       - say: "Le Distrib'Ô-Matic. Derrière la spirale, à la place du sandwich : un éclat qui vibre d'improbabilité. Il est coincé. Évidemment. Ce distributeur coince TOUT."
         set: ch1_voit_eclat
       - say: "bob: Un morceau du Réacteur, Gary. Le premier des 4 096. Je le sens d'ici. Il a le même humour que la station."
         mood: surprised
     use:
+      - if: { flags: [ch1_josiane_coincee] }
+        say: "narrateur: Gary donne un coup de pied, pour Josiane. L'écran affiche : « COUP DE PIED FACTURÉ : 2 CRÉDITS. ARTICLE TOUJOURS NON DISTRIBUABLE »."
+        stop: true
       - say: "narrateur: Coup de pied. L'écran, sous la cire, affiche encore : « COUP DE PIED FACTURÉ : 2 CRÉDITS »."
       - say: "Même dans une autre dimension, il me facture. C'est presque rassurant."
     useItem:
       serpilliere:
-        - if: { flags: [ch1_eclat_tombe] }
-          say: "Il n'y a plus rien à décoincer. Sauf ma carrière."
-          stop: true
         - if: { notFlags: [ch1_voit_eclat] }
           say: "Décoincer quoi ? Je ne sais même pas ce qu'il y a dedans. Regardons d'abord."
           stop: true
-        - say: "narrateur: Gary glisse le manche de Josiane par la trappe, comme au bon vieux temps. Il y a trois heures. L'éclat tombe et roule dans le logement de sortie."
-          set: ch1_eclat_tombe
-        - say: "narrateur: Gary approche la main. Sa moustache pousse de trois centimètres. Il recule. Elle reste."
-          shake: true
-        - say: "Trop chaud. Il faut le refroidir. Avec un liquide. J'ai un seau. J'ai l'habitude. Ça ne s'est jamais mal passé. Une fois."
+        # Josiane reste coincée dans la spirale (ch1_josiane_coincee, quitte l'inventaire)
+        - dialogue: ch1_josiane
       badge: "« BADGE NON RECONNU. CE DISTRIBUTEUR EST DÉSORMAIS UN LIEU DE CULTE. » Même lui a eu une promotion."
       seau: "Verser de l'eau dans un distributeur ? Ça, c'est le geste qui détruit des stations. J'ai donné."
 
@@ -96,7 +98,7 @@ hotspots:
         - say: "sylvie: ...GARRY... HORS... JURIDICTION... BONHEUR... NON... GARANTI..."
           mood: suspicious
         - say: "SYLVIE ? ...Un écho. Elle est quelque part, de l'autre côté. Elle me manque. Non. Si. Un peu. Non."
-      serpilliere: "Nettoyer ce lecteur ? J'ai déjà donné. C'est comme ça que tout a commencé."
+      serpilliere: "Serpiller ce lecteur ? J'ai déjà donné. C'est comme ça que tout a commencé."
 
   - id: bob
     label: B.O.B.
