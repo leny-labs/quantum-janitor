@@ -55,14 +55,25 @@ reine: {~LE SIGNE, GARRY. LE GRAND SCRIBE ATTEND DANS LA GALERIE.|TU N'AS TOUJOU
 -> END
 
 = remise
-reine: GARRY. LE GRAND SCRIBE A PARLÉ. TU ES L'HOMME AU SEAU.
+reine: GARRY. LE GRAND SCRIBE A PARLÉ. IL A MÊME PLEURÉ. C'EST LA PREMIÈRE FOIS DEPUIS LE DÉLUGE DE DÉSINFECTANT.
+reine: MAIS AVANT DE TE RENDRE LE SEAU, JE VEUX L'ENTENDRE DE TA BOUCHE. QUE FERAS-TU DE L'ÉCLAT, HOMME AU SEAU ?
+* [« Le contenir. »]
+    gary: Le contenir. Couvercle, scotch, étiquette « NE PAS OUVRIR ». Protocole de catégorie 4.
+    reine: UNE ÉTIQUETTE. SUR L'IMPROBABILITÉ. ... C'EST SI BÊTE QUE ÇA PEUT MARCHER.
+* [« Aucune idée. »]
+    gary: Honnêtement ? Aucune idée. Je suis intérimaire. On ne me donne jamais la fiche de poste avant.
+    reine: PARFAIT. LES MESSIES QUI ONT UN PLAN FINISSENT EN STATUE. LES AUTRES FINISSENT LE TRAVAIL.
+* [« Je peux juste avoir mon seau ? »]
+    gary: Je peux juste avoir mon seau ? C'est pour ça que je suis venu, à la base.
+    reine: IL RÉCLAME SON SEAU AVANT LA GLOIRE. AUCUN IMPOSTEUR N'EST AUSSI PEU AMBITIEUX.
+- reine: ÉCOUTE BIEN. SI LA FAILLE GRANDIT, MON NID SE REPLIE EN UN POINT. UN POINT TRÈS DENSE. TRÈS ÉTROIT. AVEC NOUS DEDANS. ET TOI AUSSI.
+gary: Donc je ne suis pas vraiment volontaire.
+reine: PERSONNE NE L'EST, GARRY. C'EST POUR ÇA QU'ON APPELLE ÇA UNE PROPHÉTIE.
 reine: GARDES ! RENDEZ LE SEAU SACRÉ À SON PORTEUR.
 Deux gardes apportent le Seau sur un coussin. Il étincelle. Il n'a jamais été aussi propre. # give: seau # set: ch1_seau_rendu
 gary: Il est... impeccable. Il y avait un yaourt dedans, non ?
-reine: IL Y EN AVAIT UN. UN ÊTRE LACTÉ. IL S'EST LEVÉ, IL NOUS A SALUÉS, ET IL EST PARTI FONDER QUELQUE CHOSE.
-bob: Fonder quoi ? # mood: surprised
-reine: IL N'A PAS VOULU LE DIRE. IL AVAIT L'AIR TRÈS DÉTERMINÉ. ET TRÈS FERMENTÉ.
-reine: MAINTENANT, GARRY : LE TEMPLE DE L'ANCIEN COULOIR. L'ÉCLAT Y SAIGNE DE L'IMPROBABILITÉ. TIENS-LE, ET REFERME LA FAILLE. AVANT QUE MON NID NE SE PLIE EN QUATRE.
+reine: IL S'EST LEVÉ, IL NOUS A SALUÉS, ET IL EST PARTI FONDER QUELQUE CHOSE. IL AVAIT L'AIR TRÈS DÉTERMINÉ. ET TRÈS FERMENTÉ.
+reine: MAINTENANT : LE TEMPLE DE L'ANCIEN COULOIR. L'ÉCLAT Y SAIGNE DE L'IMPROBABILITÉ. TIENS-LE, ET REFERME LA FAILLE.
 gary: Contenir une faille dimensionnelle. Avec un seau. Ce sont des heures sup', ça.
 reine: ICI, LE TEMPS N'EXISTE PAS. DONC NON.
 -> END

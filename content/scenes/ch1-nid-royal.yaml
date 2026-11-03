@@ -70,11 +70,18 @@ hotspots:
     look: "Mon seau. Sur un autel. Entouré de bougies. Deux gardes le veillent. Il a une meilleure carrière que moi."
     use:
       - say: "narrateur: Gary tend la main. Deux gardes cafards croisent leurs pattes devant lui. Beaucoup de pattes."
+      - if: { flags: [ch1_signe_reconnu] }
+        say: "reine: PAS SI VITE, HOMME AU SEAU. ON NE SE SERT PAS SUR L'AUTEL. ON VIENT PARLER À SA REINE."
+        stop: true
       - say: "reine: ON NE TOUCHE PAS AU SEAU SACRÉ. SAUF L'HOMME AU SEAU. QUI DOIT D'ABORD PROUVER QU'IL EST L'HOMME AU SEAU."
       - say: "C'est mon seau. J'ai la preuve d'achat. Non. C'est le seau de la station. Bon."
     useItem:
       serpilliere: "Serpiller un autel ? Pas sans fiche de poste. Et pas devant les gardes."
-      badge: "Les gardes regardent le badge, puis moi, puis le badge. « LE SCRIBE », disent-ils. Tout le monde ici renvoie au Scribe."
+      badge:
+        - if: { flags: [ch1_signe_reconnu] }
+          say: "Les gardes regardent le badge, puis moi, puis le trône. « LA REINE », disent-ils. On a changé de guichet."
+          stop: true
+        - say: "Les gardes regardent le badge, puis moi, puis le badge. « LE SCRIBE », disent-ils. Tout le monde ici renvoie au Scribe."
 
   - id: courtisans
     label: La cour
