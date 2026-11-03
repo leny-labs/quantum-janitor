@@ -61,7 +61,7 @@ const FACES: Record<string, { mouth: MouthOptions; blink?: BlinkOptions }> = {
   // cafards : mandibules + palpes seulement, jamais de bouche (largeur 0 = rien dessiné)
   reine: { mouth: { width: 0, showClosed: false }, blink: { enabled: false } },
   scribe: { mouth: { width: 0, showClosed: false }, blink: { enabled: false } },
-  // M. Sabot (portrait GenAI fixe) : bouche sous la moustache réglementaire, fermée au repos (dessinée par l'image)
+  // M. Sabot : repli si sa planche (portraits/sabot-sheet.png) manque ; bouche sous la moustache, fermée au repos
   sabot: { mouth: { x: 0.51, y: 0.515, width: 0.1, showClosed: false, style: { lipColor: '#7a3a30' } }, blink: { enabled: false } },
 };
 
@@ -167,6 +167,7 @@ export class DialogueBox implements DialogueView {
     // le calque vit sur sa propre horloge, indépendante des boucles idle / talk
     const tick = (_t: number, dt: number) => {
       speaking.talking = this.root.visible && this.face.talking;
+      speaking.open = this.root.visible;
       if (this.root.visible && this.overlayOn) {
         this.overlayOn.setTalking(this.face.talking);
         this.overlayOn.update(dt);
@@ -527,6 +528,7 @@ export class DialogueBox implements DialogueView {
     this.root.setVisible(false);
     speaking.id = null;
     speaking.talking = false;
+    speaking.open = false;
     duckMusic(false);
   }
 }

@@ -6,6 +6,7 @@ import type { HeroShot } from '../Hero';
 import { at, box, cyl, glow, mat, sphere, Vignette } from '../kit';
 import { GARY_PRONE_ASPECT, GARY_PRONE_URL, REINE_ASPECT, REINE_SHEET, ROACH_2D, ROACH_ACTOR, actorFrame, billboardSheet, billboard, bob, roach, roachSprite, seau } from '../props';
 import { skyPlane, skyTexture } from './backdrop';
+import { speaking } from '../../engine/speaking';
 
 export function endShot(width: number, height: number): HeroShot {
   const scene = new THREE.Scene();
@@ -106,9 +107,24 @@ export function endShot(width: number, height: number): HeroShot {
   const queenSprite = queen.userData.sprite as THREE.Sprite | undefined;
   const queenScale = queenSprite?.scale.clone();
   const LOOK = new THREE.Vector3(0, 2.4, -3);
+  // pendant les répliques, le panneau de dialogue couvre le bas de l'écran (y > 462 / 720) :
+  // la caméra recule, monte et plonge pour que Gary, B.O.B. et le Seau passent au-dessus,
+  // couronne de la Reine toujours dans le cadre ; fondu entre les deux cadrages
+  let talkK = 0;
+  let last = 0;
   const tick = (t: number) => {
-    camera.position.set(Math.sin(t * 0.1) * 0.8, 2.4 + Math.sin(t * 0.13) * 0.15, 11);
+    const dt = Math.min(0.1, Math.max(0, t - last));
+    last = t;
+    talkK += ((speaking.open ? 1 : 0) - talkK) * Math.min(1, dt * 2.5);
+    const k = talkK * talkK * (3 - 2 * talkK);
+    camera.position.set(Math.sin(t * 0.1) * 0.8 * (1 - k * 0.5), 2.4 + 0.6 * k + Math.sin(t * 0.13) * 0.15, 11 + 5 * k);
+    LOOK.y = 2.4 - 2.15 * k;
     camera.lookAt(LOOK);
+    const fov = 38 + 4 * k;
+    if (Math.abs(camera.fov - fov) > 0.01) {
+      camera.fov = fov;
+      camera.updateProjectionMatrix();
+    }
     if (queenSprite && queenScale) {
       // sprite : respiration royale plutôt que des petits sauts
       queenSprite.scale.set(queenScale.x, queenScale.y * (1 + Math.sin(t * 1.3) * 0.015), 1);

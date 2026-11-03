@@ -65,7 +65,7 @@ export const overlayUrl = (id: string) => `portraits/${id}-robot.png`;
  * Portraits GenAI sans modèle 3D : PNG fixe chargé sous `portraitKey(id)` (repli)
  * + planche `sheetUrl(id)` au layout SHEET, qui prime dès qu'elle est chargée
  * (Frère Élytre : _briefs/ch1/genai-fix/faces.py — mandibules qui s'écartent en
- * parlant, jamais de bouche). M. Sabot : portrait fixe seul (pas encore de planche).
+ * parlant, jamais de bouche). M. Sabot : planche GenAI (clignement, agacé, bouche sous la moustache).
  */
 const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png', sabot: 'portraits/sabot-portrait.png' };
 
@@ -202,7 +202,7 @@ export const PORTRAIT_IDS = Object.keys(PORTRAITS);
  * Planches GenAI (docs/PORTRAIT_GENAI.md) : jamais rebakées, ni par
  * `bake:portraits` ni au runtime — le 3D suit l'image, pas l'inverse.
  */
-export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob', 'reine', 'scribe']);
+export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob', 'reine', 'scribe', 'sabot']);
 
 function makeRenderer(): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
