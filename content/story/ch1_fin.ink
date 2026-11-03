@@ -1,4 +1,5 @@
-// Chapitre 1 : transition vers la Station Bureaucratique (ch.2, non implémenté). Joué dans EndScene.
+// Préfixe ch1_ = acte Blattaria (acte II) du chapitre 0 (historique, docs/CHAPTERS.md).
+// Fin du chapitre 0 : la faille du Nid vers la Station Bureaucratique (ch.1). Joué dans EndScene.
 
 === ch1_suite ===
 L'éclat pulse. La voûte du Nid Royal s'entrouvre : une nouvelle faille, propre, nette, comme découpée aux ciseaux. Derrière, des rangées de guichets à perte de vue.

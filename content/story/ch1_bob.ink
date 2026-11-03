@@ -1,3 +1,4 @@
+// Préfixe ch1_ = acte Blattaria (acte II) du chapitre 0 (historique, docs/CHAPTERS.md).
 // Chapitre 1 : B.O.B. compagnon, système d'indices (une branche par étape de docs/CHAPTER1.md).
 
 === ch1_bob ===

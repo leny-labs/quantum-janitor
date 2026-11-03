@@ -148,6 +148,9 @@ export interface SaveData {
   visited: string[];
   ended: boolean;
   inkState?: string;
-  /** Chapitre de la partie (absent = ch0 ; ajouté sans changer `version`). */
+  /**
+   * Chapitre de la partie (absent = ch0). v2 : `ch0` = Klepsydra + Blattaria, `ch1` = Station ;
+   * en v1, `ch1` voulait dire Blattaria (migré par engine/saveMigration.ts).
+   */
   chapter?: string;
 }

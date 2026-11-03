@@ -1,3 +1,4 @@
+// Préfixe ch1_ = acte Blattaria (acte II) du chapitre 0 (historique, docs/CHAPTERS.md).
 // Chapitre 1 « Blattaria Prime » : l'arrivée au Nid Royal et les audiences de la Reine.
 
 === ch1_arrivee ===

@@ -12,9 +12,12 @@
 //     « URL » = ?scene=nid-royal&chapter=1&…&cine=1.
 //   #0 début : direct au Nid, intro déjà vue (comme avant).
 // Sur ch0, le checkpoint FIN porte un lien « → suite : transition ch.1 ».
+// ch0 = acte I Klepsydra + acte II Blattaria : la coupure d'acte (cliffhanger cafards → Nid Royal)
+// est une entrée « ↪ » (kind `act`, ancre #acte-2) ; « Jouer ici » rejoue l'intro du Nid.
 import './style.css';
 import { loadContent } from '../engine/contentBrowser';
 import { GameState } from '../engine/GameState';
+import { migrateSave } from '../engine/saveMigration';
 import { SaveSystem } from '../engine/SaveSystem';
 import type { SaveData } from '../engine/types';
 import { CHAPTERS, chapterPrelude, walkChapter, type ChapterDef, type Checkpoint } from '../engine/walkthrough';
@@ -59,7 +62,7 @@ function debugUrl(c: Checkpoint): string {
   if (c.save.chapter && c.save.chapter !== 'ch0') q.set('chapter', c.save.chapter.replace(/^ch/, ''));
   if (c.save.flags.length) q.set('flags', c.save.flags.join(','));
   if (c.save.items.length) q.set('items', c.save.items.join(','));
-  if (c.kind === 'launch') q.set('cine', '1');
+  if (c.kind === 'launch' || c.kind === 'act') q.set('cine', '1');
   return `${GAME_URL}?${q.toString().replace(/%2C/g, ',')}`;
 }
 
@@ -90,7 +93,7 @@ function selectChapter(c: ChapterDef, anchor?: string): void {
 }
 
 /** Repère affiché d'une entrée : ↪ transition, ▶ lancement, sinon son numéro. */
-const mark = (c: Checkpoint) => (c.kind === 'transition' ? '↪' : c.kind === 'launch' ? '▶' : String(c.index));
+const mark = (c: Checkpoint) => (c.kind === 'transition' || c.kind === 'act' ? '↪' : c.kind === 'launch' ? '▶' : String(c.index));
 const where = (c: Checkpoint) => (c.kind ? `« ${c.label} »` : `checkpoint #${c.index}`);
 
 function renderTimeline(current: SaveData | null): HTMLElement {
@@ -125,7 +128,7 @@ function renderTimeline(current: SaveData | null): HTMLElement {
       el(
         'li',
         {
-          id: c.kind ?? '',
+          id: c.kind === 'act' ? 'acte-2' : (c.kind ?? ''),
           className: `cp${c.kind ? ` ${c.kind}` : ''}${c === exact ? ' match' : c === near ? ' near' : ''}`,
           title: `flags : ${c.save.flags.join(', ') || '—'}\nobjets : ${c.save.items.join(', ') || '—'}`,
         },
@@ -169,8 +172,9 @@ function renderSave(current: SaveData | null): HTMLElement {
     const f = file.files?.[0];
     if (!f) return;
     try {
-      const data = JSON.parse(await f.text()) as SaveData;
-      if (data.version !== 1 || typeof data.scene !== 'string' || !Array.isArray(data.flags)) throw new Error('format inattendu (version 1 attendue)');
+      // v1 (avant la fusion ch.0 + Blattaria) migrée comme au chargement du jeu
+      const data = migrateSave(JSON.parse(await f.text()));
+      if (!data) throw new Error('format inattendu (version 1 ou 2 attendue)');
       save.save(GameState.fromSave(data));
       render();
     } catch (e) {

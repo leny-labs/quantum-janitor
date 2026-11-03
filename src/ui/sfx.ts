@@ -274,7 +274,7 @@ export function pickupCue(): void {
 }
 
 if (import.meta.env.DEV && typeof window !== 'undefined') {
-  (window as unknown as { qjSfx: unknown }).qjSfx = { unlockCue, pickupCue, chime };
+  (window as unknown as { qjSfx: unknown }).qjSfx = { unlockCue, pickupCue, chime, riftCue, stampClonk, distantPlouf };
 }
 
 /** Tampon administratif : coup sourd. */
@@ -380,4 +380,45 @@ export function creak(back = false): void {
   const [f0, f1] = back ? [420, 260] : [260, 420];
   for (let i = 0; i < 3; i++) tone(a, 'sawtooth', f0 + i * 30, f1 + i * 30, t + i * 0.09, 0.08, 0.025);
   noise(a, t, 0.3, 0.05, 2600, 1400);
+}
+
+// ── Transitions de chapitre (docs/CHAPTERS.md §2) ───────────────────────────
+
+/**
+ * Faille : long souffle qui s'ouvre puis glissando descendant de harpe cosmique
+ * (même synthé que les effets papillon) — fin de chapitre / aspiration.
+ */
+export function riftCue(): void {
+  const a = ctx();
+  if (!a) return;
+  const t = a.currentTime;
+  noise(a, t, 1.6, 0.09, 180, 3600);
+  noise(a, t + 0.5, 1.2, 0.05, 5200, 400);
+  tone(a, 'sine', 55, 38, t, 1.8, 0.12);
+  // lydien qui se défait vers le grave, notes espacées, longues
+  cosmicHarp([24, 21, 18, 14, 11, 7, 2, 0], 55, 0.11, { dur: 1.2, vol: 0.032, shimmer: 0.012 });
+}
+
+/** « CLONK » de tampon administratif : choc mat, bois et métal, petit rebond. */
+export function stampClonk(): void {
+  const a = ctx();
+  if (!a) return;
+  const t = a.currentTime;
+  tone(a, 'sine', 180, 42, t, 0.32, 0.3);
+  tone(a, 'square', 95, 60, t, 0.07, 0.08);
+  noise(a, t, 0.06, 0.22, 1800, 600);
+  noise(a, t + 0.004, 0.18, 0.06, 4200, 2600);
+  // rebond du manche
+  tone(a, 'triangle', 760, 690, t + 0.09, 0.08, 0.03);
+  noise(a, t + 0.11, 0.04, 0.05, 2400, 1200);
+}
+
+/** « PLOUF » lointain : le seau, dans une autre dimension (carte d'acte). */
+export function distantPlouf(): void {
+  const a = ctx();
+  if (!a) return;
+  const t = a.currentTime;
+  tone(a, 'sine', 380, 70, t, 0.5, 0.08);
+  noise(a, t + 0.03, 0.6, 0.035, 700, 180);
+  cosmicHarp([0, 7, 14], 62, 0.16, { dur: 0.9, vol: 0.016, shimmer: 0.004 });
 }

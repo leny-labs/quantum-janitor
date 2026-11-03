@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { getSession } from '../session';
-import { CHAPTERS } from '../engine/walkthrough';
+import { CHAPTERS, enterAct, findAct } from '../engine/walkthrough';
+import { showChapterCard } from '../ui/ChapterCard';
 import { t } from '../i18n';
 import { makeButton } from '../ui/Button';
 import { HeroView } from '../three/Hero';
@@ -14,19 +15,22 @@ import { COLORS, DISPLAY, FONT, H, W, hex } from '../ui/theme';
 interface EndData {
   knot?: string;
   final?: boolean;
+  /**
+   * Coupure d'acte (ChapterDef.acts) : `knot` = cliffhanger de l'acte précédent (facultatif),
+   * puis carte d'acte et entrée dans l'acte, sans écran de fin ni menu.
+   */
+  act?: string;
 }
 
 /**
- * Fin de chaque chapitre : flag posé, plan affiché, chapitre suivant
- * proposé. `roaches` = plan 3D de la Reine (ch.0) ; `stub` = fond 2D de
- * transition (ch.1 → Station Bureaucratique, non implémentée).
+ * Fin de chaque chapitre : flag posé, plan affiché, chapitre suivant proposé.
+ * `stub` = fond 2D de la faille vers la Station Bureaucratique (fin du ch.0).
+ * Le plan 3D `roaches` (dimension des cafards) sert à la coupure d'acte Klepsydra → Blattaria.
  */
 const END_BY_CHAPTER: Record<string, { flag: string; shot: 'roaches' | 'stub'; next?: string; hook?: string[] }> = {
-  ch0: { flag: 'chapitre0_termine', shot: 'roaches', next: 'ch1' },
-  // hook merge ch.0 → Station 2 : la faille du Nid est franchie. TOUTES les sorties du Nid
-  // (couronnement `# end: ch1_suite`, sortie « La Faille » `to: fin`, Reine avec la combi)
-  // arrivent ici ; le merge n'a qu'à rebrancher `next` (Station Bureaucratique) et lire ces flags.
-  ch1: { flag: 'chapitre1_termine', shot: 'stub', hook: ['go_station2', 'fin_ch0'] },
+  // la faille du Nid est franchie. TOUTES les sorties du Nid (couronnement `# end: ch1_suite`,
+  // sortie « La Faille » `to: fin`, Reine avec la combi) arrivent ici.
+  ch0: { flag: 'ch0_termine', shot: 'stub', hook: ['go_station2', 'fin_ch0'] },
 };
 
 /** Cliffhanger du chapitre (ch.0 : la dimension des cafards), puis « À suivre… ». */
@@ -41,6 +45,7 @@ export class EndScene extends Phaser.Scene {
   async create(data: EndData): Promise<void> {
     const session = getSession();
     session.activeScene = this;
+    if (data.act) return this.actBreak(data.act, data.knot);
     const { state } = session;
     // le knot de fin désigne le chapitre ; sinon (reprise d'une partie finie) celui de la sauvegarde
     this.chapter = CHAPTERS.find((c) => c.endKnot === data.knot)?.id ?? session.chapter;
@@ -72,12 +77,48 @@ export class EndScene extends Phaser.Scene {
     this.hero?.update();
   }
 
+  /**
+   * Coupure d'acte (fin Klepsydra → Blattaria) : l'état de l'acte suivant est posé tout de
+   * suite (un rechargement reprend à l'arrivée, sans rejouer la catastrophe), puis plan de la
+   * dimension des cafards + cliffhanger, carte « ACTE II », et la pièce de l'acte (intro filmée).
+   */
+  private async actBreak(actId: string, knot?: string): Promise<void> {
+    const session = getSession();
+    const act = findAct(session.chapter, actId);
+    if (!act) {
+      console.warn(`[end] acte inconnu « ${actId} » (${session.chapter})`);
+      this.scene.start('Room');
+      return;
+    }
+    enterAct(session.state, act);
+    bakeStudio(this.textures);
+    playMusic('fin');
+    this.drawRoachDimension();
+    if (knot) {
+      this.cameras.main.fadeIn(1400, 255, 255, 255);
+      await new Promise((r) => this.time.delayedCall(1500, r));
+      const box = new DialogueBox(this);
+      const deferred = await session.dialogue.run(knot, box);
+      if (deferred.length) console.warn('goto/end ignorés dans la coupure d\'acte', deferred);
+    } else {
+      this.cameras.main.fadeIn(800, 0, 0, 0);
+      await new Promise((r) => this.time.delayedCall(900, r));
+    }
+    await showChapterCard(this, {
+      kicker: t('card.act2.kicker'),
+      title: t('card.act2.title'),
+      tagline: t('card.act2.tagline'),
+      foot: t('card.act2.foot'),
+    });
+    this.scene.start('Room');
+  }
+
   private drawRoachDimension(): void {
     this.hero = new HeroView(this, endShot(W, H));
     this.drawLocation(t('end.location'), t('end.jurisdiction'));
   }
 
-  /** Fin du ch.1 : la faille s'ouvre sur la Station Bureaucratique (plan 2D, ch.2 non implémenté). */
+  /** Fin du ch.0 : la faille du Nid s'ouvre sur la Station Bureaucratique (plan 2D). */
   private drawBureaucracyStub(): void {
     const g = this.add.graphics();
     g.fillGradientStyle(0x1a0830, 0x1a0830, 0x6b5a3a, 0x6b5a3a, 1);
@@ -101,18 +142,18 @@ export class EndScene extends Phaser.Scene {
     [[W / 2 + 30, 160], [W / 2 - 25, 220], [W / 2 + 15, 260]].forEach(([x, y]) => g.lineTo(x, y));
     g.strokePath();
     this.add
-      .text(W / 2, 175, t('end.ch1.stub'), { fontFamily: FONT, fontSize: '26px', fontStyle: '700', color: '#ffd166', align: 'center' })
+      .text(W / 2, 175, t('end.ch0.stub'), { fontFamily: FONT, fontSize: '26px', fontStyle: '700', color: '#ffd166', align: 'center' })
       .setOrigin(0.5)
       .setLetterSpacing(3)
       .setStroke('#07050f', 6);
     // le tampon géant
     this.add
-      .text(W * 0.84, 150, t('end.ch1.stamp'), { fontFamily: DISPLAY, fontSize: '52px', color: '#ff4f9a' })
+      .text(W * 0.84, 150, t('end.ch0.stamp'), { fontFamily: DISPLAY, fontSize: '52px', color: '#ff4f9a' })
       .setOrigin(0.5)
       .setAngle(-14)
       .setAlpha(0.85)
       .setStroke('#ff4f9a', 3);
-    this.drawLocation(t('end.ch1.location'), t('end.ch1.jurisdiction'));
+    this.drawLocation(t('end.ch0.location'), t('end.ch0.jurisdiction'));
   }
 
   private drawLocation(label: string, jurisdiction: string): void {
@@ -149,13 +190,13 @@ export class EndScene extends Phaser.Scene {
     grad.addColorStop(1, '#ff4f9a');
     title.setFill(grad).setStroke('#07050f', 10).setShadow(0, 10, 'rgba(255,79,154,0.55)', 26, true, true);
     const sub = this.add
-      .text(W / 2, 385, this.chapter === 'ch1' ? t('end.ch1.next') : t('end.next'), { fontFamily: FONT, fontSize: '22px', fontStyle: '600', color: COLORS.hover })
+      .text(W / 2, 385, this.chapter === 'ch0' ? t('end.ch0.next') : t('end.next'), { fontFamily: FONT, fontSize: '22px', fontStyle: '600', color: COLORS.hover })
       .setOrigin(0.5)
       .setLetterSpacing(3)
       .setDepth(1001)
       .setAlpha(0);
     const thanks = this.add
-      .text(W / 2, 425, this.chapter === 'ch1' ? t('end.ch1.thanks') : t('end.thanks'), { fontFamily: FONT, fontSize: '17px', color: COLORS.dim })
+      .text(W / 2, 425, this.chapter === 'ch0' ? t('end.ch0.thanks') : t('end.thanks'), { fontFamily: FONT, fontSize: '17px', color: COLORS.dim })
       .setOrigin(0.5)
       .setDepth(1001)
       .setAlpha(0);

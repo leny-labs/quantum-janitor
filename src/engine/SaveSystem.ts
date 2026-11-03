@@ -1,6 +1,8 @@
 import { GameState } from './GameState';
+import { migrateSave } from './saveMigration';
 import type { SaveData } from './types';
 
+// la clé garde « v1 » : le numéro de format est dans `SaveData.version` (migration : saveMigration.ts)
 const KEY = 'quantum-janitor.save.v1';
 
 /** Sauvegarde unique, automatique, dans localStorage. */
@@ -16,8 +18,8 @@ export class SaveSystem {
     try {
       const raw = localStorage.getItem(KEY);
       if (!raw) return null;
-      const data = JSON.parse(raw) as SaveData;
-      return data.version === 1 ? data : null;
+      // v1 (avant la fusion ch.0 + Blattaria) migrée à la lecture ; réécrite en v2 au premier changement
+      return migrateSave(JSON.parse(raw));
     } catch {
       return null;
     }

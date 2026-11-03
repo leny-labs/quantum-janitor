@@ -1,5 +1,7 @@
 // Logique pure (sans Phaser) : invariants de l'état, réparés au chargement
 // d'une sauvegarde et en fin des séquences qui peuvent être interrompues.
+// Préfixe `ch1_` = acte Blattaria du chapitre 0 (historique, docs/CHAPTERS.md) ; la Station
+// (nouveau ch.1) utilise `st_*`.
 import type { GameState } from './GameState';
 
 /**
@@ -22,6 +24,6 @@ export function repairState(state: GameState): void {
   if (state.hasFlag('ch1_eclat_stabilise') && !state.hasItem('fragment') && !state.ended) state.give('fragment');
   if (state.hasFlag('ch1_eclat_stabilise') && !state.hasFlag('ch1_seau_perdu')) state.setFlag('ch1_seau_perdu');
   if (state.hasFlag('ch1_seau_perdu') && state.hasItem('seau')) state.take('seau');
-  // `ch1_couronnement` remet la combi avant la fin
-  if (state.hasFlag('ch1_combi') && !state.hasItem('combi_chitine')) state.give('combi_chitine');
+  // `ch1_couronnement` remet la combi avant la fin (jusqu'à ce qu'elle soit enfilée dans l'interlude)
+  if (state.hasFlag('ch1_combi') && !state.hasItem('combi_chitine') && !state.hasFlag('combi_portee')) state.give('combi_chitine');
 }

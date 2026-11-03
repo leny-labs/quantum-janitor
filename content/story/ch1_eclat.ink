@@ -1,3 +1,4 @@
+// Préfixe ch1_ = acte Blattaria (acte II) du chapitre 0 (historique, docs/CHAPTERS.md).
 // Chapitre 1 : Josiane reste dans le distributeur, le seau contient la faille, le couronnement.
 
 === ch1_josiane ===

@@ -146,6 +146,13 @@ const reachable = new Set<string>([content.startScene, ...CHAPTERS.map((c) => c.
 for (const c of CHAPTERS) {
   if (!content.scenes.has(c.startScene)) err(`chapitre ${c.id} : startScene « ${c.startScene} » inconnue`);
   c.initial?.items?.forEach((i) => content.items.has(i) || err(`chapitre ${c.id} : objet initial inconnu « ${i} »`));
+  for (const a of c.acts ?? []) {
+    reachable.add(a.startScene);
+    if (!content.scenes.has(a.startScene)) err(`chapitre ${c.id} › acte ${a.id} : startScene « ${a.startScene} » inconnue`);
+    a.enter?.items?.forEach((i) => content.items.has(i) || err(`chapitre ${c.id} › acte ${a.id} : objet d'entrée inconnu « ${i} »`));
+    if (a.breakKnot) note(knotsUsed, a.breakKnot, `walkthrough ${c.id}.acts.${a.id}`);
+  }
+  note(knotsUsed, c.endKnot, `walkthrough ${c.id}.endKnot`);
 }
 if (!content.scenes.has(content.startScene)) err(`game.yaml : startScene « ${content.startScene} » inconnue`);
 
@@ -213,7 +220,15 @@ if (story) {
 }
 
 // posés par le moteur : EndScene, état initial des chapitres
-const ENGINE_FLAGS = new Set(['chapitre0_termine', 'chapitre1_termine', ...CHAPTERS.flatMap((c) => c.initial?.flags ?? [])]);
+// `ch0_termine` / `st_termine` : EndScene ; flags d'entrée des actes : enterAct (coupure d'acte)
+const ENGINE_FLAGS = new Set([
+  'chapitre0_termine',
+  'ch0_termine',
+  'st_termine',
+  'go_station2',
+  'fin_ch0',
+  ...CHAPTERS.flatMap((c) => [...(c.initial?.flags ?? []), ...(c.acts ?? []).flatMap((a) => a.enter?.flags ?? [])]),
+]);
 for (const [f, where] of flagsRead) {
   if (!flagsSet.has(f) && !ENGINE_FLAGS.has(f)) err(`flag « ${f} » lu mais jamais posé (lu : ${where.slice(0, 3).join(', ')})`);
 }

@@ -10,7 +10,7 @@ import { SceneManager } from '../engine/SceneManager';
 import type { Action, CharacterDef, Exit, Hotspot, Interaction } from '../engine/types';
 import { hotspotVerbs, smartVerb, type HotspotVerb } from '../engine/verbs';
 import { END_SCENE_ID, getSession, type Session } from '../session';
-import { endKnotOf } from '../engine/walkthrough';
+import { actBreak, endKnotOf } from '../engine/walkthrough';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { CLOSEUPS, ROOMS } from '../three/rooms';
 import { BobRig } from '../three/rooms/bobrepas';
@@ -693,7 +693,9 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       cam.fadeOut(900, 255, 255, 255);
       cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => resolve());
     });
-    this.scene.start('End', { knot });
+    // coupure d'acte (fin Klepsydra, `# end: cafards`) : cliffhanger puis acte suivant, pas de fin de chapitre
+    const act = actBreak(this.session.chapter, knot);
+    this.scene.start('End', act ? { knot, act: act.id } : { knot });
   }
 
   shake(): void {

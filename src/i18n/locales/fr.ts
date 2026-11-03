@@ -149,21 +149,30 @@ export const fr = {
     location: 'DIMENSION B-7  ·  « BLATTARIA PRIME »',
     jurisdiction: 'HORS JURIDICTION DE SYLVIE · VOTRE BONHEUR N’Y EST PLUS GARANTI',
     toBeContinued: 'À SUIVRE…',
-    next: 'MAINTENANT — CHAPITRE 1 : « BLATTARIA PRIME »',
-    thanks: "Merci d'avoir joué le chapitre 0. Votre satisfaction a été enregistrée d'office.",
+    next: 'LA SUITE DU CHAPITRE ARRIVE',
+    thanks: "Merci d'avoir joué jusqu'ici. Votre satisfaction a été enregistrée d'office.",
     menu: 'Menu principal',
     replay: 'Rejouer',
     replayKicker: 'UN NOUVEAU CLONE EST PRÊT',
     nextChapter: 'Chapitre 1 →',
-    nextChapterKicker: 'BLATTARIA PRIME · LA PROPHÉTIE VOUS ATTEND',
-    ch1: {
+    nextChapterKicker: 'STATION BUREAUCRATIQUE · FORMULAIRE B-7/12 REQUIS',
+    /** Fin du chapitre 0 : la faille du Nid Royal vers la Station Bureaucratique. */
+    ch0: {
       location: 'FAILLE B-7 → ???  ·  « STATION BUREAUCRATIQUE »',
       jurisdiction: 'JURIDICTION : TOUTES · VOTRE DOSSIER EST EN COURS DE TRAITEMENT',
       stub: 'STATION BUREAUCRATIQUE\nFORMULAIRE EN COURS DE TRAITEMENT',
       stamp: 'REÇU',
-      // neutre : la numérotation des chapitres change au merge ch.0 + Blattaria
-      next: 'LA FAILLE S’OUVRE… PROCHAIN ARRÊT : LA STATION BUREAUCRATIQUE (À VENIR)',
-      thanks: "Merci d'avoir joué jusqu'ici. Faille refermée, éclat contenu : 1/4096.",
+      next: 'FIN DU CHAPITRE 0 · PROCHAIN ARRÊT : LA STATION BUREAUCRATIQUE',
+      thanks: "Merci d'avoir joué le chapitre 0. Faille refermée, éclat contenu : 1/4096.",
+    },
+  },
+  /** Cartes de transition (src/ui/ChapterCard.ts, docs/CHAPTERS.md §2). */
+  card: {
+    act2: {
+      kicker: 'CHAPITRE 0 · ACTE II',
+      title: 'Blattaria Prime',
+      tagline: 'Le seau est passé avant vous. La prophétie, elle, vous attendait.',
+      foot: 'DIMENSION B-7 · HORS JURIDICTION DE SYLVIE · ARRIVÉE NON DÉCLARÉE',
     },
   },
   /** Textes peints dans les décors 3D (affiches, étiquettes, écrans). */

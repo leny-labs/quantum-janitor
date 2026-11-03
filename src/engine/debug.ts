@@ -16,8 +16,14 @@
  *   ?scene=placard&items=seau,serpilliere                       serpillière sur le seau (inventaire) : plouf et gerbe de gouttes
  *   ?resume=1                                                   reprend directement la sauvegarde (page /creator), sans écran titre
  *   ?scene=fin&roach2d=0                                        plan de fin avec l'ancienne Reine / cour en 3D procédural (défaut : sprites GenAI)
- *   ?chapter=1                                                  nouvelle partie du chapitre 1 (état initial propre, sauvegarde active)
- *   ?scene=nid-royal&chapter=1&flags=…                          debug dans le ch.1 ; `scene=fin&chapter=1` = fin du ch.1
+ *   ?chapter=0                                                  nouvelle partie du chapitre 0 « Le Seau » (Klepsydra puis Blattaria)
+ *   ?chapter=0&act=blattaria                                    nouvelle partie du ch.0 directement à l'acte II (carte d'acte, intro du Nid)
+ *   ?chapter=1                                                  nouvelle partie du chapitre 1 « La Station Bureaucratique » (sauvegarde active)
+ *   ?scene=nid-royal&chapter=0&flags=ch1,chapitre0_termine&items=serpilliere,badge   debug acte Blattaria
+ *   ?scene=fin&chapter=0                                        fin du ch.0 (couronnement / faille → bouton « Chapitre 1 → »)
+ *   ?scene=st-sas&chapter=1&flags=st,ch0_termine,combi_portee&items=badge,fragment   debug Station
+ * Anciens liens : `?scene=<pièce Blattaria>&chapter=1` (Blattaria était le ch.1) → alias ch.0.
+ * Numérotation : docs/CHAPTERS.md (`ch1-*` / `ch1_*` = acte Blattaria du ch.0, préfixe historique).
  * `scene=fin` saute directement au cliffhanger ; `scene=panneau` ouvre le labo cadré sur la console.
  * En mode debug, la sauvegarde automatique est désactivée.
  */
@@ -40,6 +46,8 @@ export interface DebugOptions {
   resume: boolean;
   /** Chapitre (`?chapter=1` ou `ch1`) : nouvelle partie de ce chapitre, ou contexte du mode debug. */
   chapter?: string;
+  /** Acte de départ d'une nouvelle partie (`?chapter=0&act=blattaria`). */
+  act?: string;
 }
 
 export function parseDebug(search: string): DebugOptions {
@@ -51,6 +59,9 @@ export function parseDebug(search: string): DebugOptions {
       .filter(Boolean);
   const scene = q.get('scene')?.trim() || undefined;
   const ch = q.get('chapter')?.trim();
+  let chapter = ch ? (/^\d+$/.test(ch) ? `ch${ch}` : ch) : undefined;
+  // ancien lien Blattaria (`chapter=1` avant la fusion) : ni Station (`st-*`), ni interlude, ni fin
+  if (chapter === 'ch1' && scene && scene !== 'fin' && !/^(st-|interlude-)/.test(scene)) chapter = 'ch0';
   return {
     active: !!scene,
     scene,
@@ -63,6 +74,7 @@ export function parseDebug(search: string): DebugOptions {
     shot: q.get('shot')?.trim() || undefined,
     cine: q.get('cine') === '1',
     resume: q.get('resume') === '1',
-    chapter: ch ? (/^\d+$/.test(ch) ? `ch${ch}` : ch) : undefined,
+    chapter,
+    act: q.get('act')?.trim() || undefined,
   };
 }

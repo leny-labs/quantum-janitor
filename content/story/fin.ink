@@ -1,4 +1,4 @@
-// Cliffhanger : la dimension des cafards. Joué dans EndScene.
+// Cliffhanger de l'acte I du ch.0 (coupure d'acte → Blattaria, ChapterDef.acts). Joué dans EndScene (mode acte).
 
 === cafards ===
 ...

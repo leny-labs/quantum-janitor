@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from './saveMigration';
 import type { Condition, SaveData } from './types';
 
 type Listener = () => void;
@@ -81,7 +82,7 @@ export class GameState {
 
   toSave(): SaveData {
     return {
-      version: 1,
+      version: SAVE_VERSION,
       scene: this.scene,
       flags: [...this.flags],
       items: [...this.items],

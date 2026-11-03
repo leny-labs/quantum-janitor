@@ -1,3 +1,4 @@
+// Préfixe ch1_ = acte Blattaria (acte II) du chapitre 0 (historique, docs/CHAPTERS.md).
 // Chapitre 1 : Frère Élytre, Grand Scribe, gardien de la prophétie.
 
 === ch1_scribe ===

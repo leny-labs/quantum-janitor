@@ -104,6 +104,10 @@ Règles communes :
   2. Garder `# end: cafards` et une table `ACT_BREAKS = { cafards: { act:
      'blattaria' } }` dans `EndScene` (moins de changements Ink, mais `end` devient
      ambigu).
+- **Implémenté (option 2)** : `ActDef.breakKnot: 'cafards'` dans `CHAPTERS` ; `actBreak()`
+  est consulté par `RoomScene.end` (→ `End` en mode `{ act }`) et par `walkChapter` ; le knot
+  `cafards` garde son `# end:`. `enterAct()` **remplace** inventaire et flags (les flags de
+  Klepsydra comme `serpilliere_mouillee` changeraient les textes partagés d'`items.yaml`).
 - `walkChapter` doit traverser la coupure d'acte (appliquer `enterAct` quand il voit
   le tag/knot) : `npm run playthrough` sur `ch0` doit enchaîner 27 + 29 checkpoints
   (± le step de transition) jusqu'à `ch1_suite`.

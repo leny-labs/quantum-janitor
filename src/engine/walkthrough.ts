@@ -1,5 +1,9 @@
 // Solution scriptée des chapitres, rejouée avec le vrai moteur (ActionRunner +
-// DialogueRunner) sans Phaser. Partagée par tools/playthrough.ts (vérifie qu'on
+// DialogueRunner) sans Phaser.
+//
+// Numérotation (docs/CHAPTERS.md) : `ch0` « Le Seau » = acte I Klepsydra-9 + acte II
+// Blattaria Prime ; `ch1` = la Station Bureaucratique (scènes `st-*`, flags `st_*`).
+// Préfixe `ch1_` / `ch1-` = acte Blattaria du chapitre 0 (historique, pas renommé). Partagée par tools/playthrough.ts (vérifie qu'on
 // atteint la fin) et la page debug /creator (un checkpoint = un instantané de
 // sauvegarde après chaque étape).
 import { ActionRunner, type ActionHost } from './ActionRunner';
@@ -17,6 +21,22 @@ export type WalkStep =
   | { combine: [a: string, b: string] }
   | { go: string };
 
+/**
+ * Acte d'un chapitre. Le premier acte commence à `startScene` du chapitre ; les suivants
+ * commencent par une **coupure d'acte** : quand le knot de fin `breakKnot` est atteint
+ * (`# end: cafards`), le jeu ne termine pas le chapitre — EndScene joue le cliffhanger en
+ * mode « acte », affiche la carte d'acte, puis `enterAct` et la pièce `startScene`.
+ */
+export interface ActDef {
+  id: string;
+  title: string;
+  startScene: string;
+  /** Knot `# end:` qui ouvre cet acte (cliffhanger de l'acte précédent). */
+  breakKnot?: string;
+  /** État propre à l'entrée de l'acte : inventaire et flags **remplacés** (les objets tombés dans la faille disparaissent). */
+  enter?: { items?: string[]; flags?: string[] };
+}
+
 export interface ChapterDef {
   id: string;
   title: string;
@@ -26,6 +46,8 @@ export interface ChapterDef {
   initial?: { items?: string[]; flags?: string[] };
   /** Knot de fin attendu (cliffhanger). */
   endKnot: string;
+  /** Actes (le premier = départ du chapitre) ; voir `ActDef`. */
+  acts?: ActDef[];
   /**
    * Chapitre précédent dont l'écran de fin lance celui-ci (bouton « Chapitre N → »,
    * `END_BY_CHAPTER[from].next` dans EndScene) : /creator affiche cette transition en
@@ -40,9 +62,22 @@ export const CHAPTERS: ChapterDef[] = [
     id: 'ch0',
     title: 'Chapitre 0 : Le Seau',
     startScene: 'placard',
-    endKnot: 'cafards',
+    // fin du chapitre = fin de Blattaria (couronnement + faille) ; `cafards` n'est qu'une coupure d'acte
+    endKnot: 'ch1_suite',
+    acts: [
+      { id: 'klepsydra', title: 'Acte I — Klepsydra-9', startScene: 'placard' },
+      {
+        id: 'blattaria',
+        title: 'Acte II — Blattaria Prime',
+        startScene: 'nid-royal',
+        breakKnot: 'cafards',
+        // arrivé par la faille avec Josiane et le badge ; le seau est passé avant lui,
+        // le sandwich et le fusible sont restés sur Klepsydra
+        enter: { items: ['serpilliere', 'badge'], flags: ['ch1', 'chapitre0_termine'] },
+      },
+    ],
     steps: [
-      { section: 'Puzzle 1 : le badge' },
+      { section: 'Acte I · Puzzle 1 : le badge' },
       { use: 'seau' },
       { use: 'serpilliere' },
       { talk: 'bob' },
@@ -50,14 +85,14 @@ export const CHAPTERS: ChapterDef[] = [
       { useItem: ['serpilliere', 'distributeur'] },
       { go: 'placard' },
       { useItem: ['sandwich', 'bob'] },
-      { section: 'Puzzle 2 : ouvrir le labo' },
+      { section: 'Acte I · Puzzle 2 : ouvrir le labo' },
       { go: 'couloir' },
       { useItem: ['badge', 'lecteur'] }, // refusé : encrassé
       { combine: ['serpilliere', 'seau'] },
       { useItem: ['serpilliere', 'lecteur'] },
       { useItem: ['badge', 'lecteur'] },
       { go: 'labo' },
-      { section: '« Réparer » le réacteur' },
+      { section: 'Acte I · « Réparer » le réacteur' },
       { go: 'panneau' },
       { look: 'logement' },
       { go: 'labo' },
@@ -71,18 +106,7 @@ export const CHAPTERS: ChapterDef[] = [
       { useItem: ['seau', 'trappe'] },
       { go: 'panneau' },
       { use: 'bouton' },
-    ],
-  },
-  {
-    id: 'ch1',
-    title: 'Chapitre 1 : Blattaria Prime',
-    startScene: 'nid-royal',
-    from: 'ch0',
-    // arrivé par la faille avec Josiane et le badge ; le Seau est passé avant lui
-    initial: { items: ['serpilliere', 'badge'], flags: ['ch1', 'chapitre0_termine'] },
-    endKnot: 'ch1_suite',
-    steps: [
-      { section: 'Puzzle 1 : le Signe aux deux R' },
+      { section: 'Acte II · Puzzle 1 : le Signe aux deux R' },
       { talk: 'reine' },
       { use: 'autel' }, // refusé : les gardes
       { go: 'galerie-des-offrandes' },
@@ -93,13 +117,13 @@ export const CHAPTERS: ChapterDef[] = [
       { useItem: ['badge', 'scribe'] },
       { go: 'nid-royal' },
       { talk: 'reine' },
-      { section: 'Puzzle 2 : la Foule' },
+      { section: 'Acte II · Puzzle 2 : la Foule' },
       { go: 'galerie-des-offrandes' },
       { look: 'foule' },
       { use: 'grenier' }, // à mains nues : non
       { useItem: ['seau', 'grenier'] },
       { useItem: ['seau', 'foule'] },
-      { section: 'Puzzle 3 : tenir l\'éclat, refermer la faille' },
+      { section: 'Acte II · Puzzle 3 : tenir l\'éclat, refermer la faille' },
       { go: 'temple-couloir' },
       { look: 'distributeur' },
       { useItem: ['serpilliere', 'distributeur'] }, // Josiane reste coincée
@@ -128,6 +152,30 @@ export function endKnotOf(id: string | undefined): string {
   return (findChapter(id) ?? CHAPTERS[0]).endKnot;
 }
 
+/** Acte d'un chapitre ouvert par le knot de fin `knot` (coupure d'acte), sinon undefined. */
+export function actBreak(chapterId: string | undefined, knot: string): ActDef | undefined {
+  return (findChapter(chapterId) ?? CHAPTERS[0]).acts?.find((a) => a.breakKnot === knot);
+}
+
+/** Acte `id` d'un chapitre. */
+export function findAct(chapterId: string | undefined, id: string | undefined): ActDef | undefined {
+  return (findChapter(chapterId) ?? CHAPTERS[0]).acts?.find((a) => a.id === id);
+}
+
+/**
+ * Entrée dans un acte (pure, partagée jeu / walkChapter / /creator) : inventaire et flags
+ * remplacés par `enter`, scène de départ de l'acte. Les pièces visitées et l'état Ink sont
+ * gardés ; la pièce d'arrivée n'est pas marquée visitée (son intro `onFirstEnter` se joue).
+ */
+export function enterAct(state: GameState, act: ActDef): void {
+  state.items = [...(act.enter?.items ?? state.items)];
+  if (act.enter?.flags) state.flags = new Set(act.enter.flags);
+  state.selectedItem = null;
+  state.scene = act.startScene;
+  state.ended = false;
+  state.emit();
+}
+
 /** Nouvelle partie au début d'un chapitre : scène de départ + état initial déclaré. */
 export function chapterState(chapter: ChapterDef): GameState {
   const s = new GameState(chapter.startScene);
@@ -149,9 +197,10 @@ export interface Checkpoint {
   save: SaveData;
   /**
    * Entrées d'avant-chapitre de /creator (hors solution) : `transition` = écran de fin du
-   * chapitre précédent ; `launch` = lancement réel du chapitre (intro d'arrivée à jouer).
+   * chapitre précédent ; `launch` = lancement réel du chapitre (intro d'arrivée à jouer) ;
+   * `act` = coupure d'acte (cliffhanger puis arrivée dans l'acte suivant, intro à jouer).
    */
-  kind?: 'transition' | 'launch';
+  kind?: 'transition' | 'launch' | 'act';
 }
 
 export interface WalkOptions {
@@ -172,6 +221,8 @@ export async function walkChapter(content: GameContent, chapter: ChapterDef, opt
   const log = opts.log ?? (() => {});
   const state = chapterState(chapter);
   let ended: string | null = null;
+  /** Coupure d'acte atteinte pendant l'étape courante. */
+  let pendingAct: ActDef | null = null;
   let choiceCursor = 0;
 
   const view: DialogueView = {
@@ -200,6 +251,13 @@ export async function walkChapter(content: GameContent, chapter: ChapterDef, opt
     },
     async end(k) {
       await dialogue.run(k, view);
+      const act = actBreak(chapter.id, k);
+      if (act) {
+        // coupure d'acte (EndScene en mode acte) : cliffhanger joué, état propre de l'acte suivant
+        enterAct(state, act);
+        pendingAct = act;
+        return;
+      }
       ended = k;
       state.ended = true;
     },
@@ -220,9 +278,10 @@ export async function walkChapter(content: GameContent, chapter: ChapterDef, opt
 
   const checkpoints: Checkpoint[] = [];
   let section = '';
-  const snap = (label: string, before: SaveData) => {
+  const snap = (label: string, before: SaveData, kind?: Checkpoint['kind']) => {
     const save = state.toSave();
     checkpoints.push({
+      ...(kind ? { kind } : {}),
       index: checkpoints.length,
       section,
       label,
@@ -277,6 +336,16 @@ export async function walkChapter(content: GameContent, chapter: ChapterDef, opt
       if (!e) throw new Error(`pas de sortie vers ${s.go} depuis ${state.scene}`);
       if (!state.check(e.requires)) throw new Error(`sortie vers ${s.go} verrouillée`);
       await runner.run([{ goto: s.go }]);
+    }
+    const act = pendingAct as ActDef | null;
+    if (act) {
+      // checkpoint « coupure d'acte » : pièce d'arrivée pas encore visitée (« Jouer ici » rejoue l'intro)
+      pendingAct = null;
+      section = `↪ Coupure d'acte — ${act.title}`;
+      snap(`${label} → cliffhanger « ${act.breakKnot} » → ${act.startScene}`, before, 'act');
+      state.visited.add(state.scene);
+      await runner.run(content.scenes.get(state.scene)!.onFirstEnter);
+      continue;
     }
     snap(label, before);
   }

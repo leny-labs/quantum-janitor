@@ -5,7 +5,7 @@ import { lang, langName, nextLang, setLang, t, tl } from '../i18n';
 import { HeroView } from '../three/Hero';
 import { titleShot } from '../three/shots/title';
 import { ROACH_SPRITE_URL } from '../three/props';
-import { endKnotOf, findChapter } from '../engine/walkthrough';
+import { endKnotOf, findAct, findChapter } from '../engine/walkthrough';
 import { bakeStudio, preloadPortraitSheets } from '../three/Studio';
 import { makeButton } from '../ui/Button';
 import { drawHazard, drawLed, drawPanel } from '../ui/chrome';
@@ -69,7 +69,9 @@ export class TitleScene extends Phaser.Scene {
     if (d.chapter && !d.active && !this.registry.get('debugStarted') && findChapter(d.chapter)) {
       this.registry.set('debugStarted', true);
       session.newGame(d.chapter);
-      this.scene.start('Room');
+      // ?chapter=0&act=blattaria : carte d'acte puis arrivée dans l'acte (EndScene en mode acte)
+      if (d.act && findAct(d.chapter, d.act)) this.scene.start('End', { act: d.act });
+      else this.scene.start('Room');
       return;
     }
 
