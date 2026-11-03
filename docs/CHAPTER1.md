@@ -100,6 +100,57 @@ Navigation : `st-fourriere` ⇄ `st-sas` ⇄ `st-attente` ⇄ `st-guichet` ⇄ `
 ⇄ {archives, tampons, réclamations, pause, sous-chef, ascenseur} ; `st-ascenseur` ⇄
 `st-conseil` / `st-direction` selon le dossier glissé dans la fente.
 
+### 4.1 Carte de la Station (idée Leny t178)
+
+Comme le plan de *Detective Grimoire* : un **plan administratif tamponné** qui sert de
+réseau de déplacement à l'échelle de la Station. Les flèches locales des pièces restent pour
+les scènes **adjacentes** ; la carte gère le **réseau large** (traverser trois étages sans
+refaire les couloirs).
+
+- **Objet** : `plan_station` (« Plan de la Station — dépliant d'accueil, édition 1987 »),
+  imprimé par la **borne SYLVIE du sas** (`use borne`, acte I). Il ouvre l'overlay carte via
+  le bouton « PLAN » du HUD (à côté de ♪ / MENU), visible dès qu'on l'a.
+- **Étages / ailes** (bandes horizontales du plan) :
+
+  | Bande | Zones (id de scène) |
+  |---|---|
+  | Niveau −1 · Quai & Fourrière | `st-fourriere` |
+  | Niveau 0 · Accueil | `st-sas`, `st-attente`, `st-guichet` |
+  | Niveau 0 · Aile B (Couloir Infini) | `st-couloir-b`, `st-archives`, `st-tampons`, `st-reclamations`, `st-pause`, `st-sous-chef` |
+  | Niveau ? · Ascenseur à Formulaires | `st-ascenseur` |
+  | Niveau 7 · Conseil | `st-conseil` |
+  | Niveau 12 · Direction Générale | `st-direction` |
+
+- **États d'une zone** (déclarés dans `content/station-map.yaml`, évalués sur l'état) :
+  - *inconnue* : pas encore visitée et `visible` faux → case hachurée « ??? » (on devine
+    qu'il y a quelque chose, pas quoi) ;
+  - *repérée mais verrouillée* : `visible` vrai, `unlock` faux → grisée, tampon rouge
+    « ACCÈS REFUSÉ — <motif> » (motif = la pièce administrative manquante) ;
+  - *découverte* : déjà visitée et `unlock` vrai → **sélectionnable pour warp** (fondu, la
+    pièce s'ouvre comme par une sortie) ; la pièce courante porte « VOUS ÊTES ICI ».
+- **Verrous** — chacun relié à un flag `st_*` de la chaîne §6 :
+
+  | Zone | Visible si | Déverrouillée si | Motif affiché |
+  |---|---|---|---|
+  | `st-sas` | toujours | toujours | — |
+  | `st-attente` | toujours | `st_laisse` (étape 3) | « ANIMAL NON ACCOMPAGNÉ » |
+  | `st-guichet` | `st_voit_afficheur` | `st_ticket_9848` (étape 6) | « TICKET 9848 REQUIS » |
+  | `st-fourriere` | `st_sabot_vu` | `st_eclat2` (étape 43) | « PERMIS DE LA DIRECTION » |
+  | `st-couloir-b` | `st_formulaire` (9) | `st_formulaire` | « FORMULAIRE B-7/12 REQUIS » |
+  | bureaux de l'aile B | `st_couloir_boucle` (10) | `st_couloir_resolu` (12) | « COULOIR NON DÉNOUÉ » |
+  | `st-ascenseur` | `st_couloir_resolu` | `st_case_d` (32) | « DOSSIER INCOMPLET (3/4) » |
+  | `st-conseil` | `st_case_d` | `st_ascenseur_conseil` (34) | « CONVOCATION DU CONSEIL » |
+  | `st-direction` | `st_case_c` | `st_case_e` (39) | « AVIS DU CONSEIL REQUIS » |
+
+  Le warp ne contourne **jamais** un puzzle : une zone n'est sélectionnable qu'une fois
+  visitée par le chemin normal, et son verrou reprend la condition de la sortie qui y mène.
+- **Rendu** : papier crème quadrillé bleu, en-tête « PLAN DE LA STATION — FORMULAIRE P-0 ·
+  DIFFUSION RESTREINTE », tampons « VU » / « ACCÈS REFUSÉ », légende ; FR + EN ; zones de tap
+  ≥ 48 px CSS ; Échap / « Fermer » / clic hors du plan pour refermer.
+- **Scaffold (stub)** : seuls `st-sas` et `st-attente` existent et sont warpables ; les autres
+  zones s'affichent inconnues ou verrouillées (`planned: true` dans le YAML : pas de scène
+  vide dans le jeu, `validate-content` n'exige pas leur scène).
+
 ## 5. Inventaire
 
 Arrivée : `badge`, `fragment`, `combi_chitine` (cette dernière est **enfilée pendant
