@@ -15,16 +15,29 @@ import { badge, bob, fusible, gary, roach, sandwich, seau, serpilliere, setFace,
 
 export const iconKey = (id: string) => `icon3d:${id}`;
 /** Icônes d'inventaire GenAI (public/inventory/) : priment sur le bake 3D sous la même clé. */
-export const GENAI_ICONS = new Set(['seau', 'serpilliere', 'badge']);
+export const GENAI_ICONS = new Set(['seau', 'serpilliere', 'badge', 'fragment']);
 const genaiIconUrl = (id: string) => `${import.meta.env.BASE_URL}inventory/${id}.png`;
-/** Variantes d'icône GenAI selon un flag (serpillière trempée dans le seau). */
-const GENAI_VARIANTS: Record<string, { flag: string; icon: string }> = {
-  serpilliere: { flag: 'serpilliere_mouillee', icon: 'serpilliere-wet' },
+/** Variante d'icône GenAI : la première règle dont les flags sont tous posés (et aucun `notFlags`) gagne. */
+interface IconVariant {
+  flags: string[];
+  notFlags?: string[];
+  icon: string;
+}
+const GENAI_VARIANTS: Record<string, IconVariant[]> = {
+  // serpillière trempée dans le seau
+  serpilliere: [{ flags: ['serpilliere_mouillee'], icon: 'serpilliere-wet' }],
+  // ch.1 : le Seau Sacré rendu vide ; son contenu suit les flags, mêmes conditions que son `look`
+  // (items.yaml). Hors ch.1 : l'eau grise de catégorie 4 de `seau.png`.
+  seau: [
+    { flags: ['ch1', 'ch1_seau_miettes'], notFlags: ['ch1_foule_dispersee'], icon: 'seau-miettes' },
+    { flags: ['ch1', 'ch1_seau_plein'], notFlags: ['ch1_eclat_stabilise'], icon: 'seau-eau' },
+    { flags: ['ch1'], icon: 'seau-vide' },
+  ],
 };
 /** Clé de texture de l'icône d'inventaire de `id`, variante selon les flags comprise. */
 export function itemIconKey(id: string, hasFlag: (f: string) => boolean): string {
-  const v = GENAI_VARIANTS[id];
-  return iconKey(v && hasFlag(v.flag) ? v.icon : id);
+  const v = GENAI_VARIANTS[id]?.find((r) => r.flags.every(hasFlag) && !r.notFlags?.some(hasFlag));
+  return iconKey(v ? v.icon : id);
 }
 export const portraitKey = (id: string) => `portrait3d:${id}`;
 export const sheetKey = (id: string) => `portraitSheet:${id}`;
@@ -567,7 +580,7 @@ export function preloadPortraitSheets(load: Phaser.Loader.LoaderPlugin): void {
   for (const id of PORTRAIT_IDS) if (!load.textureManager.exists(sheetKey(id))) load.image(sheetKey(id), sheetUrl(id));
   for (const id of Object.keys(PORTRAIT_OVERLAYS)) if (!load.textureManager.exists(overlayKey(id))) load.image(overlayKey(id), overlayUrl(id));
   for (const id of GENAI_ICONS) if (!load.textureManager.exists(iconKey(id))) load.image(iconKey(id), genaiIconUrl(id));
-  for (const { icon } of Object.values(GENAI_VARIANTS)) if (!load.textureManager.exists(iconKey(icon))) load.image(iconKey(icon), genaiIconUrl(icon));
+  for (const { icon } of Object.values(GENAI_VARIANTS).flat()) if (!load.textureManager.exists(iconKey(icon))) load.image(iconKey(icon), genaiIconUrl(icon));
   for (const [id, url] of Object.entries(GENAI_PORTRAITS)) {
     if (!load.textureManager.exists(portraitKey(id))) load.image(portraitKey(id), url);
     if (!load.textureManager.exists(sheetKey(id))) load.image(sheetKey(id), sheetUrl(id));
