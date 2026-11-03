@@ -6,6 +6,7 @@ import { t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
 import { PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, actorFrame, billboard, billboardSheet } from '../props';
 import { bobSpot } from './bobspot';
+import { pressable } from '../press';
 import type { RoomBuild } from './index';
 import { against, shell, wallPanels } from './shell';
 import type { Stage } from '../Stage';
@@ -318,10 +319,44 @@ export const stAttente: RoomBuild = {
     disp.add(at(cyl(0.05, 0.05, ds.h * 0.5, '#8d93a0', { edges: false }), 0, ds.h * 0.25, 0));
     disp.add(at(box(ds.w * 0.8, ds.h * 0.45, 0.4, '#c0392b'), 0, ds.h * 0.72, 0));
     disp.add(at(label(tr('props.station.dispenser'), ds.w * 0.7, ds.h * 0.12, { color: '#ffffff', bold: true }), 0, ds.h * 0.86, 0.21));
-    disp.add(at(label(tr('props.station.outOfStock'), ds.w * 0.68, ds.h * 0.1, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true }), 0, ds.h * 0.73, 0.21));
-    const button = at(cyl(ds.w * 0.1, ds.w * 0.1, 0.06, '#ffd166', { seg: 16 }), 0, ds.h * 0.6, 0.21);
-    button.rotation.x = Math.PI / 2;
-    disp.add(button, at(box(ds.w * 0.4, 0.03, 0.05, '#1a1a1a', { edges: false }), 0, ds.h * 0.53, 0.21));
+    const rupt = at(label(tr('props.station.outOfStock'), ds.w * 0.68, ds.h * 0.1, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true }), 0, ds.h * 0.73, 0.21);
+    disp.add(rupt);
+    // gros bouton « TICKET » en saillie (docs/CHAPTERS.md, « Props interactifs physiques ») :
+    // collerette sombre + bague chromée, capuchon jaune bombé qui s'enfonce au clic, entre le
+    // libellé RUPTURE (bas à 0,68 h) et la fente à ticket (haut à 0,54 h)
+    const fz = 0.2;
+    const by = ds.h * 0.61;
+    const rb = Math.min(ds.w * 0.13, ds.h * 0.052);
+    const rc = rb * 0.7;
+    const collar = at(cyl(rb, rb * 1.06, 0.06, '#2a2830', { seg: 28 }), 0, by, fz + 0.03);
+    collar.rotation.x = Math.PI / 2;
+    disp.add(collar, at(torus(rb * 0.86, rb * 0.07, '#c9ced8'), 0, by, fz + 0.06));
+    const capBody = at(cyl(rc, rc * 1.04, 0.08, '#ffd166', { seg: 24 }), 0, 0, 0.04);
+    capBody.rotation.x = Math.PI / 2;
+    const dome = at(sphere(rc * 0.98, '#ffe08a', { seg: 20 }), 0, 0, 0.08);
+    dome.scale.z = 0.38;
+    const push = at(new THREE.Group().add(capBody, dome), 0, by, fz + 0.05);
+    pressable(s, 'distributeur', push, 'button', -0.065);
+    disp.add(push);
+    disp.add(at(label(tr('props.station.dispenserPress'), ds.w * 0.22, ds.h * 0.055, { color: '#ffd166', bg: '#140a0a', bold: true }), -(rb + ds.w * 0.14), by, fz + 0.012));
+    // fente de sortie : cadre gris en relief, bouche noire
+    disp.add(at(box(ds.w * 0.44, ds.h * 0.03, 0.04, '#8d93a0'), 0, ds.h * 0.522, fz + 0.02));
+    disp.add(at(box(ds.w * 0.38, ds.h * 0.012, 0.02, '#0a0a0a', { edges: false }), 0, ds.h * 0.522, fz + 0.035));
+    // au clic : le voyant RUPTURE clignote (bzzt), lueur rouge
+    const buzz = at(glow('#ff4f5a', ds.w * 0.9, 0), 0, ds.h * 0.73, fz + 0.05);
+    disp.add(buzz);
+    let was = false;
+    let since = -1e9;
+    s.animate((t) => {
+      const down = push.position.z < fz + 0.05 - 0.02;
+      if (down && !was) since = t;
+      was = down;
+      const e = t - since;
+      const on = e >= 0 && e < 1.3;
+      const lit = !on || Math.floor(e * 9) % 2 === 0;
+      rupt.visible = lit;
+      buzz.material.opacity = on && lit ? 0.55 : 0;
+    });
     s.spot('distributeur', at(disp, ds.x, 0, ds.z));
 
     // ── M. Ficus, plante en plastique (tant qu'elle n'est pas dans la poche de Gary) ──

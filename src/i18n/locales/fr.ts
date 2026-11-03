@@ -306,6 +306,7 @@ export const fr = {
       serving: 'NOUS SERVONS LE N°',
       dispenser: 'TICKETS',
       outOfStock: 'RUPTURE',
+      dispenserPress: 'APPUYER',
       toSas: 'SAS',
       toDesk: 'GUICHET',
       takeTicket: 'MUNISSEZ-\nVOUS D’UN\nTICKET',

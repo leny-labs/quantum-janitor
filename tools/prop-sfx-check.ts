@@ -25,7 +25,7 @@ const PHYSICAL: Record<string, PressGesture> = {
   'interlude-vaisseau/dest_klepsydra': 'button',
   'interlude-vaisseau/dest_yaourt': 'button',
   'interlude-vaisseau/dest_station': 'button',
-  'st-attente/distributeur': null,
+  'st-attente/distributeur': 'button',
   'st-sas/portique': null,
   'st-sas/borne': null,
 };

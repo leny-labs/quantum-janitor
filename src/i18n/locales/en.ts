@@ -217,6 +217,7 @@ export const en: PartialCatalog = {
       serving: 'NOW SERVING No.',
       dispenser: 'TICKETS',
       outOfStock: 'OUT OF STOCK',
+      dispenserPress: 'PRESS',
       toSas: 'AIRLOCK',
       toDesk: 'DESK',
       takeTicket: 'PLEASE\nTAKE A\nTICKET',
