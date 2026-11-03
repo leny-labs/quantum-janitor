@@ -124,6 +124,7 @@ exits:
     label: L'éclat du Réacteur
     to: coeur-eclat
     dir: up
-    rect: [410, 380, 90, 80]
-    # n'apparaît qu'une fois l'éclat tombé dans le logement de sortie
+    rect: [250, 478, 80, 54]
+    # n'apparaît qu'une fois l'éclat tombé dans le logement de sortie ; au sol,
+    # sous le bac du distributeur (x centré), hors du rect du hotspot et du fidèle à [470, 500]
     if: { flags: [ch1_eclat_tombe] }
