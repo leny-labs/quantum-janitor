@@ -137,6 +137,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     }
     this.heldItem = this.add
       .text(0, 0, '', { fontFamily: FONT, fontSize: '18px', color: '#ffffff', fontStyle: 'bold', padding: { x: 6, y: 4 } })
+      .setLetterSpacing(1.5) // « 1/4096 » : le 1 ne touche plus le /
       .setDepth(790)
       .setVisible(false);
     this.input.on('pointermove', (p: Phaser.Input.Pointer) => this.heldItem.setPosition(p.x + 14, p.y + 14));

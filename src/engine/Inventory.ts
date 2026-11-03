@@ -195,6 +195,7 @@ export class Inventory {
         strip.add(
           s.add
             .text(x + SLOT / 2, y + 38, def.icon.glyph, { fontFamily: FONT, fontSize: def.icon.glyph.length > 2 ? '17px' : '24px', color: '#ffffff', fontStyle: '700' })
+            .setLetterSpacing(1)
             .setOrigin(0.5),
         );
       }

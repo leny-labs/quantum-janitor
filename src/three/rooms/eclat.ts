@@ -269,10 +269,28 @@ function engravingTexture(aspect: number): THREE.CanvasTexture {
     g.arc(sx, sy, sr * 0.12, 0, Math.PI * 2);
     g.fill();
   }, 8);
-  g.textAlign = 'center';
+  // « 1/4096 » espacé glyphe par glyphe (Bungee colle le 1 au /), rétréci pour tenir entre symbole et bord
+  const label = '1/4096';
+  const left = sx + sr + W * 0.04;
+  const maxW = W - 48 - W * 0.04 - left;
+  g.textAlign = 'left';
   g.textBaseline = 'middle';
-  g.font = `${Math.round(H * 0.3)}px Bungee, Impact, sans-serif`;
-  engrave(() => g.fillText('1/4096', W * 0.64, H * 0.46), 1);
+  let size = Math.round(H * 0.3);
+  let track = 0;
+  const widthAt = () => [...label].reduce((w, ch) => w + g.measureText(ch).width, 0) + track * (label.length - 1);
+  for (;;) {
+    g.font = `${size}px Bungee, Impact, sans-serif`;
+    track = size * 0.14;
+    if (widthAt() <= maxW || size <= 24) break;
+    size -= 2;
+  }
+  let tx = left + (maxW - widthAt()) / 2;
+  const glyphs = [...label].map((ch) => {
+    const x = tx;
+    tx += g.measureText(ch).width + track;
+    return { ch, x };
+  });
+  engrave(() => glyphs.forEach(({ ch, x }) => g.fillText(ch, x, H * 0.46)), 1);
   engrave(() => {
     for (let i = 0; i < 3; i++) {
       g.beginPath();
