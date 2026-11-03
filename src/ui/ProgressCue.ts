@@ -5,7 +5,7 @@
 import Phaser from 'phaser';
 import type { GameState } from '../engine/GameState';
 import { COLORS, ROOM_H, hex } from './theme';
-import { chime } from './sfx';
+import { pickupCue, unlockCue } from './sfx';
 
 const DURATION = 380;
 /** Écart minimal entre deux cues (ms) : plusieurs changements d'un coup = un seul retour. */
@@ -64,11 +64,11 @@ export class ProgressCue {
           const slot = this.slotRect(i);
           this.pulse(slot.x, slot.y, slot.size);
           this.burst(slot.x, slot.y, hex(COLORS.hover), 7);
-          chime([988, 1319]);
+          pickupCue();
         }
       : () => {
           this.burst(x, Math.min(y, ROOM_H - 24), hex(COLORS.accent), 6);
-          chime([784, 1175]);
+          unlockCue();
         };
     // joué à la frame suivante : une réplique lancée dans la foulée (give → say)
     // ouvre le dialogue d'abord, et le cue attend alors sa fermeture.

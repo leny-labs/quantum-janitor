@@ -122,6 +122,161 @@ export function chime(freqs: number[]): void {
   freqs.forEach((f, i) => tone(a, 'triangle', f, f, a.currentTime + i * 0.07, 0.22, 0.05));
 }
 
+// ── Effets papillon : harpe / célesta cosmique ──────────────────────────────
+// Glissando rapide sur un accord lydien / maj9, timbre de cloche FM douce
+// (sinus modulé + partiel inharmonique bref), deux voix légèrement désaccordées
+// et écartées en stéréo, un voile de souffle aigu et une courte queue d'écho
+// filtrée. Tout le graphe est temporaire : les sources s'arrêtent seules et la
+// boucle d'écho est déconnectée une fois éteinte.
+
+const midiHz = (m: number): number => 440 * 2 ** ((m - 69) / 12);
+const pick = <T>(xs: readonly T[]): T => xs[Math.floor(Math.random() * xs.length)];
+
+/** Panoramique stéréo si disponible, sinon simple passe-plat. */
+function panner(a: AudioContext, pan: number): AudioNode {
+  if (typeof a.createStereoPanner !== 'function') return a.createGain();
+  const p = a.createStereoPanner();
+  p.pan.value = pan;
+  return p;
+}
+
+/** Une note de cloche FM : deux porteuses désaccordées (±cents) gauche / droite. */
+function bellNote(a: AudioContext, out: AudioNode, f: number, t: number, dur: number, vol: number): void {
+  const end = t + dur;
+  // enveloppe d'amplitude : attaque douce (pas de clic), décroissance exponentielle
+  const env = a.createGain();
+  env.gain.setValueAtTime(0, t);
+  env.gain.linearRampToValueAtTime(vol, t + 0.012);
+  env.gain.exponentialRampToValueAtTime(0.0001, end);
+  env.connect(out);
+
+  // modulateur partagé : index qui retombe vite → attaque cristalline, queue ronde
+  const mod = a.createOscillator();
+  mod.frequency.value = f * 4;
+  const modGain = a.createGain();
+  modGain.gain.setValueAtTime(f * 1.1, t);
+  modGain.gain.exponentialRampToValueAtTime(f * 0.04, t + 0.18);
+  mod.connect(modGain);
+  mod.start(t);
+  mod.stop(end + 0.02);
+
+  for (const [cents, pan] of [[-6, -0.45], [6, 0.45]] as const) {
+    const car = a.createOscillator();
+    car.frequency.value = f;
+    car.detune.value = cents;
+    modGain.connect(car.frequency);
+    const half = a.createGain();
+    half.gain.value = 0.5;
+    car.connect(half).connect(panner(a, pan)).connect(env);
+    car.start(t);
+    car.stop(end + 0.02);
+  }
+
+  // partiel inharmonique (×2,76, façon lame de célesta) : très bref et discret
+  const part = a.createOscillator();
+  part.frequency.value = f * 2.76;
+  const pg = a.createGain();
+  pg.gain.setValueAtTime(0, t);
+  pg.gain.linearRampToValueAtTime(vol * 0.18, t + 0.006);
+  pg.gain.exponentialRampToValueAtTime(0.0001, t + Math.min(0.22, dur));
+  part.connect(pg).connect(out);
+  part.start(t);
+  part.stop(t + Math.min(0.22, dur) + 0.02);
+}
+
+/** Voile de poussière d'étoiles : bruit passe-haut, à peine audible. */
+function shimmer(a: AudioContext, out: AudioNode, t: number, dur: number, vol: number): void {
+  const len = Math.ceil(a.sampleRate * dur);
+  const buf = a.createBuffer(1, len, a.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+  const src = a.createBufferSource();
+  src.buffer = buf;
+  const hp = a.createBiquadFilter();
+  hp.type = 'highpass';
+  hp.frequency.value = 7000;
+  const g = a.createGain();
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(vol, t + dur * 0.3);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(hp).connect(g).connect(out);
+  src.start(t);
+  src.stop(t + dur + 0.02);
+}
+
+/**
+ * Joue un glissando cosmique : `notes` en demi-tons au-dessus de `root` (MIDI),
+ * espacées de `gap` s. Retourne immédiatement ; le graphe se nettoie seul.
+ */
+function cosmicHarp(notes: readonly number[], root: number, gap: number, opts: { dur: number; vol: number; shimmer: number }): void {
+  const a = ctx();
+  if (!a) return;
+  const out = sfxOut(a);
+  const t0 = a.currentTime + 0.01;
+
+  // bus du son : sec → sortie, et envoi vers un écho court filtré
+  const dry = a.createGain();
+  dry.gain.value = 1;
+  dry.connect(out);
+  const send = a.createGain();
+  send.gain.value = 0.32;
+  const delay = a.createDelay(0.5);
+  delay.delayTime.value = 0.13;
+  const lp = a.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = 2600;
+  const fb = a.createGain();
+  fb.gain.value = 0.3;
+  const wet = a.createGain();
+  wet.gain.value = 0.6;
+  dry.connect(send).connect(delay).connect(lp);
+  lp.connect(fb).connect(delay);
+  lp.connect(panner(a, 0.25)).connect(wet).connect(out);
+
+  let last = t0;
+  notes.forEach((n, i) => {
+    // léger flottement rythmique, comme une main sur les cordes
+    const t = t0 + i * gap + (i ? (Math.random() - 0.5) * 0.008 : 0);
+    // les notes aiguës un peu plus courtes et plus douces (perception)
+    const dur = opts.dur * (1 - i * 0.06);
+    bellNote(a, dry, midiHz(root + n), t, dur, opts.vol * (1 - i * 0.08));
+    last = Math.max(last, t + dur);
+  });
+  shimmer(a, dry, t0, (last - t0) * 0.8, opts.shimmer);
+
+  // queue d'écho : 0,3 de feedback → −30 dB après ~6 répétitions (< 1 s)
+  const tailMs = (last - a.currentTime + 0.9) * 1000;
+  setTimeout(() => {
+    for (const node of [dry, send, delay, lp, fb, wet]) node.disconnect();
+  }, tailMs);
+}
+
+/** Effet papillon : un flag posé, quelque chose se débloque (lydien suspendu). */
+export function unlockCue(): void {
+  // Gmaj7♯11 ouvert (G D F♯ C♯) : flottant, interrogatif, qui « s'ouvre »
+  const voicings = [
+    [0, 7, 11, 18],
+    [0, 7, 11, 16, 18],
+    [0, 4, 11, 18],
+  ] as const;
+  cosmicHarp(pick(voicings), 67 + pick([-2, 0, 3]), 0.045, { dur: 0.6, vol: 0.028, shimmer: 0.005 });
+}
+
+/** Effet papillon : objet obtenu (maj9 qui monte plus haut, plus brillant). */
+export function pickupCue(): void {
+  // Cmaj9 en arpège montant jusqu'à la 9e / 13e de l'octave au-dessus
+  const voicings = [
+    [0, 4, 7, 11, 14],
+    [0, 7, 11, 14, 19],
+    [0, 4, 11, 14, 21],
+  ] as const;
+  cosmicHarp(pick(voicings), 72 + pick([-1, 0, 2]), 0.038, { dur: 0.55, vol: 0.026, shimmer: 0.007 });
+}
+
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  (window as unknown as { qjSfx: unknown }).qjSfx = { unlockCue, pickupCue, chime };
+}
+
 /** Tampon administratif : coup sourd. */
 export function thud(): void {
   const a = ctx();
