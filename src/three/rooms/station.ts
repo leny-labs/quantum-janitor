@@ -70,7 +70,8 @@ function neonTubes(s: Stage, y: number, xs: number[], z: number): void {
 }
 
 /** Affiche administrative collée au mur (bordure, en-tête coloré). */
-function poster(s: Stage, rect: [number, number, number, number], text: string, head: string, z = 0.02): void {
+// z ≥ 0.05 : devant les joints de `wallPanels` (face avant à z = 0.04), sinon une barre verticale barre l'affiche
+function poster(s: Stage, rect: [number, number, number, number], text: string, head: string, z = 0.06): void {
   const f = s.fit(rect, z);
   s.add(at(box(f.w, f.h, 0.02, '#f6efdc', { edges: true, shadow: false }), f.x, f.y, z));
   s.add(at(plane(f.w * 0.96, f.h * 0.16, head), f.x, f.y + f.h * 0.38, z + 0.012));
@@ -78,7 +79,7 @@ function poster(s: Stage, rect: [number, number, number, number], text: string, 
 }
 
 /** Tampon « VU » encré de travers sur le mur (décor). */
-function inkStamp(s: Stage, px: number, py: number, text: string, z = 0.025): void {
+function inkStamp(s: Stage, px: number, py: number, text: string, z = 0.08): void {
   const p = s.wallAt(px, py, z);
   const m = at(label(text, 0.9, 0.38, { color: '#c0392b', bold: true }), p.x, p.y, z);
   m.rotation.z = 0.25;
@@ -190,7 +191,17 @@ export const stSas: RoomBuild = {
 
     // ── porte-gobelet orphelin (resté du vaisseau) ──
     const pg = s.stand(s.rect('porte_gobelet'));
-    s.spot('porte_gobelet', at(cyl(pg.w * 0.35, pg.w * 0.3, pg.h * 0.5, '#c9ced6', { seg: 14 }), pg.x, pg.h * 0.25, pg.z));
+    // posé sur le tapis roulant, devant son liseré du fond : jamais masqué par la bande jaune ni par l'UI
+    const cupH = pg.h * 0.62;
+    const cupR = Math.min(pg.w * 0.34, cupH * 0.6);
+    const orphan = new THREE.Group();
+    orphan.add(at(cyl(cupR, cupR * 0.82, cupH, '#c9ced6', { seg: 18 }), 0, cupH / 2 + 0.04, 0));
+    orphan.add(at(cyl(cupR * 0.86, cupR * 0.86, 0.02, '#2a2830', { seg: 18, edges: false }), 0, cupH + 0.045, 0));
+    orphan.add(at(cyl(cupR * 1.06, cupR * 1.06, cupH * 0.1, '#8d93a0', { seg: 18, edges: false }), 0, cupH * 0.9 + 0.04, 0));
+    const cupGlint = at(glow('#e8f4ff', cupR * 4, 0.18), 0, cupH * 0.6, 0.05);
+    orphan.add(cupGlint);
+    s.spot('porte_gobelet', at(orphan, pg.x, 0, pg.z, -0.2));
+    s.animate((t) => (cupGlint.material.opacity = 0.12 + Math.max(0, Math.sin(t * 1.3)) * 0.12));
 
     bobHere(s, s.rect('bob'));
 

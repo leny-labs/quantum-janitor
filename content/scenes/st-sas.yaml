@@ -102,10 +102,11 @@ hotspots:
 
   - id: porte_gobelet
     label: Porte-gobelet orphelin
-    rect: [740, 440, 70, 50]
+    # posé SUR le tapis roulant (pas derrière son liseré jaune), bien au-dessus de la barre d'inventaire
+    rect: [770, 440, 80, 85]
     if: { flags: [st_arrive] }
     art:
-      - { circle: [775, 470, 18], color: "#c9ced6", stroke: "#ffffff" }
+      - { circle: [810, 490, 22], color: "#c9ced6", stroke: "#ffffff" }
     look: "Le porte-gobelet de la capsule. La pince l'a oublié. Il nous regarde partir sans lui. Je n'ose pas le prendre. Il a sa dignité."
     use: "Non. Il est mieux ici. Un porte-gobelet sans capsule, c'est comme un intérimaire sans contrat : ça tient debout, mais on se demande pourquoi."
 
