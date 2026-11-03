@@ -114,9 +114,10 @@ hotspots:
 
   - id: bob
     label: B.O.B.
-    rect: [540, 470, 180, 100]
+    # à droite du panneau ANIMAL DE COMPAGNIE, hors du portique ; yeux au-dessus du HUD (docs/CHAPTERS.md)
+    rect: [985, 425, 170, 85]
     art:
-      - { rect: [560, 490, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+      - { rect: [1000, 445, 140, 50], color: "#7c8794", stroke: "#ffffff" }
     look:
       - say: "B.O.B., mon propriétaire officiel. Il ne sait pas quoi faire de ses roues. Il n'a jamais eu d'animal. Il a eu un tome 2."
     talk:

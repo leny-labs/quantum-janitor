@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { at, box, cyl, glow, mat, pool, sphere, torus } from '../kit';
-import { ROACH_ACTOR, SCRIBE_ASPECT, SCRIBE_SHEET, actorFrame, billboardSheet, bob } from '../props';
-import { BobVoice } from './bobvoix';
+import { ROACH_ACTOR, SCRIBE_ASPECT, SCRIBE_SHEET, actorFrame, billboardSheet } from '../props';
+import { bobSpot } from './bobspot';
 import { candle, crowd, drip, eggLamps, hive, mist, puddle, rib, rng, shaft, vaultArch } from './hive';
 import type { RoomBuild } from './index';
 
@@ -302,10 +302,7 @@ export const galerie: RoomBuild = {
     ]);
 
     // ── B.O.B. ──
-    const bb = s.stand(s.rect('bob'));
-    const robot = at(bob(bb.w * 0.72), bb.x, 0, bb.z, 0.4);
-    s.spot('bob', robot);
-    s.expose('bobVoix', new BobVoice(s, robot));
+    const { robot } = bobSpot(s, { scale: 0.72 });
     s.animate((time) => {
       // il tourne autour des miettes comme un requin (dépressif)
       robot.rotation.y = 0.4 + Math.sin(time * 0.6) * 0.35;

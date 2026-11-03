@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { at, box, cyl, glow, mat, pool, sphere, torus } from '../kit';
-import { REINE_ASPECT, REINE_SHEET, ROACH_ACTOR, actorFrame, billboardSheet, bob, seau } from '../props';
-import { BobVoice } from './bobvoix';
+import { REINE_ASPECT, REINE_SHEET, ROACH_ACTOR, actorFrame, billboardSheet, seau } from '../props';
+import { bobSpot } from './bobspot';
 import { candle, crowd, drip, eggLamps, hive, mist, puddle, rib, shaft, vaultArch } from './hive';
 import type { RoomBuild } from './index';
 
@@ -254,10 +254,7 @@ export const nid: RoomBuild = {
     ]);
 
     // ── B.O.B. (« le Grand Avaleur ») ──
-    const bb = s.stand(s.rect('bob'));
-    const robot = at(bob(bb.w * 0.72), bb.x, 0, bb.z, 0.25);
-    s.spot('bob', robot);
-    s.expose('bobVoix', new BobVoice(s, robot));
+    const { robot } = bobSpot(s, { scale: 0.72 });
     s.animate((t) => {
       robot.position.y = Math.abs(Math.sin(t * 1.2)) * 0.015;
     });

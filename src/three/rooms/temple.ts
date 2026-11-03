@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { at, box, cyl, glow, label, mat, plane, pool, sphere, stripeTexture, tileTexture, torus, wallTexture } from '../kit';
-import { bob, serpilliere } from '../props';
+import { serpilliere } from '../props';
 import type { Stage } from '../Stage';
-import { BobVoice } from './bobvoix';
+import { bobSpot } from './bobspot';
 import { candle, crowd, drip, eggLamps, hive, mist, puddle, reactorShard, rib, rng, shaft, vaultArch } from './hive';
 import type { RoomBuild } from './index';
 import { pipe } from './shell';
@@ -196,10 +196,7 @@ export const temple: RoomBuild = {
     ]);
 
     // ── B.O.B. ──
-    const bb = s.stand(s.rect('bob'));
-    const robot = at(bob(bb.w * 0.72), bb.x, 0, bb.z, -0.25);
-    s.spot('bob', robot);
-    s.expose('bobVoix', new BobVoice(s, robot));
+    const { robot } = bobSpot(s, { scale: 0.72 });
     s.animate((t) => {
       robot.position.y = Math.abs(Math.sin(t * 1.1)) * 0.015;
     });

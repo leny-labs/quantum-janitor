@@ -29,11 +29,14 @@ export class BobVoice {
   /** Humeur de la réplique en cours (calm hors réplique) et pose courante des sourcils. */
   private mood: Mood = 'calm';
   private brows: BrowPair = copy(BROW_POSES.calm);
+  /** Inclinaison de repos (B.O.B. cabré vers la caméra, rooms/bobspot.ts) : le hochement s'y ajoute. */
+  private restX: number;
 
   constructor(
     stage: Stage,
     private robot: THREE.Object3D,
   ) {
+    this.restX = robot.rotation.x;
     stage.animate((t, dt) => this.tick(t, dt));
   }
 
@@ -65,7 +68,7 @@ export class BobVoice {
       this.live = false;
       (robot.userData.restFace as (() => void) | undefined)?.();
       if (!robot.userData.anim) robot.scale.set(1, 1, 1);
-      robot.rotation.x = 0;
+      robot.rotation.x = this.restX;
       return;
     }
     this.live = true;
@@ -76,6 +79,6 @@ export class BobVoice {
       const b = syl * this.amount;
       robot.scale.set(1 - b * 0.035, 1 + b * 0.1, 1 - b * 0.035);
     }
-    robot.rotation.x = Math.sin(t * 4.5) * 0.035 * this.amount;
+    robot.rotation.x = this.restX + Math.sin(t * 4.5) * 0.035 * this.amount;
   }
 }

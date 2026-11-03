@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { t as tr } from '../../i18n';
 import { at, box, cyl, glow, label, plane, pool, sphere, torus } from '../kit';
-import { SIEGE_CARAPACE_ASPECT, SIEGE_CARAPACE_URL, billboard, bob } from '../props';
+import { SIEGE_CARAPACE_ASPECT, SIEGE_CARAPACE_URL, billboard } from '../props';
 import { pressable } from '../press';
-import { BobVoice } from './bobvoix';
+import { bobSpot } from './bobspot';
 import type { RoomBuild } from './index';
 
 const CONTACT = { flags: ['iv_contact'] };
@@ -399,15 +399,11 @@ export const cockpit: RoomBuild = {
     s.spot('siege', at(billboard(SIEGE_CARAPACE_URL, seatH, SIEGE_CARAPACE_ASPECT, { tint: '#f2e4ff', shadow: 0 }), st.x, st.y - st.h / 2, st.z));
 
     // ── B.O.B., sur les genoux de Gary, le porte-gobelet sur la tête ──
-    const bb = s.stand(s.rect('bob'));
-    // face caméra : tourné vers le centre de la cabine et cabré vers l'objectif
-    // (caméra plongeante) pour que les yeux restent bien au-dessus du HUD
-    const robot = at(bob(bb.w * 0.78), bb.x, 0, bb.z, -0.35);
-    robot.rotation.x = -0.28;
+    // face caméra (¾ vers le centre de la cabine) et cabré vers l'objectif (caméra plongeante)
+    // pour que les yeux restent bien au-dessus du HUD
+    const { robot, stand: bb } = bobSpot(s, { scale: 0.78, tilt: -0.28 });
     const cupHolder = at(cyl(bb.w * 0.1, bb.w * 0.08, bb.w * 0.12, '#c9ced6', { seg: 14 }), 0, bb.w * 0.27, 0);
     robot.add(cupHolder);
-    s.spot('bob', robot);
-    s.expose('bobVoix', new BobVoice(s, robot));
     s.animate((t) => (robot.position.y = Math.abs(Math.sin(t * 1.4)) * 0.015));
     s.add(at(pool('#c77dff', bb.w * 1.6, bb.w, 0.18), bb.x, 0.01, bb.z));
   },

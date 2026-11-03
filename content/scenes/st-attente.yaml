@@ -89,9 +89,10 @@ hotspots:
 
   - id: bob
     label: B.O.B.
-    rect: [600, 470, 170, 100]
+    # reculé devant les chaises : yeux au-dessus du HUD (docs/CHAPTERS.md)
+    rect: [560, 430, 170, 85]
     art:
-      - { rect: [615, 490, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+      - { rect: [575, 450, 140, 50], color: "#7c8794", stroke: "#ffffff" }
     look: "B.O.B. tient toujours ma laisse, du bout de l'antenne. Il fixe M. Patience avec respect. Et un peu d'appétit, je crois."
     talk:
       - dialogue: st_patience

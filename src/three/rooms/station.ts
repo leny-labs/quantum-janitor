@@ -4,8 +4,8 @@
 import * as THREE from 'three';
 import { t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
-import { PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, actorFrame, billboard, billboardSheet, bob } from '../props';
-import { BobVoice } from './bobvoix';
+import { PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, actorFrame, billboard, billboardSheet } from '../props';
+import { bobSpot } from './bobspot';
 import type { RoomBuild } from './index';
 import { against, shell, wallPanels } from './shell';
 import type { Stage } from '../Stage';
@@ -106,12 +106,9 @@ function inkStamp(s: Stage, px: number, py: number, text: string, z = 0.08): voi
   s.add(m);
 }
 
-/** B.O.B. au sol, avec sa voix (onde Bender). */
-function bobHere(s: Stage, rect: [number, number, number, number]): void {
-  const bb = s.stand(rect);
-  const robot = at(bob(bb.w * 0.75), bb.x, 0, bb.z, -0.15);
-  s.spot('bob', robot);
-  s.expose('bobVoix', new BobVoice(s, robot));
+/** B.O.B. au sol, tourné vers la caméra, avec sa voix (onde Bender). */
+function bobHere(s: Stage): void {
+  const { robot } = bobSpot(s);
   s.animate((t) => (robot.position.y = Math.abs(Math.sin(t * 1.3)) * 0.02));
 }
 
@@ -216,7 +213,7 @@ export const stSas: RoomBuild = {
     s.spot('porte_gobelet', at(orphan, pg.x, 0, pg.z, -0.2));
     s.animate((t) => (cupGlint.material.opacity = 0.12 + Math.max(0, Math.sin(t * 1.3)) * 0.12));
 
-    bobHere(s, s.rect('bob'));
+    bobHere(s);
 
     // porte de la salle d'attente, dans le mur de droite
     const d = s.fitX(s.rect('vers_attente'), 9);
@@ -331,7 +328,7 @@ export const stAttente: RoomBuild = {
     const pl = s.stand(s.rect('plante'));
     s.spot('plante', at(ficus(pl.h * 0.95), pl.x, 0, pl.z, 0.4));
 
-    bobHere(s, s.rect('bob'));
+    bobHere(s);
 
     // portes : retour au sas (gauche), guichet d'accueil (droite, panneau « MUNISSEZ-VOUS D'UN TICKET »)
     for (const [id, x, dir] of [['vers_sas', -9, 1], ['vers_guichet', 9, -1]] as const) {

@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { at, box, cyl, glow, label, mat, neon, plane, pool, sphere, starTexture, stripeTexture, torus } from '../kit';
-import { bob, fusible } from '../props';
+import { fusible } from '../props';
 import type { RoomBuild } from './index';
 import { against, backDoor, pipe, shell, wallPanels } from './shell';
 import { FuseRig } from './fusible';
 import { LecteurRig } from './lecteur';
 import { VendingRig } from './vending';
 import { t as tr } from '../../i18n';
-import { BobVoice } from './bobvoix';
+import { bobSpot } from './bobspot';
 
 const POWER_OFF = { flags: ['fusible_retire'] };
 const POWER_ON = { notFlags: ['fusible_retire'] };
@@ -271,10 +271,7 @@ export const couloir: RoomBuild = {
     });
 
     // ── B.O.B. (s'il suit Gary) ──
-    const bb = s.stand(s.rect('bob'));
-    const robot = at(bob(bb.w * 0.75), bb.x, 0, bb.z, -0.3);
-    s.spot('bob', robot);
-    s.expose('bobVoix', new BobVoice(s, robot));
+    const { robot } = bobSpot(s, { scale: 0.75 });
     s.animate((time) => {
       robot.rotation.y = -0.3 + Math.sin(time * 0.7) * 0.15;
     });

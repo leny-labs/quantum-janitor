@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import type { Condition } from '../../engine/types';
 import { at, beam, box, cyl, glow, label, mat, neon, pool, sphere, stripeTexture, torus } from '../kit';
-import { bob, mug } from '../props';
+import { mug } from '../props';
 import type { Stage, Standing } from '../Stage';
 import type { RoomBuild } from './index';
 import { consolePanel, PANNEAU_CAMERA } from './panneau';
 import { against, backDoor, pipe, shell, wallPanels } from './shell';
 import { t as tr } from '../../i18n';
-import { BobVoice } from './bobvoix';
+import { bobSpot } from './bobspot';
 
 const FULL = { flags: ['refroidissement_verse'] };
 const POWERED = { flags: ['panneau_allume'] };
@@ -267,10 +267,7 @@ export const labo: RoomBuild = {
     });
 
     // ── B.O.B. ──
-    const bb = s.stand(s.rect('bob'));
-    const robot = at(bob(bb.w * 0.75), bb.x, 0, bb.z, 0.35);
-    s.spot('bob', robot);
-    s.expose('bobVoix', new BobVoice(s, robot));
+    const { robot } = bobSpot(s, { scale: 0.75 });
     s.animate((t) => {
       robot.position.y = Math.abs(Math.sin(t * 1.1)) * 0.015;
     });
