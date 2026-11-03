@@ -62,6 +62,39 @@ objets à payoff différé (voir [`CHAPTER1.md`](CHAPTER1.md), §5).
 - Exemples : `panneau/bouton` (STABILISER : 1er appui `catastrophe`, 2e appui
   `catastrophe_fort`), `interlude-vaisseau/bouton_*`, `levier`, `dest_*`.
 
+### Convention : les yeux de B.O.B. toujours visibles
+
+> **Dans toute salle 3D où B.O.B. apparaît, on voit ses yeux : face ou ¾ caméra, posé au sol,
+> assez loin du bas de l'écran pour que la barre d'inventaire ne les coupe pas.**
+
+- Toujours placer B.O.B. via `bobSpot(s, { scale?, turn?, tilt? })` (`src/three/rooms/bobspot.ts`),
+  jamais avec un `at(bob(…), …, rotY)` codé en dur : il est posé au pied du rect `bob` du YAML
+  (hotspot et mesh restent alignés), **orienté automatiquement vers la caméra** de la salle
+  (+ ¾ de 0,25 rad vers le centre de l'écran) et reçoit sa voix (`BobVoice`).
+- Pour le déplacer, on bouge le **rect `bob` du YAML** (et son `art` de repli), pas le code. On joue sur la
+  **profondeur** : bas du rect vers y ≈ 500–520 (sol plus loin) plutôt que collé à `ROOM_H` (580).
+- Garde-fou dev : `[3D] B.O.B. : yeux à y=… sous la marge HUD` dans la console si ses yeux
+  descendent sous `ROOM_H - BOB_HUD_MARGIN` (556 px) ou s'il est trop détourné de la caméra.
+  Un placement neuf doit passer sans ce warning.
+- Caméra très plongeante (cockpit) : `tilt` négatif le cabre vers l'objectif ; `BobVoice` conserve
+  cette inclinaison de repos.
+
+### Convention : icônes d'inventaire 100 % GenAI
+
+> **Tout item d'inventaire / transportable = icône GenAI (`public/inventory/`), jamais de plot 2D
+> plat ni bake 3D. Nouvel item ⇒ générer son icône via `_briefs/ch1/genai-inv/gen.py` avant de merger.**
+
+- Pipeline : `python3 _briefs/ch1/genai-inv/gen.py gemini-3-pro-image-preview <refs,csv> "<prompt>" raw.png`
+  (refs de style : `public/inventory/seau.png`, `fragment.png`, `combi_chitine.png` ; fond violet uni `#231842`),
+  puis détourage `_briefs/ch1/genai-inv/cutout2.py raw.png public/inventory/<id>.png` (`cutout-glow.py` pour un objet lumineux).
+- Sortie : PNG RGBA recadré serré, 256 × 256 ; silhouette forte, texte gros (lisible en petite case).
+- Déclarer l'id dans `GENAI_ICONS` (`src/three/Studio.ts`) ; un état d'objet porté par des flags
+  (seau plein, serpillière trempée…) = une variante `GENAI_VARIANTS` (`public/inventory/<id>-<variante>.png`).
+- L'icône sert partout : case d'inventaire et objet en main qui suit le curseur. Le plot couleur + glyphe
+  d'`items.yaml` n'est qu'un repli si le PNG manque.
+- Le badge 3D (`badge()` dans `src/three/props.ts`) est texturé par `public/inventory/badge-card.png`
+  (recto redressé 512 × 360, avec la photo de Gary) : à régénérer avec l'icône `badge.png`.
+
 ## 2. Règles de transition (pas de hard cut)
 
 Toute transition suit la même grammaire, en trois temps :

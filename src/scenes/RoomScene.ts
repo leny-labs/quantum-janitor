@@ -19,6 +19,7 @@ import { FuseRig } from '../three/rooms/fusible';
 import { LecteurRig } from '../three/rooms/lecteur';
 import { VendingRig } from '../three/rooms/vending';
 import { PRESS_LEAD, type PressRig } from '../three/press';
+import { itemIconKey } from '../three/Studio';
 import { propSound } from '../ui/sfx';
 import { propSfx } from '../engine/propSfx';
 import { makeButton } from '../ui/Button';
@@ -75,6 +76,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   private mapOverlay: StationMapOverlay | null = null;
   private debugText: Phaser.GameObjects.Text | null = null;
   private heldItem!: Phaser.GameObjects.Text;
+  /** Objet en main : son icône GenAI suit le curseur (repli : étiquette `heldItem`). */
+  private heldIcon!: Phaser.GameObjects.Image;
   /** Flèche « retour » quand la caméra reste sur un travel d'examen (?shot=…). */
   private shotExit: Phaser.GameObjects.Container | null = null;
   private busy = false;
@@ -162,7 +165,11 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       .setLetterSpacing(1.5) // « 1/4096 » : le 1 ne touche plus le /
       .setDepth(790)
       .setVisible(false);
-    this.input.on('pointermove', (p: Phaser.Input.Pointer) => this.heldItem.setPosition(p.x + 14, p.y + 14));
+    this.heldIcon = this.add.image(0, 0, '__DEFAULT').setOrigin(0).setDepth(790).setVisible(false);
+    this.input.on('pointermove', (p: Phaser.Input.Pointer) => {
+      this.heldItem.setPosition(p.x + 14, p.y + 14);
+      this.heldIcon.setPosition(p.x + 12, p.y + 12);
+    });
     // clic dans le vide : reposer l'objet tenu ; en gros plan, sinon, reculer vers la pièce
     this.input.on('pointerdown', (p: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]) => {
       // plan d'arrivée : un clic / tap saute au plan de la pièce (la réplique, elle, se lit normalement)
@@ -224,8 +231,12 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.mapButton.setVisible(hasStationMap(state));
     playMusic(themeForScene(state.scene));
     const held = state.selectedItem ? content.items.get(state.selectedItem) : null;
-    this.heldItem.setVisible(!!held);
-    if (held) this.heldItem.setText(held.icon.glyph).setBackgroundColor(held.icon.color);
+    const heldKey = held ? itemIconKey(held.id, (f) => state.hasFlag(f)) : null;
+    const iconHeld = !!heldKey && this.textures.exists(heldKey);
+    this.heldIcon.setVisible(iconHeld);
+    if (iconHeld) this.heldIcon.setTexture(heldKey).setDisplaySize(56, 56);
+    this.heldItem.setVisible(!!held && !iconHeld);
+    if (held && !iconHeld) this.heldItem.setText(held.icon.glyph).setBackgroundColor(held.icon.color);
     this.renderDropButton(held?.name ?? null);
     this.hover.set(null);
     this.room.highlight(null);
@@ -483,6 +494,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.dropButton = null;
     if (!heldName || !isTouch()) return;
     this.heldItem.setVisible(false);
+    this.heldIcon.setVisible(false);
     this.dropButton = makeButton(this, 14, ROOM_H - 14, t('hud.drop'), () => this.session.state.select(null), {
       size: uiPx(this, 20, 15),
       align: 'left',

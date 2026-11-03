@@ -7,16 +7,33 @@
 // planches dans public/portraits/ ; un PNG présent là (bake ou remplacement
 // GenAI au même layout) prime sur le bake runtime. Les planches GenAI
 // (GENAI_SHEETS) ne sont jamais rebakées.
-import { ficus, planFolded, ticket } from './rooms/station';
 import Phaser from 'phaser';
 import * as THREE from 'three';
-import { at, cyl, glow } from './kit';
+import { at, glow } from './kit';
 import type { Mood } from '../engine/mood';
-import { badge, bob, fusible, gary, roach, sandwich, seau, serpilliere, setFace, sylvie, type FacePose } from './props';
+import { bob, gary, roach, setFace, sylvie, type FacePose } from './props';
 
 export const iconKey = (id: string) => `icon3d:${id}`;
-/** Icônes d'inventaire GenAI (public/inventory/) : priment sur le bake 3D sous la même clé. */
-export const GENAI_ICONS = new Set(['seau', 'serpilliere', 'badge', 'fragment', 'combi_chitine']);
+/**
+ * Icônes d'inventaire GenAI (public/inventory/<id>.png, RGBA recadré serré ≤ 256²).
+ * CONSIGNE DURABLE : tout item d'inventaire / transportable = icône GenAI, jamais de
+ * plot 2D plat ni de bake 3D. Nouvel item ⇒ générer son icône via
+ * _briefs/ch1/genai-inv/gen.py (+ cutout2.py) avant de merger, et l'ajouter ici.
+ * Le plot couleur + glyphe d'items.yaml n'est qu'un repli si le PNG manque.
+ */
+export const GENAI_ICONS = new Set([
+  'seau',
+  'serpilliere',
+  'badge',
+  'sandwich',
+  'fusible',
+  'fragment',
+  'combi_chitine',
+  'ticket_douane',
+  'ticket_9848',
+  'plante',
+  'plan_station',
+]);
 const genaiIconUrl = (id: string) => `${import.meta.env.BASE_URL}inventory/${id}.png`;
 /** Variante d'icône GenAI : la première règle dont les flags sont tous posés (et aucun `notFlags`) gagne. */
 interface IconVariant {
@@ -130,40 +147,6 @@ interface Pose {
   pitch?: number;
   rim?: string;
 }
-
-const ICONS: Record<string, Pose> = {
-  seau: {
-    build: () => {
-      const g = seau(1, 1.1);
-      g.add(at(cyl(0.42, 0.42, 0.02, '#9cff57', { glow: true, edges: false }), 0, 0.84, 0));
-      return g;
-    },
-    // cadre assez haut pour l'anse entière (sommet ≈ y 1.3)
-    look: [0, 0.62, 0],
-    dist: 3.1,
-    pitch: 0.42,
-    rim: '#7fffd4',
-  },
-  serpilliere: {
-    build: () => {
-      const g = serpilliere(1.6);
-      g.rotation.z = -0.65;
-      return g;
-    },
-    look: [0.3, 0.6, 0],
-    dist: 2.6,
-    rim: '#ffd166',
-  },
-  badge: { build: () => badge(0.8), look: [0, 0.3, 0], dist: 1.9, yaw: -0.35, pitch: 0.12, rim: '#7fffd4' },
-  sandwich: { build: () => sandwich(1), look: [0, 0.12, 0], dist: 2.1, pitch: 0.75, rim: '#ff8ab8' },
-  fusible: { build: () => fusible(1.1), look: [0, 0, 0], dist: 2, yaw: -0.3, pitch: 0.35, rim: '#ff5c7a' },
-  // combi_chitine : icône GenAI uniquement (GENAI_ICONS), jamais de bake 3D
-  // ch.1 « La Station Bureaucratique » : icônes 3D (rooms/station.ts)
-  ticket_douane: { build: () => ticket(1, 'D-0001', '#1f7f73'), look: [0, 0, 0], dist: 1.5, yaw: -0.3, pitch: 0.15, rim: '#7fffd4' },
-  ticket_9848: { build: () => ticket(1, '9848', '#ffd166'), look: [0, 0, 0], dist: 1.5, yaw: 0.3, pitch: 0.15, rim: '#ffd166' },
-  plan_station: { build: () => planFolded(1.2), look: [0, 0, 0], dist: 1.8, yaw: 0.2, pitch: 0.1, rim: '#7fffd4' },
-  plante: { build: () => ficus(1.2), look: [0, 0.6, 0], dist: 2.4, yaw: 0.3, pitch: 0.2, rim: '#9cff57' },
-};
 
 const PORTRAITS: Record<string, Pose & { bg: [string, string] }> = {
   gary: { build: () => gary(1.6), look: [0, 1.0, 0], dist: 2.5, yaw: 0.35, pitch: 0.05, bg: ['#ff8c42', '#3a1240'], rim: '#7fffd4' },
@@ -613,8 +596,7 @@ export function preloadPortraitSheets(load: Phaser.Loader.LoaderPlugin): void {
 export function bakeStudio(textures: Phaser.Textures.TextureManager): void {
   if (textures.exists(portraitKey('gary'))) return;
   const renderer = makeRenderer();
-  // icône GenAI préchargée : pas de bake (repli 3D si le PNG manque)
-  for (const [id, pose] of Object.entries(ICONS)) if (!textures.exists(iconKey(id))) textures.addCanvas(iconKey(id), shootSingle(renderer, pose, 160));
+  // icônes d'inventaire : GenAI uniquement (GENAI_ICONS, préchargées), plus aucun bake 3D
   for (const [id, pose] of Object.entries(PORTRAITS)) {
     textures.addCanvas(portraitKey(id), shootSingle(renderer, pose, 300, pose.bg));
     // planche absente de public/portraits/ (ou illisible) : bake runtime, même layout
