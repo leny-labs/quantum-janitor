@@ -15,7 +15,7 @@ import { badge, bob, combiChitine, fusible, gary, roach, sandwich, seau, serpill
 
 export const iconKey = (id: string) => `icon3d:${id}`;
 /** Icônes d'inventaire GenAI (public/inventory/) : priment sur le bake 3D sous la même clé. */
-export const GENAI_ICONS = new Set(['seau', 'serpilliere', 'badge', 'fragment']);
+export const GENAI_ICONS = new Set(['seau', 'serpilliere', 'badge', 'fragment', 'combi_chitine']);
 const genaiIconUrl = (id: string) => `${import.meta.env.BASE_URL}inventory/${id}.png`;
 /** Variante d'icône GenAI : la première règle dont les flags sont tous posés (et aucun `notFlags`) gagne. */
 interface IconVariant {
