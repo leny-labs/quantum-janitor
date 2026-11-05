@@ -11,6 +11,7 @@ import { guichardBall } from '../guichardBall';
 import { guichardChain } from '../guichardChain';
 import { officeChair } from '../officeChair';
 import { bobSpot } from './bobspot';
+import { CouloirWalkRig, type WalkDoor } from './couloirWalk';
 import { pressable } from '../press';
 import { speaking } from '../../engine/speaking';
 import type { Condition } from '../../engine/types';
@@ -1102,7 +1103,8 @@ export const stCouloirB: RoomBuild = {
     panneau: { fill: 0.8, fov: 36 },
     extincteur: { fill: 0.9, lift: 0.2, fov: 36 },
     emplacement: { fill: 0.9, lift: 0.4, fov: 40 },
-    ficus: { fill: 0.85, lift: 0.2, fov: 40 },
+    ficus_pose: { fill: 0.85, lift: 0.2, fov: 40 },
+    ficus: { fill: 0.85, lift: 0.2, orbit: -4, fov: 40 },
     casier: { fill: 0.85, orbit: 8, fov: 40 },
   },
   intro: 'panneau',
@@ -1125,7 +1127,8 @@ export const stCouloirB: RoomBuild = {
       fog: { color: '#1c1e22', near: 9, far: 24 },
       vignette: { color: '#0c0d10', strength: 0.65, warm: '#e0f0ff14' },
     });
-    neonTubes(s, s.wallAt(640, 10, 2).y, [-6, 0, 6], 2.4);
+    const neonY = s.wallAt(640, 10, 2).y;
+    neonTubes(s, neonY, [-6, 0, 6], 2.4);
 
     // chemin de lino central (le couloir « file » vers le fond, jamais très loin)
     for (let i = 0; i < 6; i++) s.add(at(box(1.6, 0.012, 0.9, i % 2 ? '#5d6168' : '#666a70', { edges: false, shadow: false }), 0, 0.006, 1 + i * 1.1));
@@ -1136,12 +1139,24 @@ export const stCouloirB: RoomBuild = {
       ['porte_b2', 'B-2', tr('props.station.officeStamps')],
       ['porte_b3', 'B-3', tr('props.station.officeComplaints')],
     ];
+    const walkDoors: Record<string, WalkDoor> = {};
     for (const [id, num, office] of doors) {
       const { door, f } = backDoor(s, s.rect(id), 0.1, '#3e3448', MAUVE);
-      const port = at(cyl(f.w * 0.16, f.w * 0.16, 0.03, '#c9d6e0', { seg: 18 }), 0, f.h * 0.2, 0.02);
+      // battant sur pivot (montant gauche) : il s'ouvre pendant la marche de la boucle ; derrière, le noir
+      const jamb = Math.min(f.w, f.h) * 0.08;
+      const hx = f.w / 2 - jamb;
+      const leaf = at(new THREE.Group(), -hx, 0, 0);
+      const panel = door.children[3];
+      panel.position.x += hx;
+      leaf.add(panel);
+      door.add(leaf);
+      const dark = new THREE.Mesh(new THREE.PlaneGeometry(f.w - 2 * jamb, f.h - jamb), new THREE.MeshBasicMaterial({ color: '#040507' }));
+      door.add(at(dark, 0, -jamb / 2, -0.09), at(glow('#cfe0ff', f.w * 0.5, 0.18), 0, -f.h * 0.05, -0.085));
+      walkDoors[id] = { x: f.x, y: f.y - jamb / 2, leaf };
+      const port = at(cyl(f.w * 0.16, f.w * 0.16, 0.03, '#c9d6e0', { seg: 18 }), hx, f.h * 0.2, 0.02);
       port.rotation.x = Math.PI / 2;
-      door.add(port, at(torus(f.w * 0.16, 0.025, '#2a2830'), 0, f.h * 0.2, 0.04));
-      door.add(at(box(f.w * 0.08, 0.05, 0.08, '#c9ced6'), f.w * 0.3, -f.h * 0.05, 0.04));
+      leaf.add(port, at(torus(f.w * 0.16, 0.025, '#2a2830'), hx, f.h * 0.2, 0.04));
+      leaf.add(at(box(f.w * 0.08, 0.05, 0.08, '#c9ced6'), hx + f.w * 0.3, -f.h * 0.05, 0.04));
       const plateY = f.h / 2 + 0.24;
       const numPlate = at(label(num, f.w * 0.55, 0.32, { color: '#f6efdc', bg: '#2a2830', bold: true, mono: true }), 0, plateY, 0.08);
       const officePlate = at(label(office, f.w * 1.05, 0.32, { color: '#f6efdc', bg: '#1f7f73', bold: true }), 0, plateY, 0.08);
@@ -1198,10 +1213,19 @@ export const stCouloirB: RoomBuild = {
     ring.rotation.x = Math.PI / 2;
     trace.add(sq, ring);
     s.spot('emplacement', at(trace, em.x, 0, em.z));
-    const fc = s.stand(s.rect('ficus'));
-    const plant = at(ficus(fc.h * 0.9), em.x, 0, em.z, 0.5);
-    s.spot('ficus', plant);
-    s.animate((t) => (plant.rotation.z = Math.sin(t * 0.6) * 0.01));
+    // M. Ficus posé juste à gauche de l'extincteur (ficus_pose) ; le couloir glissé (st_couloir_glisse),
+    // le même M. Ficus une porte plus à gauche, de l'autre côté de la B-1 (ficus). La marche de la
+    // boucle fait glisser le premier jusqu'à la place du second (CouloirWalkRig).
+    const fh = s.stand(s.rect('ficus_pose')).h * 0.9;
+    const plant = at(ficus(fh), em.x, 0, em.z, 0.5);
+    s.spot('ficus_pose', plant);
+    const fs = s.stand(s.rect('ficus'));
+    const slid = at(ficus(fh), fs.x, 0, fs.z, 0.5);
+    s.spot('ficus', slid);
+    s.animate((t) => (plant.rotation.z = slid.rotation.z = Math.sin(t * 0.6) * 0.01));
+    const walk = new CouloirWalkRig(s, walkDoors, { obj: plant, from: plant.position.clone(), to: slid.position.clone() }, { y: neonY - 0.05, z: 2.4, xs: [-6, 0, 6] });
+    s.expose(CouloirWalkRig.ID, walk);
+    if (import.meta.env.DEV) (window as unknown as { __qjCouloirWalk: CouloirWalkRig }).__qjCouloirWalk = walk;
 
     // ── casier « STOCK B-7/12 » : armoire grise, étiquette GenAI ; porte entrouverte après le dénouement ──
     const cz = 0.45;

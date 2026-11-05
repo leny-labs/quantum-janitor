@@ -17,6 +17,7 @@ import { BobAspirRig } from '../three/rooms/bobaspire';
 import type { BobIdle } from '../three/rooms/bobidle';
 import { BobRig } from '../three/rooms/bobrepas';
 import { BobVoice } from '../three/rooms/bobvoix';
+import { CouloirWalkRig } from '../three/rooms/couloirWalk';
 import { FuseRig } from '../three/rooms/fusible';
 import { LecteurRig } from '../three/rooms/lecteur';
 import { VendingRig } from '../three/rooms/vending';
@@ -558,12 +559,44 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     }
   }
 
+  /**
+   * Couloir Infini B : la caméra passe la porte et revient par le bout du couloir (même extincteur),
+   * M. Ficus glisse d'une porte si la plante est posée ; puis le dialogue de la boucle.
+   * Clic / touche pendant la marche = coupe sèche sur la vue de la pièce.
+   */
+  private async corridorWalk(rig: CouloirWalkRig, door: string, i: Interaction): Promise<void> {
+    this.scenes.spots(false);
+    const walking = rig.walk(door);
+    // armé un peu après : le clic qui a poussé la porte ne doit pas couper la marche aussitôt
+    this.time.delayedCall(150, () => {
+      if (!rig.walking) return;
+      this.skipCine = () => {
+        this.skipCine = null;
+        rig.skip();
+      };
+    });
+    try {
+      await walking;
+    } finally {
+      this.skipCine = null;
+      if (this.sys.isActive()) this.scenes.spots(true);
+    }
+    await this.runner.run(i);
+  }
+
   /** Verbe d'un hotspot ; certains gestes clés ont leur petite animation. */
   private runVerb(h: Hotspot, v: HotspotVerb): void {
     const { state } = this.session;
     const fuse =
       h.id === 'fusibles' && v.kind === 'use' && state.hasFlag('sait_fusible') && !state.hasFlag('fusible_retire') ? this.room.rig<FuseRig>('fusible') : null;
     if (fuse) return void this.locked(() => this.fuse(fuse, v.action));
+    // Couloir Infini B : une porte poussée pendant la boucle = marche 3D, puis l'Ink
+    const walk = v.kind === 'use' ? this.room.rig<CouloirWalkRig>(CouloirWalkRig.ID) : null;
+    if (walk?.loops(h.id)) {
+      const sound = propSfx(h, state);
+      if (sound) propSound(sound, h.id);
+      return void this.locked(() => this.corridorWalk(walk, h.id, v.action));
+    }
     // props physiques en clic direct (three/press.ts) : le bouton s'enfonce, le levier bascule,
     // et un bruitage joue à CHAQUE actionnement (réappui, hors tension, refus : engine/propSfx.ts)
     // (+ flash/halo bref ; la bulle attend PRESS_LEAD ms pour laisser voir le geste)

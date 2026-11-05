@@ -217,6 +217,7 @@ keys:
   scene.st-couloir-b.hotspot.panneau.label: “WING B” sign
   scene.st-couloir-b.hotspot.extincteur.label: Fire extinguisher
   scene.st-couloir-b.hotspot.emplacement.label: Spot on the floor
+  scene.st-couloir-b.hotspot.ficus_pose.label: Mr Ficus
   scene.st-couloir-b.hotspot.ficus.label: Mr Ficus
   scene.st-couloir-b.hotspot.casier.label: “B-7/12 STOCK” locker
   scene.st-couloir-b.hotspot.bob.label: B.O.B.

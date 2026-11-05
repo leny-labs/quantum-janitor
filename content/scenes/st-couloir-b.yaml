@@ -3,7 +3,9 @@
 # Une seule pièce : la boucle est jouée par l'Ink (content/story/st_couloir_b.ink), pas par la géométrie.
 #   porte B-n (avant la plante)      → même extincteur                       [st_couloir_boucle]
 #   plante sur l'emplacement au sol  → repère à gauche de l'extincteur       [st_plante_posee] −plante
+#   porte ensuite                    → le couloir glisse : M. Ficus une porte plus à gauche [st_couloir_glisse]
 #   porte / ficus ensuite            → « suivre la plante » (3 directions)   [st_couloir_resolu] +plante
+# Porte poussée pendant la boucle : marche 3D (three/rooms/couloirWalk.ts, rig « couloir-walk ») avant l'Ink.
 #   casier « STOCK B-7/12 »          → le dernier formulaire                 [st_formulaire] = fin de l'Acte I
 # Entrée : porte de l'Aile B du guichet (article 47bis, st_acces_aile_b). Une fois le couloir dénoué
 # (st_couloir_resolu), les hotspots porte_b1/b2/b3 laissent la place aux sorties (même rect) vers les
@@ -93,7 +95,7 @@ hotspots:
     art:
       - { rect: [430, 260, 50, 150], color: "#c0392b", stroke: "#2a2830", text: "EXT.", size: 12 }
     look:
-      - if: { flags: [st_plante_posee], notFlags: [st_couloir_resolu] }
+      - if: { flags: [st_couloir_glisse], notFlags: [st_couloir_resolu] }
         say: "L'extincteur. Toujours là. M. Ficus aussi. Mais entre les deux, il y a désormais toute une porte de différence."
         stop: true
       - say: "Un extincteur rouge, accroché au mur. Panneau : « EXTINCTEUR — NE PAS DÉPLACER ». Une étiquette d'inventaire : « EXT-B-001 ». Il n'y en a qu'un. On le croise plusieurs fois."
@@ -128,15 +130,27 @@ hotspots:
           mood: love
     useItemDefault: "Il faut un repère qui ne suive aucune procédure. Ça, ça en suit forcément une."
 
-  # M. Ficus posé : repère ; « suivre la plante » (Ink) jusqu'au dénouement
+  # M. Ficus posé : repère ; « suivre la plante » (Ink) jusqu'au dénouement.
+  # Deux places : juste à gauche de l'extincteur (ficus_pose), puis, une fois le couloir glissé
+  # (st_couloir_glisse), une porte plus à gauche, de l'autre côté de la B-1 (ficus).
+  - id: ficus_pose
+    label: M. Ficus
+    if: { flags: [st_plante_posee], notFlags: [st_couloir_glisse, st_couloir_resolu] }
+    rect: [290, 320, 130, 150]
+    look:
+      - say: "M. Ficus, posé à gauche de l'extincteur. En plastique. Immobile. Indifférent. Le seul objet de l'Aile B qui sait où il est."
+    use:
+      - dialogue: st_couloir_suivre
+    talk: "Monsieur Ficus ? ...Il ne répond pas. Il ne répond jamais. C'est ce qui le rend si fiable."
+
   - id: ficus
     label: M. Ficus
-    if: { flags: [st_plante_posee], notFlags: [st_couloir_resolu] }
-    rect: [290, 320, 130, 150]
+    if: { flags: [st_plante_posee, st_couloir_glisse], notFlags: [st_couloir_resolu] }
+    rect: [62, 330, 120, 140]
     art:
       - { rect: [320, 340, 70, 120], color: "#3e8f4a", stroke: "#2a2830", text: "FICUS", size: 12 }
     look:
-      - say: "M. Ficus, posé à gauche de l'extincteur. En plastique. Immobile. Indifférent. Le seul objet de l'Aile B qui sait où il est."
+      - say: "M. Ficus. Je l'ai posé à gauche de l'extincteur. Maintenant, il y a la porte B-1 entre eux. Il n'a pas bougé d'un millimètre. Le couloir, si."
     use:
       - dialogue: st_couloir_suivre
     talk: "Monsieur Ficus ? ...Il ne répond pas. Il ne répond jamais. C'est ce qui le rend si fiable."
