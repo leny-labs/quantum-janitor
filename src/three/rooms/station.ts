@@ -451,8 +451,8 @@ export const stAttente: RoomBuild = {
       sign.rotation.y = (dir * Math.PI) / 2;
       s.add(sign);
     }
-    // porte de la cafétéria, au fond : double porte battante (deux vantaux, grands hublots où l'on
-    // voit le sandwich consigné, plaques de poussée, plinthes inox), enseigne à la largeur du cadre
+    // porte de la cafétéria, au fond : double porte battante (deux vantaux, grands hublots vitrés
+    // éclairés par la salle, plaques de poussée, plinthes inox), enseigne à la largeur du cadre
     const { door: cafDoor, f: cf } = backDoor(s, s.rect('vers_cafeteria'), 0.1, '#4a4232', '#2a2418');
     const ft = Math.min(cf.w, cf.h) * 0.08;
     const lw = (cf.w - 2 * ft) / 2 - 0.03;
@@ -464,15 +464,19 @@ export const stAttente: RoomBuild = {
       const cx = side * (lw / 2 + 0.03);
       const leaf = new THREE.Group();
       leaf.add(at(box(lw, lh, 0.06, '#7a6f52'), 0, 0, 0));
-      // hublot : vitre éclairée (lumière de la cafétéria), bague sombre, sandwich derrière la vitre
-      const glass = at(cyl(portR, portR, 0.03, '#f2dcae', { seg: 28 }), 0, portY - ly, 0.035);
+      // hublot neutre : vitre éclairée (lumière de la cafétéria), bague sombre, deux reflets en
+      // biais sur le verre — rien derrière (pas de sandwich : la vitrine est dans la cafétéria)
+      const py = portY - ly;
+      const glass = at(cyl(portR, portR, 0.03, '#f2dcae', { seg: 28 }), 0, py, 0.035);
       glass.rotation.x = Math.PI / 2;
-      leaf.add(glass, at(torus(portR, 0.045, '#2a2830'), 0, portY - ly, 0.06));
-      // (dessiné après les faisceaux des néons, sinon il ressort délavé)
-      const sh = portR * 1.4;
-      const sw = billboard(SANDWICH_URL, sh, SANDWICH_ASPECT, { shadow: 0 });
-      sw.userData.sprite.renderOrder = POSTER_ORDER;
-      leaf.add(at(sw, side * portR * 0.06, portY - ly - sh * 0.5, 0.07));
+      leaf.add(glass, at(torus(portR, 0.045, '#2a2830'), 0, py, 0.06));
+      for (const [w, len, ox, oy, op] of [[0.16, 1.1, -0.22, 0.12, 0.42], [0.07, 0.8, 0.12, 0.3, 0.3]] as const) {
+        // (dessinés après les faisceaux des néons, sinon ils ressortent délavés)
+        const streak = at(plane(portR * w, portR * len, '#ffffff', { opacity: op }), portR * ox, py + portR * oy, 0.055);
+        streak.rotation.z = -0.65;
+        streak.renderOrder = POSTER_ORDER;
+        leaf.add(streak);
+      }
       // plaque de poussée inox (côté du battement), plinthe de coup de pied
       leaf.add(at(box(lw * 0.16, lh * 0.2, 0.03, '#c9ced6'), -side * lw * 0.32, -cf.h * 0.06 - ly, 0.045));
       leaf.add(at(box(lw * 0.9, lh * 0.1, 0.03, '#a8aeb8'), 0, -lh / 2 + lh * 0.07, 0.045));
@@ -490,10 +494,8 @@ export const stAttente: RoomBuild = {
   },
 };
 
-/** Sandwich consigné (GenAI, détouré) : vitrine de la cafétéria, hublot de sa porte. */
-const SANDWICH_URL = `${import.meta.env.BASE_URL}props/st/sandwich.png`;
-const SANDWICH_ASPECT = 401 / 384;
-/** Même sandwich redressé de 17° et détouré au ras de l'alpha : base à plat, pour la poser sur une tablette. */
+/** Sandwich consigné (GenAI `sandwich.png` redressé de 17° et détouré au ras de l'alpha) : base à plat,
+ *  posé sur les tablettes de la vitrine de la cafétéria. */
 const SANDWICH_SHELF_URL = `${import.meta.env.BASE_URL}props/st/sandwich-pose.png`;
 const SANDWICH_SHELF_ASPECT = 412 / 341;
 
