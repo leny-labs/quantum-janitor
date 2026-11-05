@@ -2,7 +2,7 @@
 // Une Klepsydra où le règlement a gagné : beige administratif, néons blafards, tout est
 // étiqueté, numéroté, tamponné. Objets de ces pièces aussi utilisés pour les icônes d'inventaire.
 import * as THREE from 'three';
-import { t as tr } from '../../i18n';
+import { lang, t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
 import { PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, actorFrame, billboard, billboardSheet } from '../props';
 import { bobSpot } from './bobspot';
@@ -88,13 +88,39 @@ function onTop(o: THREE.Object3D, order = POSTER_ORDER): THREE.Object3D {
   return o;
 }
 
-/** Affiche administrative collée au mur (bordure, en-tête coloré). */
+/**
+ * Signalétique GenAI de la Station (docs/CHAPTERS.md, « props GenAI ») : public/props/st/<id>-<lang>.jpg,
+ * générée par _briefs/ch1/st-genai/ (texte peint dans l'image, une variante par langue).
+ * Rapports largeur / hauteur des images recadrées : le panneau est ajusté dedans, jamais déformé.
+ */
+const SIGNS = {
+  bienvenue: { fr: 1536 / 236, en: 1536 / 240 },
+  douane: { fr: 1536 / 231, en: 1536 / 226 },
+  animaux: { fr: 768 / 515, en: 768 / 515 },
+  horaires: { fr: 1, en: 1 },
+  patience: { fr: 768 / 573, en: 768 / 573 },
+} as const;
+type SignId = keyof typeof SIGNS;
+
+/** Panneau texturé (plan) contenu dans `maxW × maxH`, au rapport de son image. */
+function stSign(id: SignId, maxW: number, maxH: number, glowing = false): { mesh: THREE.Mesh; w: number; h: number } {
+  const l = lang();
+  const aspect = SIGNS[id][l];
+  const w = Math.min(maxW, maxH * aspect);
+  const h = w / aspect;
+  const t = new THREE.TextureLoader().load(`${import.meta.env.BASE_URL}props/st/${id}-${l}.jpg`);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return { mesh: plane(w, h, '#ffffff', { map: t, glow: glowing }), w, h };
+}
+
+/** Affiche administrative GenAI collée au mur, sur un support à sa taille. */
 // z ≥ 0.05 : devant les joints de `wallPanels` (face avant à z = 0.04), sinon une barre verticale barre l'affiche
-function poster(s: Stage, rect: [number, number, number, number], text: string, head: string, z = 0.06): void {
+function poster(s: Stage, rect: [number, number, number, number], id: SignId, z = 0.06): void {
   const f = s.fit(rect, z);
-  s.add(onTop(at(box(f.w, f.h, 0.02, '#f6efdc', { edges: true, shadow: false }), f.x, f.y, z)));
-  s.add(onTop(at(plane(f.w * 0.96, f.h * 0.16, head), f.x, f.y + f.h * 0.38, z + 0.012), POSTER_ORDER + 1));
-  s.add(onTop(at(label(text, f.w * 0.9, f.h * 0.66, { color: '#2a2830', bold: true }), f.x, f.y - f.h * 0.08, z + 0.013), POSTER_ORDER + 1));
+  const p = stSign(id, f.w, f.h);
+  s.add(onTop(at(box(p.w * 1.02, p.h * 1.02, 0.02, '#3a3630', { edges: true, shadow: false }), f.x, f.y, z)));
+  s.add(onTop(at(p.mesh, f.x, f.y, z + 0.012), POSTER_ORDER + 1));
 }
 
 /** Tampon « VU » encré de travers sur le mur (décor). */
@@ -140,10 +166,12 @@ export const stSas: RoomBuild = {
     neonTubes(s, s.wallAt(640, 10, 2).y, [-4.5, 0, 4.5], 2);
 
     // bandeau « BIENVENUE — VOTRE VISITE EST ENREGISTRÉE »
+    // (plaque émaillée GenAI, au rapport de l'image, centrée dans l'emprise d'origine)
     const ban = s.fit([540, 20, 520, 60], 0.03);
-    s.add(onTop(at(box(ban.w, ban.h, 0.06, '#1f7f73'), ban.x, ban.y, 0.03)));
-    s.add(onTop(at(label(tr('props.station.welcome'), ban.w * 0.95, ban.h * 0.8, { color: '#f6efdc', bold: true }), ban.x, ban.y, 0.065), POSTER_ORDER + 1));
-    poster(s, [985, 110, 170, 110], tr('props.station.pets'), '#c0392b');
+    const welcome = stSign('bienvenue', ban.w, ban.h);
+    s.add(onTop(at(box(welcome.w * 1.01, welcome.h * 1.04, 0.06, '#123f3a'), ban.x, ban.y, 0.03)));
+    s.add(onTop(at(welcome.mesh, ban.x, ban.y, 0.065), POSTER_ORDER + 1));
+    poster(s, [985, 110, 170, 110], 'animaux');
     inkStamp(s, 1070, 235, tr('props.station.stampSeen'));
 
     // tapis roulant à l'arrêt, du quai jusqu'au portique
@@ -158,7 +186,8 @@ export const stSas: RoomBuild = {
     const pw = pr.w * 0.9;
     arch.add(at(box(pw * 0.14, pr.h, 0.6, '#8d93a0'), -pw / 2, pr.h / 2, 0), at(box(pw * 0.14, pr.h, 0.6, '#8d93a0'), pw / 2, pr.h / 2, 0));
     arch.add(at(box(pw * 1.14, pr.h * 0.12, 0.7, '#6d7380'), 0, pr.h * 0.95, 0));
-    arch.add(at(label(tr('props.station.customs'), pw, pr.h * 0.08, { color: '#ffd166', bold: true }), 0, pr.h * 0.95, 0.36));
+    // plaque « DOUANE DIMENSIONNELLE » (GenAI, lettres rétroéclairées : non éclairée)
+    arch.add(at(stSign('douane', pw * 1.1, pr.h * 0.11, true).mesh, 0, pr.h * 0.95, 0.36));
     const scan = at(box(pw * 0.86, 0.04, 0.04, '#ff4f5a', { glow: true, edges: false }), 0, pr.h * 0.5, 0.05);
     const scanGlow = at(glow('#ff4f5a', pw * 1.1, 0.3), 0, pr.h * 0.5, 0.1);
     arch.add(scan, scanGlow);
@@ -275,8 +304,8 @@ export const stAttente: RoomBuild = {
     minHand.rotation.z = -(11 / 60) * Math.PI * 2;
     clock.add(hourHand, minHand);
     s.add(at(clock, ck.x, ck.y, 0.05));
-    poster(s, [1050, 60, 120, 110], tr('props.station.hours'), '#1f7f73');
-    poster(s, [380, 160, 110, 80], tr('props.station.patience'), '#c0392b');
+    poster(s, [1050, 60, 120, 110], 'horaires');
+    poster(s, [380, 160, 110, 80], 'patience');
     inkStamp(s, 150, 120, tr('props.station.stampPending'));
 
     // ── afficheur « NOUS SERVONS LE N° 9 847 » ──
