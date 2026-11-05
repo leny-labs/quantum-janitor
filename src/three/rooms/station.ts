@@ -104,6 +104,10 @@ const SIGNS = {
   horaires: { fr: 1, en: 1 },
   patience: { fr: 768 / 573, en: 768 / 573 },
   platdujour: { fr: 768 / 573, en: 768 / 573 },
+  // Couloir Infini B : _briefs/aile-b/genai/ (gpt-image-2.6-sunburst)
+  aileb: { fr: 1.5, en: 1.5 },
+  extincteur: { fr: 2 / 3, en: 2 / 3 },
+  stock: { fr: 1.5, en: 1.5 },
 } as const;
 type SignId = keyof typeof SIGNS;
 
@@ -912,12 +916,189 @@ export const stGuichet: RoomBuild = {
     wing.add(at(label(tr('props.station.wingB'), bf.w * 0.9, 0.3, { color: '#f6efdc', bg: MAUVE, bold: true }), 0, bf.h / 2 + 0.22, 0.06));
     const reader = new THREE.Group();
     reader.add(at(box(0.36, 0.5, 0.08, '#2a2830'), 0, 0, 0));
+    // demande verbale 47bis (st_acces_aile_b) : diode verte, « ACCÈS OK », battants entrouverts
+    const ACCESS: Condition = { flags: ['st_acces_aile_b'] };
     const led = at(sphere(0.04, '#ff4f5a', { glow: true }), 0, -0.16, 0.05);
-    reader.add(at(label(tr('props.station.wingBReader'), 0.32, 0.22, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true }), 0, 0.08, 0.045), led);
+    const ledOk = at(sphere(0.04, '#4fe07a', { glow: true }), 0, -0.16, 0.05);
+    const refused = at(label(tr('props.station.wingBReader'), 0.32, 0.22, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true }), 0, 0.08, 0.045);
+    const granted = at(label(tr('props.station.wingBReaderOk'), 0.32, 0.22, { color: '#4fe07a', bg: '#0a140c', bold: true, mono: true }), 0, 0.08, 0.045);
+    reader.add(refused, granted, led, ledOk);
+    s.when({ notFlags: ['st_acces_aile_b'] }, refused);
+    s.when(ACCESS, granted, ledOk);
     wing.add(at(reader, -bf.w / 2 - 0.3, -bf.h * 0.05, 0.02));
-    s.animate((t) => (led.visible = Math.floor(t * 1.5) % 2 === 0));
-    s.spot('porte_b', wing);
+    s.animate((t) => (led.visible = !s.is(ACCESS) && Math.floor(t * 1.5) % 2 === 0));
+    // lueur froide du couloir derrière les battants entrouverts
+    const gap = at(plane(bf.w * 0.16, bf.h * 0.86, '#d8f0ff', { glow: true }), 0, -bf.h * 0.05, 0.005);
+    wing.add(gap);
+    s.when(ACCESS, gap);
+    // le hotspot porte_b disparaît avec l'accès (sortie vers_couloir_b à la place) : la porte, elle, reste
+    s.add(wing);
     s.spot('lecteur', reader);
     s.add(at(pool('#ffd166', 3, 2, 0.1), 0, 0.01, 4));
+  },
+};
+
+/** Couloir dénoué (Ink « suivre la plante ») : plaques des bureaux, casier entrouvert. */
+const RESOLU: Condition = { flags: ['st_couloir_resolu'] };
+
+/**
+ * 4. Couloir Infini B (Aile B). Une seule pièce : trois portes mauves numérotées, l'extincteur
+ * « NE PAS DÉPLACER » (repère), le panneau « VOUS ÊTES ICI (ENCORE) », le casier « STOCK B-7/12 » au
+ * bout. La boucle est jouée par l'Ink (docs/CHAPTER1.md §10) ; ici, seuls les props suivent les flags :
+ * M. Ficus posé (`st_plante_posee`), plaques ARCHIVES / TAMPONS / RÉCLAMATIONS et casier ouvert
+ * (`st_couloir_resolu`), formulaire dans le casier jusqu'à `st_formulaire`. Accents mauves de l'Aile B.
+ */
+export const stCouloirB: RoomBuild = {
+  camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    porte_b1: { fill: 0.8, orbit: -6, fov: 42 },
+    porte_b2: { fill: 0.8, fov: 42 },
+    porte_b3: { fill: 0.8, orbit: 6, fov: 42 },
+    panneau: { fill: 0.8, fov: 36 },
+    extincteur: { fill: 0.9, lift: 0.2, fov: 36 },
+    emplacement: { fill: 0.9, lift: 0.4, fov: 40 },
+    ficus: { fill: 0.85, lift: 0.2, fov: 40 },
+    casier: { fill: 0.85, orbit: 8, fov: 40 },
+  },
+  intro: 'panneau',
+  build(s) {
+    const MAUVE = '#5a4a6a';
+    shell(s, { floor: { a: '#4a4e54', b: '#52565c', joint: '#2a2c30', tile: 0.6 }, wall: { top: '#b9c0c4', bottom: '#6e7880' }, trim: '#3e3448', left: -9, right: 9 });
+    wallPanels(s, '#9aa2a8', -9, 9, 1.5, 8);
+    s.lights({
+      sky: '#eef6ff',
+      ground: '#24262a',
+      ambient: 1.1,
+      key: { color: '#f0fff4', intensity: 1.9, pos: [0, 9, 6], target: [0, 0, 0] },
+      points: [
+        // halo rouge de l'extincteur, petite lampe froide sur le casier
+        { color: '#ff5a4a', intensity: 1.6, pos: [-2.6, 2, 1.2], distance: 2.6 },
+        { color: '#bfe6ff', intensity: 1.8, pos: [7.4, 3.2, 1.5], distance: 3.5 },
+      ],
+      rim: { color: '#8a6db0', intensity: 0.6, pos: [-6, 5, -4] },
+      fill: { color: '#9aa8ff', intensity: 0.35, pos: [6, 3, 6] },
+      fog: { color: '#1c1e22', near: 9, far: 24 },
+      vignette: { color: '#0c0d10', strength: 0.65, warm: '#e0f0ff14' },
+    });
+    neonTubes(s, s.wallAt(640, 10, 2).y, [-6, 0, 6], 2.4);
+
+    // chemin de lino central (le couloir « file » vers le fond, jamais très loin)
+    for (let i = 0; i < 6; i++) s.add(at(box(1.6, 0.012, 0.9, i % 2 ? '#5d6168' : '#666a70', { edges: false, shadow: false }), 0, 0.006, 1 + i * 1.1));
+
+    // ── portes B-1, B-2, B-3 : mauves, hublot dépoli, plaque ; après le dénouement, plaque de bureau ──
+    const doors: [string, string, string][] = [
+      ['porte_b1', 'B-1', tr('props.station.officeArchives')],
+      ['porte_b2', 'B-2', tr('props.station.officeStamps')],
+      ['porte_b3', 'B-3', tr('props.station.officeComplaints')],
+    ];
+    for (const [id, num, office] of doors) {
+      const { door, f } = backDoor(s, s.rect(id), 0.1, '#3e3448', MAUVE);
+      const port = at(cyl(f.w * 0.16, f.w * 0.16, 0.03, '#c9d6e0', { seg: 18 }), 0, f.h * 0.2, 0.02);
+      port.rotation.x = Math.PI / 2;
+      door.add(port, at(torus(f.w * 0.16, 0.025, '#2a2830'), 0, f.h * 0.2, 0.04));
+      door.add(at(box(f.w * 0.08, 0.05, 0.08, '#c9ced6'), f.w * 0.3, -f.h * 0.05, 0.04));
+      const plateY = f.h / 2 + 0.24;
+      const numPlate = at(label(num, f.w * 0.55, 0.32, { color: '#f6efdc', bg: '#2a2830', bold: true, mono: true }), 0, plateY, 0.08);
+      const officePlate = at(label(office, f.w * 1.05, 0.32, { color: '#f6efdc', bg: '#1f7f73', bold: true }), 0, plateY, 0.08);
+      const later = at(label(tr('props.station.toBeContinued'), f.w * 0.8, 0.22, { color: '#c0392b', bg: '#f6efdc', bold: true }), 0, f.h * 0.02, 0.05);
+      later.rotation.z = -0.12;
+      door.add(numPlate, officePlate, later);
+      s.when({ notFlags: ['st_couloir_resolu'] }, numPlate);
+      s.when(RESOLU, officePlate, later);
+      s.spot(id, door);
+    }
+
+    // panneau GenAI « AILE B — VOUS ÊTES ICI (ENCORE) »
+    s.spot('panneau', poster(s, s.rect('panneau'), 'aileb'));
+    inkStamp(s, 800, 232, tr('props.station.stampPending'));
+
+    // ── l'extincteur (repère) : bouteille rouge, tête, flexible, support ; panneau GenAI au-dessus ──
+    const ex = s.fit(s.rect('extincteur'), 0.25);
+    const ext = new THREE.Group();
+    const eh = ex.h * 0.62;
+    const er = Math.min(ex.w * 0.32, 0.16);
+    ext.add(at(cyl(er, er, eh, '#c0392b', { seg: 18 }), 0, 0, 0));
+    ext.add(at(sphere(er, '#c0392b', { seg: 14 }), 0, eh / 2, 0));
+    ext.add(at(cyl(er * 0.35, er * 0.45, er * 0.9, '#2a2830', { seg: 10 }), 0, eh / 2 + er * 0.9, 0));
+    ext.add(at(box(er * 1.6, er * 0.25, er * 0.4, '#2a2830'), er * 0.4, eh / 2 + er * 1.35, 0));
+    const hose = at(cyl(er * 0.12, er * 0.12, eh * 0.8, '#1a1a1a', { edges: false }), er * 1.2, 0, er * 0.3);
+    hose.rotation.z = 0.08;
+    ext.add(hose, at(box(er * 2.2, er * 0.5, er * 0.3, '#5a5f6a'), 0, eh * 0.1, -er - 0.02));
+    ext.add(at(label('EXT-B-001', er * 1.6, er * 0.5, { color: '#1a1a1a', bg: '#f6efdc', bold: true, mono: true }), 0, -eh * 0.15, er + 0.005)); // i18n-ignore (étiquette d'inventaire)
+    ext.add(at(glow('#ff5a4a', er * 8, 0.12), 0, 0, -0.1));
+    s.spot('extincteur', at(ext, ex.x, ex.y - ex.h * 0.12, 0.25));
+    const exSign = s.fit([418, 150, 74, 96], 0.06);
+    const es = stSign('extincteur', exSign.w, exSign.h);
+    s.add(onTop(at(box(es.w * 1.03, es.h * 1.03, 0.02, '#3a3630', { shadow: false }), exSign.x, exSign.y, 0.06)));
+    s.add(onTop(at(es.mesh, exSign.x, exSign.y, 0.072), POSTER_ORDER + 1));
+
+    // ── emplacement au sol (trace de pot, lino plus clair) / M. Ficus posé dessus ──
+    const em = s.stand(s.rect('emplacement'));
+    const trace = new THREE.Group();
+    const sq = at(box(em.w * 0.55, 0.01, em.w * 0.55, '#7d8288', { edges: false, shadow: false }), 0, 0.012, 0);
+    const ring = at(torus(em.w * 0.14, 0.012, '#3a3e44'), 0, 0.02, 0);
+    ring.rotation.x = Math.PI / 2;
+    trace.add(sq, ring);
+    s.spot('emplacement', at(trace, em.x, 0, em.z));
+    const fc = s.stand(s.rect('ficus'));
+    const plant = at(ficus(fc.h * 0.9), em.x, 0, em.z, 0.5);
+    s.spot('ficus', plant);
+    s.animate((t) => (plant.rotation.z = Math.sin(t * 0.6) * 0.01));
+
+    // ── casier « STOCK B-7/12 » : armoire grise, étiquette GenAI ; porte entrouverte après le dénouement ──
+    const cz = 0.45;
+    const cs = s.fit(s.rect('casier'), cz);
+    const cab = new THREE.Group();
+    const cw = cs.w * 0.9;
+    const ch = cs.h * 0.95;
+    // caisson creux (fond, flancs, dessus, socle) : l'étagère se voit porte ouverte
+    const T = 0.05;
+    cab.add(at(box(T, ch, 0.7, '#6e7880'), -cw / 2 + T / 2, ch / 2, -0.35), at(box(T, ch, 0.7, '#6e7880'), cw / 2 - T / 2, ch / 2, -0.35));
+    cab.add(at(box(cw, T, 0.7, '#6e7880'), 0, ch - T / 2, -0.35), at(box(cw, 0.12, 0.7, '#4a5058'), 0, 0.06, -0.35));
+    // intérieur sombre (fond du casier) : visible quand la porte s'ouvre
+    cab.add(at(box(cw, ch, 0.02, '#2a2c30', { edges: false }), 0, ch / 2, -0.69));
+    // étagère et le formulaire (visible tant qu'il n'est pas pris)
+    cab.add(at(box(cw * 0.88, 0.03, 0.6, '#9aa2a8'), 0, ch * 0.5, -0.3));
+    const form = new THREE.Group();
+    // posé debout contre le fond, légèrement incliné : lisible depuis la caméra
+    form.add(at(box(cw * 0.55, cw * 0.72, 0.012, '#efe4c6'), 0, 0, 0));
+    form.add(at(label(tr('props.station.formB712'), cw * 0.42, cw * 0.14, { color: '#1a1a1a', bold: true }), 0, cw * 0.2, 0.008));
+    for (let i = 0; i < 4; i++) form.add(at(box(cw * 0.3, 0.012, 0.004, '#8a8070', { edges: false }), cw * 0.05, cw * (0.02 - i * 0.09), 0.008));
+    form.rotation.x = -0.12;
+    const formObj = at(form, 0, ch * 0.5 + cw * 0.38, -0.45);
+    cab.add(formObj);
+    s.when({ flags: ['st_couloir_resolu'], notFlags: ['st_formulaire'] }, formObj);
+    const formGlow = at(glow('#fff2c0', cw * 1.2, 0.3), 0, ch * 0.5 + 0.1, 0);
+    cab.add(formGlow);
+    s.when({ flags: ['st_couloir_resolu'], notFlags: ['st_formulaire'] }, formGlow);
+    s.animate((t) => (formGlow.material.opacity = 0.22 + Math.sin(t * 2.2) * 0.08));
+    // porte pivotante (charnière à droite : elle s'ouvre vers la caméra sans masquer l'étagère), étiquette GenAI
+    const hinge = new THREE.Group();
+    hinge.position.set(cw / 2, ch / 2, 0.02);
+    const leaf = new THREE.Group();
+    leaf.add(at(box(cw, ch, 0.04, '#7c8794'), -cw / 2, 0, 0));
+    for (let i = 0; i < 4; i++) leaf.add(at(box(cw * 0.5, 0.02, 0.01, '#4a5058', { edges: false }), -cw / 2, ch * 0.32 - i * 0.06, 0.025));
+    const st = stSign('stock', cw * 0.8, ch * 0.22);
+    leaf.add(at(st.mesh, -cw / 2, ch * 0.18, 0.025));
+    leaf.add(at(box(0.04, 0.2, 0.05, '#c9ced6'), -cw * 0.88, -ch * 0.02, 0.04));
+    hinge.add(leaf);
+    cab.add(hinge);
+    let open = 0;
+    s.animate(() => {
+      open += ((s.is(RESOLU) ? 1 : 0) - open) * 0.06;
+      hinge.rotation.y = open * 1.9;
+    });
+    s.spot('casier', at(cab, cs.x, 0, cz));
+
+    bobHere(s);
+
+    // ── porte de gauche : retour au Guichet d'Accueil ──
+    const d = s.fitX(s.rect('vers_guichet'), -9);
+    const door = new THREE.Group();
+    door.add(at(box(0.3, d.h, d.d * 1.12, '#3e3448'), 0, 0, 0), at(box(0.1, d.h * 0.94, d.d, '#7c6e86'), 0.15, -d.h * 0.03, 0));
+    s.add(at(door, -9, d.y, d.z));
+    const wsign = at(label(tr('props.station.reception2'), d.d * 1.1, 0.35, { color: '#f6efdc', bg: '#8a6db0', bold: true }), -8.95, d.y + d.h / 2 + 0.3, d.z);
+    wsign.rotation.y = Math.PI / 2;
+    s.add(wsign, at(pool('#d8f0ff', 3, 2, 0.08), 0, 0.01, 4));
   },
 };

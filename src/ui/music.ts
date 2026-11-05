@@ -161,6 +161,7 @@ const SCENE_THEME: Record<string, ThemeId> = {
   'st-attente': 'couloir',
   'st-cafeteria': 'couloir',
   'st-guichet': 'couloir',
+  'st-couloir-b': 'couloir',
 };
 export function themeForScene(id: string): ThemeId {
   return SCENE_THEME[id] ?? 'couloir';

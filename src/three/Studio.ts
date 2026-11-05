@@ -33,6 +33,7 @@ export const GENAI_ICONS = new Set([
   'ticket_9848',
   'plante',
   'plan_station',
+  'formulaire',
 ]);
 const genaiIconUrl = (id: string) => `${import.meta.env.BASE_URL}inventory/${id}.png`;
 /** Variante d'icône GenAI : la première règle dont les flags sont tous posés (et aucun `notFlags`) gagne. */

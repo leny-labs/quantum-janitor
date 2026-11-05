@@ -179,15 +179,15 @@ export const fr = {
       /** Tampon de l'aspiration dans la faille (bouton « Chapitre 1 → »). */
       transfer: 'TRANSFÉRÉ',
     },
-    /** Fin provisoire du chapitre 1 (stub : la suite de la Station n'existe pas encore). */
+    /** Fin de l'Acte I du chapitre 1 (Accueil : B-7/12 trouvé dans le Couloir Infini B ; la suite de la Station n'existe pas encore). */
     ch1: {
-      location: 'STATION BUREAUCRATIQUE  ·  SAS D’ARRIVÉE',
-      jurisdiction: 'JURIDICTION : TOUTES · GUICHET OUVERT DE 10 H 12 À 10 H 14',
-      stub: 'GUICHET FERMÉ\nFORMULAIRE B-7/12 MANQUANT',
-      stamp: 'EN ATTENTE',
+      location: 'STATION BUREAUCRATIQUE  ·  AILE B',
+      jurisdiction: 'JURIDICTION : TOUTES · BUREAUX OUVERTS DÈS QUE LE RÈGLEMENT LE PERMETTRA',
+      stub: 'FORMULAIRE B-7/12 OBTENU\nCINQ CASES À REMPLIR',
+      stamp: 'VU',
       toBeContinued: 'LA SUITE ARRIVE…',
-      next: 'LA SUITE DU CHAPITRE 1 EST EN COURS DE TRAITEMENT',
-      thanks: 'Merci d’avoir joué les premières salles de la Station. Ticket de douane et M. Ficus : à suivre. Dossier complet à 2 %.',
+      next: 'FIN DE L’ACTE I · LES BUREAUX DE L’AILE B SONT EN COURS DE TRAITEMENT',
+      thanks: 'Merci d’avoir joué l’Acte I de la Station. Couloir dénoué, B-7/12 en poche. Ticket de douane et M. Ficus : à suivre. Dossier complet à 20 %.',
     },
   },
   /** Plan de la Station (src/ui/StationMap.ts, docs/CHAPTER1.md §4.1). */
@@ -368,6 +368,14 @@ export const fr = {
       closed: 'FERMÉ',
       planIcon: 'PLAN',
       ficusTag: 'MEMBRE HON. DU C…',
+      /** Couloir Infini B (stCouloirB) : lecteur ouvert par la demande 47bis, plaques des portes après le dénouement. */
+      wingBReaderOk: '47BIS\nACCÈS OK',
+      reception2: 'ACCUEIL',
+      officeArchives: 'ARCHIVES',
+      officeStamps: 'TAMPONS',
+      officeComplaints: 'RÉCLAMATIONS',
+      toBeContinued: 'À SUIVRE',
+      formB712: 'B-7/12',
     },
     cockpit: {
       plate: 'CAPSULE DE SERVICE CS-07\nÉQUIPAGE PRÉVU : 12 · PLACES : 1\nINSTALLÉE PAR LE MOINS-DISANT',

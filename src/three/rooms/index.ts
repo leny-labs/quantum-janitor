@@ -9,7 +9,7 @@ import { galerie } from './galerie';
 import { labo } from './labo';
 import { nid } from './nid';
 import { placard } from './placard';
-import { stAttente, stCafeteria, stGuichet, stSas } from './station';
+import { stAttente, stCafeteria, stCouloirB, stGuichet, stSas } from './station';
 import { temple } from './temple';
 
 export interface RoomBuild {
@@ -44,6 +44,7 @@ export const ROOMS: Record<string, RoomBuild> = {
   'st-attente': stAttente,
   'st-cafeteria': stCafeteria,
   'st-guichet': stGuichet,
+  'st-couloir-b': stCouloirB,
 };
 
 /**
