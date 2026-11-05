@@ -1989,8 +1989,9 @@ export const stSousChef: RoomBuild = {
     s.spot('fax', at(fax, fx.x, top + 0.06, zb + 0.05));
 
     const g = s.fit(s.rect('delaigue'), zg);
-    const base = top - 0.2;
-    const h = Math.min(g.y + g.h / 2 - base, (g.w * 1.25) / DELAIGUE_ASPECT);
+    const base = top - 0.12; // réduit, on remonte un peu le buste pour garder les épaules au-dessus du plateau
+    // ×0.72 : à pleine taille sa tête mangeait la moitié du placard (cf. fix Mme Guichard)
+    const h = Math.min(g.y + g.h / 2 - base, (g.w * 1.25) / DELAIGUE_ASPECT) * 0.72;
     const npc = billboardSheet(DELAIGUE_SHEET, 2, h, DELAIGUE_ASPECT, { tint: '#fff6ec', shadow: 0.01 });
     const sp = npc.userData.sprite as THREE.Sprite;
     const sy = sp.scale.y;
@@ -1998,11 +1999,50 @@ export const stSousChef: RoomBuild = {
     // « Z z z » qui monte tant qu'il dort
     const zzz = at(label(tr('props.station.zzz'), 0.5, 0.25, { color: '#f6efdc', bold: true }), g.x + 0.6, base + h * 0.85, zg + 0.1);
     s.when({ notFlags: ['st_delaigue_reveille'] }, zzz);
+    // bave 3D (effacée de la planche) : un filet qui s'étire au coin de la bouche en se balançant,
+    // une goutte qui grossit au bout, lâche, tombe, et le filet se rétracte — boucle de ~3,4 s.
+    const DROOL = { u: 365 / 764 - 0.5, v: 1 - 377 / 768 }; // coin de la bouche dans la cellule 0
+    const slime = new THREE.MeshBasicMaterial({ color: '#e8f4ff', transparent: true, opacity: 0.85, depthTest: false });
+    const rimMat = new THREE.MeshBasicMaterial({ color: '#2a3440', transparent: true, opacity: 0.55, depthTest: false });
+    const drool = new THREE.Group();
+    drool.renderOrder = 5;
+    const strand = new THREE.Group(); // pivot au coin de la bouche, filet vers -y (longueur 1, mise à l'échelle)
+    const sw = h * 0.009;
+    const strandIn = at(new THREE.Mesh(new THREE.CylinderGeometry(sw * 0.7, sw, 1, 8), slime), 0, -0.5, 0);
+    const strandRim = at(new THREE.Mesh(new THREE.CylinderGeometry(sw * 1.25, sw * 1.5, 1, 8), rimMat), 0, -0.5, -0.002);
+    strand.add(strandRim, strandIn);
+    const drop = new THREE.Group();
+    drop.add(new THREE.Mesh(new THREE.SphereGeometry(sw * 1.9, 12, 10), rimMat), at(new THREE.Mesh(new THREE.SphereGeometry(sw * 1.55, 12, 10), slime), 0, 0, 0.003));
+    drop.add(at(new THREE.Mesh(new THREE.SphereGeometry(sw * 0.45, 6, 6), new THREE.MeshBasicMaterial({ color: '#ffffff', depthTest: false })), -sw * 0.5, sw * 0.5, sw * 1.6));
+    const falling = drop.clone();
+    drool.add(strand, drop, falling);
+    for (const o of [strandIn, strandRim, ...drop.children, ...falling.children]) o.renderOrder = 5;
+    npc.add(drool);
+    s.when({ notFlags: ['st_delaigue_reveille'] }, drool);
     s.animate((t) => {
       const awake = s.is(REVEILLE);
       npc.userData.setFrame(awake ? 1 : 0);
       // endormi : grosse respiration de ronfleur ; réveillé : respiration de fonctionnaire
       sp.scale.y = sy * (1 + Math.sin(t * (awake ? 1.1 : 0.7)) * (awake ? 0.006 : 0.018));
+      if (!awake) {
+        drool.position.set(DROOL.u * sp.scale.x, (DROOL.v - 0.008) * sp.scale.y, 0.02);
+        const P = 3.4;
+        const k = (t % P) / P; // 0→0,75 : s'étire ; 0,75→1 : la goutte tombe, le filet remonte
+        const stretch = k < 0.75 ? 0.25 + (k / 0.75) ** 1.6 : 1.25 - ((k - 0.75) / 0.25) * 0.95;
+        const len = h * 0.075 * stretch * (1 + Math.sin(t * 0.7) * 0.12); // il respire, le filet suit
+        const sway = Math.sin(t * 2.3) * 0.18 + Math.sin(t * 0.7) * 0.06;
+        strand.scale.set(1, len, 1);
+        strand.rotation.z = sway;
+        drop.position.set(Math.sin(sway) * len, -Math.cos(sway) * len, 0);
+        drop.scale.setScalar(k < 0.75 ? 0.55 + (k / 0.75) * 0.6 : 0.5);
+        falling.visible = k >= 0.75;
+        if (falling.visible) {
+          const f = (k - 0.75) / 0.25;
+          const tip = h * 0.075 * 1.25;
+          falling.position.set(Math.sin(sway) * tip, -tip - f * f * h * 0.2, 0);
+          falling.scale.set(1.1 * (1 - f), (1.1 + f * 0.6) * (1 - f * 0.8), 1); // s'écrase sur le menton
+        }
+      }
       const k = (t * 0.3) % 1;
       zzz.position.y = base + h * (0.8 + k * 0.25);
       (zzz.material as THREE.MeshBasicMaterial).opacity = 1 - k;
