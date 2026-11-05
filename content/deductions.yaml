@@ -1,0 +1,40 @@
+# Carnet de déduction (ch.1) — déductions. docs/CHAPTER1.md « Carnet de déduction ».
+# Rapprocher deux pièces (indices de content/clues.yaml ou conclusions ci-dessous, ordre libre).
+#   needs  [a, b] — ou une liste de paires alternatives [[a, b], [a, c]]
+#   set    flag posé quand la déduction est validée (= sauvegarde) ; la conclusion devient une
+#          pièce combinable à son tour (section « CONCLUSIONS » du carnet)
+#   line   réplique affichée sous la conclusion (« bob: … », « narrateur: … » ou Gary)
+# Mauvaise paire : réplique absurde (src/i18n, carnet.rejected), aucune pénalité.
+deductions:
+  - id: d_minute
+    needs: [horloge_1011, horaires]
+    set: st_deduit_minute
+    title: { fr: "La minute manquante", en: "The missing minute" }
+    text:
+      fr: "L'horloge marque 10 h 11. Le guichet ouvre à 10 h 12. Entre le formulaire et moi, il n'y a ni dossier ni règlement : il y a une minute. Une seule. Coincée depuis 1985."
+      en: "The clock says 10:11. The desk opens at 10:12. Between me and the form there's no file, no regulation: there's one minute. Just one. Stuck since 1985."
+    line:
+      fr: "bob: Une minute de retard en quarante et un ans, Gary. Pour un service public, c'est presque de la ponctualité."
+      en: "bob: One minute late in forty-one years, Gary. For a public service, that's practically punctual."
+
+  - id: d_horloge
+    needs: [[d_minute, horloge_tremble], [d_minute, eclat]]
+    set: st_deduit_horloge
+    title: { fr: "L'improbable pousse l'aiguille", en: "The improbable pushes the hand" }
+    text:
+      fr: "Il est impossible que l'horloge avance. Donc il faut quelque chose d'improbable. J'en ai un dans la poche. Elle a tremblé parce que je visais au hasard : il faut viser la minute, pile quand la trotteuse hésite."
+      en: "The clock cannot possibly move. So it takes something improbable. I have one in my pocket. It trembled because I aimed at random: I have to aim at the minute, right when the second hand dithers."
+    line:
+      fr: "bob: Éclat sur l'horloge, au bon moment. Si ça marche, je te tiens la laisse jusqu'au guichet. Si ça rate, je dirai que je ne te connais pas."
+      en: "bob: Shard on the clock, at the right moment. If it works, I'll hold your leash all the way to the desk. If it fails, I'll say I don't know you."
+
+  - id: d_formulaire
+    needs: [guichet_ouvert, guichard_rupture]
+    set: st_deduit_formulaire
+    title: { fr: "Formulaire B-7/12 requis", en: "Form B-7/12 required" }
+    text:
+      fr: "Le guichet est ouvert, mais il n'a rien à donner : le B-7/12 est en rupture, et le dernier est derrière la porte de l'Aile B — qui exige le B-7/12. Ce n'est pas un problème. C'est une boucle. Il faudra la couper quelque part."
+      en: "The desk is open, but it has nothing to give: B-7/12 is out of stock, and the last copy is behind the Wing B door — which requires B-7/12. That's not a problem. It's a loop. Somebody will have to cut it somewhere."
+    line:
+      fr: "narrateur: Gary souligne « boucle » deux fois. Puis une troisième, pour le principe."
+      en: "narrateur: Gary underlines “loop” twice. Then a third time, on principle."

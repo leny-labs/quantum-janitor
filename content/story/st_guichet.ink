@@ -4,6 +4,10 @@
 // `st_stub_fin` (st_fin.ink) reste l'endKnot nominal du ch.1 mais n'est plus joué par la porte.
 
 === st_guichard ===
+// 10 h 12 (éclat sur l'horloge après la déduction du carnet) : le guichet est ouvert
+{ has_flag("st_guichet_ouvert"):
+    -> st_guichard_ouvert
+}
 { not has_flag("st_guichard_ferme"):
     Derrière la vitre, Mme Guichard mâche. Elle ne lève pas les yeux.
     guichard: C'est fermé.
@@ -58,6 +62,33 @@ gary: Et le formulaire ?
 guichard: Au guichet. # set: st_guichard_ticket
 -> END
 
+// Guichet ouvert (st_guichet_ouvert) : elle prend le ticket… et le B-7/12 est en rupture.
+// Pose st_guichard_rupture (indice du carnet → déduction « Formulaire B-7/12 requis »).
+=== st_guichard_ouvert ===
+{ has_flag("st_guichard_rupture"):
+    guichard: Toujours en rupture. Le réassort est prévu. Revenez au réassort.
+    bob: Elle a dit « prévu », Gary. Comme le guichet 2. # mood: sad
+    -> END
+}
+Le rideau est en haut. Mme Guichard a posé son sandwich sur une pile de dossiers. Elle regarde l'afficheur, puis Gary.
+guichard: 9 848 ?
+{ has_item("ticket_9848"):
+    Gary glisse le ticket sous la vitre. Elle le prend du bout des doigts, le retourne, le tamponne « VU » et le rend. CLONK. # shake
+- else:
+    gary: C'est nous. Le ticket est dans ma poche. Quelque part.
+}
+guichard: Les animaux s'adressent au propriétaire.
+bob: C'est moi. Bonjour, madame. Je voudrais un Formulaire B-7/12, s'il vous plaît. # mood: love
+guichard: Le B-7/12. Bien sûr.
+Elle ouvre un tiroir. Puis un deuxième. Puis le tiroir caché dans le deuxième tiroir.
+guichard: En rupture.
+gary: En rupture ? C'est du papier !
+guichard: En rupture de stock depuis 1985. Le réassort est prévu.
+guichard: Le dernier exemplaire est parti dans l'Aile B. Rien ne revient jamais de l'Aile B. Et il faut le formulaire pour y entrer.
+bob: Donc il faut le formulaire pour aller chercher le formulaire. # mood: surprised
+guichard: Voilà. Vous avez compris le règlement. C'est rare. # set: st_guichard_rupture
+-> END
+
 === st_bob_guichet ===
 { not has_flag("st_guichard_ferme"):
     bob: C'est elle, Gary. La personne qui décide. Enfin, la personne qui dit que ce n'est pas elle qui décide. # mood: surprised
@@ -76,6 +107,28 @@ guichard: Au guichet. # set: st_guichard_ticket
     bob: Il est très improbable que ce guichet ouvre un jour. Tu as quelque chose d'improbable sur toi ? Dans une poche ? Qui brille ? # mood: suspicious
     -> END
 }
-bob: L'horloge a tremblé, Gary. Elle n'est pas prête. Le formulaire non plus. Nous non plus. # mood: sad
-bob: La suite, c'est par l'horloge, puis par l'Aile B. Mais pas aujourd'hui. Aujourd'hui, on a un ticket, une plante et un sandwich en face de nous. C'est déjà beaucoup. # mood: love
+// indices gradués du carnet de déduction (touche C) : D1 puis D2, puis l'éclat au bon moment
+{ not has_flag("st_deduit_minute"):
+    bob: L'horloge a tremblé, Gary. Elle n'est pas prête parce que nous ne savons pas ce qu'on lui demande. # mood: sad
+    bob: Ouvre ton carnet. Mets l'horloge à côté des horaires. Les fonctionnaires appellent ça « faire le rapprochement ». Moi, j'appelle ça lire. # mood: calm
+    -> END
+}
+{ not has_flag("st_deduit_horloge"):
+    bob: Une minute manquante et une horloge qui a peur de l'éclat, Gary. Dans ton carnet, ces deux-là ont des choses à se dire. # mood: suspicious
+    -> END
+}
+{ not has_flag("st_guichet_ouvert"):
+    bob: Tu sais ce qu'il manque : une minute. Tu as de l'improbable en poche. Vise l'horloge, pile quand la trotteuse hésite. # mood: love
+    -> END
+}
+{ not has_flag("st_guichard_rupture"):
+    bob: Le guichet est ouvert, Gary ! Parle-lui avant 10 h 14 ! Montre-lui le ticket ! Vite, mais poliment ! # mood: surprised
+    -> END
+}
+{ not has_flag("st_deduit_formulaire"):
+    bob: Note ça au carnet, Gary : un guichet ouvert et un formulaire en rupture. Rapproche-les. Ça va te faire de la peine, mais c'est instructif. # mood: suspicious
+    -> END
+}
+bob: Le formulaire est derrière la porte qui exige le formulaire. Je n'ai jamais été aussi fier de cette Station. # mood: love
+bob: La suite, c'est par l'Aile B. Mais pas aujourd'hui. Aujourd'hui, on a ouvert un guichet. Personne n'avait fait ça depuis 1985. # mood: calm
 -> END

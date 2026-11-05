@@ -13,6 +13,7 @@ import { CHAPTERS } from '../src/engine/walkthrough';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseStationMap } from '../src/engine/stationMap';
+import { CLUE_PICTOS, deductionPairs, parseClues, parseDeductions, type ClueDef, type DeductionDef } from '../src/engine/clues';
 import { ROOT, readRawContent } from './readContent';
 
 const END_SCENE_ID = 'fin';
@@ -249,6 +250,76 @@ for (const it of content.items.values()) {
     }
   }
   for (const id of content.scenes.keys()) if (id.startsWith('st-') && !seen.has(id)) warn(`${w} : la scène « ${id} » n'apparaît pas sur la carte`);
+}
+
+// ── Carnet de déduction (content/clues.yaml + deductions.yaml, docs/CHAPTER1.md) ─────
+{
+  const ids = new Set<string>();
+  const icon = (i: string | undefined, where: string) => {
+    if (!i) return;
+    if (i.startsWith('item:')) {
+      if (!content.items.has(i.slice(5))) err(`${where}.icon : objet inconnu « ${i.slice(5)} »`);
+    } else if (!(CLUE_PICTOS as readonly string[]).includes(i)) err(`${where}.icon : pictogramme « ${i} » inconnu (attendus : ${CLUE_PICTOS.join(', ')}, item:<id>)`);
+  };
+  const text = (t: { fr?: string; en?: string } | undefined, what: string, where: string) => {
+    if (!t?.fr) err(`${where} : ${what}.fr manquant`);
+    else if (!t.en) warn(`${where} : ${what}.en manquant (retombe sur le français)`);
+  };
+  let clues: ClueDef[] = [];
+  let deductions: DeductionDef[] = [];
+  try {
+    clues = parseClues(readFileSync(join(ROOT, 'content', 'clues.yaml'), 'utf8'));
+    deductions = parseDeductions(readFileSync(join(ROOT, 'content', 'deductions.yaml'), 'utf8'));
+  } catch (e) {
+    err(`clues.yaml / deductions.yaml : YAML invalide (${(e as Error).message})`);
+  }
+  for (const c of clues) {
+    const w = `clues.yaml › ${c.id}`;
+    if (!c.id) err('clues.yaml : indice sans id');
+    if (ids.has(c.id)) err(`${w} : id en double`);
+    ids.add(c.id);
+    text(c.title, 'title', w);
+    text(c.text, 'text', w);
+    icon(c.icon, w);
+    if (!c.when || !Object.keys(c.when).length) err(`${w} : condition « when » vide`);
+    checkCondition(c.when, `${w}.when`);
+  }
+  const sets = new Set<string>();
+  for (const d of deductions) {
+    const w = `deductions.yaml › ${d.id}`;
+    if (!d.id) err('deductions.yaml : déduction sans id');
+    if (ids.has(d.id)) err(`${w} : id en double (indices et déductions partagent les ids)`);
+    ids.add(d.id);
+  }
+  for (const d of deductions) {
+    const w = `deductions.yaml › ${d.id}`;
+    text(d.title, 'title', w);
+    text(d.text, 'text', w);
+    if (d.line) text(d.line, 'line', w);
+    icon(d.icon, w);
+    if (!d.set) err(`${w} : flag « set » manquant`);
+    else {
+      if (sets.has(d.set)) err(`${w} : flag « ${d.set} » déjà posé par une autre déduction`);
+      sets.add(d.set);
+      note(flagsSet, d.set, w);
+    }
+    const pairs = Array.isArray(d.needs) ? deductionPairs(d) : [];
+    if (!pairs.length) err(`${w} : « needs » doit être [a, b] ou [[a, b], …]`);
+    for (const p of pairs) {
+      if (!Array.isArray(p) || p.length !== 2 || p[0] === p[1]) err(`${w}.needs : paire invalide ${JSON.stringify(p)}`);
+      for (const id of p ?? []) {
+        if (!ids.has(id)) err(`${w}.needs : pièce inconnue « ${id} »`);
+        if (id === d.id) err(`${w}.needs : une déduction ne peut pas se citer elle-même`);
+      }
+    }
+  }
+  // deux déductions sur la même paire : la seconde serait inatteignable
+  const seenPairs = new Map<string, string>();
+  for (const d of deductions) for (const p of deductionPairs(d)) {
+    const k = [...p].sort().join('+');
+    if (seenPairs.has(k)) err(`deductions.yaml › ${d.id} : paire ${k} déjà utilisée par « ${seenPairs.get(k)} »`);
+    seenPairs.set(k, d.id);
+  }
 }
 
 // ── Références croisées ────────────────────────────────────────────────

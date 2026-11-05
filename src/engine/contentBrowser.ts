@@ -10,6 +10,8 @@ const ink = import.meta.glob('/content/story/*.ink', { query: '?raw', import: 'd
 const locales = import.meta.glob('/content/locales/*.yaml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 import items from '/content/items.yaml?raw';
 import game from '/content/game.yaml?raw';
+import clues from '/content/clues.yaml?raw';
+import deductions from '/content/deductions.yaml?raw';
 
 import stationMapYaml from '/content/station-map.yaml?raw';
 import { parseStationMap, type StationMap } from './stationMap';
@@ -18,7 +20,7 @@ import { parseStationMap, type StationMap } from './stationMap';
 export const STATION_MAP: StationMap = parseStationMap(stationMapYaml);
 
 export function loadContent(): GameContent {
-  const content = parseContent({ scenes, ink, items, game });
+  const content = parseContent({ scenes, ink, items, game, clues, deductions });
   const file = locales[`/content/locales/${lang()}.yaml`];
   if (file) localizeContent(content, parseCatalog(file));
   return content;

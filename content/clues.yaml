@@ -1,0 +1,112 @@
+# Carnet de déduction (ch.1) — indices. docs/CHAPTER1.md « Carnet de déduction ».
+# Un indice est noté au carnet dès que `when` est vrai (flags / objets déjà posés par les looks
+# et les dialogues) : rien à stocker, sauvegardes et ?flags= marchent tels quels.
+#   id     clé stable (unique, partagée avec les ids de content/deductions.yaml)
+#   title  / text : { fr, en } (le français est la source, l'anglais facultatif)
+#   icon   pictogramme dessiné (clock, schedule, display, ticket, skeleton, stamp, speech, shard,
+#          map, form, shutter) ou `item:<id>` (icône d'inventaire existante)
+#   when   condition (flags, notFlags, items, notItems) — tous les indices exigent la Station (flag st) ; éclat et plan : après l'arrivée (st_arrive)
+clues:
+  - id: ticket_9848
+    icon: item:ticket_9848
+    when: { flags: [st_ticket_9848] }
+    title: { fr: "Ticket n° 9 848", en: "Ticket no. 9,848" }
+    text:
+      fr: "Le ticket de M. Patience, aspiré par B.O.B. C'est le suivant. Ça fait quarante et un ans que c'est le suivant."
+      en: "Mr Patience's ticket, vacuumed up by B.O.B. It's next. It has been next for forty-one years."
+
+  - id: afficheur_9847
+    icon: display
+    when: { flags: [st_voit_afficheur] }
+    title: { fr: "Afficheur : EN COURS 9 847", en: "Display: NOW SERVING 9,847" }
+    text:
+      fr: "Les afficheurs de l'attente et du guichet sont bloqués sur 9 847. Synchronisés. Sur l'immobilité."
+      en: "The waiting-room and desk displays are stuck on 9,847. Synchronised. On standing still."
+
+  - id: patience
+    icon: skeleton
+    when: { flags: [st_voit_patience] }
+    title: { fr: "M. Patience (squelette)", en: "Mr Patience (skeleton)" }
+    text:
+      fr: "Un usager mort en attendant son tour, ticket 9 848 en main. Il a attendu plus longtemps que sa propre chair."
+      en: "A customer who died waiting his turn, ticket 9,848 in hand. He outwaited his own flesh."
+
+  - id: horloge_1011
+    icon: clock
+    when: { flags: [st_voit_horloge] }
+    title: { fr: "Horloge : 10 h 11", en: "Clock: 10:11" }
+    text:
+      fr: "L'horloge du guichet marque 10 h 11. La trotteuse hésite sur la 59e seconde. Depuis 1985."
+      en: "The desk clock says 10:11. The second hand dithers on the 59th second. Since 1985."
+
+  - id: horaires
+    icon: schedule
+    when: { flags: [st_voit_horaires] }
+    title: { fr: "Horaires : 10 h 12 – 10 h 14", en: "Hours: 10:12 – 10:14" }
+    text:
+      fr: "« GUICHET OUVERT DE 10 H 12 À 10 H 14. » Deux minutes d'ouverture par jour. En cas de fermeture, s'adresser au guichet."
+      en: "“DESK OPEN 10:12 TO 10:14.” Two minutes a day. In case of closure, please apply at the desk."
+
+  - id: horloge_tremble
+    icon: shard
+    when: { flags: [st_horloge_tremble] }
+    title: { fr: "L'horloge a peur de l'éclat", en: "The clock is afraid of the shard" }
+    text:
+      fr: "Devant l'éclat, la grande aiguille a tremblé vers 10 h 12… puis elle est retombée. CLAC. Elle a senti quelque chose."
+      en: "Faced with the shard, the minute hand trembled towards 10:12… then fell back. CLACK. It felt something."
+
+  - id: guichard_ferme
+    icon: speech
+    when: { flags: [st_guichard_ferme] }
+    title: { fr: "Mme Guichard : « C'est fermé. »", en: "Mrs Guichard: “We're closed.”" }
+    text:
+      fr: "« C'est pas moi qui décide. C'est l'horloge. Revenez à 10 h 12. » Avec le Formulaire B-7/12, qui se retire… au guichet."
+      en: "“It's not me who decides. It's the clock. Come back at 10:12.” With Form B-7/12, which you collect… at the desk."
+
+  - id: guichard_suivant
+    icon: speech
+    when: { flags: [st_guichard_ticket] }
+    title: { fr: "Mme Guichard : « C'est le suivant. »", en: "Mrs Guichard: “That's next.”" }
+    text:
+      fr: "Le 9 848 est bien le suivant. Mais l'afficheur est au 9 847, et elle « ne prend pas d'avance ». Article 12 : les animaux passent après."
+      en: "9,848 really is next. But the display says 9,847 and she “doesn't jump ahead”. Article 12: animals go after."
+
+  - id: sabot_permis
+    icon: stamp
+    when: { flags: [st_sabot_vu] }
+    title: { fr: "M. Sabot : ticket + permis", en: "Mr Sabot: ticket + permit" }
+    text:
+      fr: "Le gardien de la fourrière rendra le vaisseau contre le ticket d'entrée et le permis de la Direction. Tamponné. Évidemment."
+      en: "The pound keeper will release the ship for the entry ticket and a permit from the Directorate. Stamped. Obviously."
+
+  - id: plan_station
+    icon: item:plan_station
+    when: { flags: [st_arrive], items: [plan_station] }
+    title: { fr: "Plan de la Station (1987)", en: "Station map (1987)" }
+    text:
+      fr: "Dépliant d'accueil, édition 1987. L'Aile B, l'Ascenseur à Formulaires, la Direction au niveau 12. Tout est « ACCÈS REFUSÉ », mais c'est imprimé en couleur."
+      en: "Welcome leaflet, 1987 edition. Wing B, the Form Elevator, the Directorate on level 12. All “ACCESS DENIED”, but printed in colour."
+
+  - id: eclat
+    icon: item:fragment
+    when: { flags: [st_arrive], items: [fragment] }
+    title: { fr: "Éclat du Réacteur (1/4096)", en: "Reactor shard (1/4096)" }
+    text:
+      fr: "Un morceau d'improbabilité pure, dans ma poche. Là où il passe, les choses qui ne devraient pas arriver arrivent. Parfois."
+      en: "A chunk of pure improbability, in my pocket. Wherever it goes, things that shouldn't happen happen. Sometimes."
+
+  - id: guichet_ouvert
+    icon: shutter
+    when: { flags: [st_guichet_ouvert] }
+    title: { fr: "10 h 12 : guichet ouvert", en: "10:12: desk open" }
+    text:
+      fr: "L'aiguille a franchi la minute. Le rideau est remonté, l'afficheur est passé au 9 848. Il reste deux minutes réglementaires."
+      en: "The hand crossed the minute. The shutter went up, the display moved to 9,848. Two regulation minutes remain."
+
+  - id: guichard_rupture
+    icon: form
+    when: { flags: [st_guichard_rupture] }
+    title: { fr: "Mme Guichard : « En rupture. »", en: "Mrs Guichard: “Out of stock.”" }
+    text:
+      fr: "Le Formulaire B-7/12 est en rupture depuis 1985. Le dernier exemplaire est parti dans l'Aile B. Il faut le formulaire pour entrer dans l'Aile B."
+      en: "Form B-7/12 has been out of stock since 1985. The last copy went into Wing B. You need the form to get into Wing B."

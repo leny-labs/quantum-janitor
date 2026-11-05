@@ -2,6 +2,7 @@
 // ce fichier est partagé avec tools/validate-content.ts.
 
 import type { PropSfx } from './propSfx';
+import type { Carnet } from './clues';
 
 export type Rect = [x: number, y: number, w: number, h: number];
 
@@ -155,6 +156,8 @@ export interface GameContent {
   characters: Map<string, CharacterDef>;
   startScene: string;
   inkSource: string;
+  /** Carnet de déduction (ch.1, engine/clues.ts) : indices et déductions. */
+  carnet?: Carnet;
 }
 
 export interface SaveData {

@@ -2,6 +2,7 @@
 import { parse } from 'yaml';
 import type { Action, CharacterDef, GameContent, Interaction, ItemDef, SceneDef } from './types';
 import { guessUseIcon } from './verbs';
+import { parseClues, parseDeductions } from './clues';
 
 export interface RawContent {
   /** chemin → texte YAML */
@@ -10,6 +11,9 @@ export interface RawContent {
   game: string;
   /** chemin → source Ink */
   ink: Record<string, string>;
+  /** Carnet de déduction (ch.1) : content/clues.yaml, content/deductions.yaml (facultatifs). */
+  clues?: string;
+  deductions?: string;
 }
 
 export interface InkFileSpan {
@@ -74,6 +78,7 @@ export function parseContent(raw: RawContent): GameContent {
     characters,
     startScene: game.startScene,
     inkSource: assembleInk(raw.ink).source,
+    carnet: { clues: raw.clues ? parseClues(raw.clues) : [], deductions: raw.deductions ? parseDeductions(raw.deductions) : [] },
   };
 }
 

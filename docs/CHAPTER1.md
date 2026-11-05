@@ -464,10 +464,46 @@ inventaire ; `npm run playthrough` passe ch0 inchangé + stub ch1.
   Le stub s'arrête **en salle** : la première conversation avec Mme Guichard (fermé, horloge,
   formulaire « au guichet ») pose `st_guichard_ferme` = `ChapterDef.endFlag` du ch1 (le playthrough
   vérifie ce flag). `endKnot` reste `st_stub_fin` (EndScene, non joué par la porte) → `st_suite` plus tard.
-  À faire : puzzle de l'horloge (éclat → 10 h 12, `st_guichet_ouvert`, rideau qui remonte),
-  formulaire B-7/12 (`st-formulaire`), couloir infini B.
+  Puzzle de l'horloge : fait, par le carnet de déduction (§9.2). À faire : formulaire B-7/12
+  (`st-formulaire`), couloir infini B.
 - Objets différés en poche à la fin du stub : `ticket_douane`, `plante` (« À suivre » dans leur
   `look`). Pas de salle vide : `st-couloir-b`, `st-fourriere`… restent dans ce document.
+
+### 9.2 Carnet de déduction
+
+Façon *Detective Grimoire* : bouton HUD « CARNET » (dossier à trombone, à gauche du PLAN ; touche
+**C** ou **N**), visible dès le premier indice noté ; pastille rouge + fiche « Noté au carnet »
+(jouée quand l'écran est libre) à chaque nouvel indice. Overlay `src/ui/Carnet.ts` : « CARNET DE
+CONSTATATIONS — FORMULAIRE D-0 (DÉDUCTIONS) · NE PAS PLIER », constatations + conclusions à
+gauche, fiche de lecture et emplacements **INDICE A + INDICE B → DÉDUIRE** à droite (clic = lire et
+poser ; re-clic = retirer ; Entrée = déduire). Échap / C / « Ranger » / clic dehors ferment.
+
+- **Données** : `content/clues.yaml` (indice = `id`, `title` / `text` `{fr, en}`, `icon` = pictogramme
+  dessiné ou `item:<id>`, `when` = condition sur flags / objets **déjà posés** par les looks et
+  dialogues) et `content/deductions.yaml` (`needs: [a, b]` ordre libre, ou liste de paires ;
+  `set: flag` ; `line` facultative affichée sous la conclusion). Moteur pur : `src/engine/clues.ts`.
+- **Persistance** : rien de neuf à sauver — indice noté = `when` vrai, conclusion = son flag `set`.
+  Sauvegardes, /creator, `?flags=` / `?items=` marchent tels quels ; pas de migration. Seul l'état
+  « nouveau » (pastille) est en mémoire. Une conclusion devient une pièce combinable.
+- **Mauvaise paire** : réplique absurde tirée au hasard (`carnet.rejected`, i18n), aucune pénalité.
+- **Chaîne de l'horloge** (étapes 7–9 de §6) :
+  - D1 « La minute manquante » = `horloge_1011` (`st_voit_horloge`) + `horaires` (`st_voit_horaires`,
+    posé par le look des horaires) → `st_deduit_minute`.
+  - D2 « L'improbable pousse l'aiguille » = D1 + `horloge_tremble` (`st_horloge_tremble`) — ou D1 +
+    `eclat` → `st_deduit_horloge`.
+  - Éclat sur l'horloge : sans D2, elle tremble (comme avant) ; avec D2 → 10 h 12,
+    `st_guichet_ouvert` : la grande aiguille passe, le rideau du guichet 1 remonte, pancarte OUVERT,
+    afficheur 9 848 (props 3D pilotés par le flag, `stGuichet`). Le flag reste posé (pas encore
+    d'`onExit` qui le remet à faux, cf. §10).
+  - Mme Guichard (guichet ouvert, `st_guichard_ouvert`) tamponne le ticket « VU » et annonce le
+    B-7/12 **en rupture** — dernier exemplaire dans l'Aile B, qui exige le B-7/12 → `st_guichard_rupture`.
+  - D3 « Formulaire B-7/12 requis » = `guichet_ouvert` + `guichard_rupture` → `st_deduit_formulaire`
+    (indice seulement ; le lecteur de l'Aile B a une réplique nouvelle). Pas de `st-couloir-b`.
+  - B.O.B. (`st_bob_guichet`) gradue : horloge tremblée → « ouvre ton carnet » ; D1 → rapprocher la
+    minute et l'éclat ; D2 → « vise l'horloge » ; guichet ouvert → « parle-lui » ; rupture → D3.
+- **Contrôles** : `validate-content` (ids uniques indices + déductions, pictos, conditions, paires
+  connues, flags `set` comptés comme posés) ; `playthrough` rejoue la chaîne (étapes `deduce` du
+  walkthrough) et vérifie rejet / ordre libre. L'`endFlag` du ch.1 reste `st_guichard_ferme`.
 
 ## 10. Notes techniques (pour plus tard)
 

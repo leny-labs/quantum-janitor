@@ -21,5 +21,7 @@ export function readRawContent(): RawContent {
     ink: readDir(join(CONTENT, 'story'), '.ink'),
     items: readFileSync(join(CONTENT, 'items.yaml'), 'utf8'),
     game: readFileSync(join(CONTENT, 'game.yaml'), 'utf8'),
+    clues: readFileSync(join(CONTENT, 'clues.yaml'), 'utf8'),
+    deductions: readFileSync(join(CONTENT, 'deductions.yaml'), 'utf8'),
   };
 }

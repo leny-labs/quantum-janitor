@@ -14,6 +14,7 @@ import { migrateSave, SAVE_VERSION } from '../src/engine/saveMigration';
 import type { SaveData } from '../src/engine/types';
 import { GameState } from '../src/engine/GameState';
 import { parseStationMap, zoneState } from '../src/engine/stationMap';
+import { concluded, deduce, hasCarnet, knownClues } from '../src/engine/clues';
 import { CHAPTERS, walkChapter } from '../src/engine/walkthrough';
 import { ROOT, readRawContent } from './readContent';
 
@@ -110,6 +111,25 @@ async function main() {
           const got = zoneState(state, zone(id), exists);
           if (got !== want) throw new Error(`carte : ${id} « ${got} » au lieu de « ${want} »`);
         }
+        // carnet de déduction : la chaîne de l'horloge ouvre le guichet (docs/CHAPTER1.md)
+        const carnet = content.carnet!;
+        const start = GameState.fromSave(checkpoints.find((c) => c.label.startsWith('début'))!.save);
+        if (hasCarnet(start, carnet)) throw new Error('carnet : aucun indice attendu à l\'arrivée dans l\'interlude');
+        const firstClue = checkpoints.find((c) => hasCarnet(GameState.fromSave(c.save), carnet));
+        if (!firstClue) throw new Error('carnet : jamais d\'indice noté');
+        for (const f of ['st_voit_horaires', 'st_deduit_minute', 'st_deduit_horloge', 'st_guichet_ouvert', 'st_guichard_rupture', 'st_deduit_formulaire']) {
+          if (!state.hasFlag(f)) throw new Error(`carnet : flag ${f} absent à la fin`);
+        }
+        // l'horloge ne s'ouvre pas sans la déduction D2
+        const tremble = checkpoints.find((c) => c.label === 'utiliser fragment sur horloge');
+        if (!tremble || tremble.save.flags.includes('st_guichet_ouvert') || !tremble.save.flags.includes('st_horloge_tremble')) throw new Error('carnet : l\'éclat sans déduction devait seulement faire trembler l\'horloge');
+        const d1 = checkpoints.find((c) => c.label === 'déduire horloge_1011 + horaires')!;
+        const atD1 = GameState.fromSave(d1.save);
+        if (deduce(atD1, carnet, 'horaires', 'horloge_1011').kind !== 'already') throw new Error('carnet : D1 devrait être conclue (ordre libre)');
+        if (deduce(atD1, carnet, 'ticket_9848', 'horaires').kind !== 'rejected') throw new Error('carnet : mauvaise paire acceptée');
+        if (deduce(atD1, carnet, 'guichet_ouvert', 'guichard_rupture').kind !== 'rejected') throw new Error('carnet : pièce non notée acceptée');
+        const clues = knownClues(state, carnet).length;
+        console.log(`✓ carnet : ${clues}/${carnet.clues.length} indices, ${concluded(state, carnet).length}/${carnet.deductions.length} conclusions, guichet ouvert à 10 h 12`);
       }
       if (chapter.endFlag) {
         if (!state.hasFlag(chapter.endFlag)) throw new Error(`fin provisoire non atteinte (flag ${chapter.endFlag} absent)`);

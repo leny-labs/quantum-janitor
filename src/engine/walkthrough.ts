@@ -8,6 +8,7 @@
 // sauvegarde après chaque étape).
 import { ActionRunner, type ActionHost } from './ActionRunner';
 import { resolveCombine } from './combine';
+import { deduce } from './clues';
 import { DialogueRunner, type DialogueView } from './DialogueRunner';
 import { GameState } from './GameState';
 import type { GameContent, Interaction, SaveData } from './types';
@@ -23,6 +24,8 @@ export type WalkStep =
   | { talk: string; pick?: number[] }
   | { useItem: [item: string, hotspot: string]; pick?: number[] }
   | { combine: [a: string, b: string] }
+  /** Carnet de déduction (ch.1) : rapprocher deux pièces (indices / conclusions, engine/clues.ts). */
+  | { deduce: [a: string, b: string] }
   | { go: string };
 
 /**
@@ -202,6 +205,15 @@ export const CHAPTERS: ChapterDef[] = [
       { look: 'horaires' },
       { useItem: ['ticket_9848', 'guichard'] }, // « c'est le suivant… de M. Patience » : animal, article 12
       { talk: 'guichard' }, // fermé, formulaire B-7/12 « au guichet » : fin provisoire du stub (st_guichard_ferme)
+      { section: 'Station · le Guichet — carnet de déduction (l\'horloge)' },
+      { useItem: ['fragment', 'horloge'] }, // l'aiguille tremble puis retombe (st_horloge_tremble)
+      { talk: 'bob' }, // « ouvre ton carnet » (indice gradué)
+      { deduce: ['horloge_1011', 'horaires'] }, // D1 « la minute manquante » (st_deduit_minute)
+      { deduce: ['d_minute', 'horloge_tremble'] }, // D2 « l'improbable pousse l'aiguille » (st_deduit_horloge)
+      { useItem: ['fragment', 'horloge'] }, // 10 h 12 : rideau levé, afficheur 9 848 (st_guichet_ouvert)
+      { talk: 'guichard' }, // ticket tamponné, B-7/12 « en rupture » (st_guichard_rupture)
+      { deduce: ['guichet_ouvert', 'guichard_rupture'] }, // D3 « Formulaire B-7/12 requis » (st_deduit_formulaire)
+      { look: 'lecteur' }, // la porte qui exige le formulaire qui est derrière la porte
     ],
   },
 ];
@@ -397,6 +409,14 @@ export async function walkChapter(content: GameContent, chapter: ChapterDef, opt
       label = `combiner ${a} + ${b}`;
       opts.onStep?.(label);
       await exec(label, resolveCombine(content, a, b));
+    } else if ('deduce' in s) {
+      const [a, b] = s.deduce;
+      label = `déduire ${a} + ${b}`;
+      opts.onStep?.(label);
+      const r = deduce(state, content.carnet ?? { clues: [], deductions: [] }, a, b);
+      if (r.kind !== 'ok') throw new Error(`déduction ${a} + ${b} : ${r.kind === 'already' ? 'déjà conclue' : 'rejetée (pièce non notée ou paire inconnue)'}`);
+      log(`  [carnet] ${r.deduction.title.fr}`);
+      state.setFlag(r.deduction.set);
     } else {
       label = `→ ${s.go}`;
       opts.onStep?.(label);
