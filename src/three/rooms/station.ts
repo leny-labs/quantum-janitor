@@ -939,12 +939,13 @@ export const stGuichet: RoomBuild = {
     const n = 16;
     for (let i = 0; i < n; i++) closed.add(at(box(w2 - 0.14, glassH / n - 0.012, 0.04, i % 2 ? '#8d939c' : '#9aa0a8', { edges: false }), 0, top + glassH * (1 - (i + 0.5) / n), 0));
     closed.add(at(box(w2 - 0.1, 0.07, 0.07, '#5a5f6a'), 0, top + 0.06, 0.01));
-    // cadenas accroché devant la barre de charge, posé sur le plateau du comptoir (dessus à top + 0,07,
-    // nez à zb + 0,125) : avant, centré à top + 0,02, il était noyé dans le plateau et on n'en voyait
-    // que des liserés. Corps au ras du plateau, anse qui enjambe la barre, nez à z ≈ zb + 0,1.
+    // cadenas accroché devant la barre de charge ET devant le nez du plateau du comptoir (plateau :
+    // y = top…top + 0,07, nez à zb + 0,125). Le rideau est à zb - 0,02 : z local 0,2 met la face arrière
+    // du corps à zb + 0,15, au-delà du nez, donc rien ne le coupe. Corps centré à top + 0,05 : il
+    // chevauche le rebord blanc, l'anse enjambe la barre de charge.
     const lock = new THREE.Group();
     lock.add(at(box(0.19, 0.16, 0.06, '#e8c26a'), 0, 0, 0), at(torus(0.06, 0.018, '#c9ced6'), 0, 0.1, -0.01));
-    closed.add(at(lock, 0, top + 0.07 + 0.085, 0.09));
+    closed.add(at(lock, 0, top + 0.05, 0.2));
     closed.add(at(label(tr('props.station.desk2'), w2 * 0.66, 0.42, { color: '#f6efdc', bg: '#3e3448', bold: true }), 0, top + glassH * 0.62, 0.03));
     s.spot('rideau', at(closed, x2, 0, zb - 0.02));
 
