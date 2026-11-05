@@ -114,6 +114,9 @@ export interface LabelOpts {
   bold?: boolean;
   mono?: boolean;
   align?: CanvasTextAlign;
+  /** Largeur d'une espace, en fraction de la taille de police : dessin glyphe à glyphe, bloc centré
+   *  optiquement (afficheurs LED « 9 847 » : en mono, l'espace ASCII fait un trou d'un chiffre entier). */
+  space?: number;
 }
 
 /** Texture de texte, à poser sur un plan de taille w × h (unités monde). */
@@ -134,7 +137,10 @@ export function textTexture(text: string, w: number, h: number, o: LabelOpts = {
   let size = o.size !== undefined ? (o.size * PX) / 128 : Math.min(c.height / (lines.length * 1.25), (48 * PX) / 128);
   // rétrécit le texte pour qu'il tienne en largeur
   g.font = font(size);
-  const widest = Math.max(...lines.map((l) => g.measureText(l).width));
+  // en mode `space`, une espace mesure size × space au lieu de sa chasse
+  const wid = (l: string) =>
+    o.space === undefined ? g.measureText(l).width : g.measureText(l.replace(/ /g, '')).width + (l.split(' ').length - 1) * size * o.space;
+  const widest = Math.max(...lines.map(wid));
   if (widest > c.width * 0.92) size *= (c.width * 0.92) / widest;
   g.font = font(size);
   g.fillStyle = o.color ?? '#ffffff';
@@ -142,7 +148,25 @@ export function textTexture(text: string, w: number, h: number, o: LabelOpts = {
   g.textBaseline = 'middle';
   const x = g.textAlign === 'left' ? size * 0.4 : c.width / 2;
   const lh = size * 1.2;
-  lines.forEach((l, i) => g.fillText(l, x, c.height / 2 + (i - (lines.length - 1) / 2) * lh));
+  if (o.space !== undefined) {
+    // glyphe à glyphe : espaces étroites, bloc centré sur son encre (pas sur la boîte de la police)
+    const sp = size * o.space;
+    const adv = (ch: string) => (ch === ' ' ? sp : g.measureText(ch).width);
+    g.textAlign = 'left';
+    g.textBaseline = 'alphabetic';
+    lines.forEach((l, i) => {
+      const chars = [...l];
+      const total = chars.reduce((a, ch) => a + adv(ch), 0);
+      const m = g.measureText(l.replace(/ /g, ''));
+      const cy = c.height / 2 + (i - (lines.length - 1) / 2) * lh;
+      let cx = c.width / 2 - total / 2;
+      const by = cy + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;
+      for (const ch of chars) {
+        if (ch !== ' ') g.fillText(ch, cx, by);
+        cx += adv(ch);
+      }
+    });
+  } else lines.forEach((l, i) => g.fillText(l, x, c.height / 2 + (i - (lines.length - 1) / 2) * lh));
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   // filtrage trilinéaire + anisotropie (bridée par le GPU) : net de biais et à distance

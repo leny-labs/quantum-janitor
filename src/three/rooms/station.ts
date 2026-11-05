@@ -337,7 +337,7 @@ export const stAttente: RoomBuild = {
     const board = new THREE.Group();
     board.add(at(box(af.w, af.h, 0.12, '#1a1418'), 0, 0, 0));
     board.add(at(label(tr('props.station.serving'), af.w * 0.9, af.h * 0.24, { color: '#ffd166', bold: true }), 0, af.h * 0.32, 0.07));
-    const digits = at(label('9 847', af.w * 0.8, af.h * 0.56, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true }), 0, -af.h * 0.1, 0.07);
+    const digits = at(label('9 847', af.w * 0.8, af.h * 0.56, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true, space: 0.28 }), 0, -af.h * 0.1, 0.07);
     board.add(digits, at(glow('#ff4f5a', af.w * 1.2, 0.18), 0, -af.h * 0.1, 0.1));
     s.spot('afficheur', at(board, af.x, af.y, 0.06));
 
@@ -854,7 +854,7 @@ export const stGuichet: RoomBuild = {
     board.add(at(box(af.w, af.h, 0.08, '#1a1418'), 0, 0, 0));
     board.add(at(label(tr('props.station.nowServing'), af.w * 0.4, af.h * 0.5, { color: '#ffd166', bold: true }), -af.w * 0.27, 0, 0.05));
     // 9 847 depuis 1985 ; 9 848 à 10 h 12 (flag st_guichet_ouvert)
-    const num = (n: string) => at(label(n, af.w * 0.5, af.h * 0.7, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true }), af.w * 0.22, 0, 0.05);
+    const num = (n: string) => at(label(n, af.w * 0.5, af.h * 0.7, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true, space: 0.28 }), af.w * 0.22, 0, 0.05);
     const n47 = num('9 847');
     const n48 = num('9 848');
     board.add(n47, n48, at(glow('#ff4f5a', af.w, 0.15), af.w * 0.22, 0, 0.08));
