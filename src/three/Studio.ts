@@ -34,6 +34,12 @@ export const GENAI_ICONS = new Set([
   'plante',
   'plan_station',
   'formulaire',
+  // Acte II (_briefs/acte2/genai/)
+  'tampon_annule',
+  'encreur',
+  'liasse',
+  'capsule',
+  'copies_dossier',
 ]);
 const genaiIconUrl = (id: string) => `${import.meta.env.BASE_URL}inventory/${id}.png`;
 /** Variante d'icône GenAI : la première règle dont les flags sont tous posés (et aucun `notFlags`) gagne. */
@@ -86,7 +92,7 @@ export const overlayUrl = (id: string) => `portraits/${id}-robot.png`;
  * parlant, jamais de bouche). M. Sabot : planche GenAI (clignement, agacé, bouche sous la moustache).
  * Mme Guichard (guichet) : planche v3 tirée d'une grille GenAI 3 × 2 (docs/PORTRAIT_GENAI.md).
  */
-const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png', sabot: 'portraits/sabot-portrait.png', guichard: 'portraits/guichard-portrait.png' };
+const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png', sabot: 'portraits/sabot-portrait.png', guichard: 'portraits/guichard-portrait.png', duplicata: 'portraits/duplicata-portrait.png', tamponnet: 'portraits/tamponnet-portrait.png' };
 
 /** Une frame de planche : expression + micro-mouvement du buste. */
 interface SheetFrame extends FacePose {
@@ -187,7 +193,7 @@ export const PORTRAIT_IDS = Object.keys(PORTRAITS);
  * Planches GenAI (docs/PORTRAIT_GENAI.md) : jamais rebakées, ni par
  * `bake:portraits` ni au runtime — le 3D suit l'image, pas l'inverse.
  */
-export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob', 'reine', 'scribe', 'sabot', 'guichard']);
+export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob', 'reine', 'scribe', 'sabot', 'guichard', 'duplicata', 'tamponnet']);
 
 function makeRenderer(): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });

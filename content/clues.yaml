@@ -133,5 +133,54 @@ clues:
     when: { flags: [st_formulaire] }
     title: { fr: "Le dernier B-7/12", en: "The last B-7/12" }
     text:
-      fr: "Trouvé dans le casier « STOCK B-7/12 », une fois le couloir dénoué par M. Ficus. Vierge. Cinq cases. Les bureaux de l'Aile B ouvriront « dès que le règlement le permettra »."
-      en: "Found in the “B-7/12 STOCK” locker once Mr Ficus untangled the corridor. Blank. Five boxes. The Wing B offices will open “as soon as regulations allow”."
+      fr: "Trouvé dans le casier « STOCK B-7/12 », une fois le couloir dénoué par M. Ficus. Vierge. Cinq cases. Les bureaux de l'Aile B sont ouverts « aux usagers munis d'un dossier »."
+      en: "Found in the “B-7/12 STOCK” locker once Mr Ficus untangled the corridor. Blank. Five boxes. The Wing B offices are open “to customers with a file”."
+
+  # Acte II « Humain, preuves à l'appui » : indices de contexte (le puzzle objet suffit, pas de déduction)
+  - id: aucun_gary
+    icon: speech
+    when: { flags: [st_cherche_gary] }
+    title: { fr: "« AUCUN GARY. AUCUN GARY. »", en: "“NO GARY. NO GARY.”" }
+    text:
+      fr: "M. Duplicata ne trouve aucun « PLUNK, GARY » aux Archives. Le fichier A–Z ne lit que les pièces d'identité : « il lit la pièce, pas la personne »."
+      en: "Mr Duplicata can't find any “PLUNK, GARY” in the Archives. The A–Z cabinet only reads ID: “it reads the document, not the person”."
+
+  - id: dossier_garry
+    icon: form
+    when: { flags: [st_dossier_trouve] }
+    title: { fr: "Dossier « PLUNK, GARRY »", en: "File “PLUNK, GARRY”" }
+    text:
+      fr: "Tiroir G, par le badge aux deux R : « STATUT : HUMAIN. INTÉRIMAIRE. RENOUVELABLE PAR PITIÉ. » L'original ne sort pas ; Duplicata garde le badge. Il faut des copies, et la photocopieuse n'a plus de papier."
+      en: "Drawer G, via the double-R badge: “STATUS: HUMAN. TEMP. RENEWABLE OUT OF PITY.” The original stays; Duplicata keeps the badge. I need copies, and the photocopier is out of paper."
+
+  - id: tampon_annule_trouve
+    icon: stamp
+    when: { flags: [st_tamponnet] }
+    title: { fr: "L'encre, c'était le café", en: "The ink was coffee" }
+    text:
+      fr: "Mme Tamponnet n'a plus d'encre depuis la grève : l'encre officielle, c'était le café de la machine de la pause, PERCO, déléguée du personnel. Elle m'a donné le tampon ANNULÉ, qui ne sert jamais."
+      en: "Mrs Tamponnet has had no ink since the strike: the official ink was coffee from PERCO, the break-room machine and staff delegate. She gave me the CANCELLED stamp, which is never used."
+
+  - id: chatiere_ouverte
+    icon: shutter
+    when: { flags: [st_chatiere] }
+    title: { fr: "Chatière « ANIMAUX DE SERVICE »", en: "“SERVICE ANIMALS” flap" }
+    text:
+      fr: "Aux Réclamations, la chatière reconnaît la carapace de ma combinaison : je passe derrière le comptoir réservé au personnel. Il y a du papier vierge."
+      en: "In Complaints, the flap recognises my suit's shell: I get behind the staff-only counter. There's blank paper."
+
+  - id: case_a
+    icon: form
+    when: { flags: [st_case_a] }
+    title: { fr: "Case A : humain (intérimaire)", en: "Box A: human (temp)" }
+    text:
+      fr: "Trois copies « CONFORME » agrafées au B-7/12 : case A remplie. Reclassement : INTÉRIMAIRE. (C'est pire.) Prochaine case : B, le « VU » des Tampons."
+      en: "Three “CERTIFIED” copies stapled to the B-7/12: box A done. Reclassified: TEMP. (It's worse.) Next box: B, the Stamp Office “SEEN”."
+
+  - id: greve
+    icon: stamp
+    when: { flags: [st_sait_greve] }
+    title: { fr: "Pas d'encre, pas de « VU »", en: "No ink, no “SEEN”" }
+    text:
+      fr: "Mme Tamponnet ne peut pas tamponner la case B : pas d'encre tant que PERCO, la machine à café de la salle de pause, fait grève. Un intérimaire, ça peut signer pour quelqu'un qui n'est pas là…"
+      en: "Mrs Tamponnet can't stamp box B: no ink while PERCO, the break-room coffee machine, is on strike. A temp can sign for someone who isn't there…"

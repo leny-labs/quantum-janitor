@@ -221,6 +221,47 @@ keys:
   scene.st-couloir-b.hotspot.bob.label: B.O.B.
   scene.st-couloir-b.exit.vers_guichet.label: Reception Desk
   item.formulaire.name: Form B-7/12
+  # Acte II : bureaux de l'Aile B
+  scene.st-couloir-b.exit.vers_archives.label: Central Archives
+  scene.st-couloir-b.exit.vers_tampons.label: Stamp Office
+  scene.st-couloir-b.exit.vers_reclamations.label: Complaints
+  scene.st-archives.title: Central Archives
+  scene.st-archives.sector: Bureaucratic Station · Level 0 · Wing B
+  scene.st-archives.hotspot.rayonnages.label: Shelving
+  scene.st-archives.hotspot.fichier.label: A–Z filing cabinet
+  scene.st-archives.hotspot.duplicata.label: Mr Duplicata
+  scene.st-archives.hotspot.photocopieuse.label: Photocopier
+  scene.st-archives.hotspot.bob.label: B.O.B.
+  scene.st-archives.exit.vers_couloir.label: Infinite Corridor B
+  scene.st-tampons.title: Stamp Office
+  scene.st-tampons.sector: Bureaucratic Station · Level 0 · Wing B
+  scene.st-tampons.hotspot.mur_tampons.label: Wall of stamps
+  scene.st-tampons.hotspot.tamponnet.label: Mrs Tamponnet
+  scene.st-tampons.hotspot.encreur.label: Dry ink pad
+  scene.st-tampons.hotspot.encreur.useLabel: Take
+  scene.st-tampons.hotspot.panneau.label: “STAMP OFFICE” plate
+  scene.st-tampons.hotspot.bob.label: B.O.B.
+  scene.st-tampons.exit.vers_couloir.label: Infinite Corridor B
+  scene.st-reclamations.title: Complaints Department
+  scene.st-reclamations.sector: Bureaucratic Station · Level 0 · Wing B
+  scene.st-reclamations.hotspot.panneau.label: “COMPLAINTS” plate
+  scene.st-reclamations.hotspot.comptoir.label: “STAFF ONLY” counter
+  scene.st-reclamations.hotspot.chatiere.label: “SERVICE ANIMALS” flap
+  scene.st-reclamations.hotspot.liasse.label: Bundle of complaint forms
+  scene.st-reclamations.hotspot.liasse.useLabel: Take
+  scene.st-reclamations.hotspot.capsule.label: Pneumatic capsule
+  scene.st-reclamations.hotspot.capsule.useLabel: Take
+  scene.st-reclamations.hotspot.broyeuse.label: Complaints box
+  scene.st-reclamations.hotspot.tube.label: Pneumatic tube
+  scene.st-reclamations.hotspot.bob.label: B.O.B.
+  scene.st-reclamations.exit.vers_couloir.label: Infinite Corridor B
+  item.tampon_annule.name: “CANCELLED” stamp
+  item.encreur.name: Dry ink pad
+  item.liasse.name: Bundle of blank complaint forms
+  item.capsule.name: Pneumatic capsule
+  item.copies_dossier.name: Copies of the “GARRY” file
+  character.duplicata.name: Mr Régis Duplicata, archivist
+  character.tamponnet.name: Mrs Gisèle Tamponnet, Stamp Office
 
 ink:
   # bob.ink — B.O.B. en compagnon (exemple de traduction de dialogue Ink)

@@ -1,0 +1,162 @@
+# Chapitre 1 « La Station Bureaucratique » — 5. Archives Centrales (docs/CHAPTER1.md §4, §6.13–14, §6.19).
+# Rendu 3D : src/three/rooms/station.ts (stArchives). `art:` = repli 2D.
+# M. Régis Duplicata derrière son bureau (GenAI, planche repos / marmonne ; il répète tout deux fois).
+#   parler à Duplicata (chercher GARY)        → « AUCUN GARY. AUCUN GARY. »            [st_cherche_gary]
+#   badge sur le fichier                       → tiroir G : « PLUNK, GARRY » ; il garde le badge
+#                                                (pièce justificative), photocopieuse sans papier [st_dossier_trouve] −badge
+#   liasse (Réclamations) sur la photocopieuse → 3 copies CONFORMES ; le papier reste dans le bac
+#                                                                                       [st_papier] −liasse +copies_dossier
+# Le formulaire sur la photocopieuse (case C, Acte III) : refus pour l'instant (ni « VU » ni signature).
+id: st-archives
+title: Archives Centrales
+sector: Station Bureaucratique · Niveau 0 · Aile B
+icon: corridor
+background: "#24202c"
+
+onFirstEnter:
+  - say: "Les Archives Centrales. Des rayonnages jusqu'au plafond. Puis, d'après la poussière, au-delà du plafond. Une odeur de papier qui attend depuis 1985."
+  - say: "duplicata: Bonjour. Bonjour. Archives Centrales. Archives Centrales. On ne délivre que des copies. Que des copies."
+  - say: "bob: Il a dit tout deux fois, Gary. Tu crois qu'il est en panne ? Je pourrais comprendre. Je suis souvent en panne."
+    mood: suspicious
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#3a3444" }
+  - { rect: [0, 0, 1280, 470], color: "#9a90a8" }
+
+hotspots:
+  - id: rayonnages
+    label: Rayonnages
+    rect: [130, 30, 230, 420]
+    art:
+      - { rect: [135, 35, 220, 410], color: "#5a4a3a", stroke: "#2a2830", text: "RAYONNAGES", size: 14 }
+    look:
+      - say: "Des rayonnages métalliques, chargés de boîtes d'archives grises. Ils montent jusqu'au plafond, et le plafond a l'air d'avoir cédé par politesse. Étiquettes : « 1985 », « 1985 (suite) », « 1985 (suite de la suite) »."
+      - say: "bob: Toute la Station tient dans une seule année, Gary. Elle n'a jamais eu besoin d'une deuxième."
+        mood: sad
+    use: "Je tire une boîte au hasard. Dedans : un formulaire de demande de boîte. Rempli. Refusé. Archivé. Je la remets en place, avec respect."
+    useItem:
+      fragment: "L'éclat près des rayonnages ? Ils risquent de devenir infinis. Ils le sont déjà presque. Pas besoin de les encourager."
+      liasse: "Classer la liasse ? Elle n'est pas remplie. Ici, on n'archive que ce qui est fini. C'est pour ça qu'il y a si peu de place."
+
+  - id: fichier
+    label: Fichier A–Z
+    rect: [380, 230, 170, 220]
+    art:
+      - { rect: [385, 235, 160, 210], color: "#7c8794", stroke: "#2a2830", text: "FICHIER\nA–Z", size: 14 }
+    look:
+      - if: { flags: [st_dossier_trouve] }
+        say: "Le tiroir G est entrouvert. « PLUNK, GARRY ». Deux R. L'original ne sort pas d'ici. Il a l'air bien. Mieux rangé que moi."
+        stop: true
+      - if: { flags: [st_cherche_gary] }
+        say: "Un fichier à tiroirs A–Z, sous une plaque : « CONSULTATION SUR PRÉSENTATION D'UNE PIÈCE D'IDENTITÉ — LE FICHIER LIT LA PIÈCE, PAS LA PERSONNE ». Une fente à badge sur chaque tiroir."
+        stop: true
+      - say: "Un fichier à tiroirs A–Z. Chaque tiroir a une petite fente à badge. Le tiroir Z est plus usé que les autres. Personne ne sait pourquoi. Personne ne demande."
+    use:
+      - if: { flags: [st_dossier_trouve] }
+        say: "Je pousse le tiroir G. Il ressort tout seul, de deux centimètres. Il tient à me montrer qu'il me connaît."
+        stop: true
+      - say: "Je tire le tiroir G. Verrouillé. Une diode rouge clignote au-dessus de la fente : « PIÈCE D'IDENTITÉ ? »"
+      - say: "duplicata: Le fichier lit la pièce. Le fichier lit la pièce. Pas la personne. Pas la personne."
+    useItem:
+      badge:
+        - if: { notFlags: [st_cherche_gary] }
+          say: "duplicata: Pas sans demande de recherche. Pas sans demande de recherche. Adressez-vous à l'archiviste. C'est moi. C'est moi."
+          stop: true
+        - dialogue: st_archives_badge
+          take: badge
+          set: st_dossier_trouve
+      formulaire: "Je glisse le formulaire dans la fente du tiroir B. « PIÈCE NON RECONNUE ». Un formulaire n'est pas une identité. Pas encore."
+      ticket_9848: "Le ticket 9 848 dans la fente du tiroir P. « PATIENCE, M. — DÉCÉDÉ — EN ATTENTE ». Même ici, il attend. Je n'insiste pas."
+      ticket_douane: "« D-0001 ». Le fichier ronronne, puis rend le ticket : « DOUANE — VOIR SOUS-SOL ». Il n'y a pas de sous-sol. Il y a la fourrière."
+      fragment: "L'éclat dans la fente ? Le fichier risquerait de trouver tous les Gary de toutes les dimensions. Je n'ai pas le temps de tous les rencontrer."
+    useItemDefault: "« PIÈCE NON RECONNUE ». Le fichier ne lit que les pièces d'identité. Il a des principes, lui aussi."
+
+  - id: duplicata
+    label: M. Duplicata
+    rect: [590, 140, 240, 220]
+    art:
+      - { rect: [600, 150, 220, 200], color: "#b09a6a", stroke: "#2a2830", text: "M. DUPLICATA", size: 16 }
+    look:
+      - say: "Un monsieur maigre en gilet beige, manchettes de lustrine, lunettes si épaisses qu'elles grossissent ses yeux jusqu'à l'inquiétude. Badge : « M. DUPLICATA »."
+      - say: "Dans sa poche de poitrine, la photocopie d'une paire de lunettes. En cas de perte, j'imagine."
+    use: "Je lui tapote l'épaule. Il me regarde à travers ses lunettes, puis à travers la photocopie de ses lunettes. « Oui ? Oui ? »"
+    talk:
+      - dialogue: st_duplicata
+    useItem:
+      badge:
+        - say: "duplicata: Ce n'est pas moi qui lis les pièces. Ce n'est pas moi qui lis les pièces. C'est le fichier. C'est le fichier."
+      liasse:
+        - say: "duplicata: Du papier ! Du papier ! Mettez-le dans la machine, pas dans ma main. Pas dans ma main."
+          mood: surprised
+      copies_dossier:
+        - say: "duplicata: CONFORME. CONFORME. Je les ai déjà certifiées. Déjà certifiées. Agrafez-les à votre demande. À votre demande."
+      formulaire:
+        - if: { flags: [st_case_a] }
+          say: "duplicata: Case A remplie. Case A remplie. Pour les trois exemplaires, il me faut un original tamponné et signé. Tamponné et signé."
+          stop: true
+        - say: "duplicata: Case A, identité : vide. Vide. Il faut joindre les copies de votre dossier. De votre dossier."
+      fragment: "duplicata: On ne photocopie pas les miracles. On ne photocopie pas les miracles. Le toner n'est pas assuré pour ça."
+      plante: "duplicata: Une plante. Une plante. Il est dans le fichier, lui aussi. Lettre F. Membre honoraire. Membre honoraire."
+      tampon_annule: "duplicata: N'annulez rien ici. N'annulez rien ici. Tout est archivé en un seul exemplaire. Sauf les copies."
+    useItemDefault: "duplicata: Je ne délivre que des copies. Que des copies. Je n'en reçois pas. Je n'en reçois pas."
+
+  - id: photocopieuse
+    label: Photocopieuse
+    sfx: clonk
+    rect: [880, 250, 200, 200]
+    art:
+      - { rect: [885, 255, 190, 190], color: "#c9ced6", stroke: "#2a2830", text: "PHOTOCOPIEUSE", size: 13 }
+    look:
+      - if: { flags: [st_papier] }
+        say: "La photocopieuse. Le bac est plein de liasses de réclamations vierges : elle a du papier pour des années. Le voyant « EN PANNE DE PAPIER » s'est éteint, déçu."
+        stop: true
+      - say: "Une photocopieuse beige, grosse comme une voiture de 1985. Un panneau sur le capot : « EN PANNE DE PAPIER ». Le bac est vide. Vide depuis assez longtemps pour avoir une odeur."
+      - if: { flags: [st_dossier_trouve] }
+        say: "duplicata: Sans papier, pas de copie. Sans papier, pas de copie. Le papier, c'est au Service des Réclamations. On n'y entre pas. On n'y entre pas."
+    use:
+      - if: { flags: [st_papier] }
+        say: "La photocopieuse ronronne, prête à copier n'importe quoi. Elle me regarde. Enfin, son voyant vert me regarde."
+        stop: true
+      - say: "J'appuie sur le gros bouton vert. La machine tousse, fait chauffer son toner, puis s'arrête : « PAPIER ? ». Je n'ai que mes mains. Elle refuse les mains."
+    useItem:
+      liasse:
+        - if: { notFlags: [st_dossier_trouve] }
+          say: "Je remplis le bac. Puis je me demande : copier quoi ? Je n'ai encore rien à copier. Je reprends la liasse. Elle n'a pas bougé d'une feuille."
+          stop: true
+        - dialogue: st_archives_copies
+          take: liasse
+          give: copies_dossier
+          set: st_papier
+      formulaire:
+        - if: { flags: [st_papier] }
+          say: "duplicata: Pas les trois exemplaires maintenant. Pas maintenant. Un original vide, je le copie vide. Il faut d'abord le « VU » et la signature. Le « VU » et la signature."
+          stop: true
+        - say: "« EN PANNE DE PAPIER ». Et de toute façon, copier un formulaire vide, c'est fabriquer trois problèmes au lieu d'un."
+      badge: "Photocopier le badge ? C'est la machine qui deviendrait Garry. Elle a déjà assez de soucis."
+      copies_dossier: "Des copies de copies ? Duplicata en ferait une syncope. Deux syncopes."
+      fragment: "L'éclat sur la vitre ? Une photocopie d'improbabilité. Le résultat serait probablement probable. Très décevant."
+      plante: "Photocopier M. Ficus ? Il resterait en plastique, mais en deux dimensions. Il n'est pas prêt."
+    useItemDefault: "« EN PANNE DE PAPIER ». Ça, ce n'est pas du papier. Même avec beaucoup de bonne volonté."
+
+  - id: bob
+    label: B.O.B.
+    rect: [650, 415, 150, 80]
+    art:
+      - { rect: [655, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+    look: "B.O.B. lit les étiquettes des rayonnages. Il soupire à chaque « 1985 ». Il soupire beaucoup."
+    talk:
+      - dialogue: st_bob_archives
+    useItem:
+      badge: "bob: Je ne suis pas un fichier, Gary. Je lis mal les pièces. Je les avale."
+      liasse: "bob: Ne me tente pas, Gary. Du papier vierge… c'est mon péché mignon."
+      copies_dossier: "bob: Trois copies de toi, Gary. Toutes humaines. Je suis… fier. Et un peu jaloux."
+    useItemDefault:
+      - say: "bob: Garde-le, Gary. Ici, tout ce qu'on donne est archivé. Pour toujours."
+        mood: sad
+
+exits:
+  - id: vers_couloir
+    label: Couloir Infini B
+    to: st-couloir-b
+    dir: left
+    rect: [10, 140, 100, 320]

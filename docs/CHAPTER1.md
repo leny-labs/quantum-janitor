@@ -534,7 +534,44 @@ L'Acte I se clôt **en salle**, dans le Couloir Infini B, le Formulaire B-7/12 e
 - **Carnet** : indices `acces_47bis`, `couloir_boucle`, `formulaire_trouve` (pas de déduction : le
   puzzle de la plante suffit). **PLAN** : `st-couloir-b` jouable (visible D3, accès 47bis) ; archives,
   tampons, réclamations, pause, sous-chef restent `planned`.
-- **Pas encore** : bureaux de l'Aile B, gros plan `st-formulaire` (5 cases), fourrière.
+- **Pas encore** (à la v1 de l'Aile B) : bureaux de l'Aile B (→ §9.4), gros plan `st-formulaire` (5 cases), fourrière.
+
+### 9.4 Acte II v1 — « Humain, preuves à l'appui » (Aile B)
+
+L'Acte II se clôt **en salle**, case A remplie : `ChapterDef.endFlag` du ch1 = **`st_case_a`** (le
+walkthrough joue encore l'étape 21, `st_sait_greve`, teaser de l'Acte III). Pas d'EndScene.
+
+- **Couloir B** : une fois dénoué (`st_couloir_resolu`), les hotspots `porte_b1/b2/b3` laissent la place
+  aux sorties `vers_archives` / `vers_tampons` / `vers_reclamations` (même rect, `dir: up`) ; plaques de
+  bureau, filet de lumière entrouvert. Pause, sous-chef, ascenseur : « À SUIVRE » (panneau, PLAN `planned`).
+- **`st-archives`** (`stArchives`, Ink `st_archives.ink`) : M. Duplicata (planche GenAI 2 cellules
+  `props/st/duplicata-sheet.png`, portrait `portraits/duplicata-{portrait,sheet}.png`), rayonnages « 1985 »,
+  fichier A–Z (tiroir G–I qui sort, diode verte), photocopieuse « EN PANNE DE PAPIER » (bac plein, « PAPIER OK »).
+  13. parler → `st_cherche_gary` ; 14. `badge` sur `fichier` (refusé sans demande) → `st_archives_badge`,
+  −badge, `st_dossier_trouve` (le badge reste agrafé sur le bureau) ; 19. `liasse` sur `photocopieuse`
+  (refusée avant le dossier) → `st_archives_copies`, −liasse +`copies_dossier`, `st_papier`.
+- **`st-tampons`** (`stTampons`, Ink `st_tampons.ink`) : Mme Tamponnet (planche + portrait GenAI), mur des
+  412 tampons (texture GenAI `murtampons.jpg`, crochet « ANNULÉ » qui se vide), encreur sec.
+  15. parler → +`tampon_annule`, `st_tamponnet` ; 16. `use encreur` → +`encreur` (`st_encreur_pris`) ;
+  21. `formulaire` sur Tamponnet : sans case A, refus ; avec case A, « PAS D'ENCRE, PAS DE VU » → `st_sait_greve`.
+  `encreur` sur elle : « encore sec » (Acte III).
+- **`st-reclamations`** (`stReclamations`, Ink `st_reclamations.ink`) : pas de PNJ. Comptoir « RÉSERVÉ AU
+  PERSONNEL » (refus + SYLVIE : « l'accès prévu à cet effet »), 17. `use chatiere` (si `combi_portee`) →
+  `st_chatiere` (battant entrouvert pour de bon), 18. `liasse` / `capsule` (hotspots conditionnels, même scène)
+  → `st_liasse_prise` / `st_capsule_prise`. Boîte-broyeuse et tube : fausses pistes (rien n'est consommé).
+- **Case A** (20) : `copies_dossier` + `formulaire` (items.yaml) → Ink `st_reclassement` (haut-parleurs :
+  « RECLASSEMENT : INTÉRIMAIRE. (C'EST PIRE.) », B.O.B. perd son animal) → −copies, `st_case_a`, `st_reclasse`.
+  Le `look` du formulaire suit les cases (A cochée). Gros plan `st-formulaire` : **pas encore** (look évolutif).
+- **Objets** (icônes GenAI `public/inventory/`) : `tampon_annule`, `encreur`, `liasse`, `capsule`,
+  `copies_dossier` ; fausses pistes : `tampon_annule` sur la borne du sas, sur le formulaire, etc.
+- **B.O.B.** : `st_bob_acte2.ink` (une étape bloquante = un stitch, 1re demande vague, ensuite précise),
+  appelé depuis les trois bureaux et le couloir. **Carnet** : indices `aucun_gary`, `dossier_garry`,
+  `tampon_annule_trouve`, `chatiere_ouverte`, `case_a`, `greve` (pas de déduction : puzzles objet).
+- **`repair.ts`** (§6.5) : `st_dossier_trouve` ∧ ¬`st_eclat2` ⇒ pas de badge ; `st_case_a` ⇒ pas de copies
+  (+ `st_reclasse`) ; `st_papier` ⇒ pas de liasse (copies rendues si case A vide) ; `st_formulaire` ∧
+  ¬`st_dossier_depose` ⇒ formulaire.
+- **GenAI** : `_briefs/acte2/genai/` (gpt-image-2.6-sunburst ; `all.sh`, `build.py`) ; captures
+  `_briefs/acte2/shoot.mjs`.
 
 ## 10. Notes techniques (pour plus tard)
 

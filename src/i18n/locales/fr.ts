@@ -376,6 +376,15 @@ export const fr = {
       officeComplaints: 'RÉCLAMATIONS',
       toBeContinued: 'À SUIVRE',
       formB712: 'B-7/12',
+      /** Acte II : bureaux de l'Aile B (stArchives, stTampons, stReclamations). */
+      corridorB: 'COULOIR B',
+      stampCertified: 'CONFORME',
+      badgeGarry: 'GARRY',
+      proofTag: 'PIÈCE JUSTIFICATIVE',
+      paperOk: 'PAPIER OK',
+      stampCancelled: 'ANNULÉ',
+      complaintBox: 'RÉCLAMATIONS',
+      tubeDest: 'CONSEIL\nPAUSE\nDIRECTION',
     },
     cockpit: {
       plate: 'CAPSULE DE SERVICE CS-07\nÉQUIPAGE PRÉVU : 12 · PLACES : 1\nINSTALLÉE PAR LE MOINS-DISANT',

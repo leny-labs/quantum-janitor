@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { lang, t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
-import { GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, actorFrame, billboard, billboardSheet } from '../props';
+import { DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet } from '../props';
 import { BobAspirRig } from './bobaspire';
 import { bobSpot } from './bobspot';
 import { pressable } from '../press';
@@ -108,6 +108,13 @@ const SIGNS = {
   aileb: { fr: 1.5, en: 1.5 },
   extincteur: { fr: 2 / 3, en: 2 / 3 },
   stock: { fr: 1.5, en: 1.5 },
+  // Acte II, bureaux de l'Aile B : _briefs/acte2/genai/ (gpt-image-2.6-sunburst)
+  archives: { fr: 1.5, en: 1.5 },
+  tampons: { fr: 1.5, en: 1.5 },
+  reclamations: { fr: 1.5, en: 1.5 },
+  papier: { fr: 1.5, en: 1.5 },
+  personnel: { fr: 1.5, en: 1.5 },
+  chatiere: { fr: 1.5, en: 1.5 },
 } as const;
 type SignId = keyof typeof SIGNS;
 
@@ -1000,12 +1007,13 @@ export const stCouloirB: RoomBuild = {
       const plateY = f.h / 2 + 0.24;
       const numPlate = at(label(num, f.w * 0.55, 0.32, { color: '#f6efdc', bg: '#2a2830', bold: true, mono: true }), 0, plateY, 0.08);
       const officePlate = at(label(office, f.w * 1.05, 0.32, { color: '#f6efdc', bg: '#1f7f73', bold: true }), 0, plateY, 0.08);
-      const later = at(label(tr('props.station.toBeContinued'), f.w * 0.8, 0.22, { color: '#c0392b', bg: '#f6efdc', bold: true }), 0, f.h * 0.02, 0.05);
-      later.rotation.z = -0.12;
-      door.add(numPlate, officePlate, later);
+      // Acte II : dénouée, la porte devient une sortie (hotspot masqué, la porte reste) ; filet de lumière entrouvert
+      const ajar = at(plane(f.w * 0.06, f.h * 0.86, '#fff2c0', { glow: true }), f.w * 0.42, -f.h * 0.05, 0.01);
+      door.add(numPlate, officePlate, ajar);
       s.when({ notFlags: ['st_couloir_resolu'] }, numPlate);
-      s.when(RESOLU, officePlate, later);
-      s.spot(id, door);
+      s.when(RESOLU, officePlate, ajar);
+      // survol : la plaque numérotée suit le hotspot (masqué une fois le couloir dénoué)
+      s.spot(id, numPlate);
     }
 
     // panneau GenAI « AILE B — VOUS ÊTES ICI (ENCORE) »
@@ -1100,5 +1108,476 @@ export const stCouloirB: RoomBuild = {
     const wsign = at(label(tr('props.station.reception2'), d.d * 1.1, 0.35, { color: '#f6efdc', bg: '#8a6db0', bold: true }), -8.95, d.y + d.h / 2 + 0.3, d.z);
     wsign.rotation.y = Math.PI / 2;
     s.add(wsign, at(pool('#d8f0ff', 3, 2, 0.08), 0, 0.01, 4));
+  },
+};
+
+// ── Acte II « Humain, preuves à l'appui » : les bureaux de l'Aile B (docs/CHAPTER1.md §4, lieux 5–7) ──
+
+/** Porte de gauche (mur latéral) qui ramène au Couloir Infini B, avec sa plaque. */
+function doorToCorridor(s: Stage, color: string): void {
+  const d = s.fitX(s.rect('vers_couloir'), -9);
+  const door = new THREE.Group();
+  door.add(at(box(0.3, d.h, d.d * 1.12, '#3e3448'), 0, 0, 0), at(box(0.1, d.h * 0.94, d.d, '#7c6e86'), 0.15, -d.h * 0.03, 0));
+  s.add(at(door, -9, d.y, d.z));
+  const sign = at(label(tr('props.station.corridorB'), d.d * 1.1, 0.35, { color: '#f6efdc', bg: color, bold: true }), -8.95, d.y + d.h / 2 + 0.3, d.z);
+  sign.rotation.y = Math.PI / 2;
+  s.add(sign);
+}
+
+/**
+ * Fonctionnaire en buste derrière un comptoir (planche GenAI 2 cellules, jamais synchronisée sur le
+ * dialogue) : le bas du buste passe sous le plateau `top` (y monde) du comptoir placé devant.
+ */
+function clerk(s: Stage, id: string, sheet: string, aspect: number, loops: Parameters<typeof actorFrame>[1], z: number, top: number, tint: string, sink = 0.3): THREE.Group {
+  const g = s.fit(s.rect(id), z);
+  const base = top - sink;
+  const h = Math.min(g.y + g.h / 2 - base, (g.w * 1.25) / aspect);
+  const npc = billboardSheet(sheet, 2, h, aspect, { tint, shadow: 0.01 });
+  const sp = npc.userData.sprite as THREE.Sprite;
+  const sy = sp.scale.y;
+  s.spot(id, at(npc, g.x, base, z));
+  s.animate((t) => {
+    npc.userData.setFrame(actorFrame(id, loops, t));
+    sp.scale.y = sy * (1 + Math.sin(t * 1.1 + z) * 0.006); // respiration de fonctionnaire
+  });
+  return npc;
+}
+
+/**
+ * 5. Archives Centrales. Rayonnages qui crèvent le plafond, fichier A–Z (le tiroir G sort avec le
+ * dossier GARRY, `st_dossier_trouve`), M. Duplicata derrière son bureau (le badge agrafé y reste),
+ * photocopieuse « EN PANNE DE PAPIER » (bac plein et voyant vert avec `st_papier`). Néons mauves.
+ */
+export const stArchives: RoomBuild = {
+  camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    rayonnages: { fill: 0.7, orbit: -8, fov: 44 },
+    fichier: { fill: 0.85, orbit: -6, fov: 40 },
+    duplicata: { fill: 0.7 },
+    photocopieuse: { fill: 0.85, orbit: 6, fov: 40 },
+  },
+  intro: 'duplicata',
+  build(s) {
+    const MAUVE = '#6a5a8a';
+    shell(s, { floor: { a: '#4a4454', b: '#544e5e', joint: '#2a2632', tile: 0.7 }, wall: { top: '#b4aac2', bottom: '#6e6480' }, trim: '#3e3448', left: -9, right: 9 });
+    wallPanels(s, '#9a90aa', -9, 9, 1.6, 8);
+    s.lights({
+      sky: '#f2ecff',
+      ground: '#2a2632',
+      ambient: 1.1,
+      key: { color: '#f4eeff', intensity: 1.9, pos: [0, 9, 6], target: [0, 0, 0] },
+      points: [
+        // lampe de bureau de Duplicata (chaude), voyant de la photocopieuse
+        { color: '#ffcf8a', intensity: 3, pos: [0.4, 2.3, 1.2], distance: 3.2 },
+        { color: '#c8a0ff', intensity: 1.6, pos: [5.2, 2.6, 1.6], distance: 3 },
+      ],
+      rim: { color: '#a58ad0', intensity: 0.8, pos: [-6, 5, -4] },
+      fill: { color: '#9aa8ff', intensity: 0.35, pos: [6, 3, 6] },
+      fog: { color: '#1e1a26', near: 9, far: 24 },
+      vignette: { color: '#0e0c14', strength: 0.65, warm: '#f0e0ff14' },
+    });
+    neonTubes(s, s.wallAt(640, 10, 2).y, [-5, 0, 5], 2.4);
+
+    // ── rayonnages : montants, tablettes, boîtes d'archives « 1985 » ; ils filent au-dessus du cadre ──
+    const rz = 0.45;
+    const r = s.fit(s.rect('rayonnages'), rz);
+    const rack = new THREE.Group();
+    const rh = r.y + r.h / 2 + 2.5; // au-delà du plafond
+    const boxes = ['#8a8478', '#9a9488', '#7c7668', '#a49c8a', '#6e6a60'];
+    for (const sx of [-1, 1]) rack.add(at(box(0.08, rh, 0.7, '#3a3444'), (sx * r.w) / 2, rh / 2, 0));
+    const shelves = 9;
+    for (let i = 0; i < shelves; i++) {
+      const y = 0.15 + i * 0.62;
+      rack.add(at(box(r.w, 0.05, 0.7, '#4a4454'), 0, y, 0));
+      const n = 4;
+      for (let k = 0; k < n; k++) {
+        const bw = (r.w - 0.2) / n - 0.04;
+        const tilt = (i * 7 + k * 3) % 5 === 0 ? 0.12 : 0;
+        const b = at(box(bw, 0.48, 0.55, boxes[(i + k * 2) % boxes.length]), -r.w / 2 + 0.12 + bw / 2 + k * (bw + 0.04), y + 0.27, 0.02);
+        b.rotation.z = tilt;
+        rack.add(b);
+        if ((i + k) % 2 === 0) rack.add(at(label('1985', bw * 0.6, 0.14, { color: '#2a2830', bg: '#f6efdc', bold: true, mono: true }), b.position.x, y + 0.3, 0.3)); // i18n-ignore
+      }
+    }
+    s.spot('rayonnages', at(rack, r.x, 0, rz));
+    // échelle à roulettes appuyée aux rayonnages
+    const ladder = new THREE.Group();
+    for (const sx of [-1, 1]) ladder.add(at(box(0.05, 3.4, 0.05, '#c9a24a'), sx * 0.22, 1.7, 0));
+    for (let i = 0; i < 9; i++) ladder.add(at(box(0.44, 0.04, 0.04, '#c9a24a'), 0, 0.3 + i * 0.36, 0));
+    ladder.rotation.x = -0.18;
+    s.add(at(ladder, r.x + r.w * 0.32, 0, rz + 0.75));
+
+    // ── plaque GenAI « ARCHIVES CENTRALES » au-dessus du bureau ──
+    poster(s, [610, 22, 220, 100], 'archives');
+    inkStamp(s, 880, 120, tr('props.station.stampCertified'));
+
+    // ── bureau de Duplicata (comptoir bas) et M. Duplicata derrière ──
+    const zb = 1.15;
+    const zg = 0.5;
+    const d = s.fit(s.rect('duplicata'), zb);
+    const top = s.wallAt(640, 352, zb).y;
+    const desk = new THREE.Group();
+    desk.add(at(box(d.w * 1.15, top, 0.7, '#5a4a6a'), 0, top / 2, 0));
+    desk.add(at(box(d.w * 1.2, 0.07, 0.85, '#d8cfe0'), 0, top + 0.035, -0.05));
+    desk.add(at(box(d.w * 1.15, top * 0.1, 0.02, MAUVE), 0, top * 0.8, 0.36));
+    // piles de dossiers, lampe, tampon « CONFORME »
+    for (const [x, n] of [[-0.42, 5], [-0.32, 3], [0.38, 7]] as [number, number][]) for (let i = 0; i < n; i++) desk.add(at(box(0.42, 0.035, 0.3, i % 2 ? '#efe4c6' : '#e2d6b6', { edges: false }), x * d.w, top + 0.09 + i * 0.036, -0.1 + (i % 3) * 0.01));
+    const lamp = new THREE.Group();
+    lamp.add(at(cyl(0.12, 0.14, 0.04, '#2a2830'), 0, 0, 0), at(cyl(0.02, 0.02, 0.5, '#2a2830', { edges: false }), 0, 0.25, 0));
+    const shade = at(cyl(0.06, 0.18, 0.16, '#1f5f5a'), 0.08, 0.5, 0);
+    shade.rotation.z = 0.5;
+    lamp.add(shade, at(glow('#ffcf8a', 0.8, 0.4), 0.14, 0.4, 0.05));
+    desk.add(at(lamp, d.w * 0.48, top + 0.07, -0.15));
+    // le badge GARRY, agrafé à sa fiche (pièce justificative), une fois le dossier trouvé
+    const proof = new THREE.Group();
+    proof.add(at(box(0.36, 0.01, 0.26, '#efe4c6', { edges: false }), 0, 0, 0));
+    const card = at(label(tr('props.station.badgeGarry'), 0.24, 0.14, { color: '#1a1a1a', bg: '#e0e0e0', bold: true }), 0.02, 0.012, 0.01);
+    card.rotation.x = -Math.PI / 2;
+    proof.add(card);
+    const tag = at(label(tr('props.station.proofTag'), 0.3, 0.08, { color: '#c0392b', bold: true }), 0, 0.013, 0.1);
+    tag.rotation.x = -Math.PI / 2;
+    proof.add(tag);
+    proof.rotation.y = -0.2;
+    const proofObj = at(proof, -0.05 * d.w, top + 0.075, 0.12);
+    desk.add(proofObj);
+    s.when({ flags: ['st_dossier_trouve'] }, proofObj);
+    s.add(at(desk, d.x, 0, zb));
+    clerk(s, 'duplicata', DUPLICATA_SHEET, DUPLICATA_ASPECT, DUPLICATA_ACTOR, zg, top, '#fff6ec');
+
+    // ── fichier A–Z : six tiroirs, fente à badge, diode ; le tiroir G–I sort avec le dossier GARRY ──
+    const fz = 0.55;
+    const fc = s.stand(s.rect('fichier'));
+    const cab = new THREE.Group();
+    const cw = fc.w * 0.92;
+    const chh = fc.h * 0.9;
+    cab.add(at(box(cw, chh, 0.7, '#7c8794'), 0, chh / 2, 0));
+    const ranges = ['A–C', 'D–F', 'G–I', 'J–M', 'N–R', 'S–Z']; // i18n-ignore (étiquettes de tiroirs)
+    const dh = (chh - 0.1) / ranges.length;
+    let drawerG: THREE.Group | null = null;
+    const FOUND: Condition = { flags: ['st_dossier_trouve'] };
+    ranges.forEach((txt, i) => {
+      const dr = new THREE.Group();
+      const y = chh - 0.05 - dh * (i + 0.5);
+      dr.add(at(box(cw * 0.94, dh - 0.03, 0.66, '#8d98a5'), 0, 0, 0));
+      dr.add(at(label(txt, cw * 0.36, dh * 0.34, { color: '#1a1a1a', bg: '#f6efdc', bold: true, mono: true }), 0, dh * 0.15, 0.335));
+      dr.add(at(box(cw * 0.3, 0.035, 0.04, '#c9ced6'), 0, -dh * 0.16, 0.35));
+      dr.add(at(box(cw * 0.12, 0.02, 0.01, '#14120e', { edges: false }), cw * 0.32, dh * 0.15, 0.335));
+      if (i === 2) {
+        // fiche GARRY qui dépasse du tiroir ouvert
+        const fiche = at(box(cw * 0.5, dh * 0.5, 0.02, '#efe4c6'), 0, dh * 0.45, 0.1);
+        dr.add(fiche);
+        s.when(FOUND, fiche);
+        drawerG = dr;
+      }
+      cab.add(at(dr, 0, y, 0.03));
+    });
+    const ledR = at(sphere(0.035, '#ff4f5a', { glow: true }), cw * 0.38, chh + 0.06, 0.3);
+    const ledG = at(sphere(0.035, '#4fe07a', { glow: true }), cw * 0.38, chh + 0.06, 0.3);
+    cab.add(ledR, ledG, at(box(cw * 0.3, 0.12, 0.08, '#2a2830'), cw * 0.38, chh + 0.06, 0.25));
+    s.when({ notFlags: ['st_dossier_trouve'] }, ledR);
+    s.when(FOUND, ledG);
+    s.animate((t) => {
+      if (drawerG) drawerG.position.z += ((s.is(FOUND) ? 0.42 : 0.03) - drawerG.position.z) * 0.08;
+      if (!s.is(FOUND)) ledR.visible = Math.floor(t * 1.4) % 2 === 0;
+    });
+    s.spot('fichier', at(cab, fc.x, 0, fz));
+
+    // ── photocopieuse beige 1985 : capot, vitre, pupitre, bacs ; « EN PANNE DE PAPIER » (GenAI) ──
+    const PAPER: Condition = { flags: ['st_papier'] };
+    const pc = s.stand(s.rect('photocopieuse'));
+    const cop = new THREE.Group();
+    const pw = pc.w * 0.95;
+    const ph = pc.h * 0.62;
+    cop.add(at(box(pw, ph, 0.9, '#d8cfb8'), 0, ph / 2, 0));
+    cop.add(at(box(pw * 1.02, 0.08, 0.95, '#bfb59c'), 0, ph + 0.04, 0));
+    const lid = at(box(pw * 0.8, 0.06, 0.8, '#a69c84'), -pw * 0.06, ph + 0.11, 0);
+    cop.add(lid);
+    // pupitre : bouton vert, voyants
+    cop.add(at(box(pw * 0.26, 0.1, 0.3, '#5a5f6a'), pw * 0.36, ph + 0.13, 0.25));
+    cop.add(at(cyl(0.05, 0.05, 0.03, '#2fb35a', { seg: 12 }), pw * 0.4, ph + 0.19, 0.25));
+    const warn = at(sphere(0.03, '#ff4f5a', { glow: true }), pw * 0.3, ph + 0.19, 0.3);
+    const ok = at(sphere(0.03, '#4fe07a', { glow: true }), pw * 0.3, ph + 0.19, 0.3);
+    cop.add(warn, ok);
+    s.when({ notFlags: ['st_papier'] }, warn);
+    s.when(PAPER, ok);
+    s.animate((t) => (warn.visible = !s.is(PAPER) && Math.floor(t * 2) % 2 === 0));
+    // bac d'alimentation sur le flanc droit : vide, ou plein de réclamations vert pâle (le papier reste)
+    cop.add(at(box(0.08, 0.04, 0.6, '#8a8070'), pw / 2 + 0.2, ph * 0.55, 0));
+    const stack = new THREE.Group();
+    for (let i = 0; i < 9; i++) stack.add(at(box(0.32, 0.02, 0.5, i % 2 ? '#cfe0c0' : '#c2d6b2', { edges: false }), 0, i * 0.022, 0));
+    const stackObj = at(stack, pw / 2 + 0.2, ph * 0.55 + 0.03, 0);
+    cop.add(stackObj);
+    s.when(PAPER, stackObj);
+    // bac de sortie
+    cop.add(at(box(0.36, 0.03, 0.5, '#8a8070'), -pw / 2 - 0.16, ph * 0.4, 0));
+    // panneau GenAI sur la face avant (masqué une fois le papier chargé : un tampon « OK » le remplace)
+    const sign = stSign('papier', pw * 0.7, ph * 0.42);
+    const signObj = at(sign.mesh, 0, ph * 0.62, 0.456);
+    cop.add(signObj);
+    s.when({ notFlags: ['st_papier'] }, signObj);
+    const okTag = at(label(tr('props.station.paperOk'), pw * 0.55, ph * 0.2, { color: '#f6efdc', bg: '#1f7f73', bold: true }), 0, ph * 0.62, 0.456);
+    cop.add(okTag);
+    s.when(PAPER, okTag);
+    s.spot('photocopieuse', at(cop, pc.x, 0, pc.z));
+    s.animate((t) => (ok.scale.setScalar(1 + Math.sin(t * 3) * 0.15)));
+
+    bobHere(s);
+    doorToCorridor(s, MAUVE);
+    s.add(at(pool('#e0d0ff', 3, 2, 0.08), 0, 0.01, 4));
+  },
+};
+
+/**
+ * 6. Bureau des Tampons. Le mur des 412 tampons (texture GenAI + quelques tampons 3D sur les
+ * crochets ; le crochet « ANNULÉ » se vide avec `st_tamponnet`), Mme Tamponnet derrière son comptoir
+ * (planche GenAI : repos / CLONK), l'encreur sec sur le comptoir (jusqu'à `st_encreur_pris`).
+ */
+export const stTampons: RoomBuild = {
+  camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    mur_tampons: { fill: 0.75, lift: 0.1, fov: 44 },
+    tamponnet: { fill: 0.7 },
+    encreur: { fill: 1.2, lift: 0.3, fov: 34 },
+    panneau: { fill: 0.85, orbit: -6, fov: 38 },
+  },
+  intro: 'tamponnet',
+  build(s) {
+    const TEAL = '#1f5f5a';
+    shell(s, { floor: { a: '#3e4a48', b: '#465250', joint: '#222a28', tile: 0.7 }, wall: { top: '#aac0bc', bottom: '#5e7a76' }, trim: '#1e3836', left: -9, right: 9 });
+    wallPanels(s, '#8aa6a2', -9, 9, 1.6, 8);
+    s.lights({
+      sky: '#eefff8',
+      ground: '#222a28',
+      ambient: 1.15,
+      key: { color: '#fff6e6', intensity: 2, pos: [1, 9, 6], target: [0, 0, 0] },
+      points: [{ color: '#ffd08a', intensity: 2.6, pos: [0, 3.4, 1.4], distance: 4 }],
+      rim: { color: '#8a6db0', intensity: 0.6, pos: [6, 5, -4] },
+      fill: { color: '#9affe8', intensity: 0.3, pos: [-6, 3, 6] },
+      fog: { color: '#18201e', near: 9, far: 24 },
+      vignette: { color: '#0a100e', strength: 0.6, warm: '#fff0d814' },
+    });
+    neonTubes(s, s.wallAt(640, 10, 2).y, [-4.5, 4.5], 2.4);
+
+    // ── le mur des tampons : texture GenAI encadrée, tablette, quelques tampons en relief ──
+    const mz = 0.06;
+    const m = s.fit(s.rect('mur_tampons'), mz);
+    const t = new THREE.TextureLoader().load(`${import.meta.env.BASE_URL}props/st/murtampons.jpg`);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = 8;
+    t.wrapS = THREE.RepeatWrapping;
+    t.repeat.set(Math.max(1, (m.w / m.h) / 1.5), 1);
+    const wall = new THREE.Group();
+    wall.add(onTop(at(box(m.w * 1.02, m.h * 1.06, 0.03, '#4a3020', { shadow: false }), 0, 0, 0)));
+    wall.add(onTop(at(plane(m.w, m.h, '#ffffff', { map: t }), 0, 0, 0.02), POSTER_ORDER + 1));
+    wall.add(at(box(m.w * 1.04, 0.06, 0.2, '#6a4a2a'), 0, -m.h / 2 - 0.05, 0.08));
+    const colors = ['#c0392b', '#1f7f73', '#c9a24a', '#6a4aa0', '#2a2830'];
+    for (let i = 0; i < 9; i++) {
+      const st = new THREE.Group();
+      st.add(at(cyl(0.05, 0.06, 0.16, colors[i % colors.length], { seg: 10 }), 0, 0.08, 0), at(sphere(0.06, colors[(i + 2) % colors.length], { seg: 10 }), 0, 0.2, 0));
+      st.add(at(box(0.16, 0.05, 0.12, '#3a2a1a'), 0, -0.02, 0));
+      wall.add(at(st, -m.w / 2 + 0.3 + i * ((m.w - 0.6) / 8), -m.h / 2 + 0.02, 0.12));
+    }
+    // le crochet « ANNULÉ », au milieu : un tampon rouge seul, puis un crochet vide
+    const hook = at(torus(0.05, 0.012, '#c9a24a'), 0, m.h * 0.05, 0.1);
+    const annule = new THREE.Group();
+    annule.add(at(cyl(0.06, 0.07, 0.2, '#8a5a2a', { seg: 10 }), 0, 0.1, 0), at(sphere(0.07, '#8a5a2a', { seg: 10 }), 0, 0.24, 0));
+    annule.add(at(box(0.22, 0.07, 0.15, '#c0392b'), 0, -0.03, 0));
+    const annuleObj = at(annule, 0, m.h * 0.05 - 0.32, 0.14);
+    const hookTag = at(label(tr('props.station.stampCancelled'), 0.42, 0.11, { color: '#c0392b', bg: '#f6efdc', bold: true }), 0, m.h * 0.05 + 0.13, 0.11);
+    wall.add(hook, annuleObj, hookTag);
+    s.when({ notFlags: ['st_tamponnet'] }, annuleObj);
+    s.spot('mur_tampons', at(wall, m.x, m.y, mz));
+
+    // ── comptoir et Mme Tamponnet ──
+    const zb = 1.15;
+    const zg = 0.5;
+    const top = s.wallAt(640, 350, zb).y;
+    const L = s.wallAt(380, 350, zb).x;
+    const R = s.wallAt(980, 350, zb).x;
+    const cw = R - L;
+    const cx = (L + R) / 2;
+    const desk = new THREE.Group();
+    desk.add(at(box(cw, top, 0.6, '#5a3e2a'), 0, top / 2, 0));
+    desk.add(at(box(cw * 1.03, 0.07, 0.8, '#d8c9a8'), 0, top + 0.035, -0.05));
+    desk.add(at(box(cw, top * 0.12, 0.02, TEAL), 0, top * 0.78, 0.31));
+    // marques de coups de tampon à vide sur le plateau (aucune encre, juste des creux)
+    for (let i = 0; i < 6; i++) desk.add(at(box(0.16, 0.004, 0.1, '#c4b590', { edges: false }), -cw * 0.15 + i * 0.09, top + 0.073, 0.05 + (i % 2) * 0.08));
+    s.add(at(desk, cx, 0, zb));
+    const npc = clerk(s, 'tamponnet', TAMPONNET_SHEET, TAMPONNET_ASPECT, TAMPONNET_ACTOR, zg, top, '#fff6ec', 0.1);
+    // CLONK : le buste tressaute à chaque coup de tampon (frame 1 de la planche)
+    const baseY = npc.position.y;
+    s.animate((tt) => (npc.position.y = baseY - (actorFrame('tamponnet', TAMPONNET_ACTOR, tt) === 1 ? 0.025 : 0)));
+
+    // encreur en fer-blanc ouvert, feutre sec craquelé (jusqu'à ce que Gary le prenne)
+    const e = s.fit(s.rect('encreur'), zb - 0.05);
+    const pad = new THREE.Group();
+    pad.add(at(box(0.36, 0.06, 0.26, '#7c8794'), 0, 0.03, 0));
+    pad.add(at(box(0.3, 0.012, 0.2, '#9a8aa8', { edges: false }), 0, 0.064, 0));
+    const lidp = at(box(0.36, 0.02, 0.26, '#8d98a5'), 0, 0.17, -0.13);
+    lidp.rotation.x = -1.2;
+    pad.add(lidp);
+    s.spot('encreur', at(pad, e.x, top + 0.07, zb - 0.1));
+
+    // plaque GenAI « BUREAU DES TAMPONS » à gauche
+    s.spot('panneau', poster(s, s.rect('panneau'), 'tampons'));
+    inkStamp(s, 1050, 230, tr('props.station.stampSeen'));
+
+    bobHere(s);
+    doorToCorridor(s, TEAL);
+    s.add(at(pool('#ffe6b0', 3, 2, 0.08), 0, 0.01, 4));
+  },
+};
+
+/**
+ * 7. Service des Réclamations. Personne. Comptoir vitré « RÉSERVÉ AU PERSONNEL » (GenAI), chatière
+ * « ANIMAUX DE SERVICE » au pied (battant entrouvert pour de bon avec `st_chatiere`), étagères de
+ * liasses et capsule derrière la vitre (prises : `st_liasse_prise`, `st_capsule_prise`), boîte à
+ * réclamations reliée à une broyeuse, terminal de tube pneumatique.
+ */
+export const stReclamations: RoomBuild = {
+  camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    panneau: { fill: 0.85, fov: 38 },
+    comptoir: { fill: 0.75 },
+    chatiere: { fill: 1.1, lift: 0.3, fov: 36 },
+    liasse: { fill: 1, fov: 36 },
+    capsule: { fill: 1, fov: 36 },
+    broyeuse: { fill: 0.85, orbit: 6, fov: 40 },
+    tube: { fill: 0.8, orbit: 8, fov: 42 },
+  },
+  intro: 'panneau',
+  build(s) {
+    const RUST = '#a8542a';
+    shell(s, { floor: { a: '#4a4038', b: '#544a40', joint: '#2a241e', tile: 0.7 }, wall: { top: '#cbbca4', bottom: '#8a7660' }, trim: '#4a3020', left: -9, right: 9 });
+    wallPanels(s, '#b4a48c', -9, 9, 1.6, 8);
+    s.lights({
+      sky: '#fff6ea',
+      ground: '#2a241e',
+      ambient: 1.1,
+      key: { color: '#fff0dc', intensity: 1.9, pos: [0, 9, 6], target: [0, 0, 0] },
+      points: [
+        { color: '#ffb070', intensity: 1.6, pos: [0, 2.6, 0.6], distance: 3.5 },
+        { color: '#bfe6ff', intensity: 1.4, pos: [7.2, 3, 1.2], distance: 3 },
+      ],
+      rim: { color: RUST, intensity: 0.6, pos: [6, 5, -4] },
+      fill: { color: '#9aa8ff', intensity: 0.3, pos: [-6, 3, 6] },
+      fog: { color: '#1e1a16', near: 9, far: 24 },
+      vignette: { color: '#100c08', strength: 0.62, warm: '#ffe8d014' },
+    });
+    neonTubes(s, s.wallAt(640, 10, 2).y, [-4.5, 4.5], 2.4);
+
+    s.spot('panneau', poster(s, s.rect('panneau'), 'reclamations'));
+
+    // ── derrière la vitre : étagère murale haute (liasses vierges, capsule), chaise, tasse ──
+    const shelfZ = 0.3;
+    const lf = s.fit(s.rect('liasse'), shelfZ);
+    const cf = s.fit(s.rect('capsule'), shelfZ);
+    const shelfY = Math.min(lf.y - lf.h / 2, cf.y - cf.h / 2);
+    const sl = s.wallAt(380, 0, shelfZ).x;
+    const sr = s.wallAt(900, 0, shelfZ).x;
+    s.add(at(box(sr - sl, 0.06, 0.5, '#6a4a2a'), (sl + sr) / 2, shelfY, shelfZ));
+    for (const x of [sl + 0.1, sr - 0.1]) s.add(at(box(0.05, 0.3, 0.05, '#4a3020'), x, shelfY - 0.18, shelfZ - 0.2));
+    // piles décoratives (toujours là : il y a du papier pour des années)
+    for (const [x, n] of [[-0.9, 6], [0.2, 4], [1.3, 7]] as [number, number][]) {
+      for (let i = 0; i < n; i++) s.add(at(box(0.38, 0.03, 0.28, i % 2 ? '#cfe0c0' : '#c2d6b2', { edges: false }), (sl + sr) / 2 + x, shelfY + 0.045 + i * 0.032, shelfZ));
+    }
+    // la liasse à prendre (élastique ocre)
+    const liasse = new THREE.Group();
+    for (let i = 0; i < 10; i++) liasse.add(at(box(0.62, 0.036, 0.4, i % 2 ? '#d8ead0' : '#cfe0c0', { edges: false }), 0, i * 0.038, 0));
+    liasse.add(at(box(0.64, 0.05, 0.06, '#c9a24a', { edges: false }), 0, 0.19, 0));
+    liasse.add(at(glow('#f0ffe0', 0.9, 0.22), 0, 0.2, 0.1));
+    s.spot('liasse', at(liasse, lf.x, shelfY + 0.05, shelfZ + 0.05));
+    // la capsule (cylindre transparent, bouchons laiton), couchée
+    const cap = new THREE.Group();
+    const tubeM = at(cyl(0.13, 0.13, 0.62, '#d8f0ff', { seg: 16, edges: false }), 0, 0, 0);
+    (tubeM.material as THREE.MeshStandardMaterial).transparent = true;
+    (tubeM.material as THREE.MeshStandardMaterial).opacity = 0.45;
+    cap.add(tubeM, at(cyl(0.145, 0.145, 0.08, '#c9a24a', { seg: 16 }), 0, 0.32, 0), at(cyl(0.145, 0.145, 0.08, '#c9a24a', { seg: 16 }), 0, -0.32, 0));
+    cap.rotation.z = Math.PI / 2;
+    s.spot('capsule', at(cap, cf.x, shelfY + 0.2, shelfZ + 0.05));
+
+    // ── le comptoir vitré « RÉSERVÉ AU PERSONNEL » ──
+    const zb = 1.15;
+    const c = s.fit(s.rect('comptoir'), zb);
+    const top = s.wallAt(640, 330, zb).y;
+    const counter = new THREE.Group();
+    counter.add(at(box(c.w, top, 0.6, '#7a5a3a'), 0, top / 2, 0));
+    counter.add(at(box(c.w * 1.03, 0.07, 0.75, '#d8c9a8'), 0, top + 0.035, -0.05));
+    const glassH = c.y + c.h / 2 - top;
+    counter.add(at(plane(c.w * 0.98, glassH, '#cfe8ff', { opacity: 0.14 }), 0, top + glassH / 2, -0.2));
+    counter.add(at(box(c.w, 0.06, 0.1, '#4a3020'), 0, top + glassH, -0.2));
+    // sonnette, tasse de café 1985 solidifié
+    counter.add(at(cyl(0.08, 0.1, 0.06, '#c9a24a', { seg: 14 }), -c.w * 0.3, top + 0.1, 0.1), at(sphere(0.03, '#2a2830'), -c.w * 0.3, top + 0.15, 0.1));
+    counter.add(at(cyl(0.07, 0.06, 0.12, '#f6efdc', { seg: 12 }), c.w * 0.3, top + 0.13, -0.15), at(cyl(0.062, 0.062, 0.01, '#3a2414', { seg: 12, edges: false }), c.w * 0.3, top + 0.19, -0.15));
+    // plaque GenAI rouge sur la façade, à gauche de la chatière
+    const ps = stSign('personnel', c.w * 0.3, top * 0.42);
+    counter.add(at(ps.mesh, -c.w * 0.3, top * 0.62, 0.305));
+    s.spot('comptoir', at(counter, c.x, 0, zb));
+
+    // ── chatière « ANIMAUX DE SERVICE » : cadre laiton, battant (s'ouvre et reste entrouvert), lecteur ──
+    const OPEN: Condition = { flags: ['st_chatiere'] };
+    const ch = s.fit(s.rect('chatiere'), zb + 0.31);
+    const flap = new THREE.Group();
+    const fw = Math.min(ch.w * 0.75, 0.6);
+    const fh = Math.min(ch.h * 0.7, 0.55);
+    flap.add(at(box(fw + 0.08, 0.05, 0.04, '#c9a24a'), 0, fh / 2 + 0.02, 0), at(box(0.04, fh + 0.06, 0.04, '#c9a24a'), -fw / 2 - 0.02, 0, 0), at(box(0.04, fh + 0.06, 0.04, '#c9a24a'), fw / 2 + 0.02, 0, 0));
+    flap.add(at(box(fw, fh, 0.01, '#140e08', { edges: false }), 0, 0, -0.01));
+    const hinge = new THREE.Group();
+    hinge.position.set(0, fh / 2, 0.005);
+    hinge.add(at(box(fw - 0.02, fh - 0.02, 0.025, '#5a3e2a'), 0, -fh / 2, 0));
+    flap.add(hinge);
+    // lecteur « CARAPACE / FOURRURE / PLUMES » au-dessus, diode qui passe au vert
+    const reader = at(box(0.24, 0.08, 0.05, '#2a2830'), 0, fh / 2 + 0.12, 0);
+    const rled = at(sphere(0.025, '#ffd166', { glow: true }), 0.08, fh / 2 + 0.12, 0.03);
+    const gled = at(sphere(0.025, '#4fe07a', { glow: true }), 0.08, fh / 2 + 0.12, 0.03);
+    flap.add(reader, rled, gled);
+    s.when({ notFlags: ['st_chatiere'] }, rled);
+    s.when(OPEN, gled);
+    let swing = 0;
+    s.animate((tt) => {
+      swing += ((s.is(OPEN) ? 1.15 : 0) - swing) * 0.06;
+      hinge.rotation.x = -swing - (s.is(OPEN) ? Math.sin(tt * 1.3) * 0.03 : 0);
+    });
+    s.spot('chatiere', at(flap, ch.x, ch.y, zb + 0.31));
+    // plaque laiton GenAI au-dessus de la chatière
+    const cs = stSign('chatiere', 0.85, 0.5);
+    s.add(at(cs.mesh, ch.x + fw / 2 + 0.6, ch.y + fh * 0.1, zb + 0.312));
+
+    // ── boîte à réclamations rouge → tuyau → broyeuse (dents qui grincent) ──
+    const bx = s.stand(s.rect('broyeuse'));
+    const bw = Math.min(bx.w * 0.8, 0.9);
+    const shred = new THREE.Group();
+    const bh = bx.h;
+    shred.add(at(box(bw, bh * 0.32, bw * 0.8, '#5a5f6a'), 0, bh * 0.16, 0));
+    const teeth = new THREE.Group();
+    for (let i = 0; i < 7; i++) teeth.add(at(box(0.03, 0.08, bw * 0.5, '#c9ced6', { edges: false }), -bw * 0.36 + i * bw * 0.12, 0, 0));
+    shred.add(at(teeth, 0, bh * 0.33, 0));
+    shred.add(at(cyl(0.08, 0.08, bh * 0.25, '#8d939c', { seg: 12 }), 0, bh * 0.46, 0));
+    shred.add(at(box(bw * 0.9, bh * 0.36, bw * 0.6, '#c0392b'), 0, bh * 0.75, 0));
+    shred.add(at(box(bw * 0.6, 0.04, 0.04, '#14120e', { edges: false }), 0, bh * 0.82, bw * 0.31));
+    shred.add(at(label(tr('props.station.complaintBox'), bw * 0.8, bh * 0.1, { color: '#f6efdc', bold: true }), 0, bh * 0.68, bw * 0.305));
+    s.animate((tt) => (teeth.position.x = Math.sin(tt * 9) * 0.006));
+    s.spot('broyeuse', at(shred, bx.x, 0, bx.z));
+
+    // ── terminal de tube pneumatique (vertical, transparent) ──
+    const tz = 0.35;
+    const tf = s.fit(s.rect('tube'), tz);
+    const pipe = new THREE.Group();
+    const tubeH = tf.y + tf.h / 2 + 1.5;
+    const glass = at(cyl(0.13, 0.13, tubeH, '#d8f0ff', { seg: 16, edges: false }), 0, tubeH / 2, 0);
+    (glass.material as THREE.MeshStandardMaterial).transparent = true;
+    (glass.material as THREE.MeshStandardMaterial).opacity = 0.35;
+    pipe.add(glass);
+    for (let i = 0; i < 5; i++) pipe.add(at(torus(0.14, 0.02, '#c9a24a'), 0, 0.6 + i * 0.75, 0).rotateX(Math.PI / 2));
+    pipe.add(at(box(0.5, 0.5, 0.35, '#7c8794'), 0, tf.y - tf.h * 0.15, 0.1));
+    pipe.add(at(label(tr('props.station.tubeDest'), 0.44, 0.3, { color: '#1a1a1a', bg: '#f6efdc', bold: true }), 0, tf.y - tf.h * 0.15, 0.28));
+    const puff = at(glow('#e8f6ff', 0.5, 0.3), 0, tubeH * 0.6, 0.15);
+    pipe.add(puff);
+    s.animate((tt) => (puff.position.y = ((tt * 0.8) % 1) * tubeH));
+    s.spot('tube', at(pipe, tf.x, 0, tz));
+
+    bobHere(s);
+    doorToCorridor(s, RUST);
+    s.add(at(pool('#ffe0c0', 3, 2, 0.08), 0, 0.01, 4));
   },
 };

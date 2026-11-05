@@ -34,6 +34,15 @@ characters:
     name: Mme Odile Guichard, guichet d'accueil
     color: "#8a6db0"
     portrait: "GUICHET\n(-_-)"
+  # Acte II (Aile B) : Archives Centrales, Bureau des Tampons
+  - id: duplicata
+    name: M. Régis Duplicata, archiviste
+    color: "#b09a6a"
+    portrait: "ARCHIVES\n(◎ ◎)"
+  - id: tamponnet
+    name: Mme Gisèle Tamponnet, Bureau des Tampons
+    color: "#1f5f5a"
+    portrait: "CLONK\n(^_^)"
   - id: narrateur
     name: ""
     color: "#000000"

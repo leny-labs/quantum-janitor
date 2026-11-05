@@ -162,10 +162,10 @@ export const CHAPTERS: ChapterDef[] = [
     from: 'ch0',
     // ch.0 fini : éclat contenu, combi de chitine (enfilée dans l'interlude), badge ; B.O.B. suit
     initial: { items: ['badge', 'fragment', 'combi_chitine'], flags: ['st', 'ch0_termine', 'chapitre0_termine', 'bob_suit'] },
-    // knot de fin nominal (EndScene) ; deviendra `st_suite`. L'Acte I (Accueil) s'arrête en salle,
-    // dans le Couloir Infini B, le B-7/12 en main (`endFlag`) : pas de porte `to: fin`
+    // knot de fin nominal (EndScene) ; deviendra `st_suite`. Checkpoint actuel : fin de l'Acte II
+    // « Humain, preuves à l'appui », en salle, case A remplie (`endFlag`) : pas de porte `to: fin`
     endKnot: 'st_stub_fin',
-    endFlag: 'st_formulaire',
+    endFlag: 'st_case_a',
     steps: [
       { section: 'Interlude — la Capsule de Service CS-07' },
       { look: 'pare_brise' },
@@ -227,6 +227,40 @@ export const CHAPTERS: ChapterDef[] = [
       { use: 'porte_b3', pick: [0] }, // le couloir glisse ; suivre la plante : tout droit = boucle ironique
       { use: 'ficus', pick: [2] }, // vers M. Ficus : le couloir se dénoue (st_couloir_resolu), +plante
       { use: 'casier' }, // le dernier Formulaire B-7/12 (st_formulaire) : fin de l'Acte I
+      { section: 'Acte II · les Archives Centrales (M. Duplicata)' },
+      { go: 'st-archives' }, // porte B-1 (sortie vers_archives, couloir dénoué)
+      { useItem: ['badge', 'fichier'] }, // refusé : pas sans demande de recherche
+      { talk: 'duplicata' }, // « AUCUN GARY. AUCUN GARY. » (st_cherche_gary)
+      { talk: 'bob' }, // indice vague : « comment la RH t'appelle-t-elle ? »
+      { look: 'fichier' }, // « le fichier lit la pièce, pas la personne »
+      { useItem: ['badge', 'fichier'] }, // tiroir G : PLUNK, GARRY ; Duplicata garde le badge (st_dossier_trouve) −badge
+      { look: 'photocopieuse' }, // EN PANNE DE PAPIER ; le papier, c'est aux Réclamations
+      { go: 'st-couloir-b' },
+      { section: 'Acte II · le Bureau des Tampons (Mme Tamponnet)' },
+      { go: 'st-tampons' }, // porte B-2
+      { look: 'mur_tampons' }, // 412 tampons, un crochet vide : ANNULÉ
+      { talk: 'tamponnet' }, // l'encre, c'était le café : grève ; +tampon_annule (st_tamponnet)
+      { use: 'encreur' }, // +encreur (sec, payoff Acte III)
+      { useItem: ['formulaire', 'tamponnet'] }, // case A vide, pas d'encre (rien n'est consommé)
+      { go: 'st-couloir-b' },
+      { section: 'Acte II · le Service des Réclamations (la chatière)' },
+      { go: 'st-reclamations' }, // porte B-3
+      { use: 'comptoir' }, // RÉSERVÉ AU PERSONNEL : « l'accès prévu à cet effet »
+      { talk: 'bob' }, // indice vague : « plus bas que ta dignité »
+      { look: 'chatiere' }, // ANIMAUX DE SERVICE — détection : carapace
+      { use: 'chatiere' }, // la combi de chitine passe (st_chatiere)
+      { use: 'liasse' }, // +liasse
+      { use: 'capsule' }, // +capsule (payoff Acte IV : procuration de PERCO)
+      { useItem: ['liasse', 'broyeuse'] }, // fausse piste : on ne broie pas le seul papier de la Station
+      { go: 'st-couloir-b' },
+      { section: 'Acte II · case A : humain, intérimaire' },
+      { go: 'st-archives' },
+      { useItem: ['liasse', 'photocopieuse'] }, // 3 copies CONFORMES, le papier reste dans le bac (st_papier) +copies_dossier
+      { combine: ['copies_dossier', 'formulaire'] }, // case A ; reclassement INTÉRIMAIRE (C'EST PIRE) (st_case_a, st_reclasse)
+      { talk: 'duplicata' }, // « Humain. Humain. Intérimaire. Intérimaire. »
+      { go: 'st-couloir-b' },
+      { go: 'st-tampons' },
+      { useItem: ['formulaire', 'tamponnet'] }, // PAS D'ENCRE, PAS DE VU : la grève (st_sait_greve, teaser Acte III)
     ],
   },
 ];

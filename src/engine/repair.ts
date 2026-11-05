@@ -26,4 +26,14 @@ export function repairState(state: GameState): void {
   if (state.hasFlag('ch1_seau_perdu') && state.hasItem('seau')) state.take('seau');
   // `ch1_couronnement` remet la combi avant la fin (jusqu'à ce qu'elle soit enfilée dans l'interlude)
   if (state.hasFlag('ch1_combi') && !state.hasItem('combi_chitine') && !state.hasFlag('combi_portee')) state.give('combi_chitine');
+  // ch.1 Station, Acte II (docs/CHAPTER1.md §6.5) : Duplicata garde le badge (pièce justificative)
+  // jusqu'à la restitution par SYLVIE (st_eclat2) ; les copies agrafées en case A ne reviennent pas
+  if (state.hasFlag('st_dossier_trouve') && !state.hasFlag('st_eclat2') && state.hasItem('badge')) state.take('badge');
+  if (state.hasFlag('st_case_a') && state.hasItem('copies_dossier')) state.take('copies_dossier');
+  if (state.hasFlag('st_case_a') && !state.hasFlag('st_reclasse')) state.setFlag('st_reclasse');
+  // la liasse part dans le bac de la photocopieuse (st_papier) et devient les copies
+  if (state.hasFlag('st_papier') && state.hasItem('liasse')) state.take('liasse');
+  if (state.hasFlag('st_papier') && !state.hasFlag('st_case_a') && !state.hasItem('copies_dossier')) state.give('copies_dossier');
+  // le formulaire ne quitte jamais l'inventaire avant le dépôt au guichet
+  if (state.hasFlag('st_formulaire') && !state.hasFlag('st_dossier_depose') && !state.hasItem('formulaire')) state.give('formulaire');
 }

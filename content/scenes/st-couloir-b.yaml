@@ -5,8 +5,10 @@
 #   plante sur l'emplacement au sol  → repère à gauche de l'extincteur       [st_plante_posee] −plante
 #   porte / ficus ensuite            → « suivre la plante » (3 directions)   [st_couloir_resolu] +plante
 #   casier « STOCK B-7/12 »          → le dernier formulaire                 [st_formulaire] = fin de l'Acte I
-# Entrée : porte de l'Aile B du guichet (article 47bis, st_acces_aile_b). Archives, Tampons,
-# Réclamations… : portes « À SUIVRE » (zones `planned` du PLAN, pas de scènes).
+# Entrée : porte de l'Aile B du guichet (article 47bis, st_acces_aile_b). Une fois le couloir dénoué
+# (st_couloir_resolu), les hotspots porte_b1/b2/b3 laissent la place aux sorties (même rect) vers les
+# Archives (st-archives), les Tampons (st-tampons) et les Réclamations (st-reclamations) — Acte II.
+# Pause, sous-chef, ascenseur : plus loin dans l'Aile B, « À SUIVRE » (zones `planned` du PLAN).
 id: st-couloir-b
 title: Couloir Infini B
 sector: Station Bureaucratique · Niveau 0 · Aile B
@@ -25,14 +27,12 @@ art:
 hotspots:
   - id: porte_b1
     label: Porte B-1
+    if: { notFlags: [st_couloir_resolu] }
     sfx: clonk
     rect: [150, 160, 130, 270]
     art:
       - { rect: [155, 165, 120, 260], color: "#5a4a6a", stroke: "#2a2830", text: "B-1", size: 18 }
     look:
-      - if: { flags: [st_couloir_resolu] }
-        say: "La plaque a changé : « ARCHIVES CENTRALES — FERMÉ POUR CLASSEMENT ». Dessous, en plus petit : « COULOIR EN COURS DE DÉNOUEMENT. À SUIVRE. »"
-        stop: true
       - say: "« B-1 ». Une porte en contreplaqué mauve, hublot dépoli, poignée polie par des générations de gens perdus."
     use:
       - dialogue: st_couloir_porte
@@ -42,14 +42,12 @@ hotspots:
 
   - id: porte_b2
     label: Porte B-2
+    if: { notFlags: [st_couloir_resolu] }
     sfx: clonk
     rect: [520, 160, 130, 270]
     art:
       - { rect: [525, 165, 120, 260], color: "#5a4a6a", stroke: "#2a2830", text: "B-2", size: 18 }
     look:
-      - if: { flags: [st_couloir_resolu] }
-        say: "« BUREAU DES TAMPONS — OUVERTURE DÈS QUE LE RÈGLEMENT LE PERMETTRA ». De l'autre côté, quelque chose fait CLONK. Puis CLONK. Puis attend."
-        stop: true
       - say: "« B-2 ». Exactement comme la B-1, avec un 2. Le 2 a l'air un peu plus fatigué que le 1. Il a fait plus de tours."
     use:
       - dialogue: st_couloir_porte
@@ -59,14 +57,12 @@ hotspots:
 
   - id: porte_b3
     label: Porte B-3
+    if: { notFlags: [st_couloir_resolu] }
     sfx: clonk
     rect: [930, 160, 130, 270]
     art:
       - { rect: [935, 165, 120, 260], color: "#5a4a6a", stroke: "#2a2830", text: "B-3", size: 18 }
     look:
-      - if: { flags: [st_couloir_resolu] }
-        say: "« RÉCLAMATIONS ». Une boîte aux lettres pleine à craquer à côté. Une réclamation dépasse : « LE COULOIR BOUCLE ». Datée de 1986. Elle n'a plus lieu d'être. Personne ne viendra la retirer."
-        stop: true
       - say: "« B-3 ». La dernière porte avant... l'extincteur. Le même extincteur. Je ne veux pas en parler."
     use:
       - dialogue: st_couloir_porte
@@ -83,6 +79,8 @@ hotspots:
     look:
       - if: { flags: [st_couloir_resolu] }
         say: "« AILE B — VOUS ÊTES ICI (ENCORE) ». Le petit plan circulaire a l'air vexé. Le couloir, lui, est redevenu droit."
+      - if: { flags: [st_couloir_resolu] }
+        say: "Une flèche, plus bas : « SALLE DE PAUSE · SOUS-CHEF ADJOINT · ASCENSEUR À FORMULAIRES → PLUS LOIN ». Un autocollant par-dessus : « À SUIVRE »."
         stop: true
       - say: "« AILE B — VOUS ÊTES ICI (ENCORE) ». Le plan est un cercle. Le point rouge est sur le cercle. Partout sur le cercle."
       - say: "bob: C'est le panneau le plus honnête de la Station, Gary. Il ne t'a jamais menti. Il t'a juste prévenu trop tard."
@@ -193,3 +191,25 @@ exits:
     to: st-guichet
     dir: left
     rect: [10, 140, 100, 320]
+
+  # le couloir dénoué (Acte II) : les portes B-1 / B-2 / B-3 mènent enfin à leurs bureaux (même rect que les hotspots)
+  - id: vers_archives
+    label: Archives Centrales
+    to: st-archives
+    dir: up
+    if: { flags: [st_couloir_resolu] }
+    rect: [150, 160, 130, 270]
+
+  - id: vers_tampons
+    label: Bureau des Tampons
+    to: st-tampons
+    dir: up
+    if: { flags: [st_couloir_resolu] }
+    rect: [520, 160, 130, 270]
+
+  - id: vers_reclamations
+    label: Réclamations
+    to: st-reclamations
+    dir: up
+    if: { flags: [st_couloir_resolu] }
+    rect: [930, 160, 130, 270]

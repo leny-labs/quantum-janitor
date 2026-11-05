@@ -44,20 +44,18 @@ bands:
         visible: { flags: [st_deduit_formulaire] }
         unlock: { flags: [st_acces_aile_b] }
         refused: { fr: "DEMANDE 47BIS OU B-7/12 REQUIS", en: "47BIS REQUEST OR B-7/12 REQUIRED" }
+      # Acte II : bureaux jouables, ouverts par le dénouement du couloir (sorties vers_archives / vers_tampons / vers_reclamations)
       - scene: st-archives
-        planned: true
         label: { fr: "Archives Centrales", en: "Central Archives" }
         visible: { flags: [st_couloir_boucle] }
         unlock: { flags: [st_couloir_resolu] }
         refused: { fr: "COULOIR NON DÉNOUÉ", en: "CORRIDOR STILL KNOTTED" }
       - scene: st-tampons
-        planned: true
         label: { fr: "Bureau des Tampons", en: "Stamp Office" }
         visible: { flags: [st_couloir_boucle] }
         unlock: { flags: [st_couloir_resolu] }
         refused: { fr: "COULOIR NON DÉNOUÉ", en: "CORRIDOR STILL KNOTTED" }
       - scene: st-reclamations
-        planned: true
         label: { fr: "Réclamations", en: "Complaints" }
         visible: { flags: [st_couloir_boucle] }
         unlock: { flags: [st_couloir_resolu] }

@@ -151,8 +151,63 @@ items:
     name: Formulaire B-7/12
     icon: { color: "#e8dcc0", glyph: "B-7/12" }
     look:
-      - say: "Le Formulaire B-7/12. Le dernier exemplaire. Légèrement jauni, parfaitement vierge. Cinq cases : REMPLI, TAMPONNÉ, SIGNÉ, CONFORME, et une cinquième sans titre."
-      - say: "En bas, en tout petit : « À REMPLIR EN TROIS EXEMPLAIRES ». Il n'y en a qu'un. On verra ça dans l'Aile B. (À suivre.)"
+      # tableau de bord : les cases suivent les flags st_case_* (docs/CHAPTER1.md §2, §6)
+      - if: { flags: [st_case_a] }
+        say: "Le Formulaire B-7/12. Case A, IDENTITÉ : cochée, trois copies « CONFORME » agrafées. « PLUNK, GARRY — HUMAIN — INTÉRIMAIRE ». Cases B, C, D, E : vides."
+        stop: true
+      - say: "Le Formulaire B-7/12. Le dernier exemplaire. Légèrement jauni, parfaitement vierge. Cinq cases : A IDENTITÉ, B « VU », C TROIS EXEMPLAIRES, D SIGNATURE, et E, sans titre."
+      - say: "En bas, en tout petit : « PIÈCES JUSTIFICATIVES À AGRAFER EN CASE A ». Agrafer quoi ? Je n'ai encore aucune pièce qui dise que j'existe."
     combine:
+      # étape 20 : case A remplie, reclassement intérimaire (fin de l'Acte II)
+      copies_dossier:
+        - dialogue: st_reclassement
+          take: copies_dossier
+          set: st_case_a
+        - set: st_reclasse
       plante: "Faire signer M. Ficus ? Il est membre honoraire de quelque chose. Mais pas aujourd'hui. Il est fatigué : il vient de dénouer un couloir."
       ticket_9848: "J'agrafe mentalement le ticket au formulaire. Mentalement, parce que je n'ai pas d'agrafeuse. Il y a sûrement un bureau pour ça."
+      tampon_annule: "Tamponner « ANNULÉ » sur ma propre demande ? C'est très local, comme réflexe. Non."
+      encreur: "Frotter le formulaire sur l'encreur ? Il est sec. Ça ne laisserait qu'une trace de déception."
+      liasse: "Une liasse de réclamations et une demande de restitution : ce ne sont pas les mêmes formulaires. Ils ne se parlent pas. Ils sont de services différents."
+      capsule: "Rouler le formulaire dans la capsule ? Il n'est pas prêt pour un voyage. Une case sur cinq, au mieux."
+      badge: "Agrafer le badge ? Duplicata dirait que l'original ne s'agrafe pas. Il me faut des copies. Conformes."
+
+  # Acte II « Humain, preuves à l'appui » (docs/CHAPTER1.md §5)
+  # payoff différé : vote de Paraphe au Conseil (39), amende de la fourrière (45) ; jamais consommé
+  - id: tampon_annule
+    name: Tampon « ANNULÉ »
+    icon: { color: "#c0392b", glyph: "ANNULÉ" }
+    look: "Le tampon « ANNULÉ » de Mme Tamponnet. Quarante et un ans sur un crochet sans jamais servir. Le manche est encore propre. Ici, on n'annule jamais rien. Justement. (À suivre.)"
+    combine:
+      encreur: "Encrer le tampon ANNULÉ sur l'encreur sec ? Il en ressort aussi sec. Annulé, mais à blanc."
+      ticket_douane: "Annuler mon ticket de sortie ? Il ne me resterait plus que l'entrée. C'est déjà le problème de toute cette Station."
+      plante: "Annuler M. Ficus ? Il a dénoué un couloir. On n'annule pas un héros. Même en plastique."
+
+  # payoff différé : imbibé de café (Acte III) puis rendu à Tamponnet pour le « VU »
+  - id: encreur
+    name: Encreur sec
+    icon: { color: "#7a6a8a", glyph: "ENCRE" }
+    look: "L'encreur de Mme Tamponnet. Feutre sec et craquelé, couleur lilas fatigué. « ENCRE OFFICIELLE — VOIR DÉLÉGUÉ DU PERSONNEL ». Il lui faudrait quelque chose de chaud et de syndiqué. (À suivre.)"
+    combine:
+      fragment: "L'éclat sur l'encreur ? Il pourrait se remplir d'encre improbable. Elle tamponnerait des choses qui n'existent pas. Ici, ce serait mal vu."
+      copies_dossier: "Les copies sont déjà « CONFORME ». Duplicata a léché son tampon. Pas besoin d'encre de plus."
+
+  - id: liasse
+    name: Liasse de réclamations vierges
+    icon: { color: "#cfe0c0", glyph: "LIASSE" }
+    look: "Une liasse de formulaires de réclamation vierges, vert pâle, tenue par un élastique. Cinq cents réclamations que personne n'a jamais faites. Du papier. Le seul de la Station."
+    combine:
+      capsule: "Rouler une réclamation dans la capsule ? Le Conseil la recevrait vierge. Il voterait contre, par principe. Gardons la capsule pour un vrai message."
+
+  # payoff différé : procuration de PERCO envoyée au Conseil par le tube (Acte IV)
+  - id: capsule
+    name: Capsule pneumatique
+    icon: { color: "#c9d6e0", glyph: "TUBE" }
+    look: "Une capsule de tube pneumatique, vide. « RÉCLAMATIONS → CONSEIL. USAGE : JAMAIS ». Elle va au Conseil. Il faudra y mettre quelque chose qui compte. (À suivre.)"
+
+  - id: copies_dossier
+    name: Copies du dossier « GARRY »
+    icon: { color: "#e8e8e0", glyph: "×3" }
+    look: "Trois photocopies de ma fiche : « PLUNK, GARRY — STATUT : HUMAIN. INTÉRIMAIRE. RENOUVELABLE PAR PITIÉ. » Tampon brunâtre « CONFORME », qui sent le café de 1985. Pièces justificatives : à agrafer au formulaire."
+    combine:
+      ticket_9848: "Agrafer le ticket de M. Patience à mon dossier ? Il a assez attendu pour nous deux. Je le laisse tranquille."

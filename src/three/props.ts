@@ -945,6 +945,39 @@ export const GUICHARD_ACTOR: ActorLoops = {
     { frame: 4, duration: 6500 },
   ],
 };
+/**
+ * Acte II (Aile B) : M. Régis Duplicata (Archives) et Mme Gisèle Tamponnet (Tampons), bustes coupés
+ * au comptoir (GenAI gpt-image-2.6-sunburst, style de guichard.png ; _briefs/acte2/genai/build.py).
+ * Planches 2 cellules : 0 repos · 1 marmonne (visage « parle » recollé sur le repos). Comme Mme
+ * Guichard, jamais synchronisées sur le dialogue : seul le portrait de la boîte de dialogue parle.
+ */
+export const DUPLICATA_SHEET = `${import.meta.env.BASE_URL}props/st/duplicata-sheet.png`;
+export const DUPLICATA_ASPECT = 708 / 768;
+/** Il marmonne tout deux fois, de temps en temps, pour lui-même. */
+export const DUPLICATA_ACTOR: ActorLoops = {
+  idle: [
+    { frame: 0, duration: 4200 },
+    { frame: 1, duration: 260 },
+    { frame: 0, duration: 180 },
+    { frame: 1, duration: 260 },
+    { frame: 0, duration: 5600 },
+    { frame: 1, duration: 240 },
+    { frame: 0, duration: 160 },
+    { frame: 1, duration: 240 },
+  ],
+};
+export const TAMPONNET_SHEET = `${import.meta.env.BASE_URL}props/st/tamponnet-sheet.png`;
+export const TAMPONNET_ASPECT = 839 / 768;
+/** Un « CLONK » ravi à chaque coup de tampon dans le vide (la planche suit le coup, pas la voix). */
+export const TAMPONNET_ACTOR: ActorLoops = {
+  idle: [
+    { frame: 0, duration: 2600 },
+    { frame: 1, duration: 420 },
+    { frame: 0, duration: 3100 },
+    { frame: 1, duration: 380 },
+    { frame: 0, duration: 1900 },
+  ],
+};
 /** M. Patience assis sur sa chaise, ticket 9 848 tendu ; variante main vide (même cadre) une fois le ticket pris. */
 export const PATIENCE_URL = `${import.meta.env.BASE_URL}props/st/patience.png`;
 export const PATIENCE_EMPTY_URL = `${import.meta.env.BASE_URL}props/st/patience-vide.png`;

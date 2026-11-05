@@ -81,6 +81,12 @@ hotspots:
       ticket_douane:
         - say: "sylvie: TICKET D'ENTRÉE VALIDE. À CONSERVER. NE PAS PLIER. NE PAS MANGER. CECI CONCERNE AUSSI LE PROPRIÉTAIRE."
           mood: calm
+      # fausse piste (docs/CHAPTER1.md §6.4) : le tampon ANNULÉ ne sert pas ici (rien n'est consommé)
+      tampon_annule:
+        - say: "narrateur: Gary tamponne « ANNULÉ » sur l'écran de la borne. CLONK."
+        - say: "sylvie: ON N'ANNULE PAS UN STATUT. VOUS ÊTES UN ÉTAT DE FAIT."
+          mood: calm
+        - say: "Un état de fait. Je préférais « animal de compagnie ». Au moins, ça avait un propriétaire."
 
   - id: guerite
     label: Guérite de la fourrière

@@ -92,7 +92,17 @@ async function main() {
         for (const kept of ['fragment', 'badge']) if (!jump.save.items.includes(kept)) throw new Error(`interlude : « ${kept} » perdu`);
         if (state.hasFlag('ch1')) throw new Error('la Station ne doit jamais poser le flag ch1 (acte Blattaria)');
         // stub de la Station : objets à payoff différé gardés jusqu'à la fin provisoire
-        for (const kept of ['ticket_douane', 'plante', 'ticket_9848', 'fragment', 'badge', 'plan_station']) if (!state.hasItem(kept)) throw new Error(`Station : « ${kept} » absent à la fin du stub`);
+        for (const kept of ['ticket_douane', 'plante', 'ticket_9848', 'fragment', 'plan_station']) if (!state.hasItem(kept)) throw new Error(`Station : « ${kept} » absent à la fin du stub`);
+        // Acte II (docs/CHAPTER1.md §6.13–21) : archives → tampons → réclamations → copies → case A
+        for (const f of ['st_cherche_gary', 'st_dossier_trouve', 'st_tamponnet', 'st_chatiere', 'st_papier', 'st_case_a', 'st_reclasse', 'st_sait_greve']) if (!state.hasFlag(f)) throw new Error(`Acte II : flag ${f} absent`);
+        for (const kept of ['formulaire', 'tampon_annule', 'encreur', 'capsule']) if (!state.hasItem(kept)) throw new Error(`Acte II : « ${kept} » absent à la fin`);
+        for (const gone of ['badge', 'liasse', 'copies_dossier']) if (state.hasItem(gone)) throw new Error(`Acte II : « ${gone} » encore en poche à la fin`);
+        const badgeEarly = checkpoints.find((c) => c.label === 'utiliser badge sur fichier');
+        if (!badgeEarly || !badgeEarly.save.items.includes('badge') || badgeEarly.save.flags.includes('st_dossier_trouve')) throw new Error('Acte II : badge sur le fichier sans demande de recherche devait être refusé');
+        const formEarly = checkpoints.find((c) => c.label === 'utiliser formulaire sur tamponnet');
+        if (!formEarly || !formEarly.save.items.includes('formulaire') || formEarly.save.flags.includes('st_sait_greve')) throw new Error('Acte II : le formulaire ne doit jamais quitter l\'inventaire chez Tamponnet');
+        const broyeuse = checkpoints.find((c) => c.label === 'utiliser liasse sur broyeuse');
+        if (!broyeuse?.save.items.includes('liasse')) throw new Error('Acte II : la broyeuse ne doit pas consommer la liasse');
         const decoy = checkpoints.find((c) => c.label === 'utiliser ticket_douane sur distributeur');
         if (!decoy?.save.items.includes('ticket_douane')) throw new Error('fausse piste : le distributeur ne doit pas garder le ticket de douane');
         for (const f of ['st_arrive', 'st_laisse', 'st_ticket_9848']) if (!state.hasFlag(f)) throw new Error(`Station : flag ${f} absent`);
@@ -109,7 +119,7 @@ async function main() {
         const map = parseStationMap(readFileSync(join(ROOT, 'content', 'station-map.yaml'), 'utf8'));
         const zone = (id: string) => map.bands.flatMap((b) => b.zones).find((z) => z.scene === id)!;
         const exists = (id: string) => content.scenes.has(id);
-        const expect = { 'st-sas': 'open', 'st-attente': 'open', 'st-cafeteria': 'open', 'st-guichet': 'open', 'st-couloir-b': 'here', 'st-archives': 'locked', 'st-fourriere': 'locked', 'st-direction': 'unknown' } as const;
+        const expect = { 'st-sas': 'open', 'st-attente': 'open', 'st-cafeteria': 'open', 'st-guichet': 'open', 'st-couloir-b': 'open', 'st-archives': 'open', 'st-reclamations': 'open', 'st-tampons': 'here', 'st-pause': 'locked', 'st-fourriere': 'locked', 'st-direction': 'unknown' } as const;
         // repérée et accessible mais jamais visitée : pas de warp (on y va à pied d'abord)
         const early = chapterStateAt(state, 'st-sas', ['st-sas']);
         if (zoneState(early, zone('st-attente'), exists) !== 'seen') throw new Error('carte : salle d\'attente non visitée devrait être « seen »');

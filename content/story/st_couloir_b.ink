@@ -62,17 +62,17 @@ Trois directions. Les trois ont un panneau « AILE B ». Un seul a une plante en
     -> END
 
 // Payoff : le dernier B-7/12, dans le casier « STOCK B-7/12 » (YAML : give formulaire, set st_formulaire).
-// Cliffhanger de l'Acte I (Accueil) : les bureaux de l'Aile B ouvriront « dès que le règlement le permettra ».
+// Fin de l'Acte I (Accueil) ; les portes des bureaux sont déjà des sorties (Acte II, st-archives…).
 === st_couloir_formulaire ===
 Gary ouvre le casier. Dedans : une étagère. Sur l'étagère : un seul formulaire, bien à plat, légèrement jauni, avec une étiquette « DERNIER EXEMPLAIRE — NE PAS UTILISER ».
 gary: Le Formulaire B-7/12. Le dernier. On l'a.
 bob: On l'a, Gary. Le premier formulaire retiré dans cette Station depuis 1985. Je vais pleurer. Je n'ai pas de glandes, mais je vais trouver. # mood: love
 Gary le retourne. Au dos : cinq cases. Rempli. Tamponné. Signé. Conforme. Et une cinquième, sans titre.
 gary: Cinq cases. Aucune remplie.
-sylvie: AVIS À LA CLIENTÈLE. LE COULOIR B EST DÉNOUÉ. LES BUREAUX DE L'AILE B OUVRIRONT DÈS QUE LE RÈGLEMENT LE PERMETTRA. MERCI DE VOTRE PATIENCE. # mood: love
-bob: « Dès que le règlement le permettra. » Tu sais ce que ça veut dire, Gary ? # mood: suspicious
-gary: Que ça n'arrivera jamais ?
-bob: Que c'est nous qui allons devoir le lui permettre. # mood: calm
+sylvie: AVIS À LA CLIENTÈLE. LE COULOIR B EST DÉNOUÉ. LES BUREAUX DE L'AILE B SONT OUVERTS AUX USAGERS MUNIS D'UN DOSSIER. MERCI DE VOTRE PATIENCE. # mood: love
+bob: « Munis d'un dossier. » Tu sais ce que ça veut dire, Gary ? # mood: suspicious
+gary: Que je n'en ai pas ?
+bob: Que tu es classé animal, et qu'un animal n'a pas de dossier. Il va falloir prouver que tu es quelqu'un. Les Archives, Gary. Porte B-1. # mood: calm
 -> END
 
 // B.O.B. dans le couloir : indices gradués (porte → plante → suivre M. Ficus → casier).
@@ -99,5 +99,8 @@ bob: Que c'est nous qui allons devoir le lui permettre. # mood: calm
     bob: Le casier, Gary. « STOCK B-7/12 ». Il était là depuis le début. Il attendait juste qu'on arrive par le bon côté. # mood: surprised
     -> END
 }
-bob: On a le formulaire, Gary. Les bureaux sont fermés, mais ils existent. Pour une Station comme celle-ci, c'est déjà une déclaration d'amour. # mood: love
--> END
+// Acte II : les bureaux sont ouverts (sorties vers_archives / vers_tampons / vers_reclamations)
+{ not has_flag("st_cherche_gary"):
+    bob: On a le formulaire, Gary. Et les portes s'ouvrent : Archives, Tampons, Réclamations. Pour une Station comme celle-ci, c'est déjà une déclaration d'amour. # mood: love
+}
+-> st_bob_acte2

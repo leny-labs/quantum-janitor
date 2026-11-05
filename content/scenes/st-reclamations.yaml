@@ -1,0 +1,169 @@
+# Chapitre 1 « La Station Bureaucratique » — 7. Service des Réclamations (docs/CHAPTER1.md §4, §6.17–18).
+# Rendu 3D : src/three/rooms/station.ts (stReclamations). `art:` = repli 2D. Pas de PNJ.
+# Une seule scène : passer la chatière révèle les hotspots « derrière le comptoir » (pas de 2e pièce).
+#   comptoir « RÉSERVÉ AU PERSONNEL »    → bloqué (refus)
+#   utiliser la chatière « ANIMAUX DE SERVICE » (combi portée) → Gary s'aplatit, la chatière
+#     reconnaît la carapace (pas le statut : elle reste ouverte après le reclassement, §6.5) [st_chatiere]
+#   derrière : liasse de réclamations vierges, capsule pneumatique vide   +liasse +capsule
+id: st-reclamations
+title: Service des Réclamations
+sector: Station Bureaucratique · Niveau 0 · Aile B
+icon: corridor
+background: "#2a221e"
+
+onFirstEnter:
+  - say: "Le Service des Réclamations. Un comptoir, une vitre, une sonnette. Personne. Une plaque : « VOTRE RÉCLAMATION EST IMPORTANTE POUR NOUS »."
+  - say: "Au pied du comptoir, une petite porte battante, à hauteur de genou. Une plaque en laiton. Je n'ose pas encore la lire."
+  - say: "bob: Il n'y a personne, Gary. C'est le service le plus efficace de la Station : aucune réclamation n'a jamais été refusée. Aucune n'a jamais été reçue."
+    mood: calm
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#3a3028" }
+  - { rect: [0, 0, 1280, 470], color: "#b0a08a" }
+
+hotspots:
+  - id: panneau
+    label: Plaque « RÉCLAMATIONS »
+    smart: look
+    rect: [480, 30, 320, 110]
+    art:
+      - { rect: [485, 35, 310, 100], color: "#a8542a", stroke: "#f6efdc", text: "RÉCLAMATIONS", size: 16 }
+    look:
+      - say: "« RÉCLAMATIONS — VOTRE RÉCLAMATION EST IMPORTANTE POUR NOUS ». Dessous, en plus petit : « C'EST POURQUOI NOUS LA CONSERVONS PRÉCIEUSEMENT, SANS L'OUVRIR »."
+
+  - id: comptoir
+    label: Comptoir « RÉSERVÉ AU PERSONNEL »
+    rect: [360, 200, 560, 160]
+    art:
+      - { rect: [365, 205, 550, 150], color: "#7a5a3a", stroke: "#2a2830", text: "RÉSERVÉ AU PERSONNEL", size: 14 }
+    look:
+      - if: { flags: [st_chatiere] }
+        say: "Le comptoir, vu d'ici, c'est-à-dire du côté du personnel. Il y a une chaise, une sonnette et une tasse. La tasse contient du café de 1985, solidifié en forme de tasse."
+        stop: true
+      - say: "Un comptoir en bois verni, une vitre, une sonnette. Une plaque rouge : « RÉSERVÉ AU PERSONNEL — ACCÈS INTERDIT ». Derrière, des étagères : des liasses de formulaires vierges. Des piles entières."
+      - say: "Du papier. Du papier vierge. À deux mètres. Derrière une plaque."
+    use:
+      - if: { flags: [st_chatiere] }
+        say: "Je suis déjà derrière. Je pourrais sonner, pour voir. Je sonne. Personne ne vient. Pas même moi."
+        stop: true
+      - say: "J'enjambe à moitié le comptoir. Une voix enregistrée : « RÉSERVÉ AU PERSONNEL. VOUS N'ÊTES PAS DU PERSONNEL. VOUS ÊTES UN ANIMAL DE COMPAGNIE. »"
+      - say: "sylvie: LES ANIMAUX SONT PRIÉS D'UTILISER L'ACCÈS PRÉVU À CET EFFET."
+        mood: calm
+      - say: "L'accès prévu à cet effet. Il y a donc un accès prévu à cet effet."
+    useItem:
+      badge: "« BADGE NON RECONNU — ESPÈCE : BLATTE ». Même le comptoir est au courant."
+      formulaire: "Je pose le formulaire sur le comptoir. Personne ne le prend. Il n'y a personne pour le prendre. C'est la définition même de ce service."
+      fragment: "L'éclat sur le comptoir ? Un employé pourrait apparaître. Statistiquement. Je ne suis pas prêt à gérer un collègue."
+    useItemDefault: "« RÉSERVÉ AU PERSONNEL ». Ça vaut aussi pour les objets."
+
+  - id: chatiere
+    label: Chatière « ANIMAUX DE SERVICE »
+    sfx: clonk
+    rect: [570, 360, 130, 100]
+    art:
+      - { rect: [575, 365, 120, 90], color: "#c9a24a", stroke: "#2a2830", text: "ANIMAUX\nDE SERVICE", size: 12 }
+    look:
+      - if: { flags: [st_chatiere] }
+        say: "La chatière « ANIMAUX DE SERVICE ». Elle se souvient de ma carapace. Elle reste entrouverte, par courtoisie entre insectes."
+        stop: true
+      - say: "Une chatière battante dans le pied du comptoir. Plaque en laiton : « ANIMAUX DE SERVICE ». Un petit lecteur au-dessus : « DÉTECTION : CARAPACE / FOURRURE / PLUMES »."
+      - say: "Carapace. Je suis en combinaison de chitine. Officiellement, je suis un animal. Pour une fois, c'est un avantage."
+    use:
+      - if: { flags: [st_chatiere] }
+        say: "narrateur: Gary repasse par la chatière, à quatre pattes, avec une dignité de cafard. Elle s'ouvre toute seule. CLONK."
+        stop: true
+      - if: { flags: [combi_portee] }
+        dialogue: st_reclamations_chatiere
+        set: st_chatiere
+        stop: true
+      - say: "Je pousse la chatière. Elle ne bouge pas. Le lecteur clignote : « AUCUNE CARAPACE DÉTECTÉE »."
+    useItem:
+      badge: "« BADGE NON REQUIS — ANIMAUX DE SERVICE ». C'est la première porte de la Station qui ne demande rien. Je ne sais pas quoi en faire. Si : passer."
+      plante: "M. Ficus par la chatière ? Il n'a ni carapace, ni fourrure, ni plumes. Il a des feuilles. Le lecteur ne gère pas les feuilles."
+      fragment: "L'éclat devant le lecteur ? Il pourrait détecter des plumes sur moi. Restons sur la carapace. Elle, au moins, est vraie."
+    useItemDefault: "Le lecteur n'attend pas un objet. Il attend un animal. J'en suis un. Il faut juste que je passe."
+
+  # derrière le comptoir (après la chatière) : liasse de réclamations vierges et capsule pneumatique
+  - id: liasse
+    label: Liasse de réclamations
+    useLabel: Prendre
+    if: { flags: [st_chatiere], notFlags: [st_liasse_prise] }
+    rect: [400, 130, 150, 70]
+    art:
+      - { rect: [405, 140, 140, 50], color: "#cfe0c0", stroke: "#2a2830", text: "LIASSE", size: 12 }
+    look: "Une liasse de formulaires de réclamation vierges, tenue par un élastique. Papier 80 g, vert pâle. Du papier, Gary. Du vrai papier qui n'a encore rien refusé à personne."
+    use:
+      - say: "Je prends la liasse. Elle est lourde comme cinq cents réclamations qui n'ont jamais été faites."
+        give: liasse
+        set: st_liasse_prise
+      - say: "bob: Le papier, Gary ! Pour la photocopieuse des Archives ! Ce Service vient de servir à quelque chose. C'est historique."
+        mood: surprised
+
+  - id: capsule
+    label: Capsule pneumatique
+    useLabel: Prendre
+    if: { flags: [st_chatiere], notFlags: [st_capsule_prise] }
+    rect: [740, 130, 130, 70]
+    art:
+      - { rect: [745, 140, 120, 50], color: "#c9d6e0", stroke: "#2a2830", text: "CAPSULE", size: 12 }
+    look: "Une capsule de tube pneumatique, vide. Cylindre transparent, deux bouchons en laiton. Étiquette : « RÉCLAMATIONS → CONSEIL. USAGE : JAMAIS »."
+    use:
+      - say: "Je prends la capsule vide. Une capsule qui va au Conseil, ça peut servir. Je ne sais pas encore à quoi. C'est comme ça que je garde tout."
+        give: capsule
+        set: st_capsule_prise
+
+  - id: broyeuse
+    label: Boîte à réclamations
+    rect: [960, 220, 140, 230]
+    art:
+      - { rect: [965, 225, 130, 220], color: "#5a5f6a", stroke: "#2a2830", text: "BOÎTE À\nRÉCLAMATIONS", size: 12 }
+    look:
+      - say: "Une boîte aux lettres rouge : « DÉPOSEZ VOTRE RÉCLAMATION ICI ». Sous la fente, un tuyau. Au bout du tuyau, une broyeuse. Elle a l'air bien nourrie."
+      - if: { flags: [st_chatiere] }
+        say: "Vu de derrière, le tuyau arrive directement dans la broyeuse. Pas de bac, pas de tri, pas d'étape intermédiaire. C'est le circuit le plus court de la Station."
+    use:
+      - say: "Je soulève le clapet. GRRRRRR. La broyeuse se réveille, pleine d'espoir. Je referme le clapet. GRrr. Elle se rendort, déçue."
+    useItem:
+      liasse: "Mettre la liasse dans la broyeuse ? C'est le seul papier vierge de la Station. Non. Même la broyeuse a eu l'air soulagée que je renonce."
+      formulaire: "Le dernier B-7/12 dans une broyeuse. Je crois que c'est le cauchemar de Mme Guichard. Et maintenant, le mien."
+      copies_dossier: "Broyer mes copies ? J'ai mis tout l'Acte à devenir humain sur papier. Non."
+      ticket_douane: "Le ticket de douane dans la broyeuse ? Et rester ici pour toujours ? Non merci. Je garde."
+      plante: "M. Ficus est contre. Il ne l'a pas dit, mais il est contre."
+    useItemDefault: "La broyeuse a faim. Mais rien de ce que j'ai n'est assez inutile pour elle."
+
+  - id: tube
+    label: Tube pneumatique
+    rect: [1120, 90, 110, 360]
+    art:
+      - { rect: [1135, 95, 80, 350], color: "#c9ced6", stroke: "#2a2830", text: "TUBE", size: 12 }
+    look:
+      - say: "Un terminal de tube pneumatique. Une étiquette : « DESTINATIONS : CONSEIL · PAUSE · DIRECTION ». Le tube aspire l'air de la pièce, doucement, comme quelqu'un qui retient un soupir."
+      - say: "bob: Un tube qui monte au Conseil, Gary. Avec une capsule, on pourrait y envoyer quelque chose. Plus tard. Retiens-le."
+        mood: calm
+    use: "J'approche l'oreille du tube. FLOUP. Il m'aspire une mèche de cheveux. Enfin, une antenne. J'ai vraiment des antennes."
+    useItem:
+      capsule: "Envoyer la capsule vide au Conseil ? Ils la voteraient. Contre. Gardons-la pour y mettre quelque chose qui compte."
+      formulaire: "Le formulaire par le tube ? Il n'arriverait au Conseil qu'à moitié rempli. Et ça, ils détestent encore plus que les formulaires vides."
+    useItemDefault: "Le tube n'accepte que des capsules. Les capsules n'acceptent que ce qui tient dedans. Ça, non."
+
+  - id: bob
+    label: B.O.B.
+    rect: [650, 415, 150, 80]
+    art:
+      - { rect: [655, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+    look: "B.O.B. a éteint ses LED, par respect pour les réclamations jamais lues."
+    talk:
+      - dialogue: st_bob_reclamations
+    useItem:
+      liasse: "bob: Pour la photocopieuse, Gary. Pas pour moi. Même si l'odeur du papier neuf… non. Non."
+      capsule: "bob: Je ne rentre pas dedans, Gary. J'ai essayé une fois avec un tube de dentifrice. Mauvais souvenir."
+    useItemDefault:
+      - say: "bob: Je ne prends pas de réclamations, Gary. Je n'ai pas de service pour ça."
+        mood: sad
+
+exits:
+  - id: vers_couloir
+    label: Couloir Infini B
+    to: st-couloir-b
+    dir: left
+    rect: [10, 140, 100, 320]
