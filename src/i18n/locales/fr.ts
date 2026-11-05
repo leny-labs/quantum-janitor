@@ -13,6 +13,10 @@ export const fr = {
     menu: 'Menu',
     /** Bouton du plan de la Station (ch.1), visible avec l'objet `plan_station`. */
     map: 'Plan',
+    /** Bouton du carnet de déduction (ch.1), visible dès le premier indice noté. */
+    carnet: 'Carnet',
+    carnetNoted: 'NOTÉ AU CARNET',
+    carnetMore: '+ {n} AUTRE(S)',
     drop: 'Reposer',
     held: 'EN MAIN : {item}',
     useOn: 'Utiliser {item} sur {target}',
@@ -200,6 +204,35 @@ export const fr = {
     close: 'Replier le plan',
     closeKicker: 'ÉCHAP · P',
   },
+  /** Carnet de déduction (src/ui/Carnet.ts, docs/CHAPTER1.md « Carnet de déduction »). */
+  carnet: {
+    title: 'CARNET DE CONSTATATIONS',
+    sub: 'FORMULAIRE D-0 (DÉDUCTIONS) · NE PAS PLIER · NE PAS DÉDUIRE HORS DES HEURES D’OUVERTURE',
+    stamp: 'CONFIDENTIEL',
+    clues: 'CONSTATATIONS',
+    conclusions: 'CONCLUSIONS',
+    noConclusion: 'Aucune conclusion. Le carnet attend. Il a l’habitude.',
+    slotA: 'INDICE A',
+    slotB: 'INDICE B',
+    slotEmpty: '— choisir une pièce —',
+    deduce: 'Déduire',
+    deduceKicker: 'A + B → ?',
+    hint: 'Cliquez une constatation pour la lire et la poser en A, puis une autre en B. Puis DÉDUIRE.',
+    validated: 'VALIDÉ',
+    rejectedStamp: 'REJETÉ',
+    newTag: 'NOUVEAU',
+    already: 'Déjà conclu. Le carnet ne radote pas. Lui.',
+    rejected: [
+      'Rejeté : pièces non concordantes. Veuillez recommencer en trois exemplaires.',
+      'Irrecevable : ces deux pièces ne se connaissent pas. Elles ne souhaitent pas se connaître.',
+      'Refusé pour motif confidentiel. Le motif du motif est également confidentiel.',
+      'Classé sans suite. La suite est en rupture de stock depuis 1985.',
+      'Rejeté pour vice de forme. La forme vous prie de l’excuser.',
+      'Rapprochement non prévu au Catalogue des Rapprochements (édition 1987).',
+    ],
+    close: 'Ranger le carnet',
+    closeKicker: 'ÉCHAP · C',
+  },
   /** Cartes de transition (src/ui/ChapterCard.ts, docs/CHAPTERS.md §2). */
   card: {
     ch1: {
@@ -329,6 +362,9 @@ export const fr = {
       wingB: 'AILE B',
       wingBReader: 'FORMULAIRE\nB-7/12 REQUIS',
       nowServing: 'EN COURS',
+      /** Pancarte du guichet 1 (st_guichet_ouvert : 10 h 12). */
+      deskClosed: 'FERMÉ',
+      deskOpen: 'OUVERT',
       closed: 'FERMÉ',
       planIcon: 'PLAN',
       ficusTag: 'MEMBRE HON. DU C…',

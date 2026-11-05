@@ -36,6 +36,8 @@ import { t, tl } from '../i18n';
 import { isTouch, uiPx } from '../ui/input';
 import { playMusic, themeForScene } from '../ui/music';
 import { makeMapToggle } from '../ui/MapToggle';
+import { CarnetOverlay, freshClues, hasUnread, makeCarnetToggle, notifyNoted, type CarnetButton } from '../ui/Carnet';
+import { hasCarnet, type Carnet, type ClueDef } from '../engine/clues';
 import { makeMusicToggle } from '../ui/MusicToggle';
 import { PressRing } from '../ui/PressRing';
 import { RoomPlaque } from '../ui/RoomPlaque';
@@ -76,6 +78,11 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   /** Plan de la Station (ch.1) : visible avec l'objet `plan_station`. */
   mapButton!: Phaser.GameObjects.Container;
   private mapOverlay: StationMapOverlay | null = null;
+  /** Carnet de déduction (ch.1) : visible dès le premier indice noté (engine/clues.ts). */
+  carnetButton!: CarnetButton;
+  private carnetOverlay: CarnetOverlay | null = null;
+  /** Indices fraîchement notés : fiche « Noté au carnet » dès que l'écran est libre. */
+  private notedPending: ClueDef[] = [];
   private debugText: Phaser.GameObjects.Text | null = null;
   private heldItem!: Phaser.GameObjects.Text;
   /** Objet en main : son icône GenAI suit le curseur (repli : étiquette `heldItem`). */
@@ -153,6 +160,11 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.mapButton = makeMapToggle(this, this.musicButton.x - menu.height - 8, menu.y, menu.height, t('hud.map'), () => this.openMap())
       .setDepth(700)
       .setVisible(hasStationMap(state));
+    this.carnetOverlay = null;
+    this.notedPending = [];
+    this.carnetButton = makeCarnetToggle(this, this.mapButton.x, menu.y, menu.height, t('hud.carnet'), () => this.openCarnet()).setDepth(700) as CarnetButton;
+    freshClues(state, this.carnet); // référence : ce qui est déjà noté au chargement n'est pas « nouveau »
+    this.layoutCarnetButton();
     if (this.session.debug.overlay) {
       this.debugText = this.add
         .text(14, 96, '', { fontFamily: MONO, fontSize: '13px', color: '#ff99ff', backgroundColor: '#000000aa', wordWrap: { width: 700 } })
@@ -184,6 +196,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const onKey = (e: KeyboardEvent) => {
       if (this.skipCine && !this.dialogueBox.isOpen && !e.repeat) return this.skipCine();
       if ((e.key === 'p' || e.key === 'P') && !e.repeat && !this.mapOverlay) return this.openMap();
+      if ('cCnN'.includes(e.key) && e.key.length === 1 && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !this.carnetOverlay) return this.openCarnet();
       if (e.key === 'Escape' || e.key === 'ArrowDown') this.leaveCloseup();
     };
     window.addEventListener('keydown', onKey);
@@ -195,6 +208,10 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const off = state.onChange(() => {
       this.refresh();
       this.cue.check();
+      // nouvel indice : petite fiche « Noté au carnet » + pastille sur le bouton
+      // (jouée à la fin de l'interaction : jamais sous une bulle de dialogue)
+      this.notedPending.push(...freshClues(state, this.carnet));
+      this.layoutCarnetButton();
     });
     // `# aspir` du dialogue (st_patience) : B.O.B. aspire le ticket de M. Patience
     const onAspir = () => void this.bobAspir();
@@ -202,6 +219,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.events.off('ink-aspir', onAspir);
       this.mapOverlay?.close();
+      this.carnetOverlay?.close();
       this.press?.cancel();
       off();
       setCursor(this, 'default');
@@ -223,6 +241,11 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
 
   update(): void {
     this.room.update();
+    if (this.notedPending.length && !this.blocked && this.carnetButton.visible) {
+      const size = this.menuButton.height;
+      notifyNoted(this, this.carnetButton.x + size / 2, this.carnetButton.y + size / 2, this.notedPending);
+      this.notedPending = [];
+    }
   }
 
   private refresh(): void {
@@ -231,6 +254,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const { state, content } = this.session;
     this.plaque.show(this.scenes.current());
     this.mapButton.setVisible(hasStationMap(state));
+    this.layoutCarnetButton();
     playMusic(themeForScene(state.scene));
     const held = state.selectedItem ? content.items.get(state.selectedItem) : null;
     const heldKey = held ? itemIconKey(held.id, (f) => state.hasFlag(f)) : null;
@@ -489,7 +513,39 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   }
 
   private get blocked(): boolean {
-    return this.busy || this.dialogueBox.isOpen || this.coin.isOpen || !!this.room.examining || !!this.mapOverlay;
+    return this.busy || this.dialogueBox.isOpen || this.coin.isOpen || !!this.room.examining || !!this.mapOverlay || !!this.carnetOverlay;
+  }
+
+  private get carnet(): Carnet {
+    return this.session.content.carnet ?? { clues: [], deductions: [] };
+  }
+
+  /** Bouton CARNET : à gauche du PLAN (ou à sa place sans plan), pastille si indice non lu. */
+  private layoutCarnetButton(): void {
+    const { state } = this.session;
+    const size = this.menuButton.height;
+    this.carnetButton.setVisible(hasCarnet(state, this.carnet));
+    this.carnetButton.setX(this.mapButton.visible ? this.mapButton.x - size - 8 : this.mapButton.x);
+    this.carnetButton.setUnread(hasUnread(state, this.carnet));
+  }
+
+  /** Carnet de déduction : overlay modal ; une déduction validée pose son flag (sauvegarde comprise). */
+  private openCarnet(): void {
+    const { state, content } = this.session;
+    if (this.blocked || !hasCarnet(state, this.carnet)) return;
+    state.select(null);
+    this.hover.set(null);
+    this.carnetOverlay = new CarnetOverlay(
+      this,
+      this.carnet,
+      state,
+      () => {
+        this.carnetOverlay = null;
+        this.layoutCarnetButton();
+      },
+      (id) => content.characters.get(id)?.name,
+    );
+    this.layoutCarnetButton();
   }
 
   /** Plan de la Station : une zone découverte = warp (comme une sortie, fondu compris). */

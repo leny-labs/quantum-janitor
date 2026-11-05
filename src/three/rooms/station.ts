@@ -10,6 +10,7 @@ import { BobAspirRig } from './bobaspire';
 import { bobSpot } from './bobspot';
 import { pressable } from '../press';
 import { speaking } from '../../engine/speaking';
+import type { Condition } from '../../engine/types';
 import type { RoomBuild } from './index';
 import { against, backDoor, shell, wallPanels } from './shell';
 import type { Stage } from '../Stage';
@@ -642,8 +643,14 @@ export const stCafeteria: RoomBuild = {
   },
 };
 
-/** Horloge murale ronde bloquée sur 10 h 11 (rayon `r`) ; trotteuse qui hésite sur la 59e seconde. */
-function clock1011(s: Stage, r: number): THREE.Group {
+/** Guichet ouvert (éclat sur l'horloge après la déduction du carnet) : 10 h 12, rideau levé, 9 848. */
+const OPEN: Condition = { flags: ['st_guichet_ouvert'] };
+
+/**
+ * Horloge murale ronde bloquée sur 10 h 11 (rayon `r`) ; trotteuse qui hésite sur la 59e seconde.
+ * Avec `open` vrai, la grande aiguille passe à 10 h 12 (petit à-coup), la trotteuse repart.
+ */
+function clock1011(s: Stage, r: number, open?: Condition): THREE.Group {
   const clock = new THREE.Group();
   const face = at(cyl(r, r, 0.06, '#f6efdc', { seg: 28 }), 0, 0, 0);
   face.rotation.x = Math.PI / 2;
@@ -664,7 +671,19 @@ function clock1011(s: Stage, r: number): THREE.Group {
   const sec = hand(r * 0.85, r * 0.025, 0.07, '#c0392b');
   clock.add(hour, min, sec, at(sphere(r * 0.06, '#c0392b'), 0, 0, 0.08));
   // la trotteuse avance jusqu'à 59 s, hésite, recule : il est 10 h 11 depuis 1985
+  let minute = 11;
   s.animate((t) => {
+    const isOpen = !!open && s.is(open);
+    if (isOpen) {
+      // 10 h 12 : la grande aiguille franchit la minute (glisse + léger rebond), la trotteuse tourne enfin
+      minute += (12 - minute) * 0.08;
+      min.rotation.z = -(minute / 60) * Math.PI * 2 + Math.sin(t * 25) * 0.01 * (12 - minute);
+      hour.rotation.z = -(10 / 12) * Math.PI * 2 - (minute / 60) * (Math.PI / 6);
+      sec.rotation.z = -((t % 60) / 60) * Math.PI * 2;
+      return;
+    }
+    minute = 11;
+    min.rotation.z = -(11 / 60) * Math.PI * 2;
     const k = t % 2.4;
     const step = k < 1.2 ? 0 : 1;
     sec.rotation.z = -((58 + step) / 60) * Math.PI * 2 + Math.sin(t * 40) * 0.006 * step;
@@ -791,8 +810,16 @@ export const stGuichet: RoomBuild = {
     shutter.add(at(box(w1 - 0.1, 0.06, 0.06, '#5a5f6a'), 0, -sh, 0));
     const shutterY = fasciaB - sh / 14;
     s.add(at(shutter, x1, shutterY, zb - 0.06));
-    // il tressaille quand elle parle (prêt à tomber à 10 h 14)
-    s.animate((t) => (shutter.position.y = shutterY - (speaking.id === 'guichard' && speaking.talking ? Math.abs(Math.sin(t * 30)) * 0.01 : 0)));
+    // il tressaille quand elle parle (prêt à tomber à 10 h 14) ; à 10 h 12 il remonte dans le bandeau
+    let lift1 = 0;
+    s.animate((t) => {
+      lift1 += ((s.is(OPEN) ? sh + 0.08 : 0) - lift1) * 0.1;
+      shutter.position.y = shutterY + lift1 - (speaking.id === 'guichard' && speaking.talking ? Math.abs(Math.sin(t * 30)) * 0.01 : 0);
+    });
+    // pancarte suspendue derrière la vitre : FERMÉ (10 h 11) / OUVERT (10 h 12)
+    const plate = (text: string, bg: string) => at(label(text, 0.62, 0.2, { color: '#f6efdc', bg, bold: true }), x1 - w1 * 0.36, top + glassH * 0.5, zb - 0.01);
+    s.when({ notFlags: ['st_guichet_ouvert'] }, plate(tr('props.station.deskClosed'), '#c0392b'));
+    s.when(OPEN, plate(tr('props.station.deskOpen'), '#1f7f73'));
     // hygiaphone : disque perforé dans la vitre, fente passe-documents au ras du comptoir
     const hy = s.fit(s.rect('hygiaphone'), zb + 0.03);
     const hr = Math.min(hy.h * 0.48, 0.24);
@@ -821,12 +848,18 @@ export const stGuichet: RoomBuild = {
 
     // ── bandeau : horloge 10 h 11, afficheur « EN COURS 9 847 » ──
     const ck = s.fit(s.rect('horloge'), zb + 0.08);
-    s.spot('horloge', at(clock1011(s, Math.min(ck.w, ck.h) * 0.48), ck.x, ck.y, zb + 0.08));
+    s.spot('horloge', at(clock1011(s, Math.min(ck.w, ck.h) * 0.48, OPEN), ck.x, ck.y, zb + 0.08));
     const af = s.fit([690, 38, 150, 58], zb + 0.06);
     const board = new THREE.Group();
     board.add(at(box(af.w, af.h, 0.08, '#1a1418'), 0, 0, 0));
     board.add(at(label(tr('props.station.nowServing'), af.w * 0.4, af.h * 0.5, { color: '#ffd166', bold: true }), -af.w * 0.27, 0, 0.05));
-    board.add(at(label('9 847', af.w * 0.5, af.h * 0.7, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true }), af.w * 0.22, 0, 0.05), at(glow('#ff4f5a', af.w, 0.15), af.w * 0.22, 0, 0.08));
+    // 9 847 depuis 1985 ; 9 848 à 10 h 12 (flag st_guichet_ouvert)
+    const num = (n: string) => at(label(n, af.w * 0.5, af.h * 0.7, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true }), af.w * 0.22, 0, 0.05);
+    const n47 = num('9 847');
+    const n48 = num('9 848');
+    board.add(n47, n48, at(glow('#ff4f5a', af.w, 0.15), af.w * 0.22, 0, 0.08));
+    s.when({ notFlags: ['st_guichet_ouvert'] }, n47);
+    s.when(OPEN, n48);
     s.spot('afficheur', at(board, af.x, af.y, zb + 0.06));
 
     // horaires d'ouverture (affiche GenAI) au mur, à droite du guichet ; tampon « EN ATTENTE »
