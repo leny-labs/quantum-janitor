@@ -2071,8 +2071,9 @@ export const stConseil: RoomBuild = {
       s.add(at(ch, x, 0, 0.35));
     }
     const g = s.fit(s.rect('paraphe'), zg);
-    const base = top - 0.3;
-    const h = Math.min(g.y + g.h / 2 - base, (g.w * 1.25) / PARAPHE_ASPECT);
+    // Échelle réduite (~70 %) : elle ne remplit plus le bureau, visage toujours lisible, air au-dessus.
+    const base = top - 0.15;
+    const h = 0.7 * Math.min(g.y + g.h / 2 - (top - 0.3), (g.w * 1.25) / PARAPHE_ASPECT);
     const npc = billboardSheet(PARAPHE_SHEET, 2, h, PARAPHE_ASPECT, { tint: '#fff6ec', shadow: 0.01 });
     const sp = npc.userData.sprite as THREE.Sprite;
     const sy = sp.scale.y;
