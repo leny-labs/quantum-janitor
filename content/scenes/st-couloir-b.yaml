@@ -167,7 +167,7 @@ hotspots:
         say: "Le casier « STOCK B-7/12 », vide. Une étiquette neuve : « RÉASSORT PRÉVU ». Je sais ce que ça veut dire, maintenant."
         stop: true
       - if: { flags: [st_couloir_resolu] }
-        say: "Un casier gris, porte entrouverte, étiquette : « STOCK B-7/12 — DERNIER EXEMPLAIRE ». Depuis que le couloir est droit, il est enfin à la bonne distance : à portée de main."
+        say: "Un casier gris, porte fermée, étiquette : « STOCK B-7/12 — DERNIER EXEMPLAIRE ». Depuis que le couloir est droit, il est enfin à la bonne distance : à portée de main."
         stop: true
       - say: "Un casier gris au bout du couloir : « STOCK B-7/12 ». Le dernier formulaire est là. À trois pas. Depuis quarante et un ans, à trois pas."
     use:

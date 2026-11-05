@@ -14,6 +14,17 @@ export type PressKind = 'button' | 'lever';
 /** Délai conseillé avant d'ouvrir la bulle : laisse voir l'enfoncement / la bascule. */
 export const PRESS_LEAD = 220;
 
+/**
+ * Porte qui s'ouvre au clic « use » (casier STOCK B-7/12 du Couloir B) : `open(id)` lance
+ * l'ouverture et renvoie le temps (ms) à laisser avant la bulle, 0 si rien ne s'ouvre.
+ */
+export interface OpenRig {
+  open(id: string): number;
+}
+export const CASIER_OPEN_ID = 'casier-open';
+/** La porte du casier pivote (~1 s) avant que Gary ne « l'ouvre » dans la bulle. */
+export const CASIER_OPEN_MS = 1000;
+
 export interface PressRig {
   /** Joue le geste du hotspot `id` ; renvoie son type, ou null si aucun mesh n'est enregistré. */
   press(id: string): PressKind | null;

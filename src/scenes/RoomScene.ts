@@ -21,7 +21,7 @@ import { CouloirWalkRig, EXIT_DOOR } from '../three/rooms/couloirWalk';
 import { FuseRig } from '../three/rooms/fusible';
 import { LecteurRig } from '../three/rooms/lecteur';
 import { VendingRig } from '../three/rooms/vending';
-import { PRESS_LEAD, type PressRig } from '../three/press';
+import { CASIER_OPEN_ID, PRESS_LEAD, type OpenRig, type PressRig } from '../three/press';
 import { itemIconKey } from '../three/Studio';
 import { propSound } from '../ui/sfx';
 import { propSfx } from '../engine/propSfx';
@@ -643,6 +643,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       const sound = propSfx(h, state, gesture);
       if (sound) propSound(sound, h.id);
       if (gesture) lead = PRESS_LEAD;
+      // porte qui s'ouvre avant la réplique (casier B-7/12) : on la laisse pivoter
+      lead = Math.max(lead, this.room.rig<OpenRig>(CASIER_OPEN_ID)?.open(h.id) ?? 0);
     }
     void this.act(v.action, v.kind === 'look' ? h.id : undefined, lead);
   }

@@ -12,7 +12,7 @@ import { guichardChain } from '../guichardChain';
 import { officeChair } from '../officeChair';
 import { bobSpot } from './bobspot';
 import { CouloirWalkRig, type WalkDoor } from './couloirWalk';
-import { pressable } from '../press';
+import { pressable, CASIER_OPEN_ID, CASIER_OPEN_MS, type OpenRig } from '../press';
 import { percoScreen } from '../percoFace';
 import { speaking } from '../../engine/speaking';
 import type { Condition } from '../../engine/types';
@@ -1085,15 +1085,15 @@ export const stGuichet: RoomBuild = {
   },
 };
 
-/** Couloir dénoué (Ink « suivre la plante ») : plaques des bureaux, casier entrouvert. */
+/** Couloir dénoué (Ink « suivre la plante ») : plaques des bureaux, sorties. */
 const RESOLU: Condition = { flags: ['st_couloir_resolu'] };
 
 /**
  * 4. Couloir Infini B (Aile B). Une seule pièce : trois portes mauves numérotées, l'extincteur
  * « NE PAS DÉPLACER » (repère), le panneau « VOUS ÊTES ICI (ENCORE) », le casier « STOCK B-7/12 » au
  * bout. La boucle est jouée par l'Ink (docs/CHAPTER1.md §10) ; ici, seuls les props suivent les flags :
- * M. Ficus posé (`st_plante_posee`), plaques ARCHIVES / TAMPONS / RÉCLAMATIONS et casier ouvert
- * (`st_couloir_resolu`), formulaire dans le casier jusqu'à `st_formulaire`. Accents mauves de l'Aile B.
+ * M. Ficus posé (`st_plante_posee`), plaques ARCHIVES / TAMPONS / RÉCLAMATIONS (`st_couloir_resolu`),
+ * casier fermé qui s'ouvre au « utiliser » du formulaire (`st_formulaire`), puis reste ouvert et vide. Accents mauves de l'Aile B.
  */
 export const stCouloirB: RoomBuild = {
   camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
@@ -1228,7 +1228,7 @@ export const stCouloirB: RoomBuild = {
     s.expose(CouloirWalkRig.ID, walk);
     if (import.meta.env.DEV) (window as unknown as { __qjCouloirWalk: CouloirWalkRig }).__qjCouloirWalk = walk;
 
-    // ── casier « STOCK B-7/12 » : armoire grise, étiquette GenAI ; porte entrouverte après le dénouement ──
+    // ── casier « STOCK B-7/12 » : armoire grise, étiquette GenAI ; porte fermée, s'ouvre quand Gary prend le formulaire ──
     const cz = 0.45;
     const cs = s.fit(s.rect('casier'), cz);
     const cab = new THREE.Group();
@@ -1266,11 +1266,22 @@ export const stCouloirB: RoomBuild = {
     leaf.add(at(box(0.04, 0.2, 0.05, '#c9ced6'), -cw * 0.88, -ch * 0.02, 0.04));
     hinge.add(leaf);
     cab.add(hinge);
-    let open = 0;
+    // fermé par défaut : la porte ne s'ouvre qu'au geste « utiliser » qui donne le formulaire
+    // (rig `casier-open`, RoomScene attend CASIER_OPEN_MS avant la bulle), puis reste ouverte.
+    let open = s.is({ flags: ['st_formulaire'] }) ? 1 : 0;
+    let opening = false;
     s.animate(() => {
-      open += ((s.is(RESOLU) ? 1 : 0) - open) * 0.06;
+      const target = opening || s.is({ flags: ['st_formulaire'] }) ? 1 : 0;
+      open += (target - open) * 0.06;
       hinge.rotation.y = open * 1.9;
     });
+    s.expose(CASIER_OPEN_ID, {
+      open(id: string): number {
+        if (id !== 'casier' || !s.is({ flags: ['st_couloir_resolu'], notFlags: ['st_formulaire'] })) return 0;
+        opening = true;
+        return CASIER_OPEN_MS;
+      },
+    } satisfies OpenRig);
     s.spot('casier', at(cab, cs.x, 0, cz));
 
     bobHere(s);
