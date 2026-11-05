@@ -726,7 +726,7 @@ export const stGuichet: RoomBuild = {
     horloge: { fill: 0.85, fov: 36 },
     horaires: { fill: 0.85, orbit: 4, fov: 36 },
     rideau: { fill: 0.75, orbit: 6 },
-    pupitre: { px: [240, 352], fill: 0.9, orbit: -6, lift: 0.3, fov: 40 },
+    pupitre: { px: [240, 350], fill: 1.1, orbit: -3, lift: 1.1, aim: [0.1, -0.95, 0], fov: 36 },
     porte_b: { fill: 0.85, orbit: 6, fov: 42 },
     // détails (sous-hotspots du YAML) : plans serrés
     afficheur: { fill: 0.45, fov: 40 },
@@ -897,12 +897,56 @@ export const stGuichet: RoomBuild = {
     tablet.add(at(box(pr.w * 0.9, 0.06, 0.04, '#4a3a2c'), 0, 0.03, 0.31));
     const fill = at(label(tr('props.station.fillHere'), pr.w * 0.62, 0.2, { color: '#3e3448', bg: '#f6efdc', bold: true }), 0, 0.03, -0.12);
     fill.rotation.x = -Math.PI / 2;
-    const empty = at(label(tr('props.station.outOfForms'), pr.w * 0.3, 0.16, { color: '#c0392b', bold: true }), pr.w * 0.18, 0.031, 0.1);
+    // emplacement du formulaire : creux vide, plus clair (poli par des milliers de coudes), filet sombre
+    const slotW = pr.w * 0.5;
+    tablet.add(at(box(slotW + 0.03, 0.002, 0.25, '#5a4836', { edges: false }), pr.w * 0.12, 0.026, 0.12));
+    tablet.add(at(box(slotW, 0.004, 0.22, '#84705a', { edges: false }), pr.w * 0.12, 0.027, 0.12));
+    // tampon encreur « B-7/12 — STOCK ÉPUISÉ » : cadre double, encre mangée par endroits, de biais
+    const empty = label(tr('props.station.outOfForms'), pr.w * 0.3, 0.15, { color: '#c0392b', bold: true });
+    const stampMat = empty.material as THREE.MeshBasicMaterial;
+    const cv = stampMat.map!.image as HTMLCanvasElement;
+    const ink = cv.getContext('2d')!;
+    const u = cv.height / 40;
+    ink.strokeStyle = '#c0392b';
+    ink.lineWidth = u * 1.6;
+    ink.strokeRect(u * 1.5, u * 1.5, cv.width - u * 3, cv.height - u * 3);
+    ink.lineWidth = u * 0.6;
+    ink.strokeRect(u * 3.6, u * 3.6, cv.width - u * 7.2, cv.height - u * 7.2);
+    ink.globalCompositeOperation = 'destination-out';
+    let seed = 47;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (let i = 0; i < 170; i++) {
+      ink.globalAlpha = 0.3 + rnd() * 0.7;
+      ink.beginPath();
+      ink.arc(rnd() * cv.width, rnd() * cv.height, u * (0.2 + rnd() * 0.9), 0, Math.PI * 2);
+      ink.fill();
+    }
+    ink.globalAlpha = 1;
+    ink.globalCompositeOperation = 'source-over';
+    stampMat.map!.needsUpdate = true;
+    stampMat.transparent = true;
+    stampMat.opacity = 0.9;
+    stampMat.depthWrite = false;
+    at(empty, pr.w * 0.14, 0.031, 0.12);
     empty.rotation.x = -Math.PI / 2;
-    empty.rotation.z = 0.2;
-    const pen = at(cyl(0.012, 0.012, 0.22, '#1f4fa0', { edges: false }), -pr.w * 0.3, 0.04, 0.12);
+    empty.rotation.z = 0.16;
+    // stylo à chaînette : corps bleu, capuchon, chaînette de maillons jusqu'à l'œillet du plateau
+    const penX = -pr.w * 0.3;
+    const pen = at(cyl(0.012, 0.012, 0.22, '#1f4fa0', { edges: false }), penX, 0.04, 0.12);
     pen.rotation.z = Math.PI / 2;
-    tablet.add(fill, empty, pen, at(box(0.01, 0.01, 0.12, '#c9ced6', { edges: false }), -pr.w * 0.38, 0.04, 0.08));
+    const cap = at(cyl(0.014, 0.014, 0.05, '#c9ced6', { edges: false }), penX - 0.12, 0.04, 0.12);
+    cap.rotation.z = Math.PI / 2;
+    tablet.add(at(cyl(0.02, 0.02, 0.012, '#8a8f98', { edges: false }), -pr.w * 0.42, 0.032, -0.02));
+    const c0 = new THREE.Vector3(penX - 0.145, 0.034, 0.12);
+    const c1 = new THREE.Vector3(-pr.w * 0.42, 0.034, -0.02);
+    for (let i = 0; i <= 9; i++) {
+      const p = c0.clone().lerp(c1, i / 9);
+      p.x += Math.sin((i / 9) * Math.PI) * -0.035; // léger mou
+      const link = at(box(0.014, 0.008, 0.008, i % 2 ? '#aab0b8' : '#d6dae0', { edges: false }), p.x, p.y, p.z);
+      link.rotation.y = i % 2 ? 0.9 : -0.5;
+      tablet.add(link);
+    }
+    tablet.add(fill, empty, pen, cap);
     tablet.rotation.x = 0.45;
     lect.add(at(tablet, 0, ph, 0));
     s.spot('pupitre', at(lect, pr.x, 0, pr.z));
