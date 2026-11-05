@@ -118,9 +118,11 @@ hotspots:
 
   - id: bob
     label: B.O.B.
-    rect: [650, 415, 150, 80]
+    # bien devant le comptoir (pied à y = 530) : sa silhouette ne mord plus sur le bas du
+    # comptoir, il ne se lit plus « dedans » ni « derrière »
+    rect: [610, 450, 150, 80]
     art:
-      - { rect: [655, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+      - { rect: [615, 465, 140, 50], color: "#7c8794", stroke: "#ffffff" }
     look: "B.O.B. sursaute à chaque CLONK. Il fait semblant de ne pas sursauter. Il sursaute quand même."
     talk:
       - dialogue: st_bob_tampons

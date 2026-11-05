@@ -164,9 +164,10 @@ hotspots:
 
   - id: bob
     label: B.O.B.
-    rect: [650, 415, 150, 80]
+    # moitié gauche (sous le panneau syndical) : PERCO et le frigo tiennent la droite
+    rect: [240, 415, 150, 80]
     art:
-      - { rect: [655, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+      - { rect: [245, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
     look: "B.O.B. regarde PERCO avec une admiration inquiète. Une machine qui dit non. Il n'y avait jamais pensé."
     talk:
       - dialogue: st_bob_pause
