@@ -14,8 +14,8 @@ icon: corridor
 background: "#2c2634"
 
 onFirstEnter:
-  - say: "Le Guichet d'Accueil. Un hygiaphone, un rideau métallique à moitié baissé, une horloge sur 10 h 11. Et derrière la vitre, une dame qui mange un sandwich."
-  - say: "Il y a des bruits de mastication que l'on reconnaît tout de suite. Celui-ci mâche depuis quarante et un ans."
+  - say: "Le Guichet d'Accueil. Un hygiaphone, un rideau métallique à moitié baissé, une horloge sur 10 h 11. Et derrière la vitre, une dame qui fait tourner une balle d'élastiques sur son doigt."
+  - say: "Il y a des ennuis que l'on reconnaît tout de suite. Celui-ci s'occupe les mains depuis quarante et un ans."
 
 art:
   - { rect: [0, 470, 1280, 110], color: "#3e3448" }
@@ -28,9 +28,9 @@ hotspots:
     art:
       - { rect: [450, 130, 230, 210], color: "#8a6db0", stroke: "#2a2830", text: "MME GUICHARD", size: 16 }
     look:
-      - say: "Une dame en gilet mauve, chignon gris, lunettes rondes. Badge : « MME GUICHARD ». Elle mange un sandwich jambon-beurre avec la lenteur d'une procédure."
-      - say: "Le sandwich a l'air plus vieux que moi. Elle a l'air plus patiente que M. Patience. Et lui, il est mort."
-    use: "Je tapote la vitre. Mme Guichard lève les yeux, me regarde comme on regarde un formulaire mal rempli, et reprend une bouchée."
+      - say: "Une dame en gilet mauve, chignon gris, lunettes rondes. Badge : « MME GUICHARD ». Elle joue avec les fournitures de bureau avec la lenteur d'une procédure."
+      - say: "Elle a l'air plus patiente que M. Patience. Et lui, il est mort."
+    use: "Je tapote la vitre. Mme Guichard lève les yeux, me regarde comme on regarde un formulaire mal rempli, et retourne à ses élastiques."
     talk:
       - dialogue: st_guichard
     useItem:
@@ -43,7 +43,7 @@ hotspots:
         - dialogue: st_guichard_formulaire
       ticket_douane: "Je glisse le ticket de douane sous la vitre. Il ressort aussitôt. « Pas le bon ticket. Pas le bon guichet. Pas la bonne vie. »"
       badge: "« GARRY PLUNK ». Elle lit le badge, puis moi, puis le badge. « Deux R. » Elle a l'air de trouver ça suspect. Moi aussi, maintenant."
-      plante: "Je montre M. Ficus. Mme Guichard s'arrête de mâcher une demi-seconde. « Rangez-moi ça. Il n'a pas pris de ticket non plus. »"
+      plante: "Je montre M. Ficus. Mme Guichard s'arrête de jouer une demi-seconde. « Rangez-moi ça. Il n'a pas pris de ticket non plus. »"
       fragment:
         - say: "Je lui montre l'éclat. Elle le regarde comme une pièce de monnaie étrangère."
         - say: "guichard: Les miracles, c'est au guichet. Revenez à 10 h 12."
@@ -62,7 +62,7 @@ hotspots:
     talk: "Allô ? ...Mme Guichard me répond « C'EST FERMÉ » sans lever les yeux. L'hygiaphone ajoute un petit écho métallique. Fermé-mé-mé."
     useItem:
       ticket_9848: "La fente sous l'hygiaphone est trop fine pour un ticket. Elle est faite pour les formulaires. Pliés en trois. En trois exemplaires."
-      fragment: "Je ne vais pas glisser l'éclat dans l'hygiaphone. Elle le mangerait avec son sandwich."
+      fragment: "Je ne vais pas glisser l'éclat dans l'hygiaphone. Elle l'ajouterait à sa chaîne de trombones."
 
   - id: horloge
     label: Horloge
@@ -102,7 +102,7 @@ hotspots:
         - if: { flags: [st_guichet_ouvert] }
           say: "guichard: Il est 10 h 12. Le guichet est ouvert. Numéro 9 848, présentez-vous. Vous avez deux minutes."
         - if: { flags: [st_guichet_ouvert] }
-          say: "Elle a dit ça sans lever les yeux. Mais elle a posé son sandwich. Ça, c'est historique."
+          say: "Elle a dit ça sans lever les yeux. Mais elle a posé ses élastiques. Ça, c'est historique."
           stop: true
         - say: "narrateur: Gary lève l'éclat vers l'horloge. La trotteuse frissonne, la grande aiguille tremble vers 10 h 12... puis retombe. CLAC."
         - say: "Elle a senti quelque chose. Elle n'est pas prête. Moi non plus, d'ailleurs. Il faudra viser le bon moment. Plus tard."

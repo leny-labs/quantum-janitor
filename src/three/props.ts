@@ -946,26 +946,25 @@ export const REMORQUE_ACTOR: ActorLoops = {
 /**
  * Mme Odile Guichard derrière l'hygiaphone, coupée à la ligne du comptoir (GenAI v3/v4 OpenAI
  * gpt-image-2.6-sunburst, édition de guichard.png, badge « Mme Guichard » ; _briefs/guichet/genai/v4).
- * Planche 5 cellules d'occupations de bureau absurdes : 0 sandwich · 1 élastique tendu en
- * lance-pierre · 2 château de cartes sur la paume · 3 chaîne de trombones · 4 balle d'élastiques
- * sur le doigt. Pas de boucle `talk` : le billboard ne se synchronise jamais sur le dialogue
- * (seul le portrait de la boîte de dialogue parle).
+ * Planche 5 cellules d'occupations de bureau absurdes : 0 sandwich (retirée du cycle : il masquait
+ * le visage, plus de sandwich dans le guichet) · 1 élastique tendu en lance-pierre · 2 château de
+ * cartes sur la paume · 3 chaîne de trombones · 4 balle d'élastiques sur le doigt. Pas de boucle
+ * `talk` : le billboard ne se synchronise jamais sur le dialogue (seul le portrait de la boîte de
+ * dialogue parle).
  */
 export const GUICHARD_URL = `${import.meta.env.BASE_URL}props/st/guichard.png`;
 export const GUICHARD_SHEET = `${import.meta.env.BASE_URL}props/st/guichard-sheet.png`;
 export const GUICHARD_FRAMES = 5;
 export const GUICHARD_ASPECT = 753 / 768;
 export const GUICHARD_ACTOR: ActorLoops = {
-  // une occupation toutes les ~5–8 s, retour au sandwich entre deux
+  // une occupation toutes les ~6–8 s, la balle d'élastiques (calme, menton dans la main) entre deux
   idle: [
-    { frame: 0, duration: 6000 },
-    { frame: 1, duration: 5500 },
-    { frame: 0, duration: 4500 },
-    { frame: 2, duration: 7500 },
-    { frame: 0, duration: 5000 },
-    { frame: 3, duration: 6000 },
-    { frame: 0, duration: 4500 },
     { frame: 4, duration: 6500 },
+    { frame: 1, duration: 5500 },
+    { frame: 4, duration: 5000 },
+    { frame: 2, duration: 7500 },
+    { frame: 4, duration: 5000 },
+    { frame: 3, duration: 6000 },
   ],
 };
 /**

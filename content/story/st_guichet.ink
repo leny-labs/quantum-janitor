@@ -9,7 +9,7 @@
     -> st_guichard_ouvert
 }
 { not has_flag("st_guichard_ferme"):
-    Derrière la vitre, Mme Guichard mâche. Elle ne lève pas les yeux.
+    Derrière la vitre, Mme Guichard tend un élastique entre deux doigts. Elle ne lève pas les yeux.
     guichard: C'est fermé.
     { has_item("ticket_9848"):
         gary: J'ai un ticket. Le 9 848. C'est le suivant.
@@ -19,7 +19,7 @@
     guichard: C'est pas moi qui décide. C'est l'horloge. Revenez à 10 h 12. Avec le Formulaire B-7/12. Rempli. Tamponné. Signé. En trois exemplaires.
     bob: Et le formulaire, on l'obtient où, madame ? # mood: calm
     guichard: Au guichet.
-    Le rideau au-dessus d'elle tressaille de deux centimètres. CLONK. Puis on l'entend reprendre sa bouchée. # shake
+    Le rideau au-dessus d'elle tressaille de deux centimètres. CLONK. Puis on entend l'élastique claquer. # shake
     gary: B.O.B. Garde le ticket de douane et M. Ficus. J'ai le pressentiment qu'on en aura besoin. Beaucoup plus tard.
     bob: En trois exemplaires, Gary. Le pressentiment aussi. # mood: sad # set: st_guichard_ferme
     -> END
@@ -30,22 +30,12 @@ guichard: C'est toujours fermé.
     guichard: 10 h 11. Comme d'habitude.
     gary: Depuis combien de temps ?
     guichard: Depuis que je suis là. Et je suis là depuis toujours. Enfin, depuis 1985. C'est pareil. # set: st_voit_horloge
-* [« Et ce sandwich ? »]
-    gary: Pardon, mais... ce sandwich. Il est d'aujourd'hui ?
-    guichard: Il est de ce matin.
-    gary: Quel matin ?
-    guichard: Le même.
 * [« Le formulaire B-7/12, s'il vous plaît. »]
     gary: Le formulaire B-7/12. S'il vous plaît. J'ai dit s'il vous plaît.
     guichard: Le formulaire se retire au guichet. Le guichet ouvre à 10 h 12. Il est 10 h 11.
     gary: Et si l'horloge avançait ?
     guichard: L'horloge n'avance pas. Ce n'est pas son rôle. Son rôle, c'est d'être exacte.
     bob: Elle a dit « n'avance pas », Gary. Pas « ne peut pas ». Retiens la nuance. # mood: suspicious
-* [« Bon appétit. »]
-    gary: Bon appétit, madame.
-    guichard: ... # mood: calm
-    Elle s'arrête de mâcher. Elle le regarde. Pour la première fois en quarante et un ans, quelqu'un lui a souhaité bon appétit.
-    guichard: C'est fermé quand même.
 - -> END
 
 === st_guichard_ticket ===
@@ -81,7 +71,7 @@ guichard: Au guichet. # set: st_guichard_ticket
     bob: Elle a dit « prévu », Gary. Comme le guichet 2. # mood: sad
     -> END
 }
-Le rideau est en haut. Mme Guichard a posé son sandwich sur une pile de dossiers. Elle regarde l'afficheur, puis Gary.
+Le rideau est en haut. Mme Guichard a posé sa balle d'élastiques sur une pile de dossiers. Elle regarde l'afficheur, puis Gary.
 guichard: 9 848 ?
 { has_item("ticket_9848"):
     Gary glisse le ticket sous la vitre. Elle le prend du bout des doigts, le retourne, le tamponne « VU » et le rend. CLONK. # shake
@@ -157,7 +147,7 @@ bob: On a le B-7/12, Gary. Mme Guichard ne s'en remettra pas. Moi non plus. # mo
 gary: Madame. Le B-7/12 est en rupture. Le dernier est dans l'Aile B. Et l'Aile B exige le B-7/12. C'est une boucle.
 guichard: C'est un règlement.
 gary: C'est une boucle réglementaire.
-Mme Guichard repose son sandwich. Elle ouvre un classeur épais comme un annuaire, l'humecte d'un doigt, et tourne exactement quarante-sept pages. Puis une demi-page.
+Mme Guichard repose sa balle d'élastiques. Elle ouvre un classeur épais comme un annuaire, l'humecte d'un doigt, et tourne exactement quarante-sept pages. Puis une demi-page.
 guichard: Article 47bis. « En cas de rupture d'un formulaire requis pour accéder au stock dudit formulaire, l'usager peut formuler une demande verbale. »
 bob: Une demande verbale ? Sans papier ? Ici ? # mood: surprised
 guichard: Verbale. Mais enregistrée. Je l'écris.
@@ -188,7 +178,7 @@ bob: Gary. Elle vient de nous rendre service. En quarante et un ans, c'est la pr
     -> st_guichard_depot
 }
 { has_flag("st_case_a"):
-    Gary plaque le formulaire contre la vitre. Mme Guichard compte les cases remplies, du bout de son sandwich.
+    Gary plaque le formulaire contre la vitre. Mme Guichard compte les cases remplies, du bout d'un trombone.
     guichard: C'est pas complet. Revenez quand c'est complet. Et à 10 h 12. Les deux. C'est pas moi qui décide.
     -> END
 }
@@ -201,12 +191,12 @@ guichard: Remplissez-le. Tamponnez-le. Faites-le signer. En trois exemplaires. L
 
 // Dépôt du dossier complet au guichet (étape 42) : tube pneumatique vers la Direction.
 === st_guichard_depot ===
-Gary glisse le Formulaire B-7/12 dans la fente sous l'hygiaphone. Épais comme un vrai dossier, il passe de justesse. Mme Guichard pose son sandwich. Pour la première fois en quarante et un ans.
+Gary glisse le Formulaire B-7/12 dans la fente sous l'hygiaphone. Épais comme un vrai dossier, il passe de justesse. Mme Guichard lève les yeux. Pour la première fois en quarante et un ans.
 guichard: Cinq cases. Rempli. Tamponné. Signé. En trois exemplaires. Avec avis du Conseil.
 guichard: …À 10 h 12.
 Elle prend un tampon dans son tiroir. Un tampon « REÇU ». Il n'avait jamais servi non plus. CLONK.
 guichard: Dépôt enregistré. Le dossier part à la Direction. # take: formulaire # set: st_dossier_depose
 Elle roule le formulaire dans une capsule et la glisse dans le tube derrière elle. FLOUP.
 guichard: C'est pas moi qui décide. Mais c'est moi qui ai envoyé. Ça compte un peu, quand même.
-bob: Elle a posé son sandwich, Gary. Pour toi. Je crois que c'est la plus haute distinction de la Station. # mood: love
+bob: Elle a levé les yeux, Gary. Pour toi. Je crois que c'est la plus haute distinction de la Station. # mood: love
 -> END
