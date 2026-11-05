@@ -8,6 +8,7 @@ import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, to
 import { CAPSULE_ASPECT, CAPSULE_SHEET, DELAIGUE_ASPECT, DELAIGUE_SHEET, DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PARAPHE_ACTOR, PARAPHE_ASPECT, PARAPHE_SHEET, PATIENCE_SHEET, PERCO_ASPECT, PERCO_SHEET, REMORQUE_ACTOR, REMORQUE_ASPECT, REMORQUE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet, sylvie } from '../props';
 import { BobAspirRig } from './bobaspire';
 import { guichardBall } from '../guichardBall';
+import { guichardChain } from '../guichardChain';
 import { officeChair } from '../officeChair';
 import { bobSpot } from './bobspot';
 import { pressable } from '../press';
@@ -896,11 +897,16 @@ export const stGuichet: RoomBuild = {
     // sur le bout du doigt à sa place (elle suit la respiration du sprite)
     const ball = guichardBall(gs.scale.x, baseSY);
     guichard.add(ball.object);
+    // frame 3 : même principe pour la chaîne de trombones, une vraie chaîne 3D qui se balance
+    // sous ses doigts (la chaîne peinte est effacée de la cellule 3)
+    const chain = guichardChain(gs.scale.x, baseSY);
+    guichard.add(chain.object);
     s.animate((t) => {
       const f = actorFrame('guichard', GUICHARD_ACTOR, t);
       guichard.userData.setFrame(f);
       gs.scale.y = baseSY * (1 + Math.sin(t * 1.1) * 0.006); // respiration de fonctionnaire
       ball.update(f, t, gs.scale.y / baseSY);
+      chain.update(f, t, gs.scale.y / baseSY);
     });
     // rideau métallique du guichet 1, à moitié baissé : lames horizontales, barre de charge
     const shutter = new THREE.Group();
