@@ -921,23 +921,29 @@ export const GARY_PRONE_ASPECT = 1024 / 397;
 export const SABOT_URL = `${import.meta.env.BASE_URL}props/st/sabot.png`;
 export const SABOT_ASPECT = 772 / 1024;
 /**
- * Mme Odile Guichard derrière l'hygiaphone, accoudée au comptoir, sandwich en main (GenAI, coupée
- * à la ligne du comptoir ; v3 OpenAI gpt-image-2.6-sunburst, buste réduit avec marge transparente,
- * badge « Mme Guichard » ; _briefs/guichet/genai/v3/build.py). Planche 2 cellules : 0 repos · 1 parle
- * (visage parlant recollé sur la frame repos : pas de scintillement à la bascule).
+ * Mme Odile Guichard derrière l'hygiaphone, coupée à la ligne du comptoir (GenAI v3/v4 OpenAI
+ * gpt-image-2.6-sunburst, édition de guichard.png, badge « Mme Guichard » ; _briefs/guichet/genai/v4).
+ * Planche 5 cellules d'occupations de bureau absurdes : 0 sandwich · 1 élastique tendu en
+ * lance-pierre · 2 château de cartes sur la paume · 3 chaîne de trombones · 4 balle d'élastiques
+ * sur le doigt. Pas de boucle `talk` : le billboard ne se synchronise jamais sur le dialogue
+ * (seul le portrait de la boîte de dialogue parle).
  */
 export const GUICHARD_URL = `${import.meta.env.BASE_URL}props/st/guichard.png`;
 export const GUICHARD_SHEET = `${import.meta.env.BASE_URL}props/st/guichard-sheet.png`;
+export const GUICHARD_FRAMES = 5;
 export const GUICHARD_ASPECT = 753 / 768;
 export const GUICHARD_ACTOR: ActorLoops = {
-  idle: [{ frame: 0, duration: 4000 }],
-  talk: [
-    { frame: 1, duration: 160 },
-    { frame: 0, duration: 120 },
-    { frame: 1, duration: 200 },
-    { frame: 0, duration: 150 },
+  // une occupation toutes les ~5–8 s, retour au sandwich entre deux
+  idle: [
+    { frame: 0, duration: 6000 },
+    { frame: 1, duration: 5500 },
+    { frame: 0, duration: 4500 },
+    { frame: 2, duration: 7500 },
+    { frame: 0, duration: 5000 },
+    { frame: 3, duration: 6000 },
+    { frame: 0, duration: 4500 },
+    { frame: 4, duration: 6500 },
   ],
-  listen: 0,
 };
 /** M. Patience assis sur sa chaise, ticket 9 848 tendu ; variante main vide (même cadre) une fois le ticket pris. */
 export const PATIENCE_URL = `${import.meta.env.BASE_URL}props/st/patience.png`;

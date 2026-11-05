@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { lang, t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
-import { GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, actorFrame, billboard, billboardSheet } from '../props';
+import { GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, actorFrame, billboard, billboardSheet } from '../props';
 import { BobAspirRig } from './bobaspire';
 import { bobSpot } from './bobspot';
 import { pressable } from '../press';
@@ -669,7 +669,11 @@ export const stGuichet: RoomBuild = {
     const R = s.wallAt(915, 400, zb).x;
     const W = R - L;
     const cx = (L + R) / 2;
-    const top = s.wallAt(640, 405, zb).y; // dessus du comptoir
+    // dessus du comptoir (rebord de la baie) relevé de 405 à 360 px : il coupe le buste de
+    // Mme Guichard à mi-poitrine ; son assise remonte moins (372 px) pour que ses mains et ses
+    // occupations (élastique, cartes, trombones) restent au-dessus du rebord
+    const top = s.wallAt(640, 360, zb).y;
+    const seat = s.wallAt(640, 372, zb).y;
     const fasciaB = s.wallAt(640, 122, zb).y; // bas du bandeau
     const fasciaT = s.wallAt(640, 0, zb).y + 0.4;
     const desk = new THREE.Group();
@@ -712,12 +716,15 @@ export const stGuichet: RoomBuild = {
     // montants. Le cadre du sprite garde sa hauteur (≈ 3,15) mais la planche v3 laisse une marge
     // transparente : buste visible ≈ 71 % de la hauteur / 67 % de la largeur du cadre (v1 : ≈ 99 %),
     // soit ≈ 2,24 de haut et ≈ 2,07 de large dans une baie de ≈ 3,49. Base top − 0,08 (v1 : − 0,05).
-    const gBase = top - 0.08;
-    const gh = Math.min((g.y + g.h / 2) - (top - 0.05), g.w / GUICHARD_ASPECT);
-    const guichard = billboardSheet(GUICHARD_SHEET, 2, gh, GUICHARD_ASPECT, { tint: '#fff2f6', shadow: 0.01 });
+    // Le rebord relevé (top) masque le bas du buste ; l'assise (seat) ne bouge pas.
+    const gBase = seat - 0.08;
+    const gh = Math.min((g.y + g.h / 2) - (seat - 0.05), g.w / GUICHARD_ASPECT);
+    const guichard = billboardSheet(GUICHARD_SHEET, GUICHARD_FRAMES, gh, GUICHARD_ASPECT, { tint: '#fff2f6', shadow: 0.01 });
     const gs = guichard.userData.sprite as THREE.Sprite;
     const baseSY = gs.scale.y;
     s.spot('guichard', at(guichard, x1, gBase, zg));
+    // occupations de bureau lentes, jamais synchronisées sur le dialogue (la bouche ne bouge que
+    // dans le portrait de la boîte de dialogue)
     s.animate((t) => {
       guichard.userData.setFrame(actorFrame('guichard', GUICHARD_ACTOR, t));
       gs.scale.y = baseSY * (1 + Math.sin(t * 1.1) * 0.006); // respiration de fonctionnaire
