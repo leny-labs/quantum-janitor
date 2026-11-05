@@ -108,6 +108,20 @@ objets à payoff différé (voir [`CHAPTER1.md`](CHAPTER1.md), §5).
 - Le badge 3D (`badge()` dans `src/three/props.ts`) est texturé par `public/inventory/badge-card.png`
   (recto redressé 512 × 360, avec la photo de Gary) : à régénérer avec l'icône `badge.png`.
 
+### Convention : props 3D visibles enrichis en GenAI
+
+> **Panneaux, affiches, bandeaux, signalétique : dès que le rendu `label()` + `plane()` fait cheap,
+> on le remplace par une texture GenAI** (référence : la fresque de `galerie.ts`, `prophecyTexture`).
+
+- Assets : `public/props/<zone>/` (ex. `public/props/st/`), JPEG q85, < 500 Ko. Texte peint dans l'image ⇒
+  **une variante par langue** (`<id>-fr.jpg`, `<id>-en.jpg`, choisie via `lang()`) ; vérifier chaque image à l'œil
+  (orthographe, accents), régénérer sinon.
+- Pipeline : `_briefs/<chapitre>/<zone>-genai/` (gen.py = celui de `genai-inv`, ratio paramétrable ;
+  ex. `_briefs/ch1/st-genai/run.sh <id> <lang>` puis `post.py`), modèle `gemini-3-pro-image-preview`.
+- Intégration : `TextureLoader`, `colorSpace = SRGBColorSpace`, plan au **rapport de l'image** (contenu dans
+  l'emprise, jamais déformé ; bandeaux très allongés : générer en 21:9 sur fond noir puis recadrer) ;
+  retirer le `label()` canvas devenu redondant ; hotspots inchangés. Exemple : `stSign()` dans `station.ts`.
+
 ## 2. Règles de transition (pas de hard cut)
 
 Toute transition suit la même grammaire, en trois temps :
