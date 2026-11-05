@@ -13,6 +13,7 @@ import { END_SCENE_ID, getSession, type Session } from '../session';
 import { actBreak, endKnotOf } from '../engine/walkthrough';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { CLOSEUPS, ROOMS } from '../three/rooms';
+import { BobAspirRig } from '../three/rooms/bobaspire';
 import { BobRig } from '../three/rooms/bobrepas';
 import { BobVoice } from '../three/rooms/bobvoix';
 import { FuseRig } from '../three/rooms/fusible';
@@ -195,7 +196,11 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       this.refresh();
       this.cue.check();
     });
+    // `# aspir` du dialogue (st_patience) : B.O.B. aspire le ticket de M. Patience
+    const onAspir = () => void this.bobAspir();
+    this.events.on('ink-aspir', onAspir);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.events.off('ink-aspir', onAspir);
       this.mapOverlay?.close();
       this.press?.cancel();
       off();
@@ -424,6 +429,29 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       secure();
       this.events.off('ink-shake', retch);
       rig.onCue = null;
+    }
+  }
+
+  /**
+   * `# aspir` : B.O.B. aspire le ticket 9 848 et le recrache aux pieds de Gary, pendant
+   * la réplique SHLUUUP (sans bloquer le dialogue). Petit travel vers B.O.B. le temps du
+   * geste, sauf si la caméra est déjà sur un plan d'examen.
+   */
+  private async bobAspir(): Promise<void> {
+    const rig = this.room.rig<BobAspirRig>('bobAspir');
+    if (!rig || rig.busy) return;
+    rig.onCue = (c) => bobCue(this, c);
+    const move = this.room.examining ? null : this.room.examine(BobAspirRig.SHOT);
+    if (move) this.scenes.spots(false);
+    try {
+      await rig.play();
+      await new Promise((r) => this.time.delayedCall(300, r));
+      if (move && this.sys.isActive() && this.room.examining === BobAspirRig.SHOT) {
+        const back = this.room.release();
+        if (back) await back;
+      }
+    } finally {
+      if (move && this.sys.isActive()) this.scenes.spots(true);
     }
   }
 

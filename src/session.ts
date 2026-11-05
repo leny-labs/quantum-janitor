@@ -92,6 +92,7 @@ export class Session {
         // les petites animations des moments clés s'y accrochent (hoquet de B.O.B.)
         this.activeScene?.events.emit('ink-shake');
       },
+      aspir: () => this.activeScene?.events.emit('ink-aspir'),
     });
     const autosave = this.save.autoSave(state);
     // flags persistants : notés dès qu'ils apparaissent (hors mode debug)

@@ -91,7 +91,7 @@ bob: Gary. Le 9 848. C'est le numéro suivant, sur l'afficheur. Il l'a attendu t
     bob: M. Patience. Nous ne nous connaissions pas. Tu étais assis. Tu attendais. Tu as été le meilleur d'entre nous à ça. # mood: sad
     bob: Tu n'as jamais doublé personne. Tu n'as jamais demandé à parler au responsable. Le responsable ne t'a jamais parlé non plus. # mood: sad
     bob: Repose en paix. Et prête-nous ton numéro. # mood: love
-    SHLUUUP. Le ticket glisse d'entre les phalanges. B.O.B. le recrache aux pieds de Gary, à peine humide. # give: ticket_9848 # set: st_ticket_9848
+    SHLUUUP. Le ticket glisse d'entre les phalanges. B.O.B. le recrache aux pieds de Gary, à peine humide. # aspir # give: ticket_9848 # set: st_ticket_9848
     Les doigts de M. Patience retombent. On dirait qu'il sourit. C'est peut-être la mâchoire.
     gary: Merci, M. Patience. On vous rendra la monnaie.
 * [« Non. On ne fait pas ça. »]

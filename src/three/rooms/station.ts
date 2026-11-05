@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { lang, t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
 import { PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, actorFrame, billboard, billboardSheet } from '../props';
+import { BobAspirRig } from './bobaspire';
 import { bobSpot } from './bobspot';
 import { pressable } from '../press';
 import type { RoomBuild } from './index';
@@ -134,9 +135,10 @@ function inkStamp(s: Stage, px: number, py: number, text: string, z = 0.08): voi
 }
 
 /** B.O.B. au sol, tourné vers la caméra, avec sa voix (onde Bender). */
-function bobHere(s: Stage): void {
-  const { robot } = bobSpot(s);
+function bobHere(s: Stage): { robot: THREE.Group; w: number } {
+  const { robot, w } = bobSpot(s);
   s.animate((t) => (robot.position.y = Math.abs(Math.sin(t * 1.3)) * 0.02));
+  return { robot, w };
 }
 
 /** 1. Sas d'Arrivée · Douane dimensionnelle. */
@@ -273,6 +275,9 @@ export const stAttente: RoomBuild = {
     squelette: { fill: 0.75, orbit: -6 },
     distributeur: { fill: 0.8, orbit: 6 },
     plante: { fill: 0.7 },
+    // aspiration du ticket 9 848 (# aspir) : léger push-in, plus bas ; M. Patience (gauche) et
+    // B.O.B. (droite) restent dans le champ, le sol devant B.O.B. au-dessus de la bulle
+    [BobAspirRig.SHOT]: { of: 'bob', cam: { pos: [0.4, 1.75, 6.6], look: [0.1, 0.55, 1.6], fov: 50 } },
   },
   build(s) {
     shell(s, { floor: { a: '#5a5040', b: '#635846', joint: '#3a3328', tile: 0.7 }, wall: { top: '#c4ba94', bottom: '#857b5c' }, trim: '#4a4232', left: -9, right: 9 });
@@ -392,7 +397,12 @@ export const stAttente: RoomBuild = {
     const pl = s.stand(s.rect('plante'));
     s.spot('plante', at(ficus(pl.h * 0.95), pl.x, 0, pl.z, 0.4));
 
-    bobHere(s);
+    // B.O.B. ; sur le `# aspir` de st_patience, il aspire le ticket d'entre les phalanges
+    // (main du squelette : pixel du ticket dans l'art du hotspot, sur le plan du sprite)
+    const bob = bobHere(s);
+    const tw = Math.max(0.22, bob.w * 0.42);
+    const hand = s.wallAt(315, 340, pz + 0.08);
+    s.expose('bobAspir', new BobAspirRig(s, { ...bob, hand, card: ticket(tw, '9 848', '#1f7f73'), cardW: tw }));
 
     // portes : retour au sas (gauche), guichet d'accueil (droite, panneau « MUNISSEZ-VOUS D'UN TICKET »)
     for (const [id, x, dir] of [['vers_sas', -9, 1], ['vers_guichet', 9, -1]] as const) {
