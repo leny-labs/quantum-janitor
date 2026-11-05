@@ -60,9 +60,9 @@ hotspots:
 
   - id: capsule_vaisseau
     label: Capsule CS-07
-    rect: [620, 150, 520, 300]
+    rect: [620, 185, 520, 300]
     art:
-      - { rect: [630, 160, 500, 280], color: "#e8e8e0", stroke: "#d9762a", text: "CS-07", size: 22 }
+      - { rect: [630, 195, 500, 280], color: "#e8e8e0", stroke: "#d9762a", text: "CS-07", size: 22 }
     look:
       - if: { flags: [st_vaisseau_libere] }
         say: "La capsule CS-07, libérée. Plus de sabot. Les petites tuyères bleuissent doucement. Elle attend un permis. Elle a l'habitude d'attendre, maintenant : elle a passé la journée ici."
@@ -95,9 +95,9 @@ hotspots:
   - id: amende
     label: Amende (sur le pare-brise)
     if: { flags: [st_amende], notFlags: [st_vaisseau_libere] }
-    rect: [800, 200, 130, 80]
+    rect: [800, 250, 130, 80]
     art:
-      - { rect: [805, 205, 120, 70], color: "#ffd166", stroke: "#c0392b", text: "AMENDE", size: 12 }
+      - { rect: [805, 255, 120, 70], color: "#ffd166", stroke: "#c0392b", text: "AMENDE", size: 12 }
     look: "L'amende, glissée sous l'essuie-glace : « 4 096 CRÉDITS — STATIONNEMENT EN TRAVERS D'UNE DIMENSION ». Je n'ai pas de crédits. Je n'ai que des objets. Dont un tampon que personne n'utilise."
     use: "Je ne vais pas payer 4 096 crédits. Je ne sais même pas ce qu'est un crédit. Je sais ce qu'est un tampon."
     useItem:
@@ -109,9 +109,9 @@ hotspots:
 
   - id: bob
     label: B.O.B.
-    rect: [650, 415, 150, 80]
+    rect: [360, 435, 150, 80]
     art:
-      - { rect: [655, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+      - { rect: [365, 450, 140, 50], color: "#7c8794", stroke: "#ffffff" }
     look: "B.O.B. tourne autour de la capsule en reniflant le sabot. Il le trouve mal entretenu. C'est la première fois qu'il critique quelque chose. Il est en train de grandir."
     talk:
       - dialogue: st_bob_fourriere

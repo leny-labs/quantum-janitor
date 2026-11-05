@@ -317,7 +317,6 @@ export const stAttente: RoomBuild = {
     afficheur: { fill: 0.75, fov: 40 },
     squelette: { fill: 0.85, orbit: -6, fov: 42 },
     distributeur: { fill: 0.9, orbit: 6, fov: 42 },
-    plante: { fill: 0.8, fov: 42 },
     // détails (sous-hotspots du YAML) : plans serrés
     horloge: { fill: 0.9, fov: 36 },
     horaires: { fill: 0.9, orbit: 4, fov: 36 },
@@ -442,10 +441,7 @@ export const stAttente: RoomBuild = {
     });
     s.spot('distributeur', at(disp, ds.x, 0, ds.z));
 
-    // ── M. Ficus, plante en plastique (tant qu'elle n'est pas dans la poche de Gary) ──
-    const pl = s.stand(s.rect('plante'));
-    s.spot('plante', at(ficus(pl.h * 0.95), pl.x, 0, pl.z, 0.4));
-
+    // (M. Ficus est passé à la cafétéria, à côté de PERCO-JUNIOR)
     // B.O.B. ; sur le `# aspir` de st_patience, il aspire le ticket d'entre les phalanges
     // (main du squelette : pixel du ticket dans l'art du hotspot, sur le plan du sprite)
     const bob = bobHere(s);
@@ -521,11 +517,8 @@ export const stCafeteria: RoomBuild = {
   shots: {
     menu: { fill: 0.82, fov: 38 },
     vitrine: { px: [470, 300], fill: 1.05, orbit: -5, fov: 38 },
-    reserve: { of: 'vitrine', px: [522, 286], fill: 1.8, orbit: -4, fov: 34 },
-    plomb: { of: 'vitrine', px: [532, 336], fill: 1.6, orbit: 5, fov: 34 },
     comptoir: { fill: 0.9, orbit: -4 },
     cafe: { px: [1030, 290], fill: 0.85, orbit: 3 },
-    tables: { px: [1190, 400], fill: 0.78, orbit: 6 },
   },
   build(s) {
     shell(s, { floor: { a: '#6a5a44', b: '#e0d6bc', joint: '#4a3e30', tile: 0.6 }, wall: { top: '#d2c39a', bottom: '#8a7a58' }, trim: '#5a4630', left: -9, right: 9 });
@@ -591,8 +584,6 @@ export const stCafeteria: RoomBuild = {
     case_.add(seal, cold);
     s.animate((t) => (cold.material.opacity = 0.14 + Math.sin(t * 0.9) * 0.05));
     s.spot('vitrine', at(case_, vr.x, 0, against(vr.z, cd)));
-    s.spot('reserve', reserved);
-    s.spot('plomb', seal);
 
     // ── comptoir : caisse à manivelle, cloche « SONNEZ », pile de plateaux, horaires du guichet ──
     const cr = s.stand(s.rect('comptoir'));
@@ -649,6 +640,10 @@ export const stCafeteria: RoomBuild = {
     });
     s.spot('cafe', at(mach, mr.x, 0, against(mr.z, md)));
 
+    // ── M. Ficus, devant entre le comptoir et PERCO-JUNIOR (tant qu'il n'est pas dans la poche de Gary) ──
+    const pl = s.stand(s.rect('plante'));
+    s.spot('plante', at(ficus(pl.h * 0.95), pl.x, 0, pl.z, -0.5));
+
     // ── tables rondes vissées + tabourets, plateau abandonné ──
     const tr_ = s.stand(s.rect('tables'));
     const tables = new THREE.Group();
@@ -664,6 +659,14 @@ export const stCafeteria: RoomBuild = {
     tray.rotation.y = 0.3;
     tables.add(tray, at(cyl(0.06, 0.045, 0.14, '#f6efdc', { seg: 12 }), 0.08, tH + 0.13, 0.05));
     s.spot('tables', at(tables, tr_.x, 0, tr_.z));
+    // cuillère en plastique beige en travers du plateau (hotspot `cuillere`, payoff Acte III : encreur)
+    const spoon = new THREE.Group();
+    spoon.add(at(box(0.26, 0.018, 0.035, '#e8dcc0'), 0.05, 0, 0));
+    const bowl = at(sphere(0.055, '#efe4c8', { seg: 12 }), -0.12, 0.004, 0);
+    bowl.scale.set(1.3, 0.3, 0.9);
+    spoon.add(bowl);
+    spoon.rotation.y = -0.5;
+    s.spot('cuillere', at(spoon, tr_.x - 0.12, tH + 0.07, tr_.z + 0.18));
 
     bobHere(s);
 
@@ -2285,17 +2288,19 @@ export const stFourriere: RoomBuild = {
     // ── la capsule CS-07 (billboard GenAI : sabot / libérée), amende sur le pare-brise ──
     const FREE: Condition = { flags: ['st_vaisseau_libere'] };
     const cv = s.stand(s.rect('capsule_vaisseau'));
-    const ch = cv.h * 0.98;
+    // Un cran plus bas / un peu plus petite : patins vers le marquage de quai (Leny t257).
+    const ch = cv.h * 0.88;
+    const podY = -0.08;
     const pod = billboardSheet(CAPSULE_SHEET, 2, ch, CAPSULE_ASPECT, { tint: '#ffffff', shadow: ch * CAPSULE_ASPECT * 0.45 });
-    s.spot('capsule_vaisseau', at(pod, cv.x, 0, cv.z));
-    const nozzle = at(glow('#8fd0ff', 1.2, 0.5), cv.x + ch * CAPSULE_ASPECT * 0.38, ch * 0.62, cv.z - 0.05);
+    s.spot('capsule_vaisseau', at(pod, cv.x, podY, cv.z));
+    const nozzle = at(glow('#8fd0ff', 1.2, 0.5), cv.x + ch * CAPSULE_ASPECT * 0.38, podY + ch * 0.62, cv.z - 0.05);
     s.add(nozzle);
     s.animate((t) => {
       const free = s.is(FREE);
       pod.userData.setFrame(free ? 1 : 0);
       nozzle.visible = free;
       nozzle.material.opacity = 0.35 + Math.sin(t * 6) * 0.15;
-      pod.position.y = free ? Math.abs(Math.sin(t * 1.6)) * 0.02 : 0;
+      pod.position.y = podY + (free ? Math.abs(Math.sin(t * 1.6)) * 0.02 : 0);
     });
     const am = s.fit(s.rect('amende'), cv.z + 0.4);
     const ticketMesh = at(label(tr('props.station.fine'), am.w * 0.8, am.h * 0.75, { color: '#1a1a1a', bg: '#ffd166', bold: true }), am.x, am.y, cv.z + 0.4);
