@@ -104,6 +104,47 @@ hotspots:
       - say: "bob: Je suis ton propriétaire, pas ta poubelle. Enfin. Pas aujourd'hui."
         mood: sad
 
+  # zooms examine sur les détails (après leurs parents : zones plus petites, prioritaires au clic)
+  - id: horloge
+    label: Horloge
+    smart: look
+    rect: [938, 40, 84, 84]
+    look:
+      - say: "Une horloge murale. 10 h 11. Pas de trotteuse : ici, on a jugé que les secondes étaient une provocation."
+      - say: "Le guichet ouvre à 10 h 12. L'horloge le sait. Elle fait exprès, je crois."
+
+  - id: horaires
+    label: Affiche « GUICHET 10 H 12 – 10 H 14 »
+    smart: look
+    rect: [1052, 56, 118, 116]
+    look:
+      - say: "« GUICHET — 10 H 12 – 10 H 14 ». Deux minutes d'ouverture. L'affiche est jaunie, cornée, punaisée quatre fois. Elle a vu passer beaucoup d'espoirs."
+      - say: "Et l'horloge, juste à côté, qui affiche 10 h 11. Ils se regardent en chiens de faïence depuis 1985."
+
+  - id: affiche_patience
+    label: Affiche « LA PATIENCE EST UNE VERTU »
+    smart: look
+    rect: [378, 156, 114, 86]
+    look:
+      - say: "« LA PATIENCE EST UNE VERTU (ART. 12) ». Un article de loi. La patience est réglementaire. Ne pas être patient, c'est une infraction."
+      - say: "Juste en dessous, M. Patience. Je ne sais pas qui a été accroché en premier. L'affiche, j'espère."
+
+  - id: ticket_patience
+    label: Ticket « 9 848 »
+    rect: [318, 336, 44, 34]
+    if: { notFlags: [st_ticket_9848] }
+    look:
+      - say: "Le ticket, de près : « 9 848 ». Papier bristol, bande verte, coin mâchonné. Serré entre deux phalanges comme un billet gagnant."
+        set: st_voit_patience
+      - say: "Un seul numéro après celui de l'afficheur. Il était le suivant. Il a attendu d'être appelé. Il l'attend encore."
+    use:
+      - say: "narrateur: Gary tire doucement sur le ticket. Les phalanges ne bougent pas d'un millimètre. Quarante et un ans de patience, ça fait une sacrée poigne."
+        set: st_main_serree
+      - say: "Il ne lâche rien. Pas avec des doigts, en tout cas. Il faudrait quelque chose de plus... aspirant."
+    useItem:
+      ticket_douane: "Lui proposer un échange ? Un ticket de douane contre son 9 848 ? Il ne fait pas d'échange. Il n'a même jamais fait la queue ailleurs."
+      badge: "« GARRY PLUNK ». Il ne regarde même pas. Il en a vu passer, des badges, en quarante et un ans."
+
 exits:
   - id: vers_sas
     label: Sas d'Arrivée

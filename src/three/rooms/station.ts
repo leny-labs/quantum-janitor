@@ -120,11 +120,13 @@ function stSign(id: SignId, maxW: number, maxH: number, glowing = false): { mesh
 
 /** Affiche administrative GenAI collée au mur, sur un support à sa taille. */
 // z ≥ 0.05 : devant les joints de `wallPanels` (face avant à z = 0.04), sinon une barre verticale barre l'affiche
-function poster(s: Stage, rect: [number, number, number, number], id: SignId, z = 0.06): void {
+function poster(s: Stage, rect: [number, number, number, number], id: SignId, z = 0.06): THREE.Object3D {
   const f = s.fit(rect, z);
   const p = stSign(id, f.w, f.h);
   s.add(onTop(at(box(p.w * 1.02, p.h * 1.02, 0.02, '#3a3630', { edges: true, shadow: false }), f.x, f.y, z)));
-  s.add(onTop(at(p.mesh, f.x, f.y, z + 0.012), POSTER_ORDER + 1));
+  const art = onTop(at(p.mesh, f.x, f.y, z + 0.012), POSTER_ORDER + 1);
+  s.add(art);
+  return art;
 }
 
 /** Tampon « VU » encré de travers sur le mur (décor). */
@@ -148,10 +150,15 @@ function bobHere(s: Stage): { robot: THREE.Group; w: number } {
 export const stSas: RoomBuild = {
   camera: { pos: [0.2, 2.2, 8.2], look: [0, 1.9, 0], fov: 50 },
   shots: {
-    portique: { fill: 0.8, lift: 0.1 },
-    borne: { fill: 0.7, orbit: 8 },
-    guerite: { fill: 0.75, orbit: -10 },
+    portique: { fill: 0.85, lift: 0.1 },
+    borne: { fill: 0.85, orbit: 6, fov: 42 },
+    guerite: { fill: 0.85, orbit: -8, fov: 42 },
     porte_gobelet: { fill: 0.3, lift: 0.4 },
+    // détails (sous-hotspots du YAML) : plans serrés
+    bienvenue: { fill: 0.9, fov: 38 },
+    affiche_animaux: { fill: 0.85, orbit: 4, fov: 36 },
+    fente: { px: [707, 288], fill: 0.45, aim: [0, 0.12, 0], fov: 40 },
+    pupitre_sabot: { px: [200, 325], fill: 0.4, orbit: -5, aim: [0, 0.05, 0], fov: 38 },
   },
   intro: 'portique',
   build(s) {
@@ -175,8 +182,10 @@ export const stSas: RoomBuild = {
     const ban = s.fit([540, 20, 520, 60], 0.03);
     const welcome = stSign('bienvenue', ban.w, ban.h);
     s.add(onTop(at(box(welcome.w * 1.01, welcome.h * 1.04, 0.06, '#123f3a'), ban.x, ban.y, 0.03)));
-    s.add(onTop(at(welcome.mesh, ban.x, ban.y, 0.065), POSTER_ORDER + 1));
-    poster(s, [985, 110, 170, 110], 'animaux');
+    const welcomeArt = onTop(at(welcome.mesh, ban.x, ban.y, 0.065), POSTER_ORDER + 1);
+    s.add(welcomeArt);
+    s.spot('bienvenue', welcomeArt);
+    s.spot('affiche_animaux', poster(s, [985, 110, 170, 110], 'animaux'));
     inkStamp(s, 1070, 235, tr('props.station.stampSeen'));
 
     // tapis roulant à l'arrêt, du quai jusqu'au portique
@@ -204,6 +213,7 @@ export const stSas: RoomBuild = {
     arch.add(stub);
     s.when({ notFlags: ['st_ticket_douane'] }, stub);
     s.spot('portique', at(arch, pr.x, 0, pr.z));
+    s.spot('fente', stub);
     s.animate((t) => {
       const k = (Math.sin(t * 1.6) + 1) / 2;
       scan.position.y = pr.h * (0.15 + k * 0.7);
@@ -274,10 +284,15 @@ const PATIENCE_CHAIR = 265;
 export const stAttente: RoomBuild = {
   camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
   shots: {
-    afficheur: { fill: 0.45 },
-    squelette: { fill: 0.75, orbit: -6 },
-    distributeur: { fill: 0.8, orbit: 6 },
-    plante: { fill: 0.7 },
+    afficheur: { fill: 0.75, fov: 40 },
+    squelette: { fill: 0.85, orbit: -6, fov: 42 },
+    distributeur: { fill: 0.9, orbit: 6, fov: 42 },
+    plante: { fill: 0.8, fov: 42 },
+    // détails (sous-hotspots du YAML) : plans serrés
+    horloge: { fill: 0.9, fov: 36 },
+    horaires: { fill: 0.9, orbit: 4, fov: 36 },
+    affiche_patience: { fill: 0.9, orbit: -4, fov: 36 },
+    ticket_patience: { px: [340, 352], fill: 0.6, orbit: 6, lift: 0.1, fov: 36 },
     // aspiration du ticket 9 848 (# aspir) : léger push-in, plus bas ; M. Patience (gauche) et
     // B.O.B. (droite) restent dans le champ, le sol devant B.O.B. au-dessus de la bulle
     [BobAspirRig.SHOT]: { of: 'bob', cam: { pos: [0.4, 1.75, 6.6], look: [0.1, 0.55, 1.6], fov: 50 } },
@@ -311,9 +326,9 @@ export const stAttente: RoomBuild = {
     minHand.geometry.translate(0, 0.17, 0);
     minHand.rotation.z = -(11 / 60) * Math.PI * 2;
     clock.add(hourHand, minHand);
-    s.add(at(clock, ck.x, ck.y, 0.05));
-    poster(s, [1050, 60, 120, 110], 'horaires');
-    poster(s, [380, 160, 110, 80], 'patience');
+    s.spot('horloge', at(clock, ck.x, ck.y, 0.05));
+    s.spot('horaires', poster(s, [1050, 60, 120, 110], 'horaires'));
+    s.spot('affiche_patience', poster(s, [380, 160, 110, 80], 'patience'));
     inkStamp(s, 150, 120, tr('props.station.stampPending'));
 
     // ── afficheur « NOUS SERVONS LE N° 9 847 » ──
@@ -666,12 +681,16 @@ function clock1011(s: Stage, r: number): THREE.Group {
 export const stGuichet: RoomBuild = {
   camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
   shots: {
-    guichard: { fill: 0.6 },
-    hygiaphone: { fill: 0.45, lift: 0.1 },
-    horloge: { fill: 0.35 },
-    horaires: { fill: 0.4 },
-    rideau: { fill: 0.6, orbit: 6 },
-    pupitre: { fill: 0.7, orbit: -8 },
+    guichard: { fill: 0.7 },
+    hygiaphone: { fill: 0.8, lift: 0.1, fov: 38 },
+    horloge: { fill: 0.85, fov: 36 },
+    horaires: { fill: 0.85, orbit: 4, fov: 36 },
+    rideau: { fill: 0.75, orbit: 6 },
+    pupitre: { px: [240, 352], fill: 0.9, orbit: -6, lift: 0.3, fov: 40 },
+    porte_b: { fill: 0.85, orbit: 6, fov: 42 },
+    // détails (sous-hotspots du YAML) : plans serrés
+    afficheur: { fill: 0.45, fov: 40 },
+    lecteur: { fill: 1.3, orbit: 8, fov: 34 },
   },
   intro: 'guichard',
   build(s) {
@@ -808,7 +827,7 @@ export const stGuichet: RoomBuild = {
     board.add(at(box(af.w, af.h, 0.08, '#1a1418'), 0, 0, 0));
     board.add(at(label(tr('props.station.nowServing'), af.w * 0.4, af.h * 0.5, { color: '#ffd166', bold: true }), -af.w * 0.27, 0, 0.05));
     board.add(at(label('9 847', af.w * 0.5, af.h * 0.7, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true }), af.w * 0.22, 0, 0.05), at(glow('#ff4f5a', af.w, 0.15), af.w * 0.22, 0, 0.08));
-    s.add(at(board, af.x, af.y, zb + 0.06));
+    s.spot('afficheur', at(board, af.x, af.y, zb + 0.06));
 
     // horaires d'ouverture (affiche GenAI) au mur, à droite du guichet ; tampon « EN ATTENTE »
     poster(s, s.rect('horaires'), 'horaires');
@@ -861,6 +880,7 @@ export const stGuichet: RoomBuild = {
     wing.add(at(reader, -bf.w / 2 - 0.3, -bf.h * 0.05, 0.02));
     s.animate((t) => (led.visible = Math.floor(t * 1.5) % 2 === 0));
     s.spot('porte_b', wing);
+    s.spot('lecteur', reader);
     s.add(at(pool('#ffd166', 3, 2, 0.1), 0, 0.01, 4));
   },
 };

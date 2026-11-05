@@ -128,6 +128,56 @@ hotspots:
       - say: "bob: Je suis ton propriétaire, pas ta consigne, Gary."
         mood: sad
 
+  # zooms examine sur les détails (après leurs parents : zones plus petites, prioritaires au clic)
+  - id: bienvenue
+    label: Bandeau « BIENVENUE »
+    smart: look
+    rect: [590, 15, 420, 72]
+    look:
+      - say: "« BIENVENUE — VOTRE VISITE EST ENREGISTRÉE ». Émail vert, rivets, pas une rayure. On a astiqué l'accueil. Pas les visiteurs."
+      - say: "Enregistrée où ? Par qui ? Pour combien de temps ? Le bandeau ne le dit pas. Il souhaite juste la bienvenue, très fermement."
+
+  - id: affiche_animaux
+    label: Affiche « LES ANIMAUX »
+    smart: look
+    rect: [985, 108, 172, 114]
+    look:
+      - say: "« LES ANIMAUX DOIVENT ÊTRE ACCOMPAGNÉS ». Un pictogramme : un bonhomme, une laisse, un chien. Le chien, aujourd'hui, c'est moi."
+      - say: "Tampon rouge en dessous : « VU ». Quelqu'un a vu l'affiche. Et l'a tamponnée. Pour prouver qu'il l'avait vue."
+
+  - id: fente
+    label: Fente « TICKET D'ENTRÉE »
+    useLabel: Prendre un ticket
+    rect: [678, 212, 64, 94]
+    if: { notFlags: [st_ticket_douane] }
+    look:
+      - say: "Une fente sur le montant du portique : « TICKET D'ENTRÉE — À CONSERVER JUSQU'À LA SORTIE ». Un ticket dépasse. « D-0001 »."
+      - say: "Numéro un. Je suis le premier visiteur de la Station. Ou le premier à être resté assez longtemps pour qu'on compte."
+    use:
+      - say: "narrateur: Gary tire sur le ticket qui dépasse. Le portique l'imprime en entier, lentement, en ronronnant, comme s'il en était fier."
+      - give: ticket_douane
+        set: st_ticket_douane
+      - say: "« TICKET D'ENTRÉE n° D-0001 — À PRÉSENTER À LA SORTIE ». Il n'y a pas de sortie. Je le garde quand même. On ne sait jamais."
+    useItem:
+      badge: "Le badge ne rentre pas dans la fente. Elle est faite pour sortir des tickets, pas pour en avaler. C'est une fente à sens unique."
+      fragment: "Glisser l'éclat dans la fente ? Le portique m'imprimerait un ticket « n° ∞ ». Je préfère le D-0001. Il est fini, lui."
+
+  - id: pupitre_sabot
+    label: Pupitre de M. Sabot
+    rect: [105, 262, 175, 82]
+    look:
+      - say: "Derrière la vitre, le pupitre de M. Sabot : une pile de contraventions, un tampon encreur, et un bras qui monte et descend. CLAC. CLAC."
+      - say: "Il ne lit pas ce qu'il tamponne. Il tamponne ce qu'il ne lit pas. C'est une méthode. Ça s'appelle « la fourrière »."
+    talk:
+      - dialogue: st_sabot
+    useItem:
+      ticket_douane:
+        - say: "sabot: Pas sans le permis. Gardez votre ticket. Le jour où vous avez les deux, on fait affaire. C'est-à-dire jamais."
+      badge:
+        - say: "sabot: Je fais pas les badges. Je fais pas les ventes. Je fais la fourrière."
+    useItemDefault:
+      - say: "sabot: Je fais pas les ventes."
+
 exits:
   - id: vers_attente
     label: Salle d'Attente

@@ -144,6 +144,26 @@ hotspots:
       - say: "bob: Je ne suis pas un guichet, Gary. Je n'ai même pas d'horaires."
         mood: sad
 
+  # zooms examine sur les détails (après leurs parents : zones plus petites, prioritaires au clic)
+  - id: afficheur
+    label: Afficheur « EN COURS »
+    smart: look
+    rect: [688, 34, 156, 62]
+    look:
+      - say: "« EN COURS : 9 847 ». Le même numéro que dans la salle d'attente. Les deux afficheurs sont synchronisés. Sur l'immobilité."
+      - say: "Le 9 848, c'est le ticket de M. Patience. Le suivant. Si ce chiffre bouge un jour, la Station entière va devoir s'asseoir."
+
+  - id: lecteur
+    label: Lecteur de formulaire
+    rect: [1036, 286, 48, 50]
+    look:
+      - say: "Un lecteur rouge à côté de la porte : « AILE B — FORMULAIRE B-7/12 REQUIS ». La diode clignote. Elle attend un formulaire depuis tellement longtemps qu'elle a appris le morse."
+    use:
+      - say: "Un lecteur clignote à côté de la poignée : « AILE B — FORMULAIRE B-7/12 REQUIS ». Il lit les formulaires. Il ne lit pas les blattes en combinaison."
+    useItem:
+      ticket_9848: "Le lecteur avale un coin du ticket, le goûte, et le recrache : « TICKET ≠ FORMULAIRE ». Il a raison. C'est dur, quand les machines ont raison."
+      badge: "« BADGE NON HABILITÉ — AILE B ». Comme d'habitude. Mon badge n'a jamais ouvert que des placards."
+
 exits:
   - id: vers_attente
     label: Salle d'Attente

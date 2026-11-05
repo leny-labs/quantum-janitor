@@ -155,6 +155,11 @@ keys:
   scene.st-sas.hotspot.guerite.label: Impound booth
   scene.st-sas.hotspot.porte_gobelet.label: Orphaned cup holder
   scene.st-sas.hotspot.bob.label: B.O.B.
+  scene.st-sas.hotspot.bienvenue.label: “WELCOME” banner
+  scene.st-sas.hotspot.affiche_animaux.label: “ANIMALS” poster
+  scene.st-sas.hotspot.fente.label: “ENTRY TICKET” slot
+  scene.st-sas.hotspot.fente.useLabel: Take a ticket
+  scene.st-sas.hotspot.pupitre_sabot.label: Mr Sabot's desk
   scene.st-sas.exit.vers_attente.label: Waiting Room
   scene.st-attente.title: Waiting Room
   scene.st-attente.sector: Bureaucratic Station · Level 0 · Please wait
@@ -164,6 +169,10 @@ keys:
   scene.st-attente.hotspot.plante.label: Plastic plant
   scene.st-attente.hotspot.plante.useLabel: Take
   scene.st-attente.hotspot.bob.label: B.O.B.
+  scene.st-attente.hotspot.horloge.label: Clock
+  scene.st-attente.hotspot.horaires.label: “DESK 10:12 – 10:14” poster
+  scene.st-attente.hotspot.affiche_patience.label: “PATIENCE IS A VIRTUE” poster
+  scene.st-attente.hotspot.ticket_patience.label: Ticket “9 848”
   scene.st-attente.exit.vers_sas.label: Arrivals Airlock
   scene.st-attente.exit.vers_guichet.label: Reception Desk
   scene.st-attente.exit.vers_cafeteria.label: Cafeteria
@@ -188,6 +197,8 @@ keys:
   scene.st-guichet.hotspot.pupitre.label: Form-filling desk
   scene.st-guichet.hotspot.porte_b.label: “WING B” door
   scene.st-guichet.hotspot.bob.label: B.O.B.
+  scene.st-guichet.hotspot.afficheur.label: “NOW SERVING” display
+  scene.st-guichet.hotspot.lecteur.label: Form reader
   scene.st-guichet.exit.vers_attente.label: Waiting Room
   item.ticket_douane.name: Customs ticket
   item.ticket_9848.name: Ticket No. 9848
