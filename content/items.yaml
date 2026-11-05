@@ -130,7 +130,11 @@ items:
   - id: plante
     name: M. Ficus (plante en plastique)
     icon: { color: "#3e8f4a", glyph: "FICUS" }
-    look: "M. Ficus. En plastique. Étiquette : « MEMBRE HON. DU C... ». Du quoi ? Du Club ? Du Comité ? Du Conseil ? Il ne dit rien. Il a des principes. (À suivre.)"
+    look:
+      - if: { flags: [st_couloir_resolu] }
+        say: "M. Ficus. Il a dénoué le Couloir Infini B sans bouger d'un millimètre. Étiquette : « MEMBRE HON. DU C... ». Du Conseil, j'en suis presque sûr maintenant. (À suivre.)"
+        stop: true
+      - say: "M. Ficus. En plastique. Étiquette : « MEMBRE HON. DU C... ». Du quoi ? Du Club ? Du Comité ? Du Conseil ? Il ne dit rien. Il a des principes. (À suivre.)"
     combine:
       ticket_douane: "Accrocher le ticket au ficus ? Il en ferait un sapin de Noël administratif. On n'est pas en décembre. On n'est même pas sûr d'être un jour."
       fragment: "L'éclat sur le ficus ? Il pourrait se mettre à pousser. Ou à voter. Gardons ça pour plus tard."
@@ -140,3 +144,15 @@ items:
     name: Plan de la Station
     icon: { color: "#f3ecd8", glyph: "PLAN" }
     look: "Le dépliant d'accueil, édition 1987. Les pièces que j'ai visitées sont blanches, les autres grisées « ACCÈS REFUSÉ » ou marquées « ??? ». On le déplie avec le bouton PLAN. Ou la touche P, pour les connaisseurs."
+
+  # fin de l'Acte I (Accueil) : le dernier B-7/12, trouvé dans le casier du Couloir Infini B ;
+  # vierge, cinq cases (rempli, tamponné, signé, conforme, ?) — la suite, dans les bureaux de l'Aile B
+  - id: formulaire
+    name: Formulaire B-7/12
+    icon: { color: "#e8dcc0", glyph: "B-7/12" }
+    look:
+      - say: "Le Formulaire B-7/12. Le dernier exemplaire. Légèrement jauni, parfaitement vierge. Cinq cases : REMPLI, TAMPONNÉ, SIGNÉ, CONFORME, et une cinquième sans titre."
+      - say: "En bas, en tout petit : « À REMPLIR EN TROIS EXEMPLAIRES ». Il n'y en a qu'un. On verra ça dans l'Aile B. (À suivre.)"
+    combine:
+      plante: "Faire signer M. Ficus ? Il est membre honoraire de quelque chose. Mais pas aujourd'hui. Il est fatigué : il vient de dénouer un couloir."
+      ticket_9848: "J'agrafe mentalement le ticket au formulaire. Mentalement, parce que je n'ai pas d'agrafeuse. Il y a sûrement un bureau pour ça."

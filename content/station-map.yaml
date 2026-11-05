@@ -38,12 +38,12 @@ bands:
   - id: aile-b
     label: { fr: "NIVEAU 0 · AILE B (COULOIR INFINI)", en: "LEVEL 0 · WING B (INFINITE CORRIDOR)" }
     zones:
+      # jouable : porte de l'Aile B du guichet, ouverte par la demande verbale (article 47bis)
       - scene: st-couloir-b
-        planned: true
         label: { fr: "Couloir Infini B", en: "Infinite Corridor B" }
-        visible: { flags: [st_formulaire] }
-        unlock: { flags: [st_formulaire] }
-        refused: { fr: "FORMULAIRE B-7/12 REQUIS", en: "FORM B-7/12 REQUIRED" }
+        visible: { flags: [st_deduit_formulaire] }
+        unlock: { flags: [st_acces_aile_b] }
+        refused: { fr: "DEMANDE 47BIS OU B-7/12 REQUIS", en: "47BIS REQUEST OR B-7/12 REQUIRED" }
       - scene: st-archives
         planned: true
         label: { fr: "Archives Centrales", en: "Central Archives" }

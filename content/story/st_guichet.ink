@@ -1,7 +1,7 @@
 // Chapitre 1 « La Station Bureaucratique » : le Guichet d'Accueil, joué en salle (st-guichet).
 // Mme Guichard derrière l'hygiaphone : fermé (10 h 11), formulaire B-7/12 « au guichet ».
-// Fin provisoire du stub = la première conversation (flag st_guichard_ferme) ; plus d'EndScene.
-// `st_stub_fin` (st_fin.ink) reste l'endKnot nominal du ch.1 mais n'est plus joué par la porte.
+// Après D3 (st_deduit_formulaire) : l'article 47bis → demande verbale → st_acces_aile_b (porte de l'Aile B).
+// Fin de l'Acte I (Accueil) = le B-7/12 trouvé dans le Couloir Infini B (st_formulaire, st_couloir_b.ink).
 
 === st_guichard ===
 // 10 h 12 (éclat sur l'horloge après la déduction du carnet) : le guichet est ouvert
@@ -65,6 +65,17 @@ guichard: Au guichet. # set: st_guichard_ticket
 // Guichet ouvert (st_guichet_ouvert) : elle prend le ticket… et le B-7/12 est en rupture.
 // Pose st_guichard_rupture (indice du carnet → déduction « Formulaire B-7/12 requis »).
 === st_guichard_ouvert ===
+{ has_flag("st_formulaire"):
+    -> st_guichard_formulaire
+}
+{ has_flag("st_acces_aile_b"):
+    guichard: Votre demande verbale au titre de l'article 47bis est enregistrée. Elle est valable jusqu'à 10 h 14. Il est 10 h 12. Depuis tout à l'heure.
+    bob: Va, Gary. La porte de l'Aile B t'attend. Moi aussi, mais je suis plus patient. # mood: calm
+    -> END
+}
+{ has_flag("st_deduit_formulaire"):
+    -> st_guichard_47bis
+}
 { has_flag("st_guichard_rupture"):
     guichard: Toujours en rupture. Le réassort est prévu. Revenez au réassort.
     bob: Elle a dit « prévu », Gary. Comme le guichet 2. # mood: sad
@@ -129,6 +140,40 @@ guichard: Voilà. Vous avez compris le règlement. C'est rare. # set: st_guichar
     bob: Note ça au carnet, Gary : un guichet ouvert et un formulaire en rupture. Rapproche-les. Ça va te faire de la peine, mais c'est instructif. # mood: suspicious
     -> END
 }
-bob: Le formulaire est derrière la porte qui exige le formulaire. Je n'ai jamais été aussi fier de cette Station. # mood: love
-bob: La suite, c'est par l'Aile B. Mais pas aujourd'hui. Aujourd'hui, on a ouvert un guichet. Personne n'avait fait ça depuis 1985. # mood: calm
+{ not has_flag("st_acces_aile_b"):
+    bob: Le formulaire est derrière la porte qui exige le formulaire. Je n'ai jamais été aussi fier de cette Station. # mood: love
+    bob: Mais un règlement qui fabrique une boucle prévoit toujours un article pour en sortir. Sinon, personne ne pourrait le respecter. Demande à Mme Guichard. Elle connaît les articles par cœur. Même ceux qui n'existent pas. # mood: suspicious
+    -> END
+}
+{ not has_flag("st_formulaire"):
+    bob: Article 47bis, Gary. Demande verbale. La porte de l'Aile B ne peut plus rien te refuser. Enfin, elle peut. Mais elle n'a plus le droit. # mood: love
+    -> END
+}
+bob: On a le B-7/12, Gary. Mme Guichard ne s'en remettra pas. Moi non plus. # mood: love
+-> END
+
+// Article 47bis : exception en cas de rupture d'un formulaire requis pour accéder au stock dudit formulaire.
+=== st_guichard_47bis ===
+gary: Madame. Le B-7/12 est en rupture. Le dernier est dans l'Aile B. Et l'Aile B exige le B-7/12. C'est une boucle.
+guichard: C'est un règlement.
+gary: C'est une boucle réglementaire.
+Mme Guichard repose son sandwich. Elle ouvre un classeur épais comme un annuaire, l'humecte d'un doigt, et tourne exactement quarante-sept pages. Puis une demi-page.
+guichard: Article 47bis. « En cas de rupture d'un formulaire requis pour accéder au stock dudit formulaire, l'usager peut formuler une demande verbale. »
+bob: Une demande verbale ? Sans papier ? Ici ? # mood: surprised
+guichard: Verbale. Mais enregistrée. Je l'écris.
+gary: Alors... je demande l'accès à l'Aile B. Verbalement. S'il vous plaît.
+Elle note la phrase sur un formulaire de demande verbale. Le formulaire de demande verbale, lui, n'est pas en rupture. CLONK. Tampon. # shake
+guichard: Demande verbale 47bis enregistrée. Le lecteur de l'Aile B est prévenu. Vous avez jusqu'à 10 h 14.
+gary: Et après 10 h 14 ?
+guichard: Il n'est jamais 10 h 14.
+bob: Gary. Elle vient de nous rendre service. En quarante et un ans, c'est la première fois. Ne dis rien. Avance. # mood: love # set: st_acces_aile_b
+-> END
+
+// B-7/12 trouvé dans le couloir (st_formulaire) : Mme Guichard constate.
+=== st_guichard_formulaire ===
+Gary plaque le Formulaire B-7/12 contre la vitre. Mme Guichard le regarde longtemps. Elle enlève ses lunettes. Elle les remet.
+guichard: Le dernier B-7/12. Il est revenu de l'Aile B.
+guichard: Rien ne revient jamais de l'Aile B.
+bob: Nous, si. Avec le formulaire. Et le ficus. # mood: love
+guichard: Remplissez-le. Tamponnez-le. Faites-le signer. En trois exemplaires. Les bureaux de l'Aile B s'en chargent. Dès que le règlement le permettra.
 -> END

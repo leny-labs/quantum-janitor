@@ -162,10 +162,10 @@ export const CHAPTERS: ChapterDef[] = [
     from: 'ch0',
     // ch.0 fini : éclat contenu, combi de chitine (enfilée dans l'interlude), badge ; B.O.B. suit
     initial: { items: ['badge', 'fragment', 'combi_chitine'], flags: ['st', 'ch0_termine', 'chapitre0_termine', 'bob_suit'] },
-    // knot de fin nominal (EndScene) ; deviendra `st_suite`. Le stub, lui, s'arrête en salle au
-    // guichet (`endFlag`) : plus de porte `to: fin`
+    // knot de fin nominal (EndScene) ; deviendra `st_suite`. L'Acte I (Accueil) s'arrête en salle,
+    // dans le Couloir Infini B, le B-7/12 en main (`endFlag`) : pas de porte `to: fin`
     endKnot: 'st_stub_fin',
-    endFlag: 'st_guichard_ferme',
+    endFlag: 'st_formulaire',
     steps: [
       { section: 'Interlude — la Capsule de Service CS-07' },
       { look: 'pare_brise' },
@@ -214,6 +214,19 @@ export const CHAPTERS: ChapterDef[] = [
       { talk: 'guichard' }, // ticket tamponné, B-7/12 « en rupture » (st_guichard_rupture)
       { deduce: ['guichet_ouvert', 'guichard_rupture'] }, // D3 « Formulaire B-7/12 requis » (st_deduit_formulaire)
       { look: 'lecteur' }, // la porte qui exige le formulaire qui est derrière la porte
+      { section: 'Station · l\'article 47bis (Mme Guichard)' },
+      { talk: 'bob' }, // « un règlement qui fabrique une boucle prévoit un article pour en sortir »
+      { talk: 'guichard' }, // article 47bis : demande verbale enregistrée (st_acces_aile_b)
+      { go: 'st-couloir-b' }, // porte de l'Aile B (sortie vers_couloir_b)
+      { section: 'Station · le Couloir Infini B (M. Ficus)' },
+      { use: 'casier' }, // à trois pas, toujours à trois pas
+      { talk: 'bob' }, // « pousse une porte »
+      { use: 'porte_b2' }, // même extincteur : le couloir boucle (st_couloir_boucle)
+      { look: 'extincteur' }, // « NE PAS DÉPLACER » : le repère
+      { useItem: ['plante', 'emplacement'] }, // M. Ficus posé à gauche de l'extincteur (st_plante_posee)
+      { use: 'porte_b3', pick: [0] }, // le couloir glisse ; suivre la plante : tout droit = boucle ironique
+      { use: 'ficus', pick: [2] }, // vers M. Ficus : le couloir se dénoue (st_couloir_resolu), +plante
+      { use: 'casier' }, // le dernier Formulaire B-7/12 (st_formulaire) : fin de l'Acte I
     ],
   },
 ];

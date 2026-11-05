@@ -96,11 +96,20 @@ async function main() {
         const decoy = checkpoints.find((c) => c.label === 'utiliser ticket_douane sur distributeur');
         if (!decoy?.save.items.includes('ticket_douane')) throw new Error('fausse piste : le distributeur ne doit pas garder le ticket de douane');
         for (const f of ['st_arrive', 'st_laisse', 'st_ticket_9848']) if (!state.hasFlag(f)) throw new Error(`Station : flag ${f} absent`);
-        // carte : les salles du stub warpables (on finit au guichet), la fourrière refusée, la Direction inconnue
+        // Aile B (fin de l'Acte I) : 47bis → couloir → plante → formulaire, M. Ficus rendu à Gary
+        for (const f of ['st_acces_aile_b', 'st_couloir_boucle', 'st_plante_posee', 'st_couloir_resolu', 'st_formulaire']) if (!state.hasFlag(f)) throw new Error(`Aile B : flag ${f} absent`);
+        if (!state.hasItem('formulaire')) throw new Error('Aile B : le Formulaire B-7/12 devait être en poche');
+        const posee = checkpoints.find((c) => c.label === 'utiliser plante sur emplacement');
+        if (!posee || posee.save.items.includes('plante')) throw new Error('Aile B : M. Ficus devait quitter l\'inventaire une fois posé');
+        const wrong = checkpoints.find((c) => c.label === 'utiliser porte_b3');
+        if (!wrong || wrong.save.flags.includes('st_couloir_resolu')) throw new Error('Aile B : la mauvaise direction devait boucler');
+        const early47 = checkpoints.find((c) => c.label === 'regarder lecteur');
+        if (!early47 || early47.save.flags.includes('st_acces_aile_b')) throw new Error('Aile B : accès 47bis avant la conversation');
+        // carte : les salles du stub warpables (on finit dans le couloir B), la fourrière refusée, la Direction inconnue
         const map = parseStationMap(readFileSync(join(ROOT, 'content', 'station-map.yaml'), 'utf8'));
         const zone = (id: string) => map.bands.flatMap((b) => b.zones).find((z) => z.scene === id)!;
         const exists = (id: string) => content.scenes.has(id);
-        const expect = { 'st-sas': 'open', 'st-attente': 'open', 'st-cafeteria': 'open', 'st-guichet': 'here', 'st-fourriere': 'locked', 'st-direction': 'unknown' } as const;
+        const expect = { 'st-sas': 'open', 'st-attente': 'open', 'st-cafeteria': 'open', 'st-guichet': 'open', 'st-couloir-b': 'here', 'st-archives': 'locked', 'st-fourriere': 'locked', 'st-direction': 'unknown' } as const;
         // repérée et accessible mais jamais visitée : pas de warp (on y va à pied d'abord)
         const early = chapterStateAt(state, 'st-sas', ['st-sas']);
         if (zoneState(early, zone('st-attente'), exists) !== 'seen') throw new Error('carte : salle d\'attente non visitée devrait être « seen »');

@@ -1,0 +1,195 @@
+# Chapitre 1 « La Station Bureaucratique » — 4. Couloir Infini B (docs/CHAPTER1.md §4, §6.10–12, §10).
+# Rendu 3D : src/three/rooms/station.ts (stCouloirB). `art:` = repli 2D.
+# Une seule pièce : la boucle est jouée par l'Ink (content/story/st_couloir_b.ink), pas par la géométrie.
+#   porte B-n (avant la plante)      → même extincteur                       [st_couloir_boucle]
+#   plante sur l'emplacement au sol  → repère à gauche de l'extincteur       [st_plante_posee] −plante
+#   porte / ficus ensuite            → « suivre la plante » (3 directions)   [st_couloir_resolu] +plante
+#   casier « STOCK B-7/12 »          → le dernier formulaire                 [st_formulaire] = fin de l'Acte I
+# Entrée : porte de l'Aile B du guichet (article 47bis, st_acces_aile_b). Archives, Tampons,
+# Réclamations… : portes « À SUIVRE » (zones `planned` du PLAN, pas de scènes).
+id: st-couloir-b
+title: Couloir Infini B
+sector: Station Bureaucratique · Niveau 0 · Aile B
+icon: corridor
+background: "#262a30"
+
+onFirstEnter:
+  - say: "L'Aile B. Un couloir administratif : néons, lino, trois portes numérotées, un extincteur rouge. Et au fond, encore un couloir administratif. Le même."
+  - say: "bob: Tu entends, Gary ? Nos pas reviennent avant nous. C'est très mauvais signe. Ou très bien rangé."
+    mood: suspicious
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#3a3e44" }
+  - { rect: [0, 0, 1280, 470], color: "#a9b0b4" }
+
+hotspots:
+  - id: porte_b1
+    label: Porte B-1
+    sfx: clonk
+    rect: [150, 160, 130, 270]
+    art:
+      - { rect: [155, 165, 120, 260], color: "#5a4a6a", stroke: "#2a2830", text: "B-1", size: 18 }
+    look:
+      - if: { flags: [st_couloir_resolu] }
+        say: "La plaque a changé : « ARCHIVES CENTRALES — FERMÉ POUR CLASSEMENT ». Dessous, en plus petit : « COULOIR EN COURS DE DÉNOUEMENT. À SUIVRE. »"
+        stop: true
+      - say: "« B-1 ». Une porte en contreplaqué mauve, hublot dépoli, poignée polie par des générations de gens perdus."
+    use:
+      - dialogue: st_couloir_porte
+    useItem:
+      plante: "Poser M. Ficus contre une porte ? Les portes bougent. Il faut un endroit qui ne bouge pas. À côté de quelque chose qui n'a pas le droit de bouger, par exemple."
+    useItemDefault: "La porte B-1 n'a pas de serrure. Juste une poignée. C'est justement ça, le problème."
+
+  - id: porte_b2
+    label: Porte B-2
+    sfx: clonk
+    rect: [520, 160, 130, 270]
+    art:
+      - { rect: [525, 165, 120, 260], color: "#5a4a6a", stroke: "#2a2830", text: "B-2", size: 18 }
+    look:
+      - if: { flags: [st_couloir_resolu] }
+        say: "« BUREAU DES TAMPONS — OUVERTURE DÈS QUE LE RÈGLEMENT LE PERMETTRA ». De l'autre côté, quelque chose fait CLONK. Puis CLONK. Puis attend."
+        stop: true
+      - say: "« B-2 ». Exactement comme la B-1, avec un 2. Le 2 a l'air un peu plus fatigué que le 1. Il a fait plus de tours."
+    use:
+      - dialogue: st_couloir_porte
+    useItem:
+      plante: "Poser M. Ficus contre une porte ? Les portes bougent. Il faut un endroit qui ne bouge pas. À côté de quelque chose qui n'a pas le droit de bouger, par exemple."
+    useItemDefault: "La porte B-2 attend une poignée qui tourne. Pas un objet. Elle est très à cheval sur les procédures."
+
+  - id: porte_b3
+    label: Porte B-3
+    sfx: clonk
+    rect: [930, 160, 130, 270]
+    art:
+      - { rect: [935, 165, 120, 260], color: "#5a4a6a", stroke: "#2a2830", text: "B-3", size: 18 }
+    look:
+      - if: { flags: [st_couloir_resolu] }
+        say: "« RÉCLAMATIONS ». Une boîte aux lettres pleine à craquer à côté. Une réclamation dépasse : « LE COULOIR BOUCLE ». Datée de 1986. Elle n'a plus lieu d'être. Personne ne viendra la retirer."
+        stop: true
+      - say: "« B-3 ». La dernière porte avant... l'extincteur. Le même extincteur. Je ne veux pas en parler."
+    use:
+      - dialogue: st_couloir_porte
+    useItem:
+      plante: "Poser M. Ficus contre une porte ? Les portes bougent. Il faut un endroit qui ne bouge pas. À côté de quelque chose qui n'a pas le droit de bouger, par exemple."
+    useItemDefault: "La porte B-3 ne s'ouvre que sur elle-même. Je ne vois pas ce qu'un objet y changerait."
+
+  - id: panneau
+    label: Panneau « AILE B »
+    smart: look
+    rect: [700, 70, 200, 130]
+    art:
+      - { rect: [705, 75, 190, 120], color: "#5a4a6a", stroke: "#f6efdc", text: "AILE B\nVOUS ÊTES ICI", size: 16 }
+    look:
+      - if: { flags: [st_couloir_resolu] }
+        say: "« AILE B — VOUS ÊTES ICI (ENCORE) ». Le petit plan circulaire a l'air vexé. Le couloir, lui, est redevenu droit."
+        stop: true
+      - say: "« AILE B — VOUS ÊTES ICI (ENCORE) ». Le plan est un cercle. Le point rouge est sur le cercle. Partout sur le cercle."
+      - say: "bob: C'est le panneau le plus honnête de la Station, Gary. Il ne t'a jamais menti. Il t'a juste prévenu trop tard."
+        mood: calm
+
+  - id: extincteur
+    label: Extincteur
+    rect: [420, 250, 70, 170]
+    art:
+      - { rect: [430, 260, 50, 150], color: "#c0392b", stroke: "#2a2830", text: "EXT.", size: 12 }
+    look:
+      - if: { flags: [st_plante_posee], notFlags: [st_couloir_resolu] }
+        say: "L'extincteur. Toujours là. M. Ficus aussi. Mais entre les deux, il y a désormais toute une porte de différence."
+        stop: true
+      - say: "Un extincteur rouge, accroché au mur. Panneau : « EXTINCTEUR — NE PAS DÉPLACER ». Une étiquette d'inventaire : « EXT-B-001 ». Il n'y en a qu'un. On le croise plusieurs fois."
+      - say: "C'est la seule chose ici qui n'a pas le droit de bouger. Ça en fait presque un ami."
+    use:
+      - say: "narrateur: Gary saisit la poignée de l'extincteur. Le panneau au-dessus clignote : « NE PAS DÉPLACER ». Gary ne déplace pas."
+      - say: "Il n'y a pas d'incendie. Il n'y a que de la procédure. Et la procédure, ça ne s'éteint pas."
+    useItem:
+      plante: "Pas SUR l'extincteur. À côté. On ne met pas une plante sur un équipement de sécurité. Il y a sûrement un article pour ça."
+      fragment: "L'éclat sur l'extincteur ? Il pourrait se mettre à éteindre des choses qui ne brûlent pas. Comme le règlement. Tentant. Pas aujourd'hui."
+
+  # emplacement au sol à gauche de l'extincteur : on y pose M. Ficus (repère qui ne suit aucune procédure)
+  - id: emplacement
+    label: Emplacement au sol
+    if: { notFlags: [st_plante_posee] }
+    rect: [300, 395, 120, 75]
+    art:
+      - { rect: [305, 420, 110, 40], color: "#4a4e54", stroke: "#f6efdc", text: "□", size: 14 }
+    look:
+      - say: "Un carré de lino plus clair, à gauche de l'extincteur. Quelque chose a été posé là pendant très longtemps. Puis plus rien. Ça a laissé une trace en forme de pot."
+    use: "Je m'accroupis. Le lino est tiède. Quelqu'un attendait ici. Ou quelque chose. En pot."
+    useItem:
+      plante:
+        - if: { notFlags: [st_couloir_boucle] }
+          say: "Poser M. Ficus ici ? Pourquoi ? Le couloir n'a encore rien fait de suspect. Enfin, à part exister."
+          stop: true
+        - say: "narrateur: Gary pose M. Ficus sur le carré de lino, à gauche de l'extincteur. Pile dans la trace. Comme s'il revenait chez lui."
+          take: plante
+          set: st_plante_posee
+        - say: "Un repère sans formulaire, sans tampon, sans avis. Le couloir peut toujours boucler. Lui, il ne bougera pas."
+        - say: "bob: Maintenant, pousse une porte, Gary. Et regarde bien où il est quand on revient."
+          mood: love
+    useItemDefault: "Il faut un repère qui ne suive aucune procédure. Ça, ça en suit forcément une."
+
+  # M. Ficus posé : repère ; « suivre la plante » (Ink) jusqu'au dénouement
+  - id: ficus
+    label: M. Ficus
+    if: { flags: [st_plante_posee], notFlags: [st_couloir_resolu] }
+    rect: [290, 320, 130, 150]
+    art:
+      - { rect: [320, 340, 70, 120], color: "#3e8f4a", stroke: "#2a2830", text: "FICUS", size: 12 }
+    look:
+      - say: "M. Ficus, posé à gauche de l'extincteur. En plastique. Immobile. Indifférent. Le seul objet de l'Aile B qui sait où il est."
+    use:
+      - dialogue: st_couloir_suivre
+    talk: "Monsieur Ficus ? ...Il ne répond pas. Il ne répond jamais. C'est ce qui le rend si fiable."
+
+  # le payoff : casier gris « STOCK B-7/12 » au bout du couloir
+  - id: casier
+    label: Casier « STOCK B-7/12 »
+    sfx: clonk
+    rect: [1100, 190, 120, 250]
+    art:
+      - { rect: [1105, 195, 110, 240], color: "#7c8794", stroke: "#2a2830", text: "STOCK\nB-7/12", size: 14 }
+    look:
+      - if: { flags: [st_formulaire] }
+        say: "Le casier « STOCK B-7/12 », vide. Une étiquette neuve : « RÉASSORT PRÉVU ». Je sais ce que ça veut dire, maintenant."
+        stop: true
+      - if: { flags: [st_couloir_resolu] }
+        say: "Un casier gris, porte entrouverte, étiquette : « STOCK B-7/12 — DERNIER EXEMPLAIRE ». Depuis que le couloir est droit, il est enfin à la bonne distance : à portée de main."
+        stop: true
+      - say: "Un casier gris au bout du couloir : « STOCK B-7/12 ». Le dernier formulaire est là. À trois pas. Depuis quarante et un ans, à trois pas."
+    use:
+      - if: { flags: [st_formulaire] }
+        say: "Vide. J'ai vérifié deux fois. Puis une troisième, pour le principe."
+        stop: true
+      - if: { flags: [st_couloir_resolu] }
+        dialogue: st_couloir_formulaire
+        give: formulaire
+        set: st_formulaire
+        stop: true
+      - say: "narrateur: Gary tend la main vers le casier. Il fait un pas. Le casier est à trois pas. Il fait trois pas. Le casier est à trois pas."
+      - say: "Le couloir boucle même à l'échelle d'un bras. Il faut le dénouer d'abord."
+    useItem:
+      badge: "« BADGE NON HABILITÉ — STOCK ». Je m'en doutais. Et puis le casier est à trois pas, de toute façon."
+      fragment: "L'éclat sur le casier ? Je risque d'obtenir quatre mille quatre-vingt-seize formulaires B-7/12. Et un seul serait le bon."
+
+  - id: bob
+    label: B.O.B.
+    rect: [650, 415, 150, 80]
+    art:
+      - { rect: [655, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+    look: "B.O.B. scanne le couloir. Ses capteurs comptent les portes. Ils en comptent trois. Puis trois. Puis trois."
+    talk:
+      - dialogue: st_bob_couloir
+    useItem:
+      plante: "bob: Pas à moi, Gary. Au couloir. À côté de quelque chose qui ne bouge jamais."
+      formulaire: "bob: Ne me le donne pas, Gary. Je risque de l'aspirer par émotion."
+    useItemDefault:
+      - say: "bob: Je ne suis pas un repère, Gary. Je bouge. C'est même mon principal défaut."
+        mood: sad
+
+exits:
+  - id: vers_guichet
+    label: Guichet d'Accueil
+    to: st-guichet
+    dir: left
+    rect: [10, 140, 100, 320]

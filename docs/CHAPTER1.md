@@ -498,12 +498,43 @@ poser ; re-clic = retirer ; Entrée = déduire). Échap / C / « Ranger » / cli
   - Mme Guichard (guichet ouvert, `st_guichard_ouvert`) tamponne le ticket « VU » et annonce le
     B-7/12 **en rupture** — dernier exemplaire dans l'Aile B, qui exige le B-7/12 → `st_guichard_rupture`.
   - D3 « Formulaire B-7/12 requis » = `guichet_ouvert` + `guichard_rupture` → `st_deduit_formulaire`
-    (indice seulement ; le lecteur de l'Aile B a une réplique nouvelle). Pas de `st-couloir-b`.
+    (le lecteur de l'Aile B a une réplique nouvelle) ; la suite : article 47bis et couloir B (§9.3).
   - B.O.B. (`st_bob_guichet`) gradue : horloge tremblée → « ouvre ton carnet » ; D1 → rapprocher la
     minute et l'éclat ; D2 → « vise l'horloge » ; guichet ouvert → « parle-lui » ; rupture → D3.
 - **Contrôles** : `validate-content` (ids uniques indices + déductions, pictos, conditions, paires
   connues, flags `set` comptés comme posés) ; `playthrough` rejoue la chaîne (étapes `deduce` du
   walkthrough) et vérifie rejet / ordre libre. L'`endFlag` du ch.1 reste `st_guichard_ferme`.
+
+### 9.3 Aile B v1 — fin de l'Acte I (Accueil)
+
+L'Acte I se clôt **en salle**, dans le Couloir Infini B, le Formulaire B-7/12 en main :
+`ChapterDef.endFlag` du ch1 = **`st_formulaire`** (plus `st_guichard_ferme`). Pas d'EndScene :
+`st_stub_fin` (st_fin.ink) reste l'endKnot nominal, réécrit pour cette fin, non joué par une porte.
+
+- **Article 47bis** (`st_guichet.ink`, `st_guichard_47bis`) : après D3 (`st_deduit_formulaire`),
+  parler à Mme Guichard → « en cas de rupture d'un formulaire requis pour accéder au stock dudit
+  formulaire, l'usager peut formuler une demande verbale » → **`st_acces_aile_b`**. Le lecteur passe
+  au vert (« 47BIS ACCÈS OK »), les battants s'entrouvrent ; le hotspot `porte_b` (texte) laisse la
+  place à la sortie **`vers_couloir_b`** (même rect, `dir: up`). Avant : lecteur / porte poussent à
+  reparler à Mme Guichard ; B.O.B. (`st_bob_guichet`) aussi (plus de « pas aujourd'hui »).
+  L'accès ne dépend que du flag : le B-7/12 n'existe que dans l'Aile B (conditions = ET dans le moteur).
+- **`st-couloir-b`** (scène `content/scenes/st-couloir-b.yaml`, Ink `st_couloir_b.ink`, pièce 3D
+  `stCouloirB`) : portes B-1 / B-2 / B-3, extincteur « NE PAS DÉPLACER » (repère), panneau
+  « VOUS ÊTES ICI (ENCORE) », casier « STOCK B-7/12 », retour au guichet. GenAI (gpt-image-2.6-sunburst,
+  `_briefs/aile-b/genai/`) : `public/props/st/{aileb,extincteur,stock}-{fr,en}.jpg`, icône
+  `public/inventory/formulaire.png`.
+  1. Pousser une porte → même couloir, même extincteur → **`st_couloir_boucle`**.
+  2. `plante` sur l'**emplacement** au sol (à gauche de l'extincteur, après la boucle) → −plante,
+     **`st_plante_posee`** ; prop `ficus()` piloté par le hotspot `ficus`.
+  3. Porte (ou M. Ficus) → le couloir glisse (« la plante est une porte plus à gauche ») → « suivre la
+     plante » : 3 choix sticky (tout droit / sortie de secours = boucles ironiques ; vers M. Ficus =
+     **`st_couloir_resolu`**, +plante). Plaques ARCHIVES / TAMPONS / RÉCLAMATIONS + « À SUIVRE », casier ouvert.
+  4. Casier → le dernier **`formulaire`** (+item, **`st_formulaire`**) ; annonce SYLVIE : les bureaux de
+     l'Aile B ouvriront « dès que le règlement le permettra » (cliffhanger d'acte).
+- **Carnet** : indices `acces_47bis`, `couloir_boucle`, `formulaire_trouve` (pas de déduction : le
+  puzzle de la plante suffit). **PLAN** : `st-couloir-b` jouable (visible D3, accès 47bis) ; archives,
+  tampons, réclamations, pause, sous-chef restent `planned`.
+- **Pas encore** : bureaux de l'Aile B, gros plan `st-formulaire` (5 cases), fourrière.
 
 ## 10. Notes techniques (pour plus tard)
 

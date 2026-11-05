@@ -5,7 +5,8 @@
 # Fin provisoire du stub = le dialogue en salle (st_guichard → flag st_guichard_ferme), plus d'EndScene.
 # Puzzle de l'horloge (carnet de déduction) : D1 « la minute manquante » + D2 « l'improbable pousse
 # l'aiguille » (st_deduit_horloge) → éclat sur l'horloge → 10 h 12, `st_guichet_ouvert` (rideau, afficheur 9 848).
-# À venir : formulaire B-7/12, couloir infini B.
+# Après D3 (st_deduit_formulaire) : Mme Guichard cite l'article 47bis → st_acces_aile_b → la porte
+# de l'Aile B devient la sortie `vers_couloir_b` (Couloir Infini B, st-couloir-b). Fin de l'Acte I = st_formulaire.
 id: st-guichet
 title: Guichet d'Accueil
 sector: Station Bureaucratique · Niveau 0 · Accueil
@@ -38,6 +39,8 @@ hotspots:
           dialogue: st_guichard_ouvert
           stop: true
         - dialogue: st_guichard_ticket
+      formulaire:
+        - dialogue: st_guichard_formulaire
       ticket_douane: "Je glisse le ticket de douane sous la vitre. Il ressort aussitôt. « Pas le bon ticket. Pas le bon guichet. Pas la bonne vie. »"
       badge: "« GARRY PLUNK ». Elle lit le badge, puis moi, puis le badge. « Deux R. » Elle a l'air de trouver ça suspect. Moi aussi, maintenant."
       plante: "Je montre M. Ficus. Mme Guichard s'arrête de mâcher une demi-seconde. « Rangez-moi ça. Il n'a pas pris de ticket non plus. »"
@@ -141,10 +144,13 @@ hotspots:
     useItem:
       ticket_9848: "Je pose le ticket 9 848 sur le pupitre. Le pupitre ne réagit pas. Il attend un formulaire. Comme tout le monde ici."
       badge: "Je pourrais remplir mon nom. Avec deux R. Sur rien. Non."
+      formulaire: "Je pose le B-7/12 sur le pupitre. Cinq cases. Le stylo à chaînette n'atteint aucune d'elles. Évidemment. Il faudra le remplir dans l'Aile B."
 
   - id: porte_b
     label: Porte « AILE B »
-    # porte à deux battants au fond, à droite des horaires (les murs latéraux sont hors champ)
+    # porte à deux battants au fond, à droite des horaires (les murs latéraux sont hors champ) ;
+    # avec la demande 47bis (st_acces_aile_b) elle laisse la place à la sortie `vers_couloir_b`
+    if: { notFlags: [st_acces_aile_b] }
     rect: [1085, 165, 120, 265]
     art:
       - { rect: [1090, 170, 110, 255], color: "#5a4a6a", stroke: "#2a2830", text: "AILE B", size: 14 }
@@ -152,6 +158,8 @@ hotspots:
       - say: "Une porte à deux battants : « AILE B — ACCÈS SUR PRÉSENTATION DU FORMULAIRE B-7/12 ». Derrière, un couloir. On entend un écho, puis l'écho de l'écho. Puis le même extincteur, deux fois."
     use:
       - say: "Un lecteur clignote à côté de la poignée : « AILE B — FORMULAIRE B-7/12 REQUIS ». Il lit les formulaires. Il ne lit pas les blattes en combinaison."
+      - if: { flags: [st_deduit_formulaire] }
+        say: "Le formulaire est derrière la porte qui exige le formulaire. Le règlement a forcément prévu un article pour ça. Mme Guichard connaît tous les articles."
     useItem:
       ticket_9848: "Le lecteur avale un coin du ticket, le goûte, et le recrache : « TICKET ≠ FORMULAIRE ». Il a raison. C'est dur, quand les machines ont raison."
       badge: "« BADGE NON HABILITÉ — AILE B ». Comme d'habitude. Mon badge n'a jamais ouvert que des placards."
@@ -188,13 +196,26 @@ hotspots:
     label: Lecteur de formulaire
     rect: [1036, 286, 48, 50]
     look:
+      - if: { flags: [st_formulaire] }
+        say: "Le lecteur affiche « B-7/12 : VU ». La diode est verte. Elle a l'air déçue de ne plus clignoter."
+        stop: true
+      - if: { flags: [st_acces_aile_b] }
+        say: "« AILE B — DEMANDE VERBALE 47BIS : ACCÈS AUTORISÉ JUSQU'À 10 H 14 ». La diode est passée au vert. Elle clignote quand même, par habitude."
+        stop: true
+      - if: { flags: [st_deduit_formulaire] }
+        say: "« AILE B — FORMULAIRE B-7/12 REQUIS ». Le formulaire est derrière la porte qui exige le formulaire. Une boucle. Il y a forcément un article pour en sortir. Mme Guichard les connaît tous."
+        stop: true
       - if: { flags: [st_guichard_rupture] }
         say: "« AILE B — FORMULAIRE B-7/12 REQUIS ». Je sais maintenant où est le dernier B-7/12 : derrière cette porte. Qui exige le B-7/12. La diode clignote. Je crois qu'elle se moque."
         stop: true
       - say: "Un lecteur rouge à côté de la porte : « AILE B — FORMULAIRE B-7/12 REQUIS ». La diode clignote. Elle attend un formulaire depuis tellement longtemps qu'elle a appris le morse."
     use:
+      - if: { flags: [st_acces_aile_b] }
+        say: "Je présente ma demande verbale au lecteur. « 47BIS : VU ». Il bipe. Il n'a jamais bipé. Il a l'air ému."
+        stop: true
       - say: "Un lecteur clignote à côté de la poignée : « AILE B — FORMULAIRE B-7/12 REQUIS ». Il lit les formulaires. Il ne lit pas les blattes en combinaison."
     useItem:
+      formulaire: "Je glisse le B-7/12 dans le lecteur. « B-7/12 : VU ». Il me le rend aussitôt. « VIERGE : NON TRAITÉ ». Il faudra le remplir. Plus tard. Dans l'Aile B."
       ticket_9848: "Le lecteur avale un coin du ticket, le goûte, et le recrache : « TICKET ≠ FORMULAIRE ». Il a raison. C'est dur, quand les machines ont raison."
       badge: "« BADGE NON HABILITÉ — AILE B ». Comme d'habitude. Mon badge n'a jamais ouvert que des placards."
 
@@ -204,3 +225,10 @@ exits:
     to: st-attente
     dir: left
     rect: [10, 140, 100, 320]
+  # porte de l'Aile B (même rect que le hotspot porte_b, masqué) : ouverte par la demande verbale 47bis
+  - id: vers_couloir_b
+    label: Aile B
+    to: st-couloir-b
+    dir: up
+    if: { flags: [st_acces_aile_b] }
+    rect: [1085, 165, 120, 265]

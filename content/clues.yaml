@@ -110,3 +110,28 @@ clues:
     text:
       fr: "Le Formulaire B-7/12 est en rupture depuis 1985. Le dernier exemplaire est parti dans l'Aile B. Il faut le formulaire pour entrer dans l'Aile B."
       en: "Form B-7/12 has been out of stock since 1985. The last copy went into Wing B. You need the form to get into Wing B."
+
+  # Aile B (fin de l'Acte I) : indices de contexte, pas de déduction obligatoire (le puzzle plante suffit)
+  - id: acces_47bis
+    icon: stamp
+    when: { flags: [st_acces_aile_b] }
+    title: { fr: "Article 47bis : demande verbale", en: "Article 47bis: verbal request" }
+    text:
+      fr: "En cas de rupture d'un formulaire requis pour accéder au stock dudit formulaire, l'usager peut formuler une demande verbale. Enregistrée. Valable jusqu'à 10 h 14."
+      en: "Should a form required to access the stock of said form be out of stock, the customer may make a verbal request. Recorded. Valid until 10:14."
+
+  - id: couloir_boucle
+    icon: map
+    when: { flags: [st_couloir_boucle] }
+    title: { fr: "Le Couloir B boucle", en: "Corridor B loops" }
+    text:
+      fr: "Trois portes, un extincteur « NE PAS DÉPLACER ». On passe la B-3 et on revient à la B-1. Le même extincteur. Il faudrait un repère qui ne suive aucune procédure."
+      en: "Three doors, one “DO NOT MOVE” extinguisher. Go through B-3 and you're back at B-1. Same extinguisher. I need a landmark that follows no procedure."
+
+  - id: formulaire_trouve
+    icon: form
+    when: { flags: [st_formulaire] }
+    title: { fr: "Le dernier B-7/12", en: "The last B-7/12" }
+    text:
+      fr: "Trouvé dans le casier « STOCK B-7/12 », une fois le couloir dénoué par M. Ficus. Vierge. Cinq cases. Les bureaux de l'Aile B ouvriront « dès que le règlement le permettra »."
+      en: "Found in the “B-7/12 STOCK” locker once Mr Ficus untangled the corridor. Blank. Five boxes. The Wing B offices will open “as soon as regulations allow”."
