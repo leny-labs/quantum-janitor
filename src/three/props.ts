@@ -922,7 +922,9 @@ export const SABOT_URL = `${import.meta.env.BASE_URL}props/st/sabot.png`;
 export const SABOT_ASPECT = 772 / 1024;
 /**
  * Mme Odile Guichard derrière l'hygiaphone, accoudée au comptoir, sandwich en main (GenAI, coupée
- * à la ligne du comptoir ; _briefs/guichet/genai). Planche 2 cellules : 0 repos · 1 parle.
+ * à la ligne du comptoir ; v3 OpenAI gpt-image-2.6-sunburst, buste réduit avec marge transparente,
+ * badge « Mme Guichard » ; _briefs/guichet/genai/v3/build.py). Planche 2 cellules : 0 repos · 1 parle
+ * (visage parlant recollé sur la frame repos : pas de scintillement à la bascule).
  */
 export const GUICHARD_URL = `${import.meta.env.BASE_URL}props/st/guichard.png`;
 export const GUICHARD_SHEET = `${import.meta.env.BASE_URL}props/st/guichard-sheet.png`;

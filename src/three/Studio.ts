@@ -83,7 +83,7 @@ export const overlayUrl = (id: string) => `portraits/${id}-robot.png`;
  * + planche `sheetUrl(id)` au layout SHEET, qui prime dès qu'elle est chargée
  * (Frère Élytre : _briefs/ch1/genai-fix/faces.py — mandibules qui s'écartent en
  * parlant, jamais de bouche). M. Sabot : planche GenAI (clignement, agacé, bouche sous la moustache).
- * Mme Guichard (guichet) : même flux que Sabot (visage img2img recollé sur le buste, sandwich fixe).
+ * Mme Guichard (guichet) : planche v3 tirée d'une grille GenAI 3 × 2 (docs/PORTRAIT_GENAI.md).
  */
 const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png', sabot: 'portraits/sabot-portrait.png', guichard: 'portraits/guichard-portrait.png' };
 

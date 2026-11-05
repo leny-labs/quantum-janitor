@@ -708,11 +708,16 @@ export const stGuichet: RoomBuild = {
     back.add(lamp);
     s.add(back);
     const g = s.fit(s.rect('guichard'), zg);
+    // Buste réduit + assise un peu plus bas : la tête reste sous le rideau, les épaules loin des
+    // montants. Le cadre du sprite garde sa hauteur (≈ 3,15) mais la planche v3 laisse une marge
+    // transparente : buste visible ≈ 71 % de la hauteur / 67 % de la largeur du cadre (v1 : ≈ 99 %),
+    // soit ≈ 2,24 de haut et ≈ 2,07 de large dans une baie de ≈ 3,49. Base top − 0,08 (v1 : − 0,05).
+    const gBase = top - 0.08;
     const gh = Math.min((g.y + g.h / 2) - (top - 0.05), g.w / GUICHARD_ASPECT);
     const guichard = billboardSheet(GUICHARD_SHEET, 2, gh, GUICHARD_ASPECT, { tint: '#fff2f6', shadow: 0.01 });
     const gs = guichard.userData.sprite as THREE.Sprite;
     const baseSY = gs.scale.y;
-    s.spot('guichard', at(guichard, x1, top - 0.05, zg));
+    s.spot('guichard', at(guichard, x1, gBase, zg));
     s.animate((t) => {
       guichard.userData.setFrame(actorFrame('guichard', GUICHARD_ACTOR, t));
       gs.scale.y = baseSY * (1 + Math.sin(t * 1.1) * 0.006); // respiration de fonctionnaire

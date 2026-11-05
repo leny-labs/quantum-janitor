@@ -25,7 +25,7 @@ hotspots:
     art:
       - { rect: [450, 130, 230, 210], color: "#8a6db0", stroke: "#2a2830", text: "MME GUICHARD", size: 16 }
     look:
-      - say: "Une dame en gilet mauve, chignon gris, lunettes rondes. Badge : « MME O. GUICHARD — RÉCEPTION ». Elle mange un sandwich jambon-beurre avec la lenteur d'une procédure."
+      - say: "Une dame en gilet mauve, chignon gris, lunettes rondes. Badge : « MME GUICHARD ». Elle mange un sandwich jambon-beurre avec la lenteur d'une procédure."
       - say: "Le sandwich a l'air plus vieux que moi. Elle a l'air plus patiente que M. Patience. Et lui, il est mort."
     use: "Je tapote la vitre. Mme Guichard lève les yeux, me regarde comme on regarde un formulaire mal rempli, et reprend une bouchée."
     talk:

@@ -337,3 +337,21 @@ Le mécanisme d'humeur existe (voir « SYLVIE » : tag `# mood:`, clé YAML `moo
 sceptique, content, agacé, réfléchit) : il faudrait une planche plus grande (ou une planche
 par humeur, avec bouche), étendre `MOODS` dans `src/engine/mood.ts` et ajouter `gary` à
 `PORTRAIT_MOODS`.
+
+## Mme Guichard — planche GenAI v3 (grille 3 × 2)
+
+Une seule génération OpenAI `gpt-image-2.6-sunburst` (edit, réf. = ancien portrait) en
+**grille 3 × 2** de cellules carrées 512 px, fond navy uni : même cadrage, seuls yeux / bouche
+changent. Badge « Mme Guichard ».
+
+| | col 0 | col 1 | col 2 |
+|---|---|---|---|
+| **idle** | neutre blasée | clignement | yeux au ciel |
+| **talk** | mi-ouvert | grand ouvert | « o » |
+
+`_briefs/guichet/genai/v3/build.py` (hors repo) découpe la grille et la remappe sur le layout
+`SHEET` 4 × 2 @256 : `[0, 1, 0, 2 | 3, 4, 5, 3]` → `public/portraits/guichard-sheet.png`
+(1024 × 512) ; cellule 0 → `guichard-portrait.png` (512 × 512). Le même script produit le
+billboard du guichet (`public/props/st/guichard-sheet.png`, 2 cellules 753 × 768 : repos /
+parle — visage parlant recollé sur la frame repos), que `actorFrame('guichard', …)` bascule
+pendant ses répliques.
