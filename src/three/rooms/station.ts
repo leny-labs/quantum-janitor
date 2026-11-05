@@ -511,8 +511,27 @@ const SANDWICH_SHELF_ASPECT = 412 / 341;
 /** Cuillère du plateau abandonné : même PNG GenAI que l'icône d'inventaire (256 × 238). */
 const SPOON_URL = `${import.meta.env.BASE_URL}inventory/cuillere.png`;
 const SPOON_ASPECT = 256 / 238;
-/** Tassement vertical du billboard (cuillère couchée sur le plateau, vue de ¾ haut). */
-const SPOON_FLAT = 0.55;
+/** Assiette de cantine GenAI vue de dessus (gpt-image-2.6-sunburst, détourée en disque 512²) :
+ *  purée grise, viande mystère en sauce figée, petits pois flétris. Brut : `assets/st-assiette-raw.png`. */
+const PLATE_URL = `${import.meta.env.BASE_URL}props/st/assiette.png`;
+
+/** Décalque GenAI posé à plat (face vers le haut), texture partagée par URL ; pas d'ombre portée
+ *  (le cadre transparent ferait une ombre carrée). `round` : disque (UV du carré inscrit). */
+const flatMaps = new Map<string, THREE.Texture>();
+function flatDecal(url: string, w: number, h: number, round = false): THREE.Mesh {
+  let map = flatMaps.get(url);
+  if (!map) {
+    map = new THREE.TextureLoader().load(url);
+    map.colorSpace = THREE.SRGBColorSpace;
+    map.anisotropy = 8;
+    flatMaps.set(url, map);
+  }
+  const geo = round ? new THREE.CircleGeometry(w / 2, 48) : new THREE.PlaneGeometry(w, h);
+  geo.rotateX(-Math.PI / 2);
+  const m = new THREE.Mesh(geo, new THREE.MeshToonMaterial({ map, transparent: true, alphaTest: 0.35, polygonOffset: true, polygonOffsetFactor: -2 }));
+  m.receiveShadow = true;
+  return m;
+}
 
 /**
  * 2 bis. Cafétéria d'accueil (porte au fond de la Salle d'Attente). Lieu d'ambiance, sans puzzle :
@@ -526,9 +545,9 @@ export const stCafeteria: RoomBuild = {
     vitrine: { px: [470, 300], fill: 1.05, orbit: -5, fov: 38 },
     comptoir: { fill: 0.9, orbit: -4 },
     cafe: { px: [1030, 290], fill: 0.85, orbit: 3 },
-    // plateau abandonné : gobelet + cuillère ; la cuillère se prend d'un clic dans le plan.
+    // couvert abandonné : assiette GenAI, verre, cuillère ; la cuillère se prend d'un clic dans le plan.
     // Cadrage explicite (le rayon auto du rect tombe tantôt sur la table, tantôt sur le sol du fond)
-    tables: { cam: { pos: [3.66, 1.66, 4.0], look: [4.72, 0.9, 2.8], fov: 38 }, picks: ['cuillere'] },
+    tables: { cam: { pos: [4.4, 2.08, 3.5], look: [5.14, 0.96, 2.64], fov: 38 }, picks: ['cuillere'] },
   },
   build(s) {
     shell(s, { floor: { a: '#6a5a44', b: '#e0d6bc', joint: '#4a3e30', tile: 0.6 }, wall: { top: '#d2c39a', bottom: '#8a7a58' }, trim: '#5a4630', left: -9, right: 9 });
@@ -665,16 +684,37 @@ export const stCafeteria: RoomBuild = {
       st.add(at(cyl(0.22, 0.22, 0.07, '#b5562a', { seg: 18 }), 0, tH * 0.62, 0), at(cyl(0.04, 0.04, tH * 0.62, '#8d93a0', { edges: false }), 0, tH * 0.31, 0));
       tables.add(at(st, sx * tR * 1.15, 0, sz));
     }
-    const tray = at(box(0.55, 0.025, 0.38, '#cfc6a6'), -0.05, tH + 0.045, 0.05);
-    tray.rotation.y = 0.3;
-    tables.add(tray, at(cyl(0.06, 0.045, 0.14, '#f6efdc', { seg: 12 }), 0.08, tH + 0.13, 0.05));
+    // couvert abandonné, posé à plat sur le dessus (y = topY) : assiette au centre, cuillère à sa
+    // droite et verre derrière à droite, vus depuis le plan d'examen (caméra à l'avant-gauche).
+    // Axes « écran » du plan `tables` au sol : droite ≈ (0.75, 0.66), profondeur ≈ (0.66, −0.75).
+    const topY = tH + 0.03;
+    const R = [0.75, 0.66] as const;
+    const F = [0.66, -0.75] as const;
+    const px = -0.1, pz = 0.08;
+    const rimR = 0.2;
+    const plateH = 0.022;
+    const plate = new THREE.Group();
+    plate.add(at(cyl(rimR, rimR * 0.72, plateH, '#ece6d6', { seg: 40 }), 0, plateH / 2, 0));
+    plate.add(at(flatDecal(PLATE_URL, rimR * 2 * 0.995, 0, true), 0, plateH + 0.001, 0));
+    tables.add(at(plate, px, topY, pz, 0.4));
+    // verre de cantine (Duralex) debout sur la table, un fond d'eau tiède
+    const gR = 0.048, gH = 0.13;
+    const glass = new THREE.Group();
+    glass.add(at(cyl(gR, gR * 0.84, gH, '#cfe8f2', { seg: 16, opacity: 0.42, edges: true }), 0, gH / 2, 0));
+    glass.add(at(cyl(gR * 0.9, gR * 0.8, gH * 0.45, '#9fc7d6', { seg: 16, opacity: 0.55, edges: false }), 0, gH * 0.24, 0));
+    glass.add(at(cyl(gR * 0.86, gR * 0.86, 0.008, '#e9f6fb', { seg: 16, opacity: 0.6, edges: false }), 0, 0.004, 0));
+    const gd = rimR + 0.09;
+    tables.add(at(glass, px + R[0] * gd * 0.8 + F[0] * gd * 0.75, topY, pz + R[1] * gd * 0.8 + F[1] * gd * 0.75));
     s.spot('tables', at(tables, tr_.x, 0, tr_.z));
-    // cuillère en plastique beige sur le plateau (GenAI `inventory/cuillere.png`, la même image que
-    // l'icône d'inventaire ; hotspot `cuillere`, ramassable dans le plan d'examen des tables)
-    // billboard tassé en hauteur : posée à plat, vue de ¾ par la caméra de la pièce
-    const spoonW = 0.34;
-    const spoon = billboard(SPOON_URL, (spoonW / SPOON_ASPECT) * SPOON_FLAT, SPOON_ASPECT / SPOON_FLAT, { tint: '#ffffff', shadow: 0.12 });
-    s.spot('cuillere', at(spoon, tr_.x - 0.22, tH + 0.06, tr_.z + 0.32));
+    // cuillère en plastique beige couchée à plat à droite de l'assiette (GenAI `inventory/cuillere.png`,
+    // la même image que l'icône d'inventaire ; hotspot `cuillere`, ramassable dans le plan d'examen).
+    // L'image a la cuillère en diagonale (manche bas-gauche → cuilleron haut-droit) : à plat, elle
+    // pointe donc déjà vers le fond ; petit quart de tour pour qu'elle longe le bord de l'assiette.
+    const spoonW = 0.25;
+    const spoon = flatDecal(SPOON_URL, spoonW, spoonW / SPOON_ASPECT);
+    spoon.rotation.y = 0.3;
+    const sd = rimR + 0.11;
+    s.spot('cuillere', at(spoon, tr_.x + px + R[0] * sd, topY + 0.002, tr_.z + pz + R[1] * sd, 0.3));
 
     bobHere(s);
 
