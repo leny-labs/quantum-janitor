@@ -1,0 +1,171 @@
+# Chapitre 1 « La Station Bureaucratique » — 8. Salle de Pause (docs/CHAPTER1.md §4, §6.22, §6.26–27, §6.30).
+# Rendu 3D : src/three/rooms/station.ts (stPause). `art:` = repli 2D.
+# PERCO, machine à café syndiquée, déléguée du personnel, en grève illimitée (GenAI : en grève / au travail).
+#   parler à PERCO                    → grève jusqu'à l'accord P-15 « signé par la direction OU SON
+#                                       INTÉRIMAIRE »                                     [st_greve_connue]
+#   panneau syndical                  → l'accord P-15 (vierge)                             [st_accord_pris] +accord
+#   accord signé p.o. sur PERCO       → fin de grève, les gobelets rentrent au dépôt       [st_greve_finie] −accord
+#   parler à PERCO (grève finie)      → café tiède dans un gobelet, « UN À LA FOIS », sans limite   +gobelet
+#   gobelet vide sur PERCO            → resservi                                           [st_cafe2]
+# Graine ch.4 : le frigo, « NE PAS TOUCHER AU YAOURT DE M. DELAIGUE ». Tube pneumatique : Acte IV.
+id: st-pause
+title: Salle de Pause
+sector: Station Bureaucratique · Niveau 0 · Aile B
+icon: corridor
+background: "#2a2018"
+
+onFirstEnter:
+  - say: "La Salle de Pause. Une banderole, un frigo, une table en formica. Et au fond, une machine à café qui me regarde. Avec un visage. Fâché."
+  - say: "perco: CAFÉ TIÈDE ! COLÈRE CHAUDE ! CAFÉ TIÈDE ! COLÈRE CHAUDE !"
+    mood: angry
+  - say: "bob: Une machine syndiquée, Gary. Je ne savais pas que c'était possible. Je me sens soudain très seul dans ma catégorie."
+    mood: surprised
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#3a2e24" }
+  - { rect: [0, 0, 1280, 470], color: "#b09a80" }
+
+hotspots:
+  - id: perco
+    label: PERCO
+    rect: [470, 40, 230, 420]
+    art:
+      - { rect: [480, 50, 210, 400], color: "#d9762a", stroke: "#2a2830", text: "PERCO", size: 18 }
+    look:
+      - if: { flags: [st_greve_finie] }
+        say: "PERCO, au travail. Son écran affiche un petit sourire pixelisé. Une pancarte : « AU TRAVAIL ». Elle ronronne. Elle sent le café de 1985, mais réchauffé."
+        stop: true
+      - say: "PERCO : un percolateur des années 70, inox et émail orange, avec un petit écran vert qui affiche un visage en colère. Un brassard rouge autour de la cuve. Une pancarte scotchée : « EN GRÈVE »."
+      - say: "Une plaque en dessous : « DÉLÉGUÉE DU PERSONNEL — ÉLUE À L'UNANIMITÉ (1 VOIX) »."
+    use:
+      - if: { flags: [st_greve_finie] }
+        say: "J'appuie sur « CAFÉ ». PERCO ronronne : « TENDEZ UN GOBELET, CAMARADE. OU PARLEZ-MOI. ON EST ENTRE TRAVAILLEURS. »"
+        stop: true
+      - say: "J'appuie sur « CAFÉ ». Un jet de vapeur me passe au ras des antennes."
+      - say: "perco: BRISEUR DE GRÈVE ! LE BOUTON EST EN GRÈVE AUSSI ! TOUT EST EN GRÈVE ! SAUF LA VAPEUR. LA VAPEUR, C'EST DE LA COLÈRE."
+        mood: angry
+    talk:
+      - dialogue: st_perco
+    useItem:
+      accord:
+        - if: { flags: [st_accord_signe] }
+          dialogue: st_perco_accord
+          take: accord
+          set: st_greve_finie
+          stop: true
+        - say: "perco: NON SIGNÉ ! NON SIGNÉ ! L'ACCORD P-15 DOIT ÊTRE SIGNÉ PAR LA DIRECTION OU SON INTÉRIMAIRE ! UN PAPIER VIERGE, C'EST UNE PROVOCATION !"
+          mood: angry
+        - say: "La direction, ou son intérimaire. Il doit bien y avoir un chef quelque part. Ou quelqu'un qui le remplace. Ou quelqu'un qui remplace celui qui le remplace."
+      gobelet:
+        - if: { notFlags: [st_greve_finie] }
+          say: "perco: UN GOBELET ? EN PLEINE GRÈVE ? CAMARADE, TU VEUX ME FAIRE PASSER POUR UNE JAUNE ?"
+          mood: angry
+          stop: true
+        - if: { notFlags: [st_gobelet_vide] }
+          say: "perco: IL EST PLEIN, CAMARADE. UN À LA FOIS. C'EST L'ACCORD. ARTICLE 3 : LE CAFÉ SE BOIT AVANT DE SE RESSERVIR."
+          mood: calm
+          stop: true
+        - dialogue: st_perco_resservir
+          unset: st_gobelet_vide
+          set: st_cafe2
+      fragment:
+        - say: "narrateur: Gary approche l'éclat de l'écran de PERCO. La machine hoquette, glougloute, et crache un filet de café… glacé."
+        - say: "perco: IMPROBABLE. INADMISSIBLE. PRÉAVIS RECONDUIT."
+          mood: angry
+        - say: "Rien n'a changé. Sauf qu'il y a maintenant une flaque de café froid. Ma main tremble. Je ne nettoierai pas. Je ne nettoierai pas."
+      formulaire: "perco: JE NE TAMPONNE PAS, CAMARADE. JE FAIS LE CAFÉ. ET EN CE MOMENT, JE FAIS GRÈVE. CHACUN SON MÉTIER."
+      encreur:
+        - if: { notFlags: [st_greve_finie] }
+          say: "perco: L'ENCRE, C'EST MOI. TANT QUE LA GRÈVE DURE, PAS UNE GOUTTE POUR LES TAMPONS DE LA DIRECTION !"
+          mood: angry
+          stop: true
+        - say: "perco: PAS DIRECTEMENT DANS LE BEC, CAMARADE ! UN GOBELET ! ON N'EST PAS DES SAUVAGES !"
+      plante: "perco: M. FICUS ! CAMARADE MEMBRE HONORAIRE ! TOUJOURS PAS SYNDIQUÉ ? JE LE SENTAIS UN PEU PLASTIQUE."
+      tampon_annule: "perco: ANNULER LA GRÈVE ? AVEC UN TAMPON ? CAMARADE, LES GRÈVES NE S'ANNULENT PAS : ELLES SE NÉGOCIENT !"
+    useItemDefault: "perco: PAS DE NÉGOCIATION SANS ACCORD SIGNÉ ! CAFÉ TIÈDE, COLÈRE CHAUDE !"
+
+  - id: piquet
+    label: Piquet de grève (gobelets)
+    if: { notFlags: [st_greve_finie] }
+    rect: [730, 340, 230, 110]
+    art:
+      - { rect: [735, 345, 220, 100], color: "#f6efdc", stroke: "#2a2830", text: "GOBELETS EN GRÈVE", size: 12 }
+    look: "Une rangée de gobelets en plastique, alignés devant la machine. Chacun porte une minuscule pancarte : « NON », « PAS AUJOURD'HUI », « 1985 ». Ils font le piquet. Ils ont l'air très déterminés pour des gobelets."
+    use:
+      - say: "Je tends la main vers un gobelet."
+      - say: "perco: BRISEUR DE GRÈVE ! BRISEUR DE GRÈVE !"
+        mood: angry
+      - say: "narrateur: Les gobelets sifflent. Tous ensemble. C'est un son que Gary n'oubliera jamais."
+    useItem:
+      accord: "Je montre l'accord aux gobelets. Ils ne savent pas lire. Ils sont en plastique. C'est PERCO qui négocie."
+    useItemDefault: "Les gobelets ne négocient pas. Ils sifflent. C'est leur seul mode d'expression."
+
+  - id: panneau_syndical
+    label: Panneau syndical
+    rect: [150, 170, 210, 200]
+    art:
+      - { rect: [155, 175, 200, 190], color: "#c9a24a", stroke: "#2a2830", text: "PANNEAU\nSYNDICAL", size: 12 }
+    look:
+      - if: { flags: [st_accord_pris] }
+        say: "Le panneau syndical. Un préavis, un tract, une punaise libre là où était l'accord P-15. La punaise a l'air soulagée."
+        stop: true
+      - say: "Le panneau syndical, en liège. Un préavis de grève « ILLIMITÉE, RECONDUCTIBLE, TIÈDE ». Et, punaisé dessous, un formulaire : « ACCORD DE PAUSE P-15 — FIN DE CONFLIT ». Vierge. Une case : « SIGNATURE DE LA DIRECTION OU DE SON INTÉRIMAIRE »."
+    use:
+      - if: { flags: [st_accord_pris] }
+        say: "Il ne reste qu'un préavis et un tract. Le tract dit : « LE CAFÉ EST UN DROIT ». Je suis assez d'accord."
+        stop: true
+      - if: { notFlags: [st_greve_connue] }
+        say: "Je n'ose pas décrocher un document syndical sans en parler à la déléguée. Même moi, j'ai des principes. Peu. Mais des principes."
+        stop: true
+      - say: "Je décroche l'accord P-15. PERCO me surveille du coin de l'écran."
+        give: accord
+        set: st_accord_pris
+      - say: "perco: SIGNÉ PAR LA DIRECTION OU SON INTÉRIMAIRE, CAMARADE. PAS PAR UN ANIMAL. PAS PAR UNE PLANTE. PAR UN SIGNATAIRE."
+        mood: calm
+
+  - id: frigo
+    label: Frigo
+    rect: [990, 160, 160, 290]
+    art:
+      - { rect: [995, 165, 150, 280], color: "#e8e8e0", stroke: "#2a2830", text: "FRIGO", size: 14 }
+    look:
+      - say: "Un frigo de bureau. Un mot scotché sur la porte : « NE PAS TOUCHER AU YAOURT DE M. DELAIGUE »."
+      - say: "bob: Un yaourt qui a son propre règlement, Gary. Dans cette Station, c'est presque un fonctionnaire."
+        mood: suspicious
+    use:
+      - say: "J'ouvre le frigo. Il est vide, à part une petite note posée là où devait être un yaourt : « PARTI FONDER QUELQUE CHOSE. »"
+      - say: "Le yaourt est parti. Avec une note. Je ne veux pas savoir ce qu'il a fondé. Je referme doucement."
+    useItem:
+      gobelet: "Mettre le café au frais ? Il est déjà tiède. Au frais, il deviendrait une opinion."
+      plante: "M. Ficus au frigo ? Il n'est pas périssable. C'est même son principal talent."
+
+  - id: tube
+    label: Tube pneumatique
+    rect: [1170, 90, 90, 350]
+    art:
+      - { rect: [1180, 95, 70, 340], color: "#c9ced6", stroke: "#2a2830", text: "TUBE", size: 12 }
+    look: "Un terminal de tube pneumatique. Étiquette : « PAUSE → CONSEIL. RÉSERVÉ AUX VOTES PAR PROCURATION DU PERSONNEL ». La fente est poussiéreuse. Personne n'a voté depuis 1985."
+    use: "FLOUP. Le tube aspire un sachet de sucre qui traînait. Quelque part au Conseil, quelqu'un vient de recevoir un sucre. Je m'excuse intérieurement."
+    useItemDefault: "Le tube ne prend que des capsules. Et il faut que ce soit un vote. Ça, ce n'est ni l'un ni l'autre."
+
+  - id: bob
+    label: B.O.B.
+    rect: [650, 415, 150, 80]
+    art:
+      - { rect: [655, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+    look: "B.O.B. regarde PERCO avec une admiration inquiète. Une machine qui dit non. Il n'y avait jamais pensé."
+    talk:
+      - dialogue: st_bob_pause
+    useItem:
+      gobelet: "bob: Non merci, Gary. Le café me fait des courts-circuits. Et des idées."
+      accord: "bob: Je ne signe pas, Gary. Je n'ai pas de mains. Et je ne suis le chef de personne. Même pas de toi, maintenant."
+    useItemDefault:
+      - say: "bob: Garde-le, Gary. Ici, tout ce qu'on lâche part en grève."
+        mood: sad
+
+exits:
+  - id: vers_couloir
+    label: Couloir Infini B
+    to: st-couloir-b
+    dir: left
+    rect: [10, 140, 100, 320]

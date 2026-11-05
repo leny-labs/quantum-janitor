@@ -34,6 +34,11 @@ export function repairState(state: GameState): void {
   // la liasse part dans le bac de la photocopieuse (st_papier) et devient les copies
   if (state.hasFlag('st_papier') && state.hasItem('liasse')) state.take('liasse');
   if (state.hasFlag('st_papier') && !state.hasFlag('st_case_a') && !state.hasItem('copies_dossier')) state.give('copies_dossier');
+  // Acte III : l'accord part chez PERCO avec la fin de grève ; l'encreur reste chez Tamponnet
+  if (state.hasFlag('st_greve_finie') && state.hasItem('accord')) state.take('accord');
+  if (state.hasFlag('st_accord_pris') && !state.hasFlag('st_greve_finie') && !state.hasItem('accord')) state.give('accord');
+  if (state.hasFlag('st_tamponnet_encre') && state.hasItem('encreur')) state.take('encreur');
+  if (state.hasFlag('st_encreur_pris') && !state.hasFlag('st_tamponnet_encre') && !state.hasItem('encreur')) state.give('encreur');
   // le formulaire ne quitte jamais l'inventaire avant le dépôt au guichet
   if (state.hasFlag('st_formulaire') && !state.hasFlag('st_dossier_depose') && !state.hasItem('formulaire')) state.give('formulaire');
 }

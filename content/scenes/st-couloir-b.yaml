@@ -8,7 +8,8 @@
 # Entrée : porte de l'Aile B du guichet (article 47bis, st_acces_aile_b). Une fois le couloir dénoué
 # (st_couloir_resolu), les hotspots porte_b1/b2/b3 laissent la place aux sorties (même rect) vers les
 # Archives (st-archives), les Tampons (st-tampons) et les Réclamations (st-reclamations) — Acte II.
-# Pause, sous-chef, ascenseur : plus loin dans l'Aile B, « À SUIVRE » (zones `planned` du PLAN).
+# Acte III : deux petites portes B-4 / B-5 apparaissent entre la B-2 et la B-3 (Salle de Pause, Sous-Chef).
+# Ascenseur : au fond, « À SUIVRE » (zone `planned` du PLAN).
 id: st-couloir-b
 title: Couloir Infini B
 sector: Station Bureaucratique · Niveau 0 · Aile B
@@ -80,7 +81,7 @@ hotspots:
       - if: { flags: [st_couloir_resolu] }
         say: "« AILE B — VOUS ÊTES ICI (ENCORE) ». Le petit plan circulaire a l'air vexé. Le couloir, lui, est redevenu droit."
       - if: { flags: [st_couloir_resolu] }
-        say: "Une flèche, plus bas : « SALLE DE PAUSE · SOUS-CHEF ADJOINT · ASCENSEUR À FORMULAIRES → PLUS LOIN ». Un autocollant par-dessus : « À SUIVRE »."
+        say: "Une flèche, plus bas : « ASCENSEUR À FORMULAIRES → AU FOND ». Un autocollant par-dessus : « DOSSIERS COMPLETS AUX TROIS QUARTS UNIQUEMENT — À SUIVRE »."
         stop: true
       - say: "« AILE B — VOUS ÊTES ICI (ENCORE) ». Le plan est un cercle. Le point rouge est sur le cercle. Partout sur le cercle."
       - say: "bob: C'est le panneau le plus honnête de la Station, Gary. Il ne t'a jamais menti. Il t'a juste prévenu trop tard."
@@ -213,3 +214,18 @@ exits:
     dir: up
     if: { flags: [st_couloir_resolu] }
     rect: [930, 160, 130, 270]
+
+  # Acte III : les deux petites portes entre la B-2 et la B-3 (sous le panneau « AILE B »)
+  - id: vers_pause
+    label: Salle de Pause
+    to: st-pause
+    dir: up
+    if: { flags: [st_couloir_resolu] }
+    rect: [672, 215, 100, 205]
+
+  - id: vers_sous_chef
+    label: Sous-Chef Adjoint
+    to: st-sous-chef
+    dir: up
+    if: { flags: [st_couloir_resolu] }
+    rect: [800, 215, 100, 205]

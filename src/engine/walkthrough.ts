@@ -162,10 +162,10 @@ export const CHAPTERS: ChapterDef[] = [
     from: 'ch0',
     // ch.0 fini : éclat contenu, combi de chitine (enfilée dans l'interlude), badge ; B.O.B. suit
     initial: { items: ['badge', 'fragment', 'combi_chitine'], flags: ['st', 'ch0_termine', 'chapitre0_termine', 'bob_suit'] },
-    // knot de fin nominal (EndScene) ; deviendra `st_suite`. Checkpoint actuel : fin de l'Acte II
-    // « Humain, preuves à l'appui », en salle, case A remplie (`endFlag`) : pas de porte `to: fin`
+    // knot de fin nominal (EndScene) ; deviendra `st_suite`. Checkpoint actuel : fin de l'Acte III
+    // « La Grève », en salle, cases A, B, D, C remplies (`endFlag`) : pas de porte `to: fin`
     endKnot: 'st_stub_fin',
-    endFlag: 'st_case_a',
+    endFlag: 'st_case_c',
     steps: [
       { section: 'Interlude — la Capsule de Service CS-07' },
       { look: 'pare_brise' },
@@ -261,6 +261,44 @@ export const CHAPTERS: ChapterDef[] = [
       { go: 'st-couloir-b' },
       { go: 'st-tampons' },
       { useItem: ['formulaire', 'tamponnet'] }, // PAS D'ENCRE, PAS DE VU : la grève (st_sait_greve, teaser Acte III)
+      { section: 'Acte III · la Salle de Pause (PERCO)' },
+      { go: 'st-couloir-b' },
+      { go: 'st-pause' }, // porte B-4
+      { use: 'piquet' }, // BRISEUR DE GRÈVE ! (les gobelets sifflent)
+      { useItem: ['fragment', 'perco'] }, // café froid : PRÉAVIS RECONDUIT (fausse piste, rien ne change)
+      { talk: 'perco' }, // grève jusqu'à l'accord P-15 « par la direction ou son intérimaire » (st_greve_connue)
+      { use: 'panneau_syndical' }, // +accord (st_accord_pris)
+      { useItem: ['accord', 'perco'] }, // NON SIGNÉ ! (rien n'est consommé)
+      { look: 'frigo' }, // graine ch.4 : le yaourt de M. Delaigue
+      { section: 'Acte III · le Sous-Chef Adjoint (M. Delaigue)' },
+      { go: 'st-couloir-b' },
+      { go: 'st-sous-chef' }, // porte B-5
+      { use: 'delaigue' }, // secouer : « …réunion… reportée… »
+      { useItem: ['accord', 'delaigue'] }, // il dort, pas de note lue : Gary n'ose pas
+      { look: 'plaque' }, // « p.i. » depuis dix-neuf ans
+      { look: 'note' }, // « tout intérimaire signe p.o. » (st_voit_delegation)
+      { useItem: ['accord', 'delaigue'] }, // Gary signe p.o. avec le stylo enchaîné (st_accord_signe)
+      { go: 'st-couloir-b' },
+      { section: 'Acte III · fin de la grève, encre au café' },
+      { go: 'st-pause' },
+      { useItem: ['accord', 'perco'] }, // FIN DU CONFLIT (st_greve_finie) −accord
+      { talk: 'perco' }, // café tiède, un à la fois : +gobelet
+      { combine: ['encreur', 'gobelet'] }, // encreur imbibé (st_encreur_cafe), gobelet vide (st_gobelet_vide)
+      { useItem: ['gobelet', 'perco'] }, // resservi (st_cafe2)
+      { go: 'st-couloir-b' },
+      { go: 'st-tampons' },
+      { useItem: ['encreur', 'tamponnet'] }, // CLONK de joie (st_tamponnet_encre) −encreur
+      { useItem: ['formulaire', 'tamponnet'] }, // case B « VU » au café (st_case_b)
+      { section: 'Acte III · signature hiérarchique et trois exemplaires' },
+      { go: 'st-couloir-b' },
+      { go: 'st-sous-chef' },
+      { useItem: ['formulaire', 'delaigue'] }, // il dort : pas de signature
+      { useItem: ['gobelet', 'delaigue'] }, // …PRIME ? Réveillé, il garde le gobelet (st_delaigue_reveille) −gobelet
+      { useItem: ['formulaire', 'delaigue'] }, // case D, signature « p.i. » ; ascenseur et quorum (st_case_d)
+      { talk: 'bob' }, // « en trois exemplaires » : Duplicata
+      { go: 'st-couloir-b' },
+      { go: 'st-archives' },
+      { useItem: ['formulaire', 'photocopieuse'] }, // case C, trois exemplaires certifiés (st_case_c) : fin de l'Acte III
     ],
   },
 ];

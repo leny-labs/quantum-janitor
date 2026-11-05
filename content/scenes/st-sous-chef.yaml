@@ -1,0 +1,152 @@
+# Chapitre 1 « La Station Bureaucratique » — 9. Bureau du Sous-Chef Adjoint (docs/CHAPTER1.md §4, §6.23–25, §6.31–32).
+# Rendu 3D : src/three/rooms/station.ts (stSousChef). `art:` = repli 2D.
+# Un placard à balais reconverti. M. Hubert Delaigue, sous-chef adjoint par intérim, dort sur son fax
+# (GenAI : endormi / réveillé, frame pilotée par `st_delaigue_reveille`).
+#   note de délégation punaisée            → « tout intérimaire signe p.o. »          [st_voit_delegation]
+#   accord sur Delaigue (sans reclassement) → « UN ANIMAL NE SIGNE PAS » (garde-fou §6.24)
+#   accord sur Delaigue (reclassé + note)   → Gary signe « p.o. »                       [st_accord_signe]
+#   gobelet plein sur Delaigue              → « …PRIME ? » réveillé, il garde le gobelet [st_delaigue_reveille] −gobelet
+#   formulaire sur Delaigue (réveillé + VU) → signature hiérarchique, ascenseur, quorum [st_case_d]
+id: st-sous-chef
+title: Bureau du Sous-Chef Adjoint
+sector: Station Bureaucratique · Niveau 0 · Aile B
+icon: bucket
+background: "#22201c"
+
+onFirstEnter:
+  - say: "Le Bureau du Sous-Chef Adjoint. C'est un placard à balais. Un vrai. Avec des balais. On a juste ajouté un bureau, un fax et un monsieur qui dort."
+  - say: "Je me sens chez moi. C'est la première fois depuis Klepsydra-9. Ça m'inquiète un peu."
+  - say: "bob: Il dort, Gary. Il ronfle en rythme avec le fax. Ou c'est le fax qui ronfle en rythme avec lui."
+    mood: calm
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#34302a" }
+  - { rect: [0, 0, 1280, 470], color: "#8a8270" }
+
+hotspots:
+  - id: delaigue
+    label: M. Delaigue
+    rect: [500, 120, 280, 250]
+    art:
+      - { rect: [510, 130, 260, 230], color: "#7c8fa8", stroke: "#2a2830", text: "M. DELAIGUE", size: 16 }
+    look:
+      - if: { flags: [st_delaigue_reveille] }
+        say: "M. Delaigue, réveillé, un gobelet de café à la main. Il a les yeux d'un homme qui vient d'apprendre qu'il existe une prime quelque part. Il n'y en a pas. Mais il est réveillé."
+        stop: true
+      - say: "Un monsieur dégarni, chemise bleu pâle froissée, cravate desserrée, un stylo derrière l'oreille. Il dort assis, la tête renversée, une feuille de fax collée à la joue."
+      - say: "Badge : « H. DELAIGUE ». Il murmure dans son sommeil : « …réunion… »"
+    use:
+      - if: { flags: [st_delaigue_reveille] }
+        say: "Je lui tapote l'épaule. « Oui, oui, je suis là. Enfin, par intérim. » Il boit une gorgée. Il est content. Tiède, mais content."
+        stop: true
+      - say: "Je le secoue doucement par l'épaule."
+      - say: "delaigue: …réunion… reportée… à la prochaine… réunion…"
+      - say: "Il se rendort. Il ne s'est jamais vraiment réveillé. Je crois qu'il faut un argument plus fort qu'une épaule."
+    talk:
+      - dialogue: st_delaigue
+    useItem:
+      accord:
+        - if: { flags: [st_accord_signe] }
+          say: "Il est déjà signé : « p.o. H. Delaigue, par G. Plunk, intérimaire ». Ma première signature officielle. Je l'encadrerais si j'avais un mur."
+          stop: true
+        - if: { notFlags: [st_reclasse] }
+          say: "delaigue: …un animal… ne signe pas… il tamponne… avec la patte…"
+        - if: { notFlags: [st_reclasse] }
+          say: "Même endormi, il connaît le règlement. Je suis classé animal. Il faudrait que je sois quelqu'un d'abord. Sur papier."
+          stop: true
+        - if: { notFlags: [st_voit_delegation] }
+          say: "Je lui glisse l'accord sous la main. Sa main ne bouge pas. Il dort. Je ne vais quand même pas signer à sa place… Enfin, est-ce que j'ai le droit ? Il doit bien y avoir une note quelque part."
+          stop: true
+        - dialogue: st_souschef_signe
+          set: st_accord_signe
+      gobelet:
+        - if: { flags: [st_gobelet_vide] }
+          say: "Je lui agite le gobelet vide sous le nez. Il renifle. « …café… » Il sourit. Il se rendort. Il faut du vrai café. Pas un souvenir de café."
+          stop: true
+        - if: { flags: [st_delaigue_reveille] }
+          say: "delaigue: J'ai déjà le mien, merci. Je le garde. On ne sait jamais quand arrivera la prochaine grève."
+          stop: true
+        - dialogue: st_delaigue_reveil
+          take: gobelet
+          set: st_delaigue_reveille
+      formulaire:
+        - if: { notFlags: [st_delaigue_reveille] }
+          say: "delaigue: …signature… hiérarchique… après la réunion… zzz…"
+        - if: { notFlags: [st_delaigue_reveille] }
+          say: "Il dort. On ne fait pas signer un formulaire hiérarchique à quelqu'un qui dort. Ça, c'est réservé aux accords de pause."
+          stop: true
+        - if: { flags: [st_case_d] }
+          say: "delaigue: Déjà signé, cher collègue. Deux fois, ce serait du zèle. Je n'en ai plus depuis 2006."
+          stop: true
+        - if: { notFlags: [st_case_b] }
+          say: "delaigue: Pas de « VU », pas de signature. Je ne signe que ce qui a été vu. C'est le seul principe qu'il me reste. Allez voir Mme Tamponnet."
+          stop: true
+        - dialogue: st_delaigue_signature
+          set: st_case_d
+      fragment: "Je lui montre l'éclat. Il ouvre un œil. « …c'est une prime ?… » Non. Il le referme. Il a bien raison."
+      plante: "Je pose M. Ficus sur son bureau. Il ne se réveille pas. M. Ficus non plus. Ils ont beaucoup en commun."
+      tampon_annule: "Tamponner « ANNULÉ » sur un sous-chef endormi ? Il risquerait d'être annulé pour de bon. Il a déjà assez de mal à exister."
+    useItemDefault: "delaigue: …réunion… reportée… zzz…"
+
+  - id: note
+    label: Note de délégation
+    smart: look
+    rect: [860, 150, 140, 190]
+    art:
+      - { rect: [865, 155, 130, 180], color: "#f6efdc", stroke: "#2a2830", text: "NOTE", size: 12 }
+    look:
+      - say: "Une note de service, punaisée au-dessus du fax : « EN CAS D'ABSENCE DU SOUS-CHEF ADJOINT (SOMMEIL COMPRIS), TOUT INTÉRIMAIRE DE LA STATION SIGNE P.O. »"
+        set: st_voit_delegation
+      - say: "P.o. : « pour ordre ». Tout intérimaire de la Station. Sommeil compris. Il dort. Je suis intérimaire. Je crois que je viens de devenir quelqu'un d'important. Par intérim."
+      - if: { notFlags: [st_reclasse] }
+        say: "Enfin, je le deviendrai quand je serai reclassé. Pour l'instant, je suis un animal. Les animaux ne signent pas p.o. Ils signent avec la patte."
+
+  - id: plaque
+    label: Plaque de porte
+    smart: look
+    rect: [290, 150, 170, 90]
+    art:
+      - { rect: [295, 155, 160, 80], color: "#c9a24a", stroke: "#2a2830", text: "H. DELAIGUE p.i.", size: 12 }
+    look:
+      - say: "Une plaque en laiton : « H. DELAIGUE — SOUS-CHEF ADJOINT p.i. ». Par intérim. Depuis dix-neuf ans. Le chef qu'il remplace est absent depuis 1987. Personne n'a jamais su quel chef."
+      - say: "bob: Il est intérimaire, Gary. Comme toi. Tu vois ? Tu n'es pas seul. Tu es juste mal entouré."
+        mood: love
+
+  - id: fax
+    label: Fax
+    rect: [560, 360, 180, 70]
+    art:
+      - { rect: [565, 365, 170, 60], color: "#5a5f6a", stroke: "#2a2830", text: "FAX", size: 12 }
+    look: "Le fax. Il ronronne sous la joue de M. Delaigue. De temps en temps, il imprime une feuille : « RÉUNION REPORTÉE ». Puis une autre : « RÉUNION REPORTÉE (SUITE) »."
+    use: "J'appuie sur « RÉCEPTION ». Le fax imprime : « RÉUNION REPORTÉE À LA PROCHAINE RÉUNION ». M. Delaigue sourit dans son sommeil. C'est sa berceuse."
+
+  - id: balais
+    label: Balais
+    rect: [1040, 130, 150, 320]
+    art:
+      - { rect: [1045, 135, 140, 310], color: "#8a6a3a", stroke: "#2a2830", text: "BALAIS", size: 12 }
+    look:
+      - say: "Des balais, une pelle, un seau rouge, une serpillière accrochée. Ce n'est pas Josiane. Je le sais. Elle le sait. On fait comme si de rien n'était."
+      - say: "Ma main tremble un peu. Zéro nettoyage. J'ai promis. Zéro."
+    use: "Je ne touche pas aux balais. Si je commence, je ne m'arrêterai pas, et la Station a besoin de moi pour autre chose. Pour une fois."
+
+  - id: bob
+    label: B.O.B.
+    rect: [650, 415, 150, 80]
+    art:
+      - { rect: [655, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+    look: "B.O.B. s'est garé à côté du seau. Il a l'air de s'y sentir bien. C'est un placard à balais : c'est un peu chez lui aussi."
+    talk:
+      - dialogue: st_bob_souschef
+    useItem:
+      gobelet: "bob: Pas pour moi, Gary. Pour lui. Les sous-chefs se réveillent au café. Les aspirateurs, à la poussière."
+    useItemDefault:
+      - say: "bob: Je ne signe rien, Gary. Je n'ai jamais été intérimaire. J'ai toujours été un appareil."
+        mood: sad
+
+exits:
+  - id: vers_couloir
+    label: Couloir Infini B
+    to: st-couloir-b
+    dir: left
+    rect: [10, 140, 100, 320]

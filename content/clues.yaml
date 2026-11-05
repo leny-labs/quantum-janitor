@@ -184,3 +184,44 @@ clues:
     text:
       fr: "Mme Tamponnet ne peut pas tamponner la case B : pas d'encre tant que PERCO, la machine à café de la salle de pause, fait grève. Un intérimaire, ça peut signer pour quelqu'un qui n'est pas là…"
       en: "Mrs Tamponnet can't stamp box B: no ink while PERCO, the break-room coffee machine, is on strike. A temp can sign for someone who isn't there…"
+
+  # Acte III « La Grève »
+  - id: greve_p15
+    icon: speech
+    when: { flags: [st_greve_connue] }
+    title: { fr: "PERCO : l'accord P-15", en: "PERCO: agreement P-15" }
+    text:
+      fr: "PERCO, déléguée du personnel, fait grève depuis 1985 (la pause est à 10 h 15, l'horloge à 10 h 11). Fin du conflit : l'accord P-15 signé « par la direction OU SON INTÉRIMAIRE »."
+      en: "PERCO, staff delegate, has been on strike since 1985 (break is at 10:15, the clock at 10:11). End of dispute: agreement P-15 signed “by management OR ITS TEMP”."
+
+  - id: delegation
+    icon: form
+    when: { flags: [st_voit_delegation] }
+    title: { fr: "« Tout intérimaire signe p.o. »", en: "“Any temp signs p.p.”" }
+    text:
+      fr: "Note punaisée chez M. Delaigue, sous-chef adjoint p.i. : en cas d'absence (sommeil compris), tout intérimaire de la Station signe « pour ordre ». Il dort. Je suis intérimaire."
+      en: "Memo pinned in Mr Delaigue's office (acting deputy assistant manager): in case of absence (sleep included), any temp in the Station signs “per pro”. He's asleep. I'm a temp."
+
+  - id: greve_finie
+    icon: stamp
+    when: { flags: [st_greve_finie] }
+    title: { fr: "Fin de la grève", en: "End of the strike" }
+    text:
+      fr: "Accord P-15 signé p.o., remis à PERCO : fin du conflit. Elle sert à nouveau du café tiède, « un à la fois », sans limite. L'encre, c'était le café."
+      en: "Agreement P-15 signed p.p., handed to PERCO: dispute over. She serves lukewarm coffee again, “one at a time”, no limit. The ink was coffee."
+
+  - id: delaigue_dort
+    icon: speech
+    when: { flags: [st_greve_connue], notFlags: [st_delaigue_reveille] }
+    title: { fr: "M. Delaigue dort", en: "Mr Delaigue is asleep" }
+    text:
+      fr: "Le sous-chef adjoint dort sur son fax. Il ne se réveille qu'au mot « prime »… ou à l'odeur du café. Pour la signature hiérarchique (case D), il faudra qu'il soit réveillé."
+      en: "The deputy assistant manager sleeps on his fax. He only wakes at the word “bonus”… or the smell of coffee. For the line-manager signature (box D), he'll have to be awake."
+
+  - id: cases_bdc
+    icon: form
+    when: { flags: [st_case_c] }
+    title: { fr: "Cases A, B, D, C", en: "Boxes A, B, D, C" }
+    text:
+      fr: "« VU » au café (Tamponnet), signature « p.i. » (Delaigue), trois exemplaires certifiés conformes (Duplicata). Il manque la case E : l'avis du Conseil. L'ascenseur ne monte que les dossiers complets aux trois quarts."
+      en: "Coffee “SEEN” (Tamponnet), “acting” signature (Delaigue), three certified copies (Duplicata). Box E is missing: the Council's opinion. The elevator only takes files three-quarters complete."

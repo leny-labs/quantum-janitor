@@ -1,6 +1,7 @@
 // Chapitre 1 « La Station Bureaucratique » : indices B.O.B. de l'Acte II (docs/CHAPTER1.md §6.3),
 // partagés par les trois bureaux (st_bob_archives / st_bob_tampons / st_bob_reclamations) et le couloir B.
 // Une étape bloquante = un stitch : 1re demande vague, suivantes précises (compteur de lecture du stitch).
+// Les stitches `tamponnet` et `vu` servent aussi à st_bob_acte3 (Tamponnet peut attendre la case A).
 
 === st_bob_acte2 ===
 { not has_flag("st_cherche_gary"):
@@ -21,17 +22,8 @@
 { not has_flag("st_case_a"):
     -> case_a
 }
-{ not has_flag("st_tamponnet"):
-    -> tamponnet
-}
-{ not has_flag("st_sait_greve"):
-    -> vu
-}
-bob: Humain, intérimaire, et une case sur cinq. On a fait un Acte entier pour une case, Gary. Il en reste quatre. Et une grève. # mood: calm
-{ not has_flag("st_encreur_pris"):
-    bob: Et prends l'encreur sec de Mme Tamponnet. Sec, on n'en fait rien. Mais un jour, il y aura du café. # mood: suspicious
-}
--> END
+// case A remplie : Acte III (st_bob_acte3 reprend Tamponnet, la grève, les cases B, D, C)
+-> st_bob_acte3
 
 = dossier
 { st_bob_acte2.dossier > 1:

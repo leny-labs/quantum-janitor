@@ -262,6 +262,31 @@ keys:
   item.copies_dossier.name: Copies of the “GARRY” file
   character.duplicata.name: Mr Régis Duplicata, archivist
   character.tamponnet.name: Mrs Gisèle Tamponnet, Stamp Office
+  # Acte III : Salle de Pause, Sous-Chef Adjoint
+  scene.st-couloir-b.exit.vers_pause.label: Break Room
+  scene.st-couloir-b.exit.vers_sous_chef.label: Deputy Assistant Manager
+  scene.st-pause.title: Break Room
+  scene.st-pause.sector: Bureaucratic Station · Level 0 · Wing B
+  scene.st-pause.hotspot.perco.label: PERCO
+  scene.st-pause.hotspot.piquet.label: Picket line (cups)
+  scene.st-pause.hotspot.panneau_syndical.label: Union noticeboard
+  scene.st-pause.hotspot.frigo.label: Fridge
+  scene.st-pause.hotspot.tube.label: Pneumatic tube
+  scene.st-pause.hotspot.bob.label: B.O.B.
+  scene.st-pause.exit.vers_couloir.label: Infinite Corridor B
+  scene.st-sous-chef.title: Deputy Assistant Manager's Office
+  scene.st-sous-chef.sector: Bureaucratic Station · Level 0 · Wing B
+  scene.st-sous-chef.hotspot.delaigue.label: Mr Delaigue
+  scene.st-sous-chef.hotspot.note.label: Delegation memo
+  scene.st-sous-chef.hotspot.plaque.label: Door plate
+  scene.st-sous-chef.hotspot.fax.label: Fax
+  scene.st-sous-chef.hotspot.balais.label: Brooms
+  scene.st-sous-chef.hotspot.bob.label: B.O.B.
+  scene.st-sous-chef.exit.vers_couloir.label: Infinite Corridor B
+  item.accord.name: Break agreement P-15
+  item.gobelet.name: Cup of lukewarm coffee
+  character.perco.name: PERCO, staff delegate
+  character.delaigue.name: Mr Hubert Delaigue, acting deputy assistant manager
 
 ink:
   # bob.ink — B.O.B. en compagnon (exemple de traduction de dialogue Ink)

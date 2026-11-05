@@ -60,14 +60,13 @@ bands:
         visible: { flags: [st_couloir_boucle] }
         unlock: { flags: [st_couloir_resolu] }
         refused: { fr: "COULOIR NON DÉNOUÉ", en: "CORRIDOR STILL KNOTTED" }
+      # Acte III : Salle de Pause (PERCO) et Bureau du Sous-Chef Adjoint (portes B-4 / B-5 du couloir dénoué)
       - scene: st-pause
-        planned: true
         label: { fr: "Salle de Pause", en: "Break Room" }
         visible: { flags: [st_couloir_boucle] }
         unlock: { flags: [st_couloir_resolu] }
         refused: { fr: "COULOIR NON DÉNOUÉ", en: "CORRIDOR STILL KNOTTED" }
       - scene: st-sous-chef
-        planned: true
         label: { fr: "Sous-Chef Adjoint", en: "Deputy Assistant Manager" }
         visible: { flags: [st_couloir_boucle] }
         unlock: { flags: [st_couloir_resolu] }

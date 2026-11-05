@@ -573,6 +573,33 @@ walkthrough joue encore l'étape 21, `st_sait_greve`, teaser de l'Acte III). Pas
 - **GenAI** : `_briefs/acte2/genai/` (gpt-image-2.6-sunburst ; `all.sh`, `build.py`) ; captures
   `_briefs/acte2/shoot.mjs`.
 
+### 9.5 Acte III v1 — « La Grève » (Pause, Sous-Chef)
+
+Checkpoint en salle, cases A, B, D, C remplies : `ChapterDef.endFlag` du ch1 = **`st_case_c`** (Archives).
+
+- **Couloir B** : deux petites portes B-4 / B-5 (sous le panneau « AILE B ») apparaissent au dénouement :
+  sorties `vers_pause` / `vers_sous_chef`. Ascenseur : « au fond », `planned` (Acte IV).
+- **`st-pause`** (`stPause`, Ink `st_pause.ink`) : PERCO (billboard GenAI 0 en grève · 1 au travail selon
+  `st_greve_finie` ; portraits `perco` / variante `perco-travail`), banderole « GRÈVE ILLIMITÉE » (tombe à la fin
+  de la grève), piquet de gobelets (« BRISEUR DE GRÈVE ! », disparaît), panneau syndical, frigo (graine ch.4 :
+  le yaourt « PARTI FONDER QUELQUE CHOSE »), tube pneumatique (Acte IV). 22. parler → `st_greve_connue` ;
+  panneau → +`accord` (`st_accord_pris`) ; 26. accord signé → −accord, `st_greve_finie` ; 27. parler → +`gobelet`
+  (« un à la fois », sans limite : PERCO en redonne un si on n'en a plus) ; 30. gobelet vide → `st_cafe2`.
+  Fausse piste : `fragment` → café froid, « PRÉAVIS RECONDUIT ».
+- **`st-sous-chef`** (`stSousChef`, Ink `st_sous_chef.ink`) : placard à balais, M. Delaigue (billboard GenAI 0
+  endormi · 1 réveillé, `st_delaigue_reveille` ; portrait endormi + variante `delaigue-reveille`), plaque « p.i. »
+  et note de délégation (GenAI). 23. note → `st_voit_delegation` ; 24. accord sans reclassement → « UN ANIMAL NE
+  SIGNE PAS » ; 25. accord (reclassé + note) → `st_accord_signe` ; 31. gobelet plein → −gobelet,
+  `st_delaigue_reveille` ; 32. formulaire (réveillé + « VU ») → `st_case_d`.
+- **Tampons** : 29. `encreur` imbibé sur Tamponnet → −encreur, `st_tamponnet_encre` ; formulaire → `st_case_b`.
+  **Archives** : 33. formulaire sur la photocopieuse (`st_case_d` + `st_papier`) → `st_case_c`.
+- **Combinaison** 28 : `encreur` + `gobelet` → `st_encreur_cafe` + `st_gobelet_vide` (le gobelet reste).
+  Icônes à variantes (Studio `GENAI_VARIANTS`) : `accord-signe`, `gobelet-vide`, `encreur-cafe`.
+- **B.O.B.** : `st_bob_acte3.ink` (après la case A ; reprend Tamponnet/« VU » de l'Acte II). **Carnet** :
+  `greve_p15`, `delegation`, `greve_finie`, `delaigue_dort`, `cases_bdc`. **`repair.ts`** : accord rendu tant
+  que la grève dure, retiré après ; encreur rendu jusqu'à Tamponnet, retiré après.
+- **GenAI** : `_briefs/acte3/genai/` ; captures `_briefs/acte3/shoot.mjs` → `/tmp/qj-acte3/`.
+
 ## 10. Notes techniques (pour plus tard)
 
 - **Tubes pneumatiques** : simple effet de mise en scène (prop + son « FLOUP »), pas un

@@ -40,6 +40,9 @@ export const GENAI_ICONS = new Set([
   'liasse',
   'capsule',
   'copies_dossier',
+  // Acte III (_briefs/acte3/genai/)
+  'accord',
+  'gobelet',
 ]);
 const genaiIconUrl = (id: string) => `${import.meta.env.BASE_URL}inventory/${id}.png`;
 /** Variante d'icône GenAI : la première règle dont les flags sont tous posés (et aucun `notFlags`) gagne. */
@@ -58,6 +61,10 @@ const GENAI_VARIANTS: Record<string, IconVariant[]> = {
     { flags: ['ch1', 'ch1_seau_plein'], notFlags: ['ch1_eclat_stabilise'], icon: 'seau-eau' },
     { flags: ['ch1'], icon: 'seau-vide' },
   ],
+  // Acte III : accord signé p.o., gobelet vidé dans l'encreur, encreur imbibé de café
+  accord: [{ flags: ['st_accord_signe'], icon: 'accord-signe' }],
+  gobelet: [{ flags: ['st_gobelet_vide'], icon: 'gobelet-vide' }],
+  encreur: [{ flags: ['st_encreur_cafe'], icon: 'encreur-cafe' }],
 };
 /** Clé de texture de l'icône d'inventaire de `id`, variante selon les flags comprise. */
 export function itemIconKey(id: string, hasFlag: (f: string) => boolean): string {
@@ -76,6 +83,9 @@ export const sheetUrl = (id: string) => `portraits/${id}-sheet.png`;
  */
 const SHEET_VARIANTS: Readonly<Record<string, readonly { flag: string; sheet: string }[]>> = {
   gary: [{ flag: 'combi_portee', sheet: 'gary-combi' }],
+  // Acte III : M. Delaigue dort (planche fixe) jusqu'au café ; PERCO sourit une fois la grève finie
+  delaigue: [{ flag: 'st_delaigue_reveille', sheet: 'delaigue-reveille' }],
+  perco: [{ flag: 'st_greve_finie', sheet: 'perco-travail' }],
 };
 /** Clé de la planche à afficher pour `id` (variante selon les flags comprise). */
 export function speakerSheetKey(id: string, hasFlag: (f: string) => boolean): string {
@@ -92,7 +102,7 @@ export const overlayUrl = (id: string) => `portraits/${id}-robot.png`;
  * parlant, jamais de bouche). M. Sabot : planche GenAI (clignement, agacé, bouche sous la moustache).
  * Mme Guichard (guichet) : planche v3 tirée d'une grille GenAI 3 × 2 (docs/PORTRAIT_GENAI.md).
  */
-const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png', sabot: 'portraits/sabot-portrait.png', guichard: 'portraits/guichard-portrait.png', duplicata: 'portraits/duplicata-portrait.png', tamponnet: 'portraits/tamponnet-portrait.png' };
+const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png', sabot: 'portraits/sabot-portrait.png', guichard: 'portraits/guichard-portrait.png', duplicata: 'portraits/duplicata-portrait.png', tamponnet: 'portraits/tamponnet-portrait.png', delaigue: 'portraits/delaigue-portrait.png', perco: 'portraits/perco-portrait.png' };
 
 /** Une frame de planche : expression + micro-mouvement du buste. */
 interface SheetFrame extends FacePose {
@@ -193,7 +203,7 @@ export const PORTRAIT_IDS = Object.keys(PORTRAITS);
  * Planches GenAI (docs/PORTRAIT_GENAI.md) : jamais rebakées, ni par
  * `bake:portraits` ni au runtime — le 3D suit l'image, pas l'inverse.
  */
-export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob', 'reine', 'scribe', 'sabot', 'guichard', 'duplicata', 'tamponnet']);
+export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob', 'reine', 'scribe', 'sabot', 'guichard', 'duplicata', 'tamponnet', 'delaigue', 'perco']);
 
 function makeRenderer(): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });

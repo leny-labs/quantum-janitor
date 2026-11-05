@@ -89,6 +89,20 @@ gary: Je ne sais pas encore. Mais un intérimaire, ça finit toujours par signer
 sylvie: PROCHAINE ÉTAPE : CASE B, « VU ». BUREAU DES TAMPONS. SOUS RÉSERVE D'ENCRE. # mood: calm
 -> END
 
+// Acte III : le formulaire « VU » et signé sur la photocopieuse (YAML : set st_case_c). Le papier de l'étape 19.
+=== st_archives_exemplaires ===
+Gary pose le Formulaire B-7/12 sur la vitre. Case A : cochée. Case B : « VU ». Case D : une signature énorme, « p.i. ».
+duplicata: Un original ! Un original ! Vu et signé ! Vu et signé ! # mood: surprised
+La photocopieuse avale trois réclamations vierges du bac, chauffe, éclaire, recrache. Trois exemplaires du formulaire, encore tièdes.
+duplicata: Trois exemplaires. Trois exemplaires. # mood: love
+M. Duplicata lèche son tampon. Le café de 1985 de sa moustache suffit encore, de justesse. Il l'abat trois fois.
+duplicata: CERTIFIÉS CONFORMES. CERTIFIÉS CONFORMES. Case C. Case C.
+Il agrafe les trois exemplaires derrière l'original. Le formulaire est maintenant épais comme un vrai dossier.
+gary: Quatre cases sur cinq.
+duplicata: La cinquième, c'est l'avis du Conseil. Du Conseil. L'ascenseur à formulaires ne monte que les dossiers complets aux trois quarts. Aux trois quarts. Vous y êtes. Vous y êtes. # mood: calm
+bob: Gary. Il a dit « vous y êtes » deux fois. Je crois que c'est un compliment. Deux compliments. # mood: love
+-> END
+
 // B.O.B. aux Archives : réplique de lieu, puis indices gradués de l'Acte II (st_bob_acte2).
 === st_bob_archives ===
 { not has_flag("st_cherche_gary"):

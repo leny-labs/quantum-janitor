@@ -4,7 +4,8 @@
 #   parler à Tamponnet          → plus d'encre « depuis la grève », tampon ANNULÉ    [st_tamponnet] +tampon_annule
 #   prendre l'encreur sec       →                                                    [st_encreur_pris] +encreur
 #   formulaire sur Tamponnet    → « PAS D'ENCRE, PAS DE VU » : la grève (teaser Acte III) [st_sait_greve]
-# L'encreur sur Tamponnet : refus « encore sec » (imbibé de café à l'Acte III).
+# Acte III : encreur imbibé de café sur Tamponnet → l'encre revient     [st_tamponnet_encre] −encreur
+#            formulaire sur Tamponnet (case A + encre) → « VU »          [st_case_b]
 id: st-tampons
 title: Bureau des Tampons
 sector: Station Bureaucratique · Niveau 0 · Aile B
@@ -56,6 +57,14 @@ hotspots:
       - dialogue: st_tamponnet
     useItem:
       formulaire:
+        - if: { flags: [st_case_b] }
+          say: "tamponnet: Déjà VU ! CLONK. Je ne tamponne pas deux fois la même case. Enfin si, mais seulement pour le plaisir. Pas sur un dossier officiel."
+          stop: true
+        # étape 29 (Acte III) : encre au café + case A → « VU »
+        - if: { flags: [st_tamponnet_encre, st_case_a] }
+          dialogue: st_tamponnet_vu
+          set: st_case_b
+          stop: true
         # étape 21 (teaser Acte III) : avec la case A, le « VU » bute sur l'encre → la grève
         - if: { flags: [st_case_a] }
           dialogue: st_tamponnet_formulaire
@@ -63,6 +72,12 @@ hotspots:
           stop: true
         - dialogue: st_tamponnet_formulaire
       encreur:
+        # étape 29 : l'encreur imbibé de café (combinaison encreur + gobelet) lui rend l'encre
+        - if: { flags: [st_encreur_cafe] }
+          dialogue: st_tamponnet_encre
+          take: encreur
+          set: st_tamponnet_encre
+          stop: true
         - say: "tamponnet: CLONK ? Il est sec, mon petit. Sec comme un règlement intérieur. CLONK."
           mood: sad
         - say: "tamponnet: L'encre, c'était le café. Pas de café, pas d'encre. Il faudrait l'imbiber de quelque chose de chaud et de syndiqué."

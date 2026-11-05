@@ -978,6 +978,15 @@ export const TAMPONNET_ACTOR: ActorLoops = {
     { frame: 0, duration: 1900 },
   ],
 };
+/**
+ * Acte III (Aile B) : M. Hubert Delaigue (0 endormi · 1 réveillé, gobelet à la main) et PERCO
+ * (0 en grève · 1 au travail). Frame pilotée par les flags (`st_delaigue_reveille`, `st_greve_finie`),
+ * jamais par le dialogue (_briefs/acte3/genai/build.py).
+ */
+export const DELAIGUE_SHEET = `${import.meta.env.BASE_URL}props/st/delaigue-sheet.png`;
+export const DELAIGUE_ASPECT = 764 / 768;
+export const PERCO_SHEET = `${import.meta.env.BASE_URL}props/st/perco-sheet.png`;
+export const PERCO_ASPECT = 548 / 1024;
 /** M. Patience assis sur sa chaise, ticket 9 848 tendu ; variante main vide (même cadre) une fois le ticket pris. */
 export const PATIENCE_URL = `${import.meta.env.BASE_URL}props/st/patience.png`;
 export const PATIENCE_EMPTY_URL = `${import.meta.env.BASE_URL}props/st/patience-vide.png`;

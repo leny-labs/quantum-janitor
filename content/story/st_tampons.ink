@@ -17,6 +17,14 @@
     tamponnet: Jamais. C'est pour ça qu'il faut que quelqu'un l'emmène. Un tampon qui ne sert jamais finit par servir une fois. C'est statistique. CLONK. # set: st_tamponnet
     -> END
 }
+{ has_flag("st_tamponnet_encre"):
+    { has_flag("st_case_b"):
+        tamponnet: CLONK ! VU ! CLONK ! VU ! Je tamponne tout ce qui passe, maintenant, et ça marque. Même les mains. Surtout les mains. # mood: love
+    - else:
+        tamponnet: J'ai de l'encre, mon petit ! CLONK ! Montrez-moi votre formulaire, que je vous le VOIE ! # mood: love
+    }
+    -> END
+}
 { not has_flag("st_encreur_pris"):
     tamponnet: CLONK. Mon encreur est sec, vous voyez ? Là, sur le comptoir. Prenez-le, si ça vous chante. S'il vous arrive de croiser du café… CLONK. # mood: sad
     -> END
@@ -27,6 +35,10 @@
 }
 { not has_flag("st_sait_greve"):
     tamponnet: CLONK ! Vous avez une case remplie, vous ! Ça se voit sur votre visage. Montrez-moi votre formulaire. CLONK. # mood: surprised
+    -> END
+}
+{ has_flag("st_encreur_cafe"):
+    tamponnet: Ça sent le café ! Ça sent le café ! Mon petit, qu'est-ce que vous avez dans la poche ? Mon encreur ? Donnez ! CLONK ! # mood: surprised
     -> END
 }
 tamponnet: La salle de pause, mon petit. La machine. PERCO. Si vous la faites revenir au travail, je vous tamponne « VU » des deux mains. CLONK. CLONK. # mood: love
@@ -49,6 +61,26 @@ gary: Il faut donc mettre fin à une grève pour obtenir un tampon.
 bob: Gary. Tu es intérimaire, maintenant. Tu sais ce que ça veut dire, dans une grève ? # mood: suspicious
 gary: Que je suis du côté de personne ?
 bob: Que tu peux signer pour quelqu'un qui n'est pas là. J'ai lu ça quelque part. Dans un placard. Sur une note punaisée. # mood: calm
+-> END
+
+// Acte III : l'encreur imbibé de café (YAML : take encreur, set st_tamponnet_encre).
+=== st_tamponnet_encre ===
+Gary tend l'encreur. Il est brun, luisant, et il sent le café tiède de la Salle de Pause.
+tamponnet: CLONK ? …CLONK ! CLONK CLONK CLONK ! # mood: surprised # shake
+Mme Tamponnet presse son tampon « VU » sur le feutre, puis sur le comptoir. CLONK. Un « VU » brun apparaît. Elle le regarde comme on regarde un premier enfant.
+tamponnet: Il marque. Il marque ! Quarante et un ans que je tamponne de l'espoir, et il marque ! # mood: love
+tamponnet: Je garde l'encreur, mon petit. Un encreur, ça ne se prête pas. Ça s'adopte. CLONK.
+bob: Elle pleure, Gary. Ou c'est le café qui coule. Dans les deux cas, c'est beau. # mood: love
+-> END
+
+// Acte III : formulaire sur Tamponnet, case A remplie et encre revenue (YAML : set st_case_b).
+=== st_tamponnet_vu ===
+Mme Tamponnet aplatit le Formulaire B-7/12 sur le comptoir. Elle lisse la case B avec le plat de la main, très lentement, comme on prépare un lit.
+tamponnet: Case B. « VU ». CLONK. # shake
+Un « VU » brun, net, légèrement de travers, comme tous les vrais « VU ». Il sent le café.
+tamponnet: Le plus beau tampon de ma carrière. Et le premier depuis 1985. Ce qui fait aussi le plus récent. # mood: love
+gary: Merci, madame Tamponnet.
+tamponnet: Allez faire signer ça. La hiérarchie, c'est le sous-chef. Il dort, mais il signe. Enfin, il signait. CLONK. # mood: calm
 -> END
 
 // B.O.B. au Bureau des Tampons : réplique de lieu, puis indices gradués de l'Acte II.

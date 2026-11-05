@@ -6,7 +6,7 @@
 #                                                (pièce justificative), photocopieuse sans papier [st_dossier_trouve] −badge
 #   liasse (Réclamations) sur la photocopieuse → 3 copies CONFORMES ; le papier reste dans le bac
 #                                                                                       [st_papier] −liasse +copies_dossier
-# Le formulaire sur la photocopieuse (case C, Acte III) : refus pour l'instant (ni « VU » ni signature).
+# Acte III : le formulaire « VU » et signé sur la photocopieuse → trois exemplaires certifiés  [st_case_c]
 id: st-archives
 title: Archives Centrales
 sector: Station Bureaucratique · Niveau 0 · Aile B
@@ -128,6 +128,14 @@ hotspots:
           give: copies_dossier
           set: st_papier
       formulaire:
+        - if: { flags: [st_case_c] }
+          say: "duplicata: Déjà en trois exemplaires. Trois exemplaires. Un quatrième serait un excès de zèle. De zèle."
+          stop: true
+        # étape 33 (Acte III) : original « VU » et signé → trois exemplaires certifiés
+        - if: { flags: [st_case_d, st_papier] }
+          dialogue: st_archives_exemplaires
+          set: st_case_c
+          stop: true
         - if: { flags: [st_papier] }
           say: "duplicata: Pas les trois exemplaires maintenant. Pas maintenant. Un original vide, je le copie vide. Il faut d'abord le « VU » et la signature. Le « VU » et la signature."
           stop: true

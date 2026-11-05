@@ -95,8 +95,19 @@ async function main() {
         for (const kept of ['ticket_douane', 'plante', 'ticket_9848', 'fragment', 'plan_station']) if (!state.hasItem(kept)) throw new Error(`Station : « ${kept} » absent à la fin du stub`);
         // Acte II (docs/CHAPTER1.md §6.13–21) : archives → tampons → réclamations → copies → case A
         for (const f of ['st_cherche_gary', 'st_dossier_trouve', 'st_tamponnet', 'st_chatiere', 'st_papier', 'st_case_a', 'st_reclasse', 'st_sait_greve']) if (!state.hasFlag(f)) throw new Error(`Acte II : flag ${f} absent`);
-        for (const kept of ['formulaire', 'tampon_annule', 'encreur', 'capsule']) if (!state.hasItem(kept)) throw new Error(`Acte II : « ${kept} » absent à la fin`);
+        for (const kept of ['formulaire', 'tampon_annule', 'capsule']) if (!state.hasItem(kept)) throw new Error(`Acte II : « ${kept} » absent à la fin`);
         for (const gone of ['badge', 'liasse', 'copies_dossier']) if (state.hasItem(gone)) throw new Error(`Acte II : « ${gone} » encore en poche à la fin`);
+        const caseA = checkpoints.find((c) => c.label === 'combiner copies_dossier + formulaire');
+        if (!caseA || !caseA.save.flags.includes('st_reclasse') || caseA.save.items.includes('copies_dossier')) throw new Error('Acte II : case A sans reclassement ou copies non agrafées');
+        // Acte III (docs/CHAPTER1.md §6.22–33) : grève → p.o. → café → encre → VU → réveil → signature → 3 exemplaires
+        for (const f of ['st_greve_connue', 'st_voit_delegation', 'st_accord_signe', 'st_greve_finie', 'st_encreur_cafe', 'st_cafe2', 'st_tamponnet_encre', 'st_case_b', 'st_delaigue_reveille', 'st_case_d', 'st_case_c']) if (!state.hasFlag(f)) throw new Error(`Acte III : flag ${f} absent`);
+        for (const gone of ['accord', 'encreur', 'gobelet']) if (state.hasItem(gone)) throw new Error(`Acte III : « ${gone} » encore en poche à la fin`);
+        const unsigned = checkpoints.find((c) => c.label === 'utiliser accord sur perco');
+        if (!unsigned || unsigned.save.flags.includes('st_greve_finie') || !unsigned.save.items.includes('accord')) throw new Error('Acte III : un accord non signé ne doit pas finir la grève');
+        const asleep = checkpoints.find((c) => c.label === 'utiliser formulaire sur delaigue');
+        if (!asleep || asleep.save.flags.includes('st_case_d')) throw new Error('Acte III : Delaigue endormi ne doit pas signer');
+        const cold = checkpoints.find((c) => c.label === 'utiliser fragment sur perco');
+        if (!cold || cold.save.flags.includes('st_greve_finie')) throw new Error('Acte III : l\'éclat sur PERCO ne doit rien débloquer');
         const badgeEarly = checkpoints.find((c) => c.label === 'utiliser badge sur fichier');
         if (!badgeEarly || !badgeEarly.save.items.includes('badge') || badgeEarly.save.flags.includes('st_dossier_trouve')) throw new Error('Acte II : badge sur le fichier sans demande de recherche devait être refusé');
         const formEarly = checkpoints.find((c) => c.label === 'utiliser formulaire sur tamponnet');
@@ -119,7 +130,7 @@ async function main() {
         const map = parseStationMap(readFileSync(join(ROOT, 'content', 'station-map.yaml'), 'utf8'));
         const zone = (id: string) => map.bands.flatMap((b) => b.zones).find((z) => z.scene === id)!;
         const exists = (id: string) => content.scenes.has(id);
-        const expect = { 'st-sas': 'open', 'st-attente': 'open', 'st-cafeteria': 'open', 'st-guichet': 'open', 'st-couloir-b': 'open', 'st-archives': 'open', 'st-reclamations': 'open', 'st-tampons': 'here', 'st-pause': 'locked', 'st-fourriere': 'locked', 'st-direction': 'unknown' } as const;
+        const expect = { 'st-sas': 'open', 'st-attente': 'open', 'st-cafeteria': 'open', 'st-guichet': 'open', 'st-couloir-b': 'open', 'st-archives': 'here', 'st-reclamations': 'open', 'st-tampons': 'open', 'st-pause': 'open', 'st-sous-chef': 'open', 'st-ascenseur': 'locked', 'st-fourriere': 'locked', 'st-direction': 'locked' } as const;
         // repérée et accessible mais jamais visitée : pas de warp (on y va à pied d'abord)
         const early = chapterStateAt(state, 'st-sas', ['st-sas']);
         if (zoneState(early, zone('st-attente'), exists) !== 'seen') throw new Error('carte : salle d\'attente non visitée devrait être « seen »');

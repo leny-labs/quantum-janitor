@@ -43,6 +43,15 @@ characters:
     name: Mme Gisèle Tamponnet, Bureau des Tampons
     color: "#1f5f5a"
     portrait: "CLONK\n(^_^)"
+  # Acte III (Aile B) : Salle de Pause, Bureau du Sous-Chef Adjoint
+  - id: perco
+    name: PERCO, déléguée du personnel
+    color: "#d9762a"
+    portrait: "PERCO\n[>_<]"
+  - id: delaigue
+    name: M. Hubert Delaigue, sous-chef adjoint p.i.
+    color: "#7c8fa8"
+    portrait: "p.i.\n(-_-) zzz"
   - id: narrateur
     name: ""
     color: "#000000"

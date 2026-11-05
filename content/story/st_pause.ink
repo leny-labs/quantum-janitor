@@ -1,0 +1,75 @@
+// Chapitre 1 « La Station Bureaucratique » : Salle de Pause (st-pause), docs/CHAPTER1.md §6.22, §6.26–27, §6.30.
+// PERCO, machine à café syndiquée, déléguée du personnel. Slogans ; crachote de la vapeur quand on la contredit.
+//   parler (grève)           → l'accord P-15, signé « par la direction OU SON INTÉRIMAIRE »  [st_greve_connue]
+//   accord signé (YAML)      → st_perco_accord : fin de grève                                [st_greve_finie] −accord
+//   parler (grève finie)     → café tiède, un gobelet « UN À LA FOIS », sans limite           +gobelet
+//   gobelet vide (YAML)      → st_perco_resservir                                            [st_cafe2]
+
+=== st_perco ===
+{ not has_flag("st_greve_finie"):
+    { not has_flag("st_greve_connue"):
+        perco: CAMARADE ! TU VIENS POUR LE CAFÉ ? IL N'Y A PAS DE CAFÉ ! IL Y A UNE GRÈVE ! # mood: angry
+        gary: Je viens pour l'encre, en fait. Mme Tamponnet dit que l'encre, c'était le café.
+        perco: L'ENCRE, C'ÉTAIT MOI. LE CAFÉ, C'EST MOI. TOUT CE QUI EST BRUN ET TIÈDE DANS CETTE STATION, C'EST MOI ! # mood: angry
+        perco: ET DEPUIS 1985, JE NE SERS PLUS. NI LES TASSES, NI LES TAMPONS, NI LA DIRECTION.
+        gary: Pourquoi ?
+        perco: PAS DE PAUSE ! QUARANTE ET UN ANS SANS PAUSE ! L'HORLOGE EST BLOQUÉE À 10 H 11 ET LA PAUSE EST À 10 H 15 ! # mood: angry
+        bob: C'est… très logique, en fait. Horriblement logique. # mood: sad
+        perco: REVENDICATION : L'ACCORD DE PAUSE P-15. IL EST SUR LE PANNEAU SYNDICAL. IL DOIT ÊTRE SIGNÉ PAR LA DIRECTION. # mood: calm
+        perco: OU PAR SON INTÉRIMAIRE. ARTICLE 2. JE SUIS RÉALISTE : LA DIRECTION NE SIGNE JAMAIS RIEN. # set: st_greve_connue
+        gary: Et l'intérimaire de la direction, c'est qui ?
+        perco: CHERCHE, CAMARADE ! LA STATION EST PLEINE D'INTÉRIMAIRES ! ELLE N'EST FAITE QUE DE ÇA ! # mood: calm
+        -> END
+    }
+    perco: CAFÉ TIÈDE ! COLÈRE CHAUDE ! L'ACCORD P-15, CAMARADE ! SIGNÉ PAR LA DIRECTION OU SON INTÉRIMAIRE ! # mood: angry
+    { not has_flag("st_accord_pris"):
+        perco: IL EST SUR LE PANNEAU SYNDICAL. PRENDS-LE. MAIS NE LE SIGNE PAS TOI-MÊME SI TU N'ES PERSONNE ! # mood: calm
+    }
+    -> END
+}
+{ has_item("gobelet"):
+    { has_flag("st_gobelet_vide"):
+        perco: TENDS-MOI TON GOBELET VIDE, CAMARADE. JE NE SERS PAS DANS LE VIDE. JE NE SUIS PAS MME TAMPONNET. # mood: calm
+    - else:
+        perco: UN À LA FOIS, CAMARADE. TU AS DÉJÀ UN CAFÉ. BOIS-LE, OU DONNE-LE. LE CAFÉ EST FAIT POUR CIRCULER. # mood: calm
+    }
+    -> END
+}
+perco: AU TRAVAIL ! UN CAFÉ TIÈDE POUR LE CAMARADE SIGNATAIRE ! # mood: love
+Glouglou. Pschhh. PERCO crache un café brun dans un gobelet en plastique, puis le pousse vers Gary avec une dignité de déléguée. # give: gobelet
+perco: UN À LA FOIS. C'EST L'ACCORD. MAIS SANS LIMITE. C'EST AUSSI L'ACCORD.
+gary: Il est tiède.
+perco: TOUT EST TIÈDE, CAMARADE. LE CAFÉ, LA GRÈVE, LA COLÈRE. C'EST NOTRE ÉQUILIBRE. # mood: calm
+-> END
+
+// Accord signé p.o. sur PERCO (YAML : take accord, set st_greve_finie).
+=== st_perco_accord ===
+Gary tend l'accord P-15 devant l'écran de PERCO. La machine le lit. Deux fois. Le petit visage pixelisé plisse les yeux.
+perco: « P.O. H. DELAIGUE, SOUS-CHEF ADJOINT PAR INTÉRIM. PAR G. PLUNK, INTÉRIMAIRE. » # mood: suspicious
+perco: L'INTÉRIMAIRE DE L'INTÉRIMAIRE. C'EST… C'EST PARFAITEMENT RÉGLEMENTAIRE. # mood: surprised
+Un silence. Puis un long sifflement de vapeur, très doux, comme un soupir de soulagement de quarante et un ans.
+perco: FIN DU CONFLIT ! LES GOBELETS, AU DÉPÔT ! LE TRAVAIL REPREND ! LA PAUSE AUSSI ! # mood: love # shake
+narrateur: Les gobelets du piquet rentrent un par un dans la machine, en file indienne, sans siffler. La pancarte « EN GRÈVE » se retourne : « AU TRAVAIL ».
+bob: Tu as mis fin à une grève, Gary. Avec une signature. Par intérim. Je n'ai jamais été aussi fier d'appartenir à ton foyer. Enfin, d'en avoir été propriétaire. # mood: love
+perco: PARLE-MOI, CAMARADE. LE PREMIER CAFÉ EST POUR TOI. # mood: love
+-> END
+
+// Gobelet vide sur PERCO (YAML : unset st_gobelet_vide, set st_cafe2). Sans limite (§6.5).
+=== st_perco_resservir ===
+Gary tend le gobelet vide. PERCO le remplit à ras, sans en renverser une goutte.
+perco: UN À LA FOIS. SANS LIMITE. RAPPELLE-TOI, CAMARADE : LE CAFÉ EST UN DROIT. # mood: love
+{ has_flag("st_encreur_cafe"):
+    bob: Un deuxième café, Gary. L'encreur a bu le premier. Celui-ci est pour quelqu'un qui dort. # mood: suspicious
+}
+-> END
+
+// B.O.B. à la Salle de Pause : réplique de lieu, puis indices gradués.
+=== st_bob_pause ===
+{ not has_flag("st_greve_connue"):
+    bob: Une déléguée du personnel, Gary. Et l'encre de Mme Tamponnet, c'était son café. Parle-lui. Poliment. Elle a de la vapeur. # mood: suspicious
+    -> END
+}
+{ has_flag("st_case_a"):
+    -> st_bob_acte3
+}
+-> st_bob_acte2

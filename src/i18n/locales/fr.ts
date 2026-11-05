@@ -385,6 +385,17 @@ export const fr = {
       stampCancelled: 'ANNULÉ',
       complaintBox: 'RÉCLAMATIONS',
       tubeDest: 'CONSEIL\nPAUSE\nDIRECTION',
+      /** Acte III (stPause, stSousChef, portes B-4 / B-5 du couloir). */
+      officeBreak: 'PAUSE',
+      officeDeputy: 'SOUS-CHEF',
+      strikeStamp: 'EN GRÈVE',
+      cupNo: 'NON',
+      cupNotToday: 'PAS AUJ.',
+      notice: 'PRÉAVIS\nILLIMITÉ\nTIÈDE',
+      coffeeRight: 'LE CAFÉ\nEST UN DROIT',
+      deputyDesk: 'SOUS-CHEF ADJ. p.i.',
+      faxMeeting: 'RÉUNION\nREPORTÉE',
+      zzz: 'Z z z',
     },
     cockpit: {
       plate: 'CAPSULE DE SERVICE CS-07\nÉQUIPAGE PRÉVU : 12 · PLACES : 1\nINSTALLÉE PAR LE MOINS-DISANT',

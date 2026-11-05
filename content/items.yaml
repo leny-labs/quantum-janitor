@@ -152,6 +152,15 @@ items:
     icon: { color: "#e8dcc0", glyph: "B-7/12" }
     look:
       # tableau de bord : les cases suivent les flags st_case_* (docs/CHAPTER1.md §2, §6)
+      - if: { flags: [st_case_c] }
+        say: "Le Formulaire B-7/12, épais comme un vrai dossier. A : HUMAIN, INTÉRIMAIRE. B : « VU » au café. D : signature « p.i. ». C : trois exemplaires CERTIFIÉS CONFORMES. E, l'avis du Conseil : vide."
+        stop: true
+      - if: { flags: [st_case_d] }
+        say: "Le Formulaire B-7/12. A : cochée. B : « VU », brun, qui sent le café. D : une signature énorme, « p.i. ». C, les trois exemplaires, et E, l'avis du Conseil : vides."
+        stop: true
+      - if: { flags: [st_case_b] }
+        say: "Le Formulaire B-7/12. Case A : HUMAIN, INTÉRIMAIRE. Case B : un « VU » brun, légèrement de travers, qui sent le café tiède. Cases C, D, E : vides."
+        stop: true
       - if: { flags: [st_case_a] }
         say: "Le Formulaire B-7/12. Case A, IDENTITÉ : cochée, trois copies « CONFORME » agrafées. « PLUNK, GARRY — HUMAIN — INTÉRIMAIRE ». Cases B, C, D, E : vides."
         stop: true
@@ -167,7 +176,9 @@ items:
       plante: "Faire signer M. Ficus ? Il est membre honoraire de quelque chose. Mais pas aujourd'hui. Il est fatigué : il vient de dénouer un couloir."
       ticket_9848: "J'agrafe mentalement le ticket au formulaire. Mentalement, parce que je n'ai pas d'agrafeuse. Il y a sûrement un bureau pour ça."
       tampon_annule: "Tamponner « ANNULÉ » sur ma propre demande ? C'est très local, comme réflexe. Non."
-      encreur: "Frotter le formulaire sur l'encreur ? Il est sec. Ça ne laisserait qu'une trace de déception."
+      encreur: "Frotter le formulaire sur l'encreur ? Ce n'est pas moi qui tamponne. Ici, chaque geste a son bureau."
+      gobelet: "Renverser du café sur le formulaire ? Duplicata le certifierait « TACHÉ CONFORME ». Non."
+      accord: "Agrafer l'accord de pause au formulaire ? Ce ne sont pas les mêmes revendications. PERCO serait vexée. Et Mme Guichard aussi."
       liasse: "Une liasse de réclamations et une demande de restitution : ce ne sont pas les mêmes formulaires. Ils ne se parlent pas. Ils sont de services différents."
       capsule: "Rouler le formulaire dans la capsule ? Il n'est pas prêt pour un voyage. Une case sur cinq, au mieux."
       badge: "Agrafer le badge ? Duplicata dirait que l'original ne s'agrafe pas. Il me faut des copies. Conformes."
@@ -187,8 +198,25 @@ items:
   - id: encreur
     name: Encreur sec
     icon: { color: "#7a6a8a", glyph: "ENCRE" }
-    look: "L'encreur de Mme Tamponnet. Feutre sec et craquelé, couleur lilas fatigué. « ENCRE OFFICIELLE — VOIR DÉLÉGUÉ DU PERSONNEL ». Il lui faudrait quelque chose de chaud et de syndiqué. (À suivre.)"
+    look:
+      - if: { flags: [st_encreur_cafe] }
+        say: "L'encreur de Mme Tamponnet, imbibé de café tiède. Brun, luisant, « conforme ». Il sent la Salle de Pause. Il est prêt à servir."
+        stop: true
+      - say: "L'encreur de Mme Tamponnet. Feutre sec et craquelé, couleur lilas fatigué. « ENCRE OFFICIELLE — VOIR DÉLÉGUÉ DU PERSONNEL ». Il lui faudrait quelque chose de chaud et de syndiqué. (À suivre.)"
     combine:
+      # étape 28 : encreur + café → encreur imbibé ; le gobelet reste, vide (PERCO ressert sans limite)
+      gobelet:
+        - if: { flags: [st_encreur_cafe] }
+          say: "Il est déjà imbibé. Encore un peu, et il deviendrait une boisson."
+          stop: true
+        - if: { flags: [st_gobelet_vide] }
+          say: "Le gobelet est vide. Une trace de café au fond, pas assez pour un encreur. PERCO ressert. Sans limite. Un à la fois."
+          stop: true
+        - say: "narrateur: Gary verse le café tiède sur le feutre craquelé. L'encreur boit tout, avec un petit bruit de soulagement. Il devient brun, luisant. Conforme."
+          set: st_encreur_cafe
+        - set: st_gobelet_vide
+        - say: "bob: De l'encre au café, Gary. Officiellement, c'est de l'encre. Officieusement, ça sent la pause."
+          mood: love
       fragment: "L'éclat sur l'encreur ? Il pourrait se remplir d'encre improbable. Elle tamponnerait des choses qui n'existent pas. Ici, ce serait mal vu."
       copies_dossier: "Les copies sont déjà « CONFORME ». Duplicata a léché son tampon. Pas besoin d'encre de plus."
 
@@ -211,3 +239,29 @@ items:
     look: "Trois photocopies de ma fiche : « PLUNK, GARRY — STATUT : HUMAIN. INTÉRIMAIRE. RENOUVELABLE PAR PITIÉ. » Tampon brunâtre « CONFORME », qui sent le café de 1985. Pièces justificatives : à agrafer au formulaire."
     combine:
       ticket_9848: "Agrafer le ticket de M. Patience à mon dossier ? Il a assez attendu pour nous deux. Je le laisse tranquille."
+
+  # Acte III « La Grève » (docs/CHAPTER1.md §5)
+  - id: accord
+    name: Accord de pause P-15
+    icon: { color: "#cfe8e0", glyph: "P-15" }
+    look:
+      - if: { flags: [st_accord_signe] }
+        say: "L'accord de pause P-15. Signé : « p.o. H. Delaigue, sous-chef adjoint p.i. — par G. Plunk, intérimaire ». La signature est tordue. Elle est parfaitement réglementaire."
+        stop: true
+      - say: "L'accord de pause P-15 — FIN DE CONFLIT. « LA PAUSE DE 10 H 15 EST RÉTABLIE. » Une case : « SIGNATURE DE LA DIRECTION OU DE SON INTÉRIMAIRE ». Vide."
+    combine:
+      gobelet: "Tacher l'accord de café ? PERCO prendrait ça pour une provocation. Ou pour une signature. Dans les deux cas, je ne veux pas le savoir."
+      tampon_annule: "Annuler l'accord de fin de grève ? On aurait une grève de la grève. Je n'ai pas le temps pour une grève de la grève."
+
+  # rempli à volonté par PERCO après la grève (« un à la fois ») ; vidé dans l'encreur, puis gardé par Delaigue
+  - id: gobelet
+    name: Gobelet de café tiède
+    icon: { color: "#f6efdc", glyph: "CAFÉ" }
+    look:
+      - if: { flags: [st_gobelet_vide] }
+        say: "Un gobelet en plastique, vide. Un rond de café au fond. PERCO le resservira. Un à la fois. Sans limite."
+        stop: true
+      - say: "Un gobelet en plastique rempli de café tiède. Il fume à peine. Il a l'odeur exacte d'une réunion qui commence en retard."
+    combine:
+      plante: "Arroser M. Ficus au café ? Il est en plastique, Gary. Il n'a pas soif. Il a des principes."
+      capsule: "Envoyer du café par tube au Conseil ? Ce n'est pas un vote, c'est un pot de départ. Pas encore."

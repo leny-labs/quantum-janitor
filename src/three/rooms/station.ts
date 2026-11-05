@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { lang, t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
-import { DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet } from '../props';
+import { DELAIGUE_ASPECT, DELAIGUE_SHEET, DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, PERCO_ASPECT, PERCO_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet } from '../props';
 import { BobAspirRig } from './bobaspire';
 import { bobSpot } from './bobspot';
 import { pressable } from '../press';
@@ -115,6 +115,12 @@ const SIGNS = {
   papier: { fr: 1.5, en: 1.5 },
   personnel: { fr: 1.5, en: 1.5 },
   chatiere: { fr: 1.5, en: 1.5 },
+  // Acte III : _briefs/acte3/genai/
+  pause: { fr: 1.5, en: 1.5 },
+  souschef: { fr: 1.5, en: 1.5 },
+  greve: { fr: 1.5, en: 1.5 },
+  yaourt: { fr: 2 / 3, en: 2 / 3 },
+  delegation: { fr: 2 / 3, en: 2 / 3 },
 } as const;
 type SignId = keyof typeof SIGNS;
 
@@ -1016,6 +1022,18 @@ export const stCouloirB: RoomBuild = {
       s.spot(id, numPlate);
     }
 
+    // Acte III : deux petites portes entre la B-2 et la B-3 (Salle de Pause, Sous-Chef), apparues au dénouement
+    for (const [id, num, office] of [
+      ['vers_pause', 'B-4', tr('props.station.officeBreak')],
+      ['vers_sous_chef', 'B-5', tr('props.station.officeDeputy')],
+    ] as const) {
+      const { door, f } = backDoor(s, s.rect(id), 0.1, '#3e3448', '#6e5a7a');
+      door.add(at(box(f.w * 0.08, 0.05, 0.08, '#c9ced6'), f.w * 0.3, -f.h * 0.05, 0.04));
+      door.add(at(label(num, f.w * 0.5, 0.22, { color: '#f6efdc', bg: '#2a2830', bold: true, mono: true }), 0, f.h * 0.28, 0.05));
+      door.add(at(label(office, f.w * 1.1, 0.26, { color: '#f6efdc', bg: '#1f7f73', bold: true }), 0, f.h / 2 + 0.2, 0.08));
+      s.when(RESOLU, door);
+    }
+
     // panneau GenAI « AILE B — VOUS ÊTES ICI (ENCORE) »
     s.spot('panneau', poster(s, s.rect('panneau'), 'aileb'));
     inkStamp(s, 800, 232, tr('props.station.stampPending'));
@@ -1559,7 +1577,17 @@ export const stReclamations: RoomBuild = {
     s.animate((tt) => (teeth.position.x = Math.sin(tt * 9) * 0.006));
     s.spot('broyeuse', at(shred, bx.x, 0, bx.z));
 
-    // ── terminal de tube pneumatique (vertical, transparent) ──
+    pneumaticTube(s);
+
+    bobHere(s);
+    doorToCorridor(s, RUST);
+    s.add(at(pool('#ffe0c0', 3, 2, 0.08), 0, 0.01, 4));
+  },
+};
+
+/** Terminal de tube pneumatique (hotspot `tube`) : colonne transparente, bagues laiton, boîtier, bouffée d'air. */
+function pneumaticTube(s: Stage): void {
+  {
     const tz = 0.35;
     const tf = s.fit(s.rect('tube'), tz);
     const pipe = new THREE.Group();
@@ -1575,9 +1603,246 @@ export const stReclamations: RoomBuild = {
     pipe.add(puff);
     s.animate((tt) => (puff.position.y = ((tt * 0.8) % 1) * tubeH));
     s.spot('tube', at(pipe, tf.x, 0, tz));
+  }
+}
+
+// ── Acte III « La Grève » : Salle de Pause, Bureau du Sous-Chef Adjoint (docs/CHAPTER1.md §4, lieux 8–9) ──
+
+const GREVE_FINIE: Condition = { flags: ['st_greve_finie'] };
+
+/**
+ * 8. Salle de Pause. PERCO (billboard GenAI : 0 en grève · 1 au travail, `st_greve_finie`) qui crachote,
+ * banderole « GRÈVE ILLIMITÉE », piquet de gobelets (rentrés au dépôt après la grève), panneau syndical
+ * (l'accord P-15 punaisé jusqu'à `st_accord_pris`), frigo « NE PAS TOUCHER AU YAOURT », tube pneumatique.
+ */
+export const stPause: RoomBuild = {
+  camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    perco: { fill: 0.75, fov: 42 },
+    piquet: { fill: 1, lift: 0.3, fov: 38 },
+    panneau_syndical: { fill: 0.85, orbit: -6, fov: 38 },
+    frigo: { fill: 0.8, orbit: 6, fov: 40 },
+    tube: { fill: 0.8, orbit: 8, fov: 42 },
+  },
+  intro: 'perco',
+  build(s) {
+    const BROWN = '#5a3a22';
+    shell(s, { floor: { a: '#4a3c30', b: '#544638', joint: '#2a2018', tile: 0.6 }, wall: { top: '#c8b498', bottom: '#806850' }, trim: '#3a2818', left: -9, right: 9 });
+    wallPanels(s, '#b09c80', -9, 9, 1.6, 8);
+    s.lights({
+      sky: '#fff4e6',
+      ground: '#2a2018',
+      ambient: 1.1,
+      key: { color: '#fff0dc', intensity: 1.9, pos: [0, 9, 6], target: [0, 0, 0] },
+      points: [
+        { color: '#ff9a50', intensity: 2.2, pos: [-0.6, 2.4, 1.6], distance: 3.5 },
+        { color: '#bfe6ff', intensity: 1.2, pos: [5.5, 2.6, 1.4], distance: 3 },
+      ],
+      rim: { color: '#d9762a', intensity: 0.7, pos: [6, 5, -4] },
+      fill: { color: '#9aa8ff', intensity: 0.3, pos: [-6, 3, 6] },
+      fog: { color: '#1e1610', near: 9, far: 24 },
+      vignette: { color: '#100a06', strength: 0.62, warm: '#ffe0c018' },
+    });
+    neonTubes(s, s.wallAt(640, 10, 2).y, [-4.5, 4.5], 2.4);
+
+    // plaque « SALLE DE PAUSE » et banderole de grève (GenAI) ; la banderole tombe à la fin de la grève
+    poster(s, [1000, 40, 150, 100], 'pause');
+    const banner = poster(s, [735, 18, 240, 150], 'greve');
+    s.when({ notFlags: ['st_greve_finie'] }, banner);
+    inkStamp(s, 1040, 120, tr('props.station.strikeStamp'));
+
+    // ── PERCO : billboard GenAI, vapeur colérique (en grève) puis paisible ──
+    const pz = 0.7;
+    const p = s.stand(s.rect('perco'));
+    const ph = p.h * 0.98;
+    const perco = billboardSheet(PERCO_SHEET, 2, ph, PERCO_ASPECT, { tint: '#fff6ee', shadow: ph * PERCO_ASPECT * 0.45 });
+    s.spot('perco', at(perco, p.x, 0, pz));
+    const steam = at(glow('#ffffff', 0.7, 0.5), p.x + ph * PERCO_ASPECT * 0.22, ph * 0.98, pz + 0.05);
+    s.add(steam);
+    s.animate((t) => {
+      const on = s.is(GREVE_FINIE);
+      perco.userData.setFrame(on ? 1 : 0);
+      // en grève : tremblement de colère + bouffées ; au travail : ronron, vapeur douce
+      perco.position.x = p.x + (on ? 0 : Math.sin(t * 31) * 0.006 * (Math.sin(t * 0.9) > 0.6 ? 1 : 0));
+      const k = (t * (on ? 0.35 : 0.9)) % 1;
+      steam.position.y = ph * 0.98 + k * (on ? 0.5 : 1.1);
+      steam.material.opacity = (1 - k) * (on ? 0.25 : 0.55);
+      steam.scale.setScalar(0.5 + k * (on ? 0.6 : 1.2));
+    });
+
+    // ── piquet de grève : gobelets en rang, minuscules pancartes ──
+    const pq = s.stand(s.rect('piquet'));
+    const picket = new THREE.Group();
+    const signs = [tr('props.station.cupNo'), tr('props.station.cupNotToday'), '1985', tr('props.station.cupNo'), tr('props.station.cupNotToday'), '1985', tr('props.station.cupNo')];
+    signs.forEach((txt, i) => {
+      const x = -pq.w / 2 + 0.15 + i * ((pq.w - 0.3) / (signs.length - 1));
+      const cup = new THREE.Group();
+      cup.add(at(cyl(0.07, 0.055, 0.18, '#f6efdc', { seg: 12 }), 0, 0.09, 0));
+      cup.add(at(cyl(0.006, 0.006, 0.24, '#8a6a3a', { edges: false }), 0.05, 0.3, 0));
+      cup.add(at(label(txt, 0.2, 0.09, { color: '#c0392b', bg: '#f6efdc', bold: true }), 0.05, 0.4, 0.01));
+      picket.add(at(cup, x, 0, (i % 2) * 0.12));
+    });
+    s.spot('piquet', at(picket, pq.x, 0, pq.z));
+    s.animate((t) => picket.children.forEach((c, i) => (c.rotation.z = Math.sin(t * 3 + i) * 0.04)));
+
+    // ── panneau syndical : liège, préavis, tract, l'accord P-15 punaisé ──
+    const pz2 = 0.08;
+    const ps = s.fit(s.rect('panneau_syndical'), pz2);
+    const cork = new THREE.Group();
+    cork.add(at(box(ps.w, ps.h, 0.04, '#b08a5a'), 0, 0, 0), at(box(ps.w * 1.04, ps.h * 1.04, 0.03, '#5a3a22'), 0, 0, -0.01));
+    cork.add(at(label(tr('props.station.notice'), ps.w * 0.42, ps.h * 0.4, { color: '#1a1a1a', bg: '#f6efdc', bold: true }), -ps.w * 0.22, ps.h * 0.18, 0.03));
+    cork.add(at(label(tr('props.station.coffeeRight'), ps.w * 0.36, ps.h * 0.26, { color: '#f6efdc', bg: '#c0392b', bold: true }), -ps.w * 0.24, -ps.h * 0.24, 0.03));
+    const accord = new THREE.Group();
+    accord.add(at(box(ps.w * 0.36, ps.h * 0.6, 0.01, '#f6efdc'), 0, 0, 0));
+    accord.add(at(label('P-15', ps.w * 0.3, ps.h * 0.12, { color: '#f6efdc', bg: '#1f7f73', bold: true }), 0, ps.h * 0.22, 0.008)); // i18n-ignore (référence)
+    for (let i = 0; i < 4; i++) accord.add(at(box(ps.w * 0.26, 0.012, 0.004, '#8a8070', { edges: false }), 0, ps.h * (0.06 - i * 0.07), 0.008));
+    accord.add(at(sphere(0.025, '#c0392b'), 0, ps.h * 0.29, 0.02));
+    const accordObj = at(accord, ps.w * 0.24, 0, 0.03);
+    cork.add(accordObj);
+    s.when({ notFlags: ['st_accord_pris'] }, accordObj);
+    s.spot('panneau_syndical', onTop(at(cork, ps.x, ps.y, pz2)));
+
+    // ── frigo : caisson blanc, poignée, mot GenAI « NE PAS TOUCHER AU YAOURT » ──
+    const fr = s.stand(s.rect('frigo'));
+    const fridge = new THREE.Group();
+    const fw = fr.w * 0.9;
+    const fh = fr.h * 0.95;
+    fridge.add(at(box(fw, fh, 0.7, '#e8e8e0'), 0, fh / 2, 0));
+    fridge.add(at(box(fw * 0.96, 0.02, 0.02, '#a0a098', { edges: false }), 0, fh * 0.7, 0.36));
+    fridge.add(at(box(0.04, fh * 0.3, 0.06, '#a0a098'), -fw * 0.4, fh * 0.45, 0.37));
+    const note = stSign('yaourt', fw * 0.45, fh * 0.32);
+    fridge.add(at(note.mesh, fw * 0.08, fh * 0.45, 0.356));
+    s.spot('frigo', at(fridge, fr.x, 0, fr.z));
+
+    pneumaticTube(s);
+    bobHere(s);
+    doorToCorridor(s, BROWN);
+    s.add(at(pool('#ffd8a8', 3, 2, 0.1), 0, 0.01, 4));
+  },
+};
+
+const REVEILLE: Condition = { flags: ['st_delaigue_reveille'] };
+
+/**
+ * 9. Bureau du Sous-Chef Adjoint : un placard à balais reconverti (étagères de produits, balais, seau).
+ * M. Delaigue derrière son bureau (billboard GenAI : 0 endormi · 1 réveillé, `st_delaigue_reveille`),
+ * fax qui ronronne, stylo enchaîné, plaque « p.i. » et note de délégation (GenAI) au mur.
+ */
+export const stSousChef: RoomBuild = {
+  camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    delaigue: { fill: 0.7 },
+    note: { fill: 0.9, orbit: 6, fov: 34 },
+    plaque: { fill: 0.9, orbit: -6, fov: 34 },
+    fax: { fill: 1.1, lift: 0.3, fov: 36 },
+    balais: { fill: 0.8, orbit: 8, fov: 40 },
+  },
+  intro: 'delaigue',
+  build(s) {
+    const BLUE = '#5a6a80';
+    shell(s, { floor: { a: '#3e3a32', b: '#48443a', joint: '#24201a', tile: 0.5 }, wall: { top: '#a49c86', bottom: '#5e584a' }, trim: '#2e2a22', left: -9, right: 9 });
+    wallPanels(s, '#8a8270', -9, 9, 1.2, 8);
+    s.lights({
+      sky: '#f6f0e0',
+      ground: '#24201a',
+      ambient: 0.95,
+      key: { color: '#ffe8c8', intensity: 1.6, pos: [0, 8, 5], target: [0, 0, 0] },
+      points: [{ color: '#ffd08a', intensity: 3, pos: [0, 3.2, 1.6], distance: 4 }],
+      rim: { color: '#7c8fa8', intensity: 0.6, pos: [-6, 5, -4] },
+      fill: { color: '#9aa8ff', intensity: 0.25, pos: [6, 3, 6] },
+      fog: { color: '#16140f', near: 8, far: 22 },
+      vignette: { color: '#0c0a06', strength: 0.72, warm: '#ffe0b018' },
+    });
+    // une seule ampoule nue au plafond (c'est un placard)
+    const bulbY = s.wallAt(640, 20, 1.5).y;
+    s.add(at(sphere(0.12, '#fff2c0', { glow: true }), 0, bulbY, 1.5), at(cyl(0.01, 0.01, 0.6, '#2a2830', { edges: false }), 0, bulbY + 0.35, 1.5), at(glow('#ffe0a0', 2.5, 0.35), 0, bulbY, 1.5));
+
+    // étagères de produits d'entretien en haut du mur, au-dessus des affiches (Gary se sent chez lui)
+    const shelfY0 = s.wallAt(640, 100, 0.25).y;
+    for (const [x0, x1] of [[-7.5, -1.7], [1.7, 7.5]] as [number, number][]) {
+      for (let i = 0; i < 2; i++) {
+        const y = shelfY0 + i * 0.75;
+        s.add(at(box(x1 - x0, 0.05, 0.4, '#6a5a3a'), (x0 + x1) / 2, y, 0.25));
+        for (let k = 0; k < 9; k++) {
+          const c = ['#3fa0d0', '#e0c040', '#d04a4a', '#5ab05a', '#f6efdc'][(i + k) % 5];
+          s.add(at(cyl(0.08, 0.1, 0.32, c, { seg: 10 }), x0 + 0.3 + k * ((x1 - x0 - 0.6) / 8), y + 0.18, 0.25));
+        }
+      }
+    }
+
+    // plaque « H. DELAIGUE — SOUS-CHEF ADJOINT p.i. » et note de délégation (GenAI)
+    s.spot('plaque', poster(s, s.rect('plaque'), 'souschef'));
+    s.spot('note', poster(s, s.rect('note'), 'delegation'));
+
+    // ── bureau, fax, stylo enchaîné ; M. Delaigue derrière ──
+    const zb = 1.2;
+    const zg = 0.55;
+    const top = s.wallAt(640, 360, zb).y;
+    const L = s.wallAt(470, 360, zb).x;
+    const R = s.wallAt(830, 360, zb).x;
+    const dw = R - L;
+    const dx = (L + R) / 2;
+    const desk = new THREE.Group();
+    desk.add(at(box(dw, top, 0.6, '#6a5040'), 0, top / 2, 0));
+    desk.add(at(box(dw * 1.04, 0.06, 0.8, '#c8b898'), 0, top + 0.03, -0.05));
+    desk.add(at(label(tr('props.station.deputyDesk'), dw * 0.5, top * 0.16, { color: '#f6efdc', bg: BLUE, bold: true }), 0, top * 0.66, 0.305));
+    // stylo enchaîné
+    const pen = at(cyl(0.012, 0.012, 0.2, '#1f4fa0', { edges: false }), -dw * 0.32, top + 0.07, 0.15);
+    pen.rotation.z = Math.PI / 2;
+    desk.add(pen);
+    for (let i = 0; i < 6; i++) desk.add(at(sphere(0.012, '#c9ced6', { seg: 6 }), -dw * 0.4 + i * 0.03, top + 0.065, 0.2));
+    s.add(at(desk, dx, 0, zb));
+    // fax (hotspot) sur le plateau, feuille « RÉUNION REPORTÉE » qui sort lentement
+    const fx = s.fit(s.rect('fax'), zb);
+    const fax = new THREE.Group();
+    fax.add(at(box(0.6, 0.18, 0.45, '#5a5f6a'), 0, 0.09, 0), at(box(0.5, 0.03, 0.2, '#3a3e44'), 0, 0.19, -0.05));
+    fax.add(at(sphere(0.02, '#4fe07a', { glow: true }), 0.22, 0.19, 0.18));
+    const sheet = at(label(tr('props.station.faxMeeting'), 0.4, 0.3, { color: '#1a1a1a', bg: '#f6efdc', bold: true }), 0, 0.3, 0.12);
+    sheet.rotation.x = -0.9;
+    fax.add(sheet);
+    s.animate((t) => (sheet.position.z = 0.12 + ((t * 0.04) % 0.12)));
+    s.spot('fax', at(fax, fx.x, top + 0.06, zb + 0.05));
+
+    const g = s.fit(s.rect('delaigue'), zg);
+    const base = top - 0.2;
+    const h = Math.min(g.y + g.h / 2 - base, (g.w * 1.25) / DELAIGUE_ASPECT);
+    const npc = billboardSheet(DELAIGUE_SHEET, 2, h, DELAIGUE_ASPECT, { tint: '#fff6ec', shadow: 0.01 });
+    const sp = npc.userData.sprite as THREE.Sprite;
+    const sy = sp.scale.y;
+    s.spot('delaigue', at(npc, g.x, base, zg));
+    // « Z z z » qui monte tant qu'il dort
+    const zzz = at(label(tr('props.station.zzz'), 0.5, 0.25, { color: '#f6efdc', bold: true }), g.x + 0.6, base + h * 0.85, zg + 0.1);
+    s.when({ notFlags: ['st_delaigue_reveille'] }, zzz);
+    s.animate((t) => {
+      const awake = s.is(REVEILLE);
+      npc.userData.setFrame(awake ? 1 : 0);
+      // endormi : grosse respiration de ronfleur ; réveillé : respiration de fonctionnaire
+      sp.scale.y = sy * (1 + Math.sin(t * (awake ? 1.1 : 0.7)) * (awake ? 0.006 : 0.018));
+      const k = (t * 0.3) % 1;
+      zzz.position.y = base + h * (0.8 + k * 0.25);
+      (zzz.material as THREE.MeshBasicMaterial).opacity = 1 - k;
+    });
+    (zzz.material as THREE.MeshBasicMaterial).transparent = true;
+
+    // ── balais, pelle, seau rouge, serpillière (pas Josiane) ──
+    const bl = s.stand(s.rect('balais'));
+    const brooms = new THREE.Group();
+    for (let i = 0; i < 3; i++) {
+      const b = new THREE.Group();
+      b.add(at(cyl(0.025, 0.025, bl.h * 0.85, '#a07a4a', { edges: false }), 0, bl.h * 0.45, 0));
+      b.add(at(box(0.3, 0.14, 0.08, i === 1 ? '#3a6ab0' : '#d0b060'), 0, 0.07, 0));
+      b.rotation.z = -0.12 + i * 0.1;
+      brooms.add(at(b, -bl.w * 0.3 + i * bl.w * 0.22, 0, -0.1));
+    }
+    brooms.add(at(cyl(0.2, 0.16, 0.34, '#c0392b', { seg: 14 }), bl.w * 0.25, 0.17, 0.15));
+    const mop = new THREE.Group();
+    mop.add(at(cyl(0.02, 0.02, bl.h * 0.8, '#8a8a80', { edges: false }), 0, bl.h * 0.5, 0));
+    for (let i = 0; i < 9; i++) mop.add(at(cyl(0.012, 0.012, 0.3, '#d8d0c0', { edges: false }), Math.cos(i) * 0.06, bl.h * 0.08, Math.sin(i) * 0.06));
+    brooms.add(at(mop, bl.w * 0.38, 0, -0.2));
+    s.spot('balais', at(brooms, bl.x, 0, bl.z));
 
     bobHere(s);
-    doorToCorridor(s, RUST);
-    s.add(at(pool('#ffe0c0', 3, 2, 0.08), 0, 0.01, 4));
+    doorToCorridor(s, BLUE);
+    s.add(at(pool('#ffe0a0', 3, 2, 0.1), 0, 0.01, 4));
   },
 };
