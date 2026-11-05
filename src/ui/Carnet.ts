@@ -202,6 +202,42 @@ function pieceIcon(scene: Phaser.Scene, state: GameState, icon: string | undefin
 
 export type CarnetButton = Phaser.GameObjects.Container & { setUnread(on: boolean): void };
 
+/**
+ * Trombone Gem qui pince le bord haut d'une feuille (bord à y = 0, coords locales ×k) :
+ * `back` = jambe longue + grand coude, à dessiner AVANT la feuille (seul le coude dépasse au-dessus
+ * du bord, le reste est masqué par le papier) ; `front` = l'autre jambe, coude du bas, boucle
+ * intérieure, à dessiner APRÈS la feuille. Le papier passe entre les deux fils.
+ * Sans `inner` (petite taille), la face avant s'arrête à la remontée du coude du bas.
+ */
+function paperclip(g: Phaser.GameObjects.Graphics, x: number, y: number, k: number, part: 'back' | 'front', inner = true): void {
+  // fil : a = jambe avant extérieure, b / c = boucle intérieure, d = jambe arrière (longue)
+  const [a, b, c, d] = inner ? [0, 5, 12, 18] : [0, 0, 9, 18];
+  const top = -16;
+  const bot = 50;
+  const R = (d - a) / 2;
+  const r = (c - a) / 2;
+  const X = (u: number) => x + u * k;
+  const Y = (v: number) => y + v * k;
+  g.beginPath();
+  if (part === 'back') {
+    g.moveTo(X(d), Y(40));
+    g.lineTo(X(d), Y(top + R));
+    g.arc(X(a + R), Y(top + R), R * k, 0, -Math.PI, true);
+    g.lineTo(X(a), Y(2));
+  } else {
+    g.moveTo(X(a), Y(0));
+    g.lineTo(X(a), Y(bot - r));
+    g.arc(X(a + r), Y(bot - r), r * k, Math.PI, 0, true);
+    if (inner) {
+      const ri = (c - b) / 2;
+      g.lineTo(X(c), Y(4 + ri));
+      g.arc(X(b + ri), Y(4 + ri), ri * k, 0, -Math.PI, true);
+      g.lineTo(X(b), Y(38));
+    } else g.lineTo(X(c), Y(14));
+  }
+  g.strokePath();
+}
+
 /** Bouton carré « carnet » (touche C) : dossier à trombone, même habillage que ♪ / PLAN ; pastille « nouveau ». */
 export function makeCarnetToggle(scene: Phaser.Scene, x: number, y: number, size: number, label: string, onOpen: () => void): CarnetButton {
   const g = scene.add.graphics();
@@ -216,6 +252,11 @@ export function makeCarnetToggle(scene: Phaser.Scene, x: number, y: number, size
     // dossier : onglet + chemise, feuille qui dépasse, lignes manuscrites
     g.fillStyle(accent, 0.3);
     g.fillRect(-11 * s, -10 * s, 9 * s, 4 * s);
+    // trombone : fil arrière d'abord (coude au-dessus du bord de la feuille, jambe masquée)
+    const warm = hex(COLORS.warm);
+    const ck = 0.27 * s;
+    g.lineStyle(1.8 * s, warm, 1);
+    paperclip(g, 3.6 * s, -9 * s, ck, 'back', false);
     g.fillStyle(0xf3ecd8, 0.95);
     g.fillRect(-8 * s, -9 * s, 17 * s, 18 * s);
     g.lineStyle(1.2 * s, INK_N, 0.8);
@@ -224,11 +265,9 @@ export function makeCarnetToggle(scene: Phaser.Scene, x: number, y: number, size
     g.fillRect(-12 * s, -6 * s, 24 * s, 17 * s);
     g.lineStyle(1.8 * s, accent, 1);
     g.strokeRect(-12 * s, -6 * s, 24 * s, 17 * s);
-    // trombone (deux boucles) sur le bord haut
-    const warm = hex(COLORS.warm);
+    // trombone : fil avant, par-dessus la feuille (elle passe entre les deux fils)
     g.lineStyle(1.8 * s, warm, 1);
-    g.strokeRoundedRect(4 * s, -13 * s, 5 * s, 13 * s, 2.4 * s);
-    g.strokeRoundedRect(5.4 * s, -11 * s, 2.4 * s, 8 * s, 1.2 * s);
+    paperclip(g, 3.6 * s, -9 * s, ck, 'front', false);
     if (unread) {
       g.fillStyle(COLORS.ink, 1);
       g.fillCircle(size / 2 - 4, -size / 2 + 4, 7.5);
@@ -347,6 +386,12 @@ export class CarnetOverlay {
     this.ph = H - this.py * 2;
     const { pw, ph } = this;
     const sheet = scene.add.container(this.px, this.py).setAngle(touch ? 0 : 0.4);
+    // trombone sur le coin, fil arrière : posé avant la feuille, qui en masque la jambe
+    const CLIP = 0x9aa0a8;
+    const clipX = pw - 64;
+    const clipBack = scene.add.graphics();
+    clipBack.lineStyle(4, CLIP, 1);
+    paperclip(clipBack, clipX, 0, 1, 'back');
     const paper = scene.add.graphics();
     paper.fillStyle(0x000000, 0.35);
     paper.fillRect(8, 10, pw, ph);
@@ -366,15 +411,19 @@ export class CarnetOverlay {
     paper.lineStyle(2, INK_N, 0.25);
     paper.lineBetween(this.split, 96, this.split, ph - 24);
     const block = scene.add.zone(0, 0, pw, ph).setOrigin(0).setInteractive();
-    sheet.add([paper, block]);
+    sheet.add([clipBack, paper, block]);
     sheet.add(scene.add.text(62, 20, t('carnet.title'), { fontFamily: DISPLAY, fontSize: touch ? '24px' : '28px', color: INK }).setLetterSpacing(2));
     sheet.add(scene.add.text(64, 58, t('carnet.sub'), { fontFamily: FONT, fontSize: '12px', fontStyle: '700', color: DIM, wordWrap: { width: pw - 360 } }).setLetterSpacing(1.5));
     sheet.add(scene.add.text(pw - 340, 26, t('carnet.stamp'), { fontFamily: DISPLAY, fontSize: '24px', color: RED }).setAngle(-8).setAlpha(0.55));
-    // trombone sur le coin
+    // trombone, fil avant (par-dessus la feuille) : ombre portée sur le papier, empreinte de la
+    // jambe arrière qui marque la feuille, puis le fil
     const clip = scene.add.graphics();
-    clip.lineStyle(4, 0x9aa0a8, 1);
-    clip.strokeRoundedRect(pw - 64, -18, 18, 60, 9);
-    clip.strokeRoundedRect(pw - 59, -10, 8, 40, 4);
+    clip.lineStyle(4, 0x000000, 0.14);
+    paperclip(clip, clipX + 2, 2, 1, 'front');
+    clip.lineStyle(2, INK_N, 0.12);
+    clip.lineBetween(clipX + 18, 3, clipX + 18, 40);
+    clip.lineStyle(4, CLIP, 1);
+    paperclip(clip, clipX, 0, 1, 'front');
     sheet.add(clip);
     this.dyn = scene.add.container(0, 0);
     sheet.add(this.dyn);
