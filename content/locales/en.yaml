@@ -166,6 +166,16 @@ keys:
   scene.st-attente.hotspot.bob.label: B.O.B.
   scene.st-attente.exit.vers_sas.label: Arrivals Airlock
   scene.st-attente.exit.vers_guichet.label: Reception Desk
+  scene.st-attente.exit.vers_cafeteria.label: Cafeteria
+  scene.st-cafeteria.title: Cafeteria
+  scene.st-cafeteria.sector: Bureaucratic Station · Level 0 · Administrative catering
+  scene.st-cafeteria.hotspot.menu.label: “DISH OF THE DAY” board
+  scene.st-cafeteria.hotspot.vitrine.label: Sandwich display case
+  scene.st-cafeteria.hotspot.comptoir.label: Counter
+  scene.st-cafeteria.hotspot.cafe.label: “PERCO-JUNIOR” coffee machine
+  scene.st-cafeteria.hotspot.tables.label: Tables
+  scene.st-cafeteria.hotspot.bob.label: B.O.B.
+  scene.st-cafeteria.exit.vers_attente.label: Waiting Room
   item.ticket_douane.name: Customs ticket
   item.ticket_9848.name: Ticket No. 9848
   item.plante.name: Mr Ficus (plastic plant)

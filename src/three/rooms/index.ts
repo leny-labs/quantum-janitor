@@ -9,7 +9,7 @@ import { galerie } from './galerie';
 import { labo } from './labo';
 import { nid } from './nid';
 import { placard } from './placard';
-import { stAttente, stSas } from './station';
+import { stAttente, stCafeteria, stSas } from './station';
 import { temple } from './temple';
 
 export interface RoomBuild {
@@ -42,6 +42,7 @@ export const ROOMS: Record<string, RoomBuild> = {
   // ch.1 « La Station Bureaucratique » (scènes st-*)
   'st-sas': stSas,
   'st-attente': stAttente,
+  'st-cafeteria': stCafeteria,
 };
 
 /**

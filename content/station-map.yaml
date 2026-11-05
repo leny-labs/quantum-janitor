@@ -85,6 +85,11 @@ bands:
         visible: { flags: [st_voit_borne] }
         unlock: { flags: [st_laisse] }
         refused: { fr: "ANIMAL NON ACCOMPAGNÉ", en: "UNACCOMPANIED PET" }
+      - scene: st-cafeteria
+        label: { fr: "Cafétéria", en: "Cafeteria" }
+        visible: { flags: [st_voit_afficheur] }
+        unlock: { flags: [st_laisse] }
+        refused: { fr: "EN RÉAPPROVISIONNEMENT DE SANDWICHS", en: "SANDWICH RESTOCKING IN PROGRESS" }
       - scene: st-guichet
         planned: true
         label: { fr: "Guichet d'Accueil", en: "Reception Desk" }

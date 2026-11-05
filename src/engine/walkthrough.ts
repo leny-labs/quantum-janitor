@@ -185,6 +185,9 @@ export const CHAPTERS: ChapterDef[] = [
       { useItem: ['ticket_douane', 'distributeur'] }, // fausse piste : le distributeur le recrache
       { use: 'squelette' }, // main serrée : il faut aspirer
       { use: 'plante' }, // +plante (payoff différé : couloir infini B, puis le Conseil)
+      { go: 'st-cafeteria' }, // détour d'ambiance : la vitrine (sandwich consigné de Mme Guichard)
+      { look: 'vitrine' },
+      { go: 'st-attente' },
       { talk: 'bob', pick: [0] }, // « Il n'en a plus besoin… » → éloge funèbre, +ticket_9848
       { go: 'fin' }, // guichet fermé, formulaire B-7/12 manquant : fin provisoire du stub
     ],

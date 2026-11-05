@@ -77,12 +77,13 @@ tache de café et sa main tremble).
 Portraits : SYLVIE et B.O.B. existants ; fonctionnaires = portraits fixes GenAI
 (buste, style `scribe-portrait.png`), repli texte. PERCO = prop 3D avec écran-visage.
 
-## 4. Lieux (13 + 1 gros plan)
+## 4. Lieux (13 + cafétéria + 1 gros plan)
 
 | # | id | Lieu | Description | On y trouve | Sorties |
 |---|---|---|---|---|---|
 | 1 | `st-sas` | **Sas d'Arrivée** · Douane dimensionnelle | Portique de scan, tapis roulant à l'arrêt, borne SYLVIE, panneau « BIENVENUE — VOTRE VISITE EST ENREGISTRÉE ». Le vaisseau encastré est remorqué à l'arrivée. | `ticket_douane` ; borne (statut de Gary) ; panneau « LES ANIMAUX DOIVENT ÊTRE ACCOMPAGNÉS » | `st-attente` (après `st_laisse`), `st-fourriere` |
-| 2 | `st-attente` | **Salle d'Attente** | Chaises vissées, afficheur « 9 847 », distributeur de tickets vide (« RUPTURE — FORMULAIRE DE RÉAPPROVISIONNEMENT AU GUICHET »), squelette M. Patience. | `ticket_9848` (via B.O.B.), `plante` (M. Ficus) | `st-sas`, `st-guichet` |
+| 2 | `st-attente` | **Salle d'Attente** | Chaises vissées, afficheur « 9 847 », distributeur de tickets vide (« RUPTURE — FORMULAIRE DE RÉAPPROVISIONNEMENT AU GUICHET »), squelette M. Patience. | `ticket_9848` (via B.O.B.), `plante` (M. Ficus) | `st-sas`, `st-cafeteria`, `st-guichet` |
+| 2 bis | `st-cafeteria` | **Cafétéria d'accueil** (idée Leny t225) | Porte de service au fond de la salle d'attente. Menu « PLAT DU JOUR : LE MÊME — PRIX : LE MÊME », vitrine réfrigérée scellée (sandwichs jambon-beurre fossilisés, place « RÉSERVÉ MME G. »), caisse ouverte de 10 h 12 à 10 h 14 (comme le guichet), PERCO-JUNIOR en « service minimum » solidaire de la grève. **Lore** : le sandwich de Mme Guichard est *consigné* — acheté le matin, rendu le soir, remis en vente le lendemain, « commande permanente n° 1, reconduction tacite » : le même depuis 41 ans. Lieu d'ambiance, sans puzzle (distinct de `st-pause`, aile B). | — (looks) | `st-attente` |
 | 3 | `st-guichet` | **Guichet d'Accueil** | Hygiaphone, rideau métallique, horloge 10 h 11, horaires « 10 h 12 – 10 h 14 », pupitre de remplissage. Mme Guichard derrière la vitre. | `formulaire` ; horloge (puzzle de l'éclat) | `st-attente`, `st-couloir-b`, gros plan `st-formulaire` (pupitre) |
 | 4 | `st-couloir-b` | **Couloir Infini B** · hub | Portes B-1, B-2… qui bouclent : on revient toujours au même extincteur. Une fois « dénoué » : hub des bureaux. | (puzzle de la plante) | `st-guichet`, `st-archives`, `st-tampons`, `st-reclamations`, `st-pause`, `st-sous-chef`, `st-ascenseur` (toutes après `st_couloir_resolu`) |
 | 5 | `st-archives` | **Archives Centrales** | Rayonnages jusqu'au plafond (et au-delà), fichier à tiroirs A–Z, photocopieuse « EN PANNE DE PAPIER », M. Duplicata. | dossier « PLUNK, GARRY » (copies) ; photocopieuse (réutilisée) | `st-couloir-b` |
@@ -97,6 +98,7 @@ Portraits : SYLVIE et B.O.B. existants ; fonctionnaires = portraits fixes GenAI
 | — | `st-formulaire` | **Gros plan : Formulaire B-7/12** | Le formulaire sur le pupitre : cases A–E qui se remplissent (tampons, signature, trombone des 3 exemplaires). Tableau de bord du chapitre. | — | retour (`st-guichet`) |
 
 Navigation : `st-fourriere` ⇄ `st-sas` ⇄ `st-attente` ⇄ `st-guichet` ⇄ `st-couloir-b`
+(`st-attente` ⇄ `st-cafeteria` par la porte du fond)
 ⇄ {archives, tampons, réclamations, pause, sous-chef, ascenseur} ; `st-ascenseur` ⇄
 `st-conseil` / `st-direction` selon le dossier glissé dans la fente.
 
@@ -115,7 +117,7 @@ refaire les couloirs).
   | Bande | Zones (id de scène) |
   |---|---|
   | Niveau −1 · Quai & Fourrière | `st-fourriere` |
-  | Niveau 0 · Accueil | `st-sas`, `st-attente`, `st-guichet` |
+  | Niveau 0 · Accueil | `st-sas`, `st-attente`, `st-cafeteria`, `st-guichet` |
   | Niveau 0 · Aile B (Couloir Infini) | `st-couloir-b`, `st-archives`, `st-tampons`, `st-reclamations`, `st-pause`, `st-sous-chef` |
   | Niveau ? · Ascenseur à Formulaires | `st-ascenseur` |
   | Niveau 7 · Conseil | `st-conseil` |
@@ -134,6 +136,7 @@ refaire les couloirs).
   |---|---|---|---|
   | `st-sas` | toujours | toujours | — |
   | `st-attente` | toujours | `st_laisse` (étape 3) | « ANIMAL NON ACCOMPAGNÉ » |
+  | `st-cafeteria` | `st_voit_afficheur` | `st_laisse` | « EN RÉAPPROVISIONNEMENT DE SANDWICHS » |
   | `st-guichet` | `st_voit_afficheur` | `st_ticket_9848` (étape 6) | « TICKET 9848 REQUIS » |
   | `st-fourriere` | `st_sabot_vu` | `st_eclat2` (étape 43) | « PERMIS DE LA DIRECTION » |
   | `st-couloir-b` | `st_formulaire` (9) | `st_formulaire` | « FORMULAIRE B-7/12 REQUIS » |
@@ -147,7 +150,7 @@ refaire les couloirs).
 - **Rendu** : papier crème quadrillé bleu, en-tête « PLAN DE LA STATION — FORMULAIRE P-0 ·
   DIFFUSION RESTREINTE », tampons « VU » / « ACCÈS REFUSÉ », légende ; FR + EN ; zones de tap
   ≥ 48 px CSS ; Échap / « Fermer » / clic hors du plan pour refermer.
-- **Scaffold (stub)** : seuls `st-sas` et `st-attente` existent et sont warpables ; les autres
+- **Scaffold (stub)** : seuls `st-sas`, `st-attente` et `st-cafeteria` existent et sont warpables ; les autres
   zones s'affichent inconnues ou verrouillées (`planned: true` dans le YAML : pas de scène
   vide dans le jeu, `validate-content` n'exige pas leur scène).
 
@@ -442,6 +445,10 @@ inventaire ; `npm run playthrough` passe ch0 inchangé + stub ch1.
 - **Attente** (mini-puzzle) : `afficheur` (9 847, `st_voit_afficheur`) + `squelette` (regarder →
   `st_voit_patience`, utiliser → `st_main_serree`) → B.O.B. (`st_patience`, indices gradués)
   aspire le ticket 9848 ; fausse piste `ticket_douane` sur le `distributeur` ; `plante` (M. Ficus).
+- **Cafétéria** (`st-cafeteria`, sortie `vers_cafeteria` au fond de l'attente, `dir: up`) : looks
+  `menu`, `vitrine`, `comptoir`, `cafe` (PERCO-JUNIOR), `tables`, `bob` ; réplique d'arrivée.
+  Pièce 3D `stCafeteria` ; GenAI `public/props/st/platdujour-{fr,en}.jpg` (menu à lettres) et
+  `sandwich.png` (détouré, vitrine + hublot de la porte). Pas d'objet ni de flag : hors chemin critique.
 - **Fin provisoire** : la sortie `vers_guichet` (`requires: ticket_9848`, `to: fin`) joue
   `st_stub_fin` (Mme Guichard, rideau baissé, formulaire B-7/12 manquant) → écran « LA SUITE
   ARRIVE… » avec Menu / Rejouer. `ChapterDef.endKnot` du ch1 = `st_stub_fin` (→ `st_suite` plus tard).

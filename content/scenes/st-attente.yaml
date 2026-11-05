@@ -110,6 +110,12 @@ exits:
     to: st-sas
     dir: left
     rect: [10, 140, 100, 320]
+  # porte de service au fond, entre la rangée de sièges et le distributeur
+  - id: vers_cafeteria
+    label: Cafétéria
+    to: st-cafeteria
+    dir: up
+    rect: [772, 165, 88, 285]
   # fin provisoire du stub : `to: fin` = st_stub_fin (le guichet est fermé, formulaire manquant)
   - id: vers_guichet
     label: Guichet d'Accueil

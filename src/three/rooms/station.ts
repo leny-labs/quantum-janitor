@@ -1,4 +1,4 @@
-// Chapitre 1 « La Station Bureaucratique » (docs/CHAPTER1.md) : sas d'arrivée et salle d'attente.
+// Chapitre 1 « La Station Bureaucratique » (docs/CHAPTER1.md) : sas d'arrivée, salle d'attente, cafétéria.
 // Une Klepsydra où le règlement a gagné : beige administratif, néons blafards, tout est
 // étiqueté, numéroté, tamponné. Objets de ces pièces aussi utilisés pour les icônes d'inventaire.
 import * as THREE from 'three';
@@ -9,7 +9,7 @@ import { BobAspirRig } from './bobaspire';
 import { bobSpot } from './bobspot';
 import { pressable } from '../press';
 import type { RoomBuild } from './index';
-import { against, shell, wallPanels } from './shell';
+import { against, backDoor, shell, wallPanels } from './shell';
 import type { Stage } from '../Stage';
 
 const BEIGE = { top: '#cfc6a6', bottom: '#8f8668' };
@@ -100,6 +100,7 @@ const SIGNS = {
   animaux: { fr: 768 / 515, en: 768 / 515 },
   horaires: { fr: 1, en: 1 },
   patience: { fr: 768 / 573, en: 768 / 573 },
+  platdujour: { fr: 768 / 573, en: 768 / 573 },
 } as const;
 type SignId = keyof typeof SIGNS;
 
@@ -414,9 +415,179 @@ export const stAttente: RoomBuild = {
       sign.rotation.y = (dir * Math.PI) / 2;
       s.add(sign);
     }
+    // porte de service de la cafétéria, au fond (hublot, plaque, sandwich peint sur la vitre)
+    const { door: cafDoor, f: cf } = backDoor(s, s.rect('vers_cafeteria'), 0.1, '#4a4232', '#7a6f52');
+    const port = at(cyl(cf.w * 0.22, cf.w * 0.22, 0.04, '#bfe6ff', { seg: 24 }), 0, cf.h * 0.16, 0.03);
+    port.rotation.x = Math.PI / 2;
+    cafDoor.add(port, at(torus(cf.w * 0.22, 0.03, '#2a2830'), 0, cf.h * 0.16, 0.05));
+    cafDoor.add(at(box(cf.w * 0.5, 0.06, 0.04, '#c9ced6'), 0, -cf.h * 0.06, 0.04));
+    cafDoor.add(at(label(tr('props.station.toCafe'), cf.w * 1.25, 0.3, { color: '#f6efdc', bg: '#b5562a', bold: true }), 0, cf.h / 2 + 0.22, 0.06));
+    cafDoor.add(at(billboard(SANDWICH_URL, cf.w * 0.3, SANDWICH_ASPECT, { shadow: 0 }), 0, cf.h * 0.06, 0.08));
     const note = s.fitX([1180, 250, 70, 70], 9);
     const notice = at(label(tr('props.station.takeTicket'), note.d * 0.9, note.h * 0.8, { color: '#1a1a1a', bg: '#f6efdc', bold: true }), 8.88, note.y, note.z);
     notice.rotation.y = -Math.PI / 2;
     s.add(notice, at(pool('#ffd166', 3, 2, 0.1), 0, 0.01, 4));
+  },
+};
+
+/** Sandwich consigné (GenAI, détouré) : vitrine de la cafétéria, hublot de sa porte. */
+const SANDWICH_URL = `${import.meta.env.BASE_URL}props/st/sandwich.png`;
+const SANDWICH_ASPECT = 401 / 384;
+
+/**
+ * 2 bis. Cafétéria d'accueil (porte au fond de la Salle d'Attente). Lieu d'ambiance, sans puzzle :
+ * le menu « LE MÊME », la vitrine aux sandwichs consignés (celui de Mme Guichard), la caisse aux
+ * horaires du guichet, PERCO-JUNIOR en service minimum. Distincte de la Salle de Pause (aile B).
+ */
+export const stCafeteria: RoomBuild = {
+  camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    menu: { fill: 0.5 },
+    vitrine: { fill: 0.75, orbit: -6 },
+    comptoir: { fill: 0.75 },
+    cafe: { fill: 0.75, orbit: 6 },
+    tables: { fill: 0.7, orbit: 8 },
+  },
+  build(s) {
+    shell(s, { floor: { a: '#6a5a44', b: '#e0d6bc', joint: '#4a3e30', tile: 0.6 }, wall: { top: '#d2c39a', bottom: '#8a7a58' }, trim: '#5a4630', left: -9, right: 9 });
+    wallPanels(s, '#b5a67e', -9, 9, 1.6, 8);
+    s.lights({
+      sky: '#fff2d8',
+      ground: '#3a3024',
+      ambient: 1.2,
+      key: { color: '#fff0d0', intensity: 2.1, pos: [1, 9, 6], target: [0, 0, 0] },
+      points: [
+        { color: '#9fd8ff', intensity: 3, pos: [-2.6, 1.6, 1.8], distance: 3.5 },
+        { color: '#ffb066', intensity: 3, pos: [3.6, 2.6, 1.6], distance: 4 },
+      ],
+      rim: { color: '#ffd166', intensity: 0.5, pos: [6, 5, -4] },
+      fill: { color: '#9aa8ff', intensity: 0.35, pos: [-6, 3, 6] },
+      fog: { color: '#2a2218', near: 9, far: 26 },
+      vignette: { color: '#120e08', strength: 0.6, warm: '#ffe0a018' },
+    });
+    neonTubes(s, s.wallAt(640, 10, 2).y, [-3.5, 3.5], 2);
+
+    // frise carrelée à mi-mur (cantine) et menu GenAI « PLAT DU JOUR : LE MÊME »
+    const fr = s.fit([0, 228, 1280, 18], 0.03);
+    s.add(at(plane(18, fr.h, '#ffffff', { map: stripeTexture('#e6dcc0', '#b5562a', 48) }), 0, fr.y, 0.03));
+    poster(s, s.rect('menu'), 'platdujour');
+    inkStamp(s, 560, 150, tr('props.station.stampSeen'));
+    // passe-plat « RETOUR PLATEAUX » (rideau baissé), au-dessus de B.O.B.
+    const hatch = s.fit([150, 110, 200, 110], 0.05);
+    s.add(at(box(hatch.w * 1.08, hatch.h * 1.1, 0.08, '#5a4630'), hatch.x, hatch.y, 0.04));
+    s.add(at(plane(hatch.w, hatch.h * 0.8, '#ffffff', { map: stripeTexture('#9aa0a8', '#7a8088', 14) }), hatch.x, hatch.y - hatch.h * 0.08, 0.09));
+    s.add(onTop(at(label(tr('props.station.trayReturn'), hatch.w * 0.8, hatch.h * 0.24, { color: '#f6efdc', bg: '#5a4630', bold: true }), hatch.x, hatch.y + hatch.h * 0.4, 0.1)));
+
+    // ── vitrine réfrigérée : socle inox, caisson vitré, deux étagères, trois sandwichs consignés ──
+    const vr = s.stand(s.rect('vitrine'));
+    const case_ = new THREE.Group();
+    const baseH = vr.h * 0.42;
+    const caseH = vr.h - baseH;
+    const cd = 0.9;
+    case_.add(at(box(vr.w * 0.96, baseH, cd, '#9aa0a8'), 0, baseH / 2, 0));
+    case_.add(at(plane(vr.w * 0.9, baseH * 0.3, '#ffffff', { map: stripeTexture('#7a8088', '#8d939c', 18) }), 0, baseH * 0.3, cd / 2 + 0.01));
+    case_.add(at(label(tr('props.station.sandwiches'), vr.w * 0.6, baseH * 0.26, { color: '#ffffff', bg: '#1f7f73', bold: true }), 0, baseH * 0.72, cd / 2 + 0.01));
+    case_.add(at(box(vr.w * 0.96, caseH, 0.06, '#d8e6ee'), 0, baseH + caseH / 2, -cd / 2 + 0.03));
+    for (const sx of [-1, 1]) case_.add(at(box(0.06, caseH, cd, '#c9ced6'), (sx * vr.w * 0.96) / 2, baseH + caseH / 2, 0));
+    case_.add(at(box(vr.w * 0.98, 0.07, cd * 1.04, '#c9ced6'), 0, vr.h, 0));
+    const shelfY = [baseH + 0.04, baseH + caseH * 0.5];
+    for (const y of shelfY) case_.add(at(box(vr.w * 0.9, 0.035, cd * 0.8, '#eef4f8', { edges: false }), 0, y, 0));
+    const sw = Math.min(vr.w * 0.28, caseH * 0.42);
+    // étage du bas : deux sandwichs ; étage du haut : un sandwich, et la place vide de Mme Guichard
+    for (const [x, y] of [[-0.25, 0], [0.18, 0], [-0.2, 1]] as const) {
+      const sand = at(billboard(SANDWICH_URL, sw / SANDWICH_ASPECT, SANDWICH_ASPECT, { tint: '#e8f0f4', shadow: sw * 0.4 }), x * vr.w, shelfY[y] + 0.02, -0.05);
+      case_.add(sand);
+    }
+    case_.add(at(label(tr('props.station.reserved'), vr.w * 0.26, caseH * 0.14, { color: '#c0392b', bg: '#f6efdc', bold: true }), vr.w * 0.2, shelfY[1] + caseH * 0.1, 0.1));
+    // vitre (froid bleuté) + plomb « NE PAS OUVRIR » ; lueur du groupe froid qui respire
+    case_.add(at(plane(vr.w * 0.94, caseH * 0.98, '#bfe6ff', { opacity: 0.2 }), 0, baseH + caseH / 2, cd / 2));
+    const seal = at(label(tr('props.station.sealed'), vr.w * 0.34, caseH * 0.1, { color: '#ffffff', bg: '#c0392b', bold: true }), vr.w * 0.25, baseH + caseH * 0.2, cd / 2 + 0.01);
+    seal.rotation.z = -0.12;
+    const cold = at(glow('#9fd8ff', vr.w * 1.2, 0.18), 0, baseH + caseH * 0.5, 0);
+    case_.add(seal, cold);
+    s.animate((t) => (cold.material.opacity = 0.14 + Math.sin(t * 0.9) * 0.05));
+    s.spot('vitrine', at(case_, vr.x, 0, against(vr.z, cd)));
+
+    // ── comptoir : caisse à manivelle, cloche « SONNEZ », pile de plateaux, horaires du guichet ──
+    const cr = s.stand(s.rect('comptoir'));
+    const counter = new THREE.Group();
+    const ch = cr.h * 0.62;
+    const ccd = 1;
+    counter.add(at(box(cr.w, ch, ccd, '#7a5a3c'), 0, ch / 2, 0), at(box(cr.w * 1.04, 0.08, ccd * 1.1, '#e6dcc0'), 0, ch + 0.04, 0));
+    counter.add(at(plane(cr.w * 0.96, ch * 0.18, '#ffffff', { map: stripeTexture('#e6dcc0', '#b5562a', 20) }), 0, ch * 0.78, ccd / 2 + 0.01));
+    // rail à plateaux
+    counter.add(at(box(cr.w * 1.02, 0.04, 0.3, '#c9ced6'), 0, ch * 0.55, ccd / 2 + 0.15));
+    const top = ch + 0.08;
+    const reg = new THREE.Group();
+    reg.add(at(box(0.62, 0.34, 0.45, '#5a5f6a'), 0, 0.17, 0), at(box(0.55, 0.16, 0.3, '#3a3f4a'), 0, 0.42, -0.05));
+    reg.add(at(label(tr('props.station.till'), 0.5, 0.12, { color: '#ffd166', bg: '#140a0a', bold: true, mono: true }), 0, 0.42, 0.105));
+    const crank = at(cyl(0.025, 0.025, 0.3, '#c9ced6', { edges: false }), 0.36, 0.2, 0);
+    crank.rotation.z = Math.PI / 2;
+    reg.add(crank, at(sphere(0.05, '#c0392b'), 0.5, 0.2, 0));
+    counter.add(at(reg, cr.w * 0.18, top, 0));
+    // cloche de comptoir
+    const bell = new THREE.Group();
+    bell.add(at(cyl(0.12, 0.13, 0.03, '#2a2830', { seg: 18 }), 0, 0.015, 0));
+    const dome = at(sphere(0.1, '#e8c26a', { seg: 18 }), 0, 0.03, 0);
+    dome.scale.y = 0.7;
+    bell.add(dome, at(sphere(0.02, '#e8c26a'), 0, 0.11, 0));
+    counter.add(at(bell, -cr.w * 0.08, top, 0.25));
+    counter.add(at(label(tr('props.station.bell'), 0.3, 0.08, { color: '#1a1a1a', bg: '#f6efdc', bold: true }), -cr.w * 0.08, top + 0.04, 0.42));
+    // pile de plateaux beiges
+    for (let i = 0; i < 6; i++) counter.add(at(box(0.6, 0.025, 0.42, i % 2 ? '#d8cfb4' : '#cfc6a6', { edges: i === 5 }), -cr.w * 0.34 + (i % 2) * 0.01, top + 0.0125 + i * 0.03, 0));
+    // chevalet « CAISSE 10 H 12 – 10 H 14 »
+    const tent = at(label(tr('props.station.tillHours'), 0.7, 0.28, { color: '#1a1a1a', bg: '#f6efdc', bold: true }), cr.w * 0.42, top + 0.16, 0.2);
+    tent.rotation.x = -0.15;
+    counter.add(tent);
+    s.spot('comptoir', at(counter, cr.x, 0, against(cr.z, ccd)));
+
+    // ── PERCO-JUNIOR : petite machine à café solidaire (service minimum) ──
+    const mr = s.stand(s.rect('cafe'));
+    const mach = new THREE.Group();
+    const md = 0.7;
+    mach.add(at(box(mr.w * 0.85, mr.h, md, '#3a3f4a'), 0, mr.h / 2, 0));
+    mach.add(at(box(mr.w * 0.9, mr.h * 0.06, md * 1.05, '#ff8c42'), 0, mr.h * 0.95, 0));
+    mach.add(at(label(tr('props.station.coffee'), mr.w * 0.7, mr.h * 0.07, { color: '#ffffff', bold: true }), 0, mr.h * 0.95, md * 0.53));
+    mach.add(at(label(tr('props.station.coffeeScreen'), mr.w * 0.62, mr.h * 0.12, { color: '#ffd166', bg: '#140a0a', bold: true, mono: true }), 0, mr.h * 0.78, md / 2 + 0.01));
+    for (let i = 0; i < 3; i++) mach.add(at(sphere(0.05, ['#c0392b', '#ffd166', '#7fffd4'][i], { glow: i === 2 }), (i - 1) * mr.w * 0.18, mr.h * 0.66, md / 2 + 0.02));
+    // niche de distribution + gobelet tiède
+    mach.add(at(box(mr.w * 0.5, mr.h * 0.18, 0.05, '#14120e', { edges: false }), 0, mr.h * 0.42, md / 2 + 0.005));
+    mach.add(at(cyl(0.07, 0.055, 0.16, '#f6efdc', { seg: 14 }), 0, mr.h * 0.35, md / 2 - 0.05));
+    mach.add(at(box(mr.w * 0.56, 0.03, 0.2, '#8d93a0'), 0, mr.h * 0.33 - 0.015, md / 2 - 0.04));
+    const steam = at(glow('#ffffff', 0.3, 0), 0, mr.h * 0.5, md / 2);
+    mach.add(steam);
+    s.animate((t) => {
+      const k = (t * 0.5) % 1;
+      steam.position.y = mr.h * (0.44 + k * 0.12);
+      steam.material.opacity = Math.sin(k * Math.PI) * 0.35;
+    });
+    s.spot('cafe', at(mach, mr.x, 0, against(mr.z, md)));
+
+    // ── tables rondes vissées + tabourets, plateau abandonné ──
+    const tr_ = s.stand(s.rect('tables'));
+    const tables = new THREE.Group();
+    const tH = tr_.h * 0.5;
+    const tR = Math.min(tr_.w * 0.4, 0.75);
+    tables.add(at(cyl(tR, tR, 0.06, '#e6dcc0', { seg: 28 }), 0, tH, 0), at(cyl(0.06, 0.06, tH, '#8d93a0', { edges: false }), 0, tH / 2, 0), at(cyl(0.3, 0.32, 0.04, '#5a5f6a', { seg: 18 }), 0, 0.02, 0));
+    for (const [sx, sz] of [[-1, 0.4], [1, -0.3]] as const) {
+      const st = new THREE.Group();
+      st.add(at(cyl(0.22, 0.22, 0.07, '#b5562a', { seg: 18 }), 0, tH * 0.62, 0), at(cyl(0.04, 0.04, tH * 0.62, '#8d93a0', { edges: false }), 0, tH * 0.31, 0));
+      tables.add(at(st, sx * tR * 1.15, 0, sz));
+    }
+    const tray = at(box(0.55, 0.025, 0.38, '#cfc6a6'), -0.05, tH + 0.045, 0.05);
+    tray.rotation.y = 0.3;
+    tables.add(tray, at(cyl(0.06, 0.045, 0.14, '#f6efdc', { seg: 12 }), 0.08, tH + 0.13, 0.05));
+    s.spot('tables', at(tables, tr_.x, 0, tr_.z));
+
+    bobHere(s);
+
+    // retour à la salle d'attente (mur de gauche)
+    const d = s.fitX(s.rect('vers_attente'), -9);
+    const door = new THREE.Group();
+    door.add(at(box(0.3, d.h, d.d * 1.12, '#5a4630'), 0, 0, 0), at(box(0.1, d.h * 0.94, d.d, '#8a7a58'), 0.15, -d.h * 0.03, 0));
+    s.add(at(door, -9, d.y, d.z));
+    const sign = at(label(tr('props.station.waitRoom'), d.d * 1.1, 0.35, { color: '#f6efdc', bg: '#1f7f73', bold: true }), -8.95, d.y + d.h / 2 + 0.3, d.z);
+    sign.rotation.y = Math.PI / 2;
+    s.add(sign, at(pool('#ffd166', 3, 2, 0.1), 0, 0.01, 4));
   },
 };
