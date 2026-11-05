@@ -83,8 +83,9 @@ export const overlayUrl = (id: string) => `portraits/${id}-robot.png`;
  * + planche `sheetUrl(id)` au layout SHEET, qui prime dès qu'elle est chargée
  * (Frère Élytre : _briefs/ch1/genai-fix/faces.py — mandibules qui s'écartent en
  * parlant, jamais de bouche). M. Sabot : planche GenAI (clignement, agacé, bouche sous la moustache).
+ * Mme Guichard (guichet) : même flux que Sabot (visage img2img recollé sur le buste, sandwich fixe).
  */
-const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png', sabot: 'portraits/sabot-portrait.png' };
+const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png', sabot: 'portraits/sabot-portrait.png', guichard: 'portraits/guichard-portrait.png' };
 
 /** Une frame de planche : expression + micro-mouvement du buste. */
 interface SheetFrame extends FacePose {
@@ -185,7 +186,7 @@ export const PORTRAIT_IDS = Object.keys(PORTRAITS);
  * Planches GenAI (docs/PORTRAIT_GENAI.md) : jamais rebakées, ni par
  * `bake:portraits` ni au runtime — le 3D suit l'image, pas l'inverse.
  */
-export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob', 'reine', 'scribe', 'sabot']);
+export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob', 'reine', 'scribe', 'sabot', 'guichard']);
 
 function makeRenderer(): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
