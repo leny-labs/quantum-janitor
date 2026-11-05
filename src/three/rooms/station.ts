@@ -2252,6 +2252,28 @@ export const stDirection: RoomBuild = {
  * `st_vaisseau_libere`), M. Sabot dans sa guérite (planche GenAI existante), panneau des tarifs (GenAI),
  * l'amende jaune sur le pare-brise (`st_amende`), marquage au sol de quai.
  */
+/** Largeur / profondeur (monde, × largeur du sprite) de l'ombre de contact CS-07. */
+const POD_SHADOW_W = 0.84;
+const POD_SHADOW_D = 0.42;
+/** Recul (× largeur) : centre de l'ellipse sur la ligne de contact des patins, pas devant (vue plongeante). */
+const POD_SHADOW_BACK = 0.17;
+let softShadowTex: THREE.Texture | undefined;
+/** Disque blanc → transparent (bords doux), teinté par le matériau : ombre de contact. */
+function softShadowTexture(): THREE.Texture {
+  if (softShadowTex) return softShadowTex;
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d')!;
+  const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  grad.addColorStop(0, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.45, 'rgba(255,255,255,0.8)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 128, 128);
+  softShadowTex = new THREE.CanvasTexture(c);
+  return softShadowTex;
+}
+
 export const stFourriere: RoomBuild = {
   camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
   shots: {
@@ -2307,8 +2329,20 @@ export const stFourriere: RoomBuild = {
     const ch = cv.h * 0.84; // 0.88 avant podZ : compense la perspective (même taille à l’écran)
     const podY = 0;
     const podZ = cv.z + 0.35;
-    const pod = billboardSheet(CAPSULE_SHEET, 2, ch, CAPSULE_ASPECT, { tint: '#ffffff', shadow: ch * CAPSULE_ASPECT * 0.45 });
+    const pod = billboardSheet(CAPSULE_SHEET, 2, ch, CAPSULE_ASPECT, { tint: '#ffffff', shadow: 0.01 });
+    pod.children[0].visible = false; // disque générique trop gros/sombre : ombre de contact dédiée ci-dessous
     s.spot('capsule_vaisseau', at(pod, cv.x, podY, podZ));
+    // ombre de contact : ellipse plate et douce sous les patins (largeur ≈ patins extérieurs),
+    // posée au sol sur la ligne de contact, dessinée juste avant la capsule
+    const podW = ch * CAPSULE_ASPECT;
+    const podShadow = new THREE.Mesh(
+      new THREE.PlaneGeometry(podW * POD_SHADOW_W, podW * POD_SHADOW_D),
+      new THREE.MeshBasicMaterial({ map: softShadowTexture(), color: '#000000', transparent: true, opacity: 0.34, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 }),
+    );
+    podShadow.rotation.x = -Math.PI / 2;
+    podShadow.renderOrder = 1; // après le sol (transparent), avant la capsule
+    pod.userData.sprite.renderOrder = 2;
+    s.add(at(podShadow, cv.x, 0.03, podZ - podW * POD_SHADOW_BACK));
     const nozzle = at(glow('#8fd0ff', 1.2, 0.5), cv.x + ch * CAPSULE_ASPECT * 0.38, podY + ch * 0.62, podZ - 0.05);
     s.add(nozzle);
     s.animate((t) => {
