@@ -461,7 +461,11 @@ export const stAttente: RoomBuild = {
       leaf.add(at(box(lw * 0.9, lh * 0.1, 0.03, '#a8aeb8'), 0, -lh / 2 + lh * 0.07, 0.045));
       cafDoor.add(at(leaf, cx, ly, 0.02));
     }
-    cafDoor.add(at(label(tr('props.station.toCafe'), cf.w * 0.9, 0.36, { color: '#f6efdc', bg: '#b5562a', bold: true }), 0, cf.h / 2 + 0.24, 0.06));
+    // enseigne posée sur le linteau (et plus au-dessus du cadre) : sinon elle mord le coin de l'afficheur
+    // « NOUS SERVONS LE N° » ; masquée pendant le zoom examine de l'afficheur.
+    const cafSign = at(label(tr('props.station.toCafe'), cf.w * 0.76, 0.28, { color: '#f6efdc', bg: '#b5562a', bold: true }), 0, cf.h / 2 - ft / 2, 0.14);
+    cafDoor.add(cafSign);
+    s.animate(() => (cafSign.visible = s.examining !== 'afficheur'));
     const note = s.fitX([1180, 250, 70, 70], 9);
     const notice = at(label(tr('props.station.takeTicket'), note.d * 0.9, note.h * 0.8, { color: '#1a1a1a', bg: '#f6efdc', bold: true }), 8.88, note.y, note.z);
     notice.rotation.y = -Math.PI / 2;
