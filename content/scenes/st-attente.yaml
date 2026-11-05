@@ -110,12 +110,12 @@ exits:
     to: st-sas
     dir: left
     rect: [10, 140, 100, 320]
-  # porte de service au fond, entre la rangée de sièges et le distributeur
+  # double porte battante au fond, entre la rangée de sièges (≤ 600 px) et le distributeur (860 px)
   - id: vers_cafeteria
     label: Cafétéria
     to: st-cafeteria
     dir: up
-    rect: [772, 165, 88, 285]
+    rect: [622, 168, 228, 282]
   # guichet d'accueil jouable (Mme Guichard, rideau, horloge 10 h 11) une fois le ticket en poche
   - id: vers_guichet
     label: Guichet d'Accueil

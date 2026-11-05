@@ -327,7 +327,7 @@ export const stAttente: RoomBuild = {
 
     // rangée de chaises vissées, le long du mur du fond : sièges GenAI (même dessin que la chaise de
     // M. Patience, qui fait partie de son sprite), du plus loin au plus près pour un tri propre.
-    // La rangée s'arrête à 550 px (plus de chaises à 645 / 740) : la porte CAFÉTÉRIA (772 px) respire.
+    // La rangée s'arrête à 550 px (plus de chaises à 645 / 740) : la double porte CAFÉTÉRIA (620-850 px) respire.
     const seatH = 1.12;
     for (let px = 75; px <= 550; px += 95) {
       if (px === PATIENCE_CHAIR) continue;
@@ -418,14 +418,34 @@ export const stAttente: RoomBuild = {
       sign.rotation.y = (dir * Math.PI) / 2;
       s.add(sign);
     }
-    // porte de service de la cafétéria, au fond (hublot, plaque, sandwich peint sur la vitre)
-    const { door: cafDoor, f: cf } = backDoor(s, s.rect('vers_cafeteria'), 0.1, '#4a4232', '#7a6f52');
-    const port = at(cyl(cf.w * 0.22, cf.w * 0.22, 0.04, '#bfe6ff', { seg: 24 }), 0, cf.h * 0.16, 0.03);
-    port.rotation.x = Math.PI / 2;
-    cafDoor.add(port, at(torus(cf.w * 0.22, 0.03, '#2a2830'), 0, cf.h * 0.16, 0.05));
-    cafDoor.add(at(box(cf.w * 0.5, 0.06, 0.04, '#c9ced6'), 0, -cf.h * 0.06, 0.04));
-    cafDoor.add(at(label(tr('props.station.toCafe'), cf.w * 1.25, 0.3, { color: '#f6efdc', bg: '#b5562a', bold: true }), 0, cf.h / 2 + 0.22, 0.06));
-    cafDoor.add(at(billboard(SANDWICH_URL, cf.w * 0.3, SANDWICH_ASPECT, { shadow: 0 }), 0, cf.h * 0.06, 0.08));
+    // porte de la cafétéria, au fond : double porte battante (deux vantaux, grands hublots où l'on
+    // voit le sandwich consigné, plaques de poussée, plinthes inox), enseigne à la largeur du cadre
+    const { door: cafDoor, f: cf } = backDoor(s, s.rect('vers_cafeteria'), 0.1, '#4a4232', '#2a2418');
+    const ft = Math.min(cf.w, cf.h) * 0.08;
+    const lw = (cf.w - 2 * ft) / 2 - 0.03;
+    const lh = cf.h - ft - 0.06;
+    const ly = -ft / 2 - 0.03;
+    const portR = Math.min(lw * 0.42, cf.h * 0.15);
+    const portY = cf.h * 0.14;
+    for (const side of [-1, 1]) {
+      const cx = side * (lw / 2 + 0.03);
+      const leaf = new THREE.Group();
+      leaf.add(at(box(lw, lh, 0.06, '#7a6f52'), 0, 0, 0));
+      // hublot : vitre éclairée (lumière de la cafétéria), bague sombre, sandwich derrière la vitre
+      const glass = at(cyl(portR, portR, 0.03, '#f2dcae', { seg: 28 }), 0, portY - ly, 0.035);
+      glass.rotation.x = Math.PI / 2;
+      leaf.add(glass, at(torus(portR, 0.045, '#2a2830'), 0, portY - ly, 0.06));
+      // (dessiné après les faisceaux des néons, sinon il ressort délavé)
+      const sh = portR * 1.4;
+      const sw = billboard(SANDWICH_URL, sh, SANDWICH_ASPECT, { shadow: 0 });
+      sw.userData.sprite.renderOrder = POSTER_ORDER;
+      leaf.add(at(sw, side * portR * 0.06, portY - ly - sh * 0.5, 0.07));
+      // plaque de poussée inox (côté du battement), plinthe de coup de pied
+      leaf.add(at(box(lw * 0.16, lh * 0.2, 0.03, '#c9ced6'), -side * lw * 0.32, -cf.h * 0.06 - ly, 0.045));
+      leaf.add(at(box(lw * 0.9, lh * 0.1, 0.03, '#a8aeb8'), 0, -lh / 2 + lh * 0.07, 0.045));
+      cafDoor.add(at(leaf, cx, ly, 0.02));
+    }
+    cafDoor.add(at(label(tr('props.station.toCafe'), cf.w * 0.9, 0.36, { color: '#f6efdc', bg: '#b5562a', bold: true }), 0, cf.h / 2 + 0.24, 0.06));
     const note = s.fitX([1180, 250, 70, 70], 9);
     const notice = at(label(tr('props.station.takeTicket'), note.d * 0.9, note.h * 0.8, { color: '#1a1a1a', bg: '#f6efdc', bold: true }), 8.88, note.y, note.z);
     notice.rotation.y = -Math.PI / 2;
