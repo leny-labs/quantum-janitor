@@ -507,6 +507,11 @@ export const stAttente: RoomBuild = {
  *  posé sur les tablettes de la vitrine de la cafétéria. */
 const SANDWICH_SHELF_URL = `${import.meta.env.BASE_URL}props/st/sandwich-pose.png`;
 const SANDWICH_SHELF_ASPECT = 412 / 341;
+/** Cuillère du plateau abandonné : même PNG GenAI que l'icône d'inventaire (256 × 238). */
+const SPOON_URL = `${import.meta.env.BASE_URL}inventory/cuillere.png`;
+const SPOON_ASPECT = 256 / 238;
+/** Tassement vertical du billboard (cuillère couchée sur le plateau, vue de ¾ haut). */
+const SPOON_FLAT = 0.55;
 
 /**
  * 2 bis. Cafétéria d'accueil (porte au fond de la Salle d'Attente). Lieu d'ambiance, sans puzzle :
@@ -520,6 +525,9 @@ export const stCafeteria: RoomBuild = {
     vitrine: { px: [470, 300], fill: 1.05, orbit: -5, fov: 38 },
     comptoir: { fill: 0.9, orbit: -4 },
     cafe: { px: [1030, 290], fill: 0.85, orbit: 3 },
+    // plateau abandonné : gobelet + cuillère ; la cuillère se prend d'un clic dans le plan.
+    // Cadrage explicite (le rayon auto du rect tombe tantôt sur la table, tantôt sur le sol du fond)
+    tables: { cam: { pos: [3.66, 1.66, 4.0], look: [4.72, 0.9, 2.8], fov: 38 }, picks: ['cuillere'] },
   },
   build(s) {
     shell(s, { floor: { a: '#6a5a44', b: '#e0d6bc', joint: '#4a3e30', tile: 0.6 }, wall: { top: '#d2c39a', bottom: '#8a7a58' }, trim: '#5a4630', left: -9, right: 9 });
@@ -660,14 +668,12 @@ export const stCafeteria: RoomBuild = {
     tray.rotation.y = 0.3;
     tables.add(tray, at(cyl(0.06, 0.045, 0.14, '#f6efdc', { seg: 12 }), 0.08, tH + 0.13, 0.05));
     s.spot('tables', at(tables, tr_.x, 0, tr_.z));
-    // cuillère en plastique beige en travers du plateau (hotspot `cuillere`, payoff Acte III : encreur)
-    const spoon = new THREE.Group();
-    spoon.add(at(box(0.34, 0.022, 0.045, '#fff3d6'), 0.07, 0, 0));
-    const bowl = at(sphere(0.07, '#fff8e6', { seg: 14 }), -0.15, 0.006, 0);
-    bowl.scale.set(1.35, 0.32, 0.9);
-    spoon.add(bowl);
-    spoon.rotation.y = 0.35;
-    s.spot('cuillere', at(spoon, tr_.x - 0.28, tH + 0.045, tr_.z + 0.38));
+    // cuillère en plastique beige sur le plateau (GenAI `inventory/cuillere.png`, la même image que
+    // l'icône d'inventaire ; hotspot `cuillere`, ramassable dans le plan d'examen des tables)
+    // billboard tassé en hauteur : posée à plat, vue de ¾ par la caméra de la pièce
+    const spoonW = 0.34;
+    const spoon = billboard(SPOON_URL, (spoonW / SPOON_ASPECT) * SPOON_FLAT, SPOON_ASPECT / SPOON_FLAT, { tint: '#ffffff', shadow: 0.12 });
+    s.spot('cuillere', at(spoon, tr_.x - 0.22, tH + 0.06, tr_.z + 0.32));
 
     bobHere(s);
 

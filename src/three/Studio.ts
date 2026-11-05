@@ -43,6 +43,8 @@ export const GENAI_ICONS = new Set([
   // Acte III (_briefs/acte3/genai/)
   'accord',
   'gobelet',
+  // cafétéria → Acte III (_briefs/cafeteria-cuillere-genai/)
+  'cuillere',
   // Acte IV (_briefs/acte4/genai/)
   'permis',
 ]);

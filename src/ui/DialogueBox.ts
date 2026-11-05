@@ -211,6 +211,15 @@ export class DialogueBox implements DialogueView {
     setCursor(this.scene, 'default');
   }
 
+  /** Passe la réplique en cours sans attendre (texte fini ou pas) — saut décidé par la scène. */
+  dismiss(): void {
+    if (this.typing && !this.typing.finished) this.typing.skip();
+    this.voice.idle();
+    const a = this.advance;
+    this.advance = null;
+    a?.();
+  }
+
   private tryAdvance(): void {
     // évite que le clic qui a ouvert la boîte ne la referme aussitôt
     if (this.scene.time.now - this.shownAt < 180) return;

@@ -113,8 +113,10 @@ hotspots:
     useItem:
       fragment: "L'éclat sur le ficus ? Il pourrait se mettre à pousser. Ou à voter. On n'a pas le temps pour l'un ni pour l'autre."
 
+  # zoom examine sur le plateau ; tant que la cuillère y est, la caméra reste et un clic dessus la prend
   - id: tables
     label: Tables
+    smart: look
     rect: [1105, 300, 165, 200]
     art:
       - { rect: [1115, 380, 145, 20], color: "#d8d2c0" }
@@ -123,13 +125,14 @@ hotspots:
       - say: "Des tables rondes, vissées au sol, comme les chaises de la salle d'attente. Sur l'une, un plateau abandonné : un gobelet vide, une serviette pliée en formulaire, et un ticket de caisse de 1985."
       - say: "Le montant total est « LE MÊME ». La TVA aussi."
       - if: { notItems: [cuillere], notFlags: [st_encreur_cafe] }
-        say: "Et une cuillère en plastique, posée en travers du plateau. Le seul couvert de la Station qui n'a pas été tamponné."
+        say: "Et une cuillère en plastique, abandonnée en travers du plateau. Le seul couvert de la Station qui n'a pas été tamponné. Elle n'attend que moi."
     use: "narrateur: Gary s'assoit une seconde. La chaise grince, puis affiche sur un petit écran : « TEMPS D'ATTENTE ESTIMÉ AVANT SERVICE : 41 ANS »."
     useItem:
       cuillere: "Je la repose ? Non. Quelqu'un la tamponnerait « OBJET TROUVÉ » et elle attendrait quarante et un ans de plus."
 
   # cuillère du plateau abandonné (après `tables` : plus petite, prioritaire au clic) → Acte III :
-  # remuer le café dans l'encreur sec (items.yaml, encreur + gobelet)
+  # remuer le café dans l'encreur sec (items.yaml, encreur + gobelet). Aussi cliquable DANS le zoom
+  # `tables` (stCafeteria.shots.tables.picks) : clic gauche sur la cuillère = Prendre.
   - id: cuillere
     label: Cuillère en plastique
     useLabel: Prendre

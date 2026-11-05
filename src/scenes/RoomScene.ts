@@ -90,6 +90,11 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   /** Flèche « retour » quand la caméra reste sur un travel d'examen (?shot=…). */
   private shotExit: Phaser.GameObjects.Container | null = null;
   private busy = false;
+  /**
+   * Objet ramassable (`ShotSpec.picks`) cliqué dans un plan d'examen pendant sa réplique :
+   * le reste du « Regarder » est sauté et l'objet est pris dans le plan, avant le retour.
+   */
+  private zoomPick: string | null = null;
   /** Plan d'arrivée en cours de travel : coupe sèche vers la vue de la pièce. */
   private skipCine: (() => void) | null = null;
   /** Carte de transition affichée (écran noir) : la pièce suivante apparaît au prochain `goto`. */
@@ -179,11 +184,25 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.input.on('pointermove', (p: Phaser.Input.Pointer) => {
       this.heldItem.setPosition(p.x + 14, p.y + 14);
       this.heldIcon.setPosition(p.x + 12, p.y + 12);
+      this.hoverInShot(p);
     });
     // clic dans le vide : reposer l'objet tenu ; en gros plan, sinon, reculer vers la pièce
     this.input.on('pointerdown', (p: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]) => {
       // plan d'arrivée : un clic / tap saute au plan de la pièce (la réplique, elle, se lit normalement)
       if (this.skipCine && !this.dialogueBox.isOpen) return this.skipCine();
+      // plan d'examen : clic sur un objet ramassable posé dans le cadre (cuillère sur le plateau…)
+      if (this.room.examining && p.y < ROOM_H && !p.rightButtonDown() && !state.selectedItem && !this.coin.isOpen) {
+        const pick = this.room.spotAt(p.x, p.y);
+        if (pick && this.busy) {
+          // pendant la réplique du « Regarder » : on saute la suite, la prise suit dans le plan
+          if (this.dialogueBox.isOpen && !this.skipCine) {
+            this.zoomPick = pick;
+            this.dialogueBox.dismiss();
+          }
+          return;
+        }
+        if (pick) return this.pickInShot(pick);
+      }
       // caméra rapprochée hors dialogue : n'importe quel clic dans la vue la ramène
       if (this.room.examining && !this.busy && p.y < ROOM_H) return this.leaveShot();
       if (over.length > 0 || p.y >= ROOM_H) return;
@@ -363,15 +382,31 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       const scene = this.session.state.scene;
       const move = shot ? this.room.examine(shot) : null;
       if (move) this.scenes.spots(false);
+      this.zoomPick = null;
+      let parked = false;
       try {
         await this.runner.run(i);
         if (move && this.room.examining === shot && this.session.state.scene === scene && this.sys.isActive()) {
           this.dialogueBox.close();
-          const back = this.room.release();
-          if (back) await back;
+          const pick = this.zoomPick;
+          this.zoomPick = null;
+          if (pick) {
+            await move; // le travel finit d'arriver : on voit la main prendre l'objet dans le plan
+            await this.runPick(pick);
+          }
+          if (!pick && this.room.hasPicks()) {
+            // il reste un objet à ramasser dans le cadre : la caméra reste, clic dessus = le prendre
+            parked = true;
+            await move;
+            this.showShotExit();
+          } else {
+            const back = this.room.release();
+            if (back) await back;
+          }
         }
       } finally {
-        if (move && this.sys.isActive()) this.scenes.spots(true);
+        this.zoomPick = null;
+        if (move && this.sys.isActive() && !parked) this.scenes.spots(true);
       }
     });
   }
@@ -730,12 +765,57 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       return;
     }
     this.scenes.spots(false, true);
+    this.showShotExit();
+  }
+
+  /** Flèche « retour » de la caméra restée sur un plan d'examen (le clic passe par `leaveShot`). */
+  private showShotExit(): void {
+    this.shotExit?.destroy();
     const g = this.add.graphics();
     drawNavButton(g, 28, 'down', 'idle');
     this.shotExit = this.add.container(W / 2, ROOM_H - 44, [g]).setDepth(20).setSize(64, 64);
     this.shotExit.setInteractive({ useHandCursor: true });
     this.shotExit.on('pointerover', () => drawNavButton(g, 28, 'down', 'hover'));
     this.shotExit.on('pointerout', () => drawNavButton(g, 28, 'down', 'idle'));
+  }
+
+  /** Verbe direct d'un hotspot ramassable du plan d'examen (prise de la cuillère…), joué dans le plan. */
+  private async runPick(id: string): Promise<void> {
+    const h = this.scenes.current().hotspots?.find((x) => x.id === id);
+    const v = h ? smartVerb(h) : null;
+    this.room.highlight(null);
+    if (!v) return;
+    await this.runner.run(v.action);
+    this.dialogueBox.close();
+  }
+
+  /** Clic sur un objet ramassable dans un plan d'examen resté ouvert : on le prend, puis retour à la pièce. */
+  private pickInShot(id: string): void {
+    this.shotExit?.destroy();
+    this.shotExit = null;
+    void this.locked(async () => {
+      try {
+        await this.runPick(id);
+        if (this.room.examining && this.sys.isActive()) {
+          const back = this.room.release();
+          if (back) await back;
+        }
+      } finally {
+        if (this.sys.isActive()) this.scenes.spots(true);
+      }
+    });
+  }
+
+  /** Survol dans un plan d'examen : l'objet ramassable s'éclaire (+ libellé « Prendre … » hors réplique). */
+  private hoverInShot(p: Phaser.Input.Pointer): void {
+    if (!this.room.examining || this.coin.isOpen || this.skipCine) return;
+    const id = p.y < ROOM_H && !this.session.state.selectedItem ? this.room.spotAt(p.x, p.y) : null;
+    this.room.highlight(id);
+    if (this.busy) return;
+    const h = id ? this.scenes.current().hotspots?.find((x) => x.id === id) : undefined;
+    const v = h ? smartVerb(h) : null;
+    this.hover.set(h && v ? t('hud.smart', { verb: v.label, target: h.label }) : null);
+    setCursor(this, h && v ? verbCursor(this.verbIcon(v, h)) : 'default');
   }
 
   /** Caméra restée sur un travel d'examen : retour à la vue de la pièce. */
@@ -802,6 +882,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   // ── ActionHost ───────────────────────────────────────────────────────
 
   async say(text: string, mood?: string): Promise<void> {
+    // objet ramassé en plein « Regarder » d'un plan d'examen : la description s'efface devant le geste
+    if (this.zoomPick) return;
     const line = this.session.dialogue.parseLine(text, 'gary');
     await this.spoken(line.speaker, line.text, mood);
   }

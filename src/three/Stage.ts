@@ -80,6 +80,12 @@ export interface ShotSpec {
   cam?: CameraSpec;
   /** Hotspot dont le rect sert au cadrage (plan nommé autrement que le hotspot : intro, mini-jeu). */
   of?: string;
+  /**
+   * Hotspots cliquables DANS ce plan (objet à ramasser posé sur l'objet examiné) : en vue
+   * rapprochée, un clic sur leur objet 3D lance leur verbe (`spotAt`) ; la caméra reste sur le
+   * plan tant qu'il en reste un visible (`hasPicks`).
+   */
+  picks?: string[];
 }
 
 /** Travel caméra en cours. */
@@ -237,6 +243,43 @@ export class Stage {
     // maillages seulement (les contours LineSegments ont un seuil de picking trop large)
     const shown = (o: THREE.Object3D | null): boolean => !o || (o.visible && shown(o.parent));
     return this.raycaster.intersectObject(subject, true).some((h) => h.object instanceof THREE.Mesh && shown(h.object));
+  }
+
+  /** Hotspots ramassables du plan d'examen en cours dont l'objet 3D est visible. */
+  private livePicks(): string[] {
+    const spec = this.shotKey ? this.shotSpecs.get(this.shotKey) : undefined;
+    const shown = (o: THREE.Object3D | null): boolean => !o || (o.visible && shown(o.parent));
+    return (spec?.picks ?? []).filter((id) => (this.spots.get(`${this.viewId}/${id}`) ?? []).some((o) => shown(o)));
+  }
+
+  /** Vrai si le plan d'examen en cours montre encore un objet ramassable (`ShotSpec.picks`). */
+  hasPicks(): boolean {
+    return this.livePicks().length > 0;
+  }
+
+  /**
+   * En plan d'examen : hotspot ramassable (`ShotSpec.picks`) sous le pixel (x, y), ou null.
+   * Rayon depuis la caméra courante (même en cours de travel) sur les objets 3D du hotspot ;
+   * un sprite GenAI ne compte que là où il est opaque, pas sur son cadre transparent.
+   */
+  spotAt(x: number, y: number): string | null {
+    const ids = this.livePicks();
+    if (!ids.length) return null;
+    const ndc = new THREE.Vector2((x / this.width) * 2 - 1, -(y / this.height) * 2 + 1);
+    this.camera.updateMatrixWorld();
+    this.raycaster.setFromCamera(ndc, this.camera);
+    const shown = (o: THREE.Object3D | null): boolean => !o || (o.visible && shown(o.parent));
+    let best: { id: string; d: number } | null = null;
+    for (const id of ids) {
+      for (const root of this.spots.get(`${this.viewId}/${id}`) ?? []) {
+        for (const h of this.raycaster.intersectObject(root, true)) {
+          if (!shown(h.object) || !(h.object instanceof THREE.Mesh || h.object instanceof THREE.Sprite)) continue;
+          if (h.object instanceof THREE.Sprite && !spriteOpaque(h.object, h.uv)) continue;
+          if (!best || h.distance < best.d) best = { id, d: h.distance };
+        }
+      }
+    }
+    return best?.id ?? null;
   }
 
   /** Vrai si la scène YAML `id` est une vue de ce décor. */
@@ -672,4 +715,40 @@ export class Stage {
       });
     }
   }
+}
+
+/** Lecteur alpha des textures de sprites (picking au pixel près), mis en cache par image. */
+const alphaCache = new WeakMap<object, { data: Uint8ClampedArray; w: number; h: number } | null>();
+
+/** Vrai si le sprite est (à peu près) opaque au point `uv` ; vrai aussi si l'image n'est pas lisible. */
+function spriteOpaque(sprite: THREE.Sprite, uv: THREE.Vector2 | undefined): boolean {
+  const img = (sprite.material as THREE.SpriteMaterial).map?.image as CanvasImageSource & { width: number; height: number } | undefined;
+  if (!uv || !img || !img.width) return true;
+  let px = alphaCache.get(img);
+  if (px === undefined) {
+    try {
+      const c = document.createElement('canvas');
+      c.width = img.width;
+      c.height = img.height;
+      const g = c.getContext('2d', { willReadFrequently: true })!;
+      g.drawImage(img, 0, 0);
+      px = { data: g.getImageData(0, 0, c.width, c.height).data, w: c.width, h: c.height };
+    } catch {
+      px = null;
+    }
+    alphaCache.set(img, px);
+  }
+  if (!px) return true;
+  // marge de tolérance : quelques pixels autour du trait (objet fin, doigt imprécis)
+  const r = Math.max(2, Math.round(px.w * 0.03));
+  const cx = Math.round(uv.x * (px.w - 1));
+  const cy = Math.round((1 - uv.y) * (px.h - 1));
+  for (let dy = -r; dy <= r; dy += r) {
+    for (let dx = -r; dx <= r; dx += r) {
+      const x = Math.min(px.w - 1, Math.max(0, cx + dx));
+      const y = Math.min(px.h - 1, Math.max(0, cy + dy));
+      if (px.data[(y * px.w + x) * 4 + 3] > 40) return true;
+    }
+  }
+  return false;
 }

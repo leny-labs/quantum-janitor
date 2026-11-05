@@ -110,6 +110,16 @@ export class RoomRenderer {
     return this.current?.onSubject(x, y) ?? true;
   }
 
+  /** En plan d'examen : hotspot ramassable sous le pixel (ShotSpec.picks), ou null. */
+  spotAt(x: number, y: number): string | null {
+    return this.current?.spotAt(x, y) ?? null;
+  }
+
+  /** Le plan d'examen en cours montre-t-il encore un objet ramassable ? */
+  hasPicks(): boolean {
+    return this.current?.hasPicks() ?? false;
+  }
+
   /**
    * Rend l'image courante si elle a pu changer (pièce animée, état, survol,
    * changement de pièce). Renvoie false si le canvas n'a pas bougé — pas
@@ -161,6 +171,15 @@ export class RoomView {
   /** Gros plan : le pixel tombe-t-il sur l'objet filmé (console…) ? */
   onSubject(x: number, y: number): boolean {
     return !this.image.visible || this.room.onSubject(x, y);
+  }
+
+  /** Plan d'examen : hotspot ramassable sous le pixel (cuillère sur le plateau…), ou null. */
+  spotAt(x: number, y: number): string | null {
+    return this.image.visible && this.room.examining ? this.room.spotAt(x, y) : null;
+  }
+
+  hasPicks(): boolean {
+    return this.image.visible && !!this.room.examining && this.room.hasPicks();
   }
 
   travel(from: string, to: string): Promise<void> | null {
