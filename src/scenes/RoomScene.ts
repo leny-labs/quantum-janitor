@@ -34,6 +34,7 @@ import { drawNavButton, verbCursor, type VerbIcon } from '../ui/chrome';
 import { t, tl } from '../i18n';
 import { isTouch, uiPx } from '../ui/input';
 import { playMusic, themeForScene } from '../ui/music';
+import { makeMapToggle } from '../ui/MapToggle';
 import { makeMusicToggle } from '../ui/MusicToggle';
 import { PressRing } from '../ui/PressRing';
 import { RoomPlaque } from '../ui/RoomPlaque';
@@ -148,11 +149,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     }).setDepth(700));
     this.musicButton = makeMusicToggle(this, menu.x - menu.width / 2 - 8 - menu.height / 2, menu.y, menu.height).setDepth(700);
     this.mapOverlay = null;
-    this.mapButton = makeButton(this, this.musicButton.x - menu.height / 2 - 8, menu.y, t('hud.map'), () => this.openMap(), {
-      size: uiPx(this, 18, 14),
-      align: 'right',
-      valign: 'top',
-    })
+    this.mapButton = makeMapToggle(this, this.musicButton.x - menu.height - 8, menu.y, menu.height, t('hud.map'), () => this.openMap())
       .setDepth(700)
       .setVisible(hasStationMap(state));
     if (this.session.debug.overlay) {
