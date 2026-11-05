@@ -221,13 +221,22 @@ items:
         - if: { flags: [st_gobelet_vide] }
           say: "Le gobelet est vide. Une trace de café au fond, pas assez pour un encreur. PERCO ressert. Sans limite. Un à la fois."
           stop: true
-        - say: "narrateur: Gary verse le café tiède sur le feutre craquelé. L'encreur boit tout, avec un petit bruit de soulagement. Il devient brun, luisant. Conforme."
+        # sans la cuillère de la cafétéria (st-cafeteria, plateau des tables), le café ne prend pas
+        - if: { notItems: [cuillere] }
+          say: "narrateur: Gary verse une goutte de café sur le feutre craquelé. Elle perle, roule, et reste en surface. Le feutre refuse. Il est sec depuis 1985 ; il a pris des habitudes."
+        - if: { notItems: [cuillere] }
+          say: "Il faudrait faire pénétrer. Remuer. Avec quelque chose de fin et de jetable. Même une cuillère de cantine."
+          stop: true
+        - say: "narrateur: Gary verse le café tiède sur le feutre craquelé et remue avec la cuillère de la cafétéria. L'encreur boit tout, avec un petit bruit de soulagement. Il devient brun, luisant. Conforme."
           set: st_encreur_cafe
+        - say: "narrateur: La cuillère, elle, a fondu à moitié. Elle a fait son service. Gary la dépose dans la corbeille, avec les honneurs."
+          take: cuillere
         - set: st_gobelet_vide
         - say: "bob: De l'encre au café, Gary. Officiellement, c'est de l'encre. Officieusement, ça sent la pause."
           mood: love
       fragment: "L'éclat sur l'encreur ? Il pourrait se remplir d'encre improbable. Elle tamponnerait des choses qui n'existent pas. Ici, ce serait mal vu."
       copies_dossier: "Les copies sont déjà « CONFORME ». Duplicata a léché son tampon. Pas besoin d'encre de plus."
+      cuillere: "Remuer un encreur sec ? Ça racle. Il lui faut d'abord quelque chose à boire. Chaud. Syndiqué."
 
   - id: liasse
     name: Liasse de réclamations vierges
@@ -274,6 +283,19 @@ items:
     combine:
       plante: "Arroser M. Ficus au café ? Il est en plastique, Gary. Il n'a pas soif. Il a des principes."
       capsule: "Envoyer du café par tube au Conseil ? Ce n'est pas un vote, c'est un pot de départ. Pas encore."
+
+  # cafétéria (plateau des tables) → Acte III : remuer le café dans l'encreur (encreur + gobelet), consommée
+  - id: cuillere
+    name: Cuillère en plastique
+    icon: { color: "#e8dcc0", glyph: "CUILL" }
+    look: "Une cuillère en plastique beige de la cafétéria. « NE PAS EMPORTER — SAUF NÉCESSITÉ DE SERVICE ». Elle a survécu à quarante et un plats du jour. LE MÊME. Elle attend sa nécessité de service."
+    combine:
+      plante: "Rempoter M. Ficus à la cuillère ? Son pot est vissé au sol et sa terre est en plastique. Il n'y a rien à creuser. Il est très bien comme ça."
+      fragment: "Touiller l'éclat ? Il tournerait dans l'autre sens. Et la cuillère avec. Et moi avec la cuillère."
+      formulaire: "Remuer le formulaire ? Les cases vides ne se remplissent pas en touillant. J'ai essayé avec la soupe, à l'entretien. Même résultat."
+      ticket_douane: "Plier le ticket autour de la cuillère ? Ça ne fait pas une fourchette. Ça fait une fraude."
+      badge: "« GARRY PLUNK », gravé à la cuillère ? Ça ferait un deuxième badge faux. Un seul suffit."
+      gobelet: "Remuer le café pour le boire ? Non. Ce café a une mission. Il a un encreur à sauver."
 
   # Acte IV « Le Conseil et la Restitution » : délivré par SYLVIE avec le badge (étape 43), présenté à la fourrière (46)
   - id: permis

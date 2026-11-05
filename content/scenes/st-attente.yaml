@@ -1,7 +1,7 @@
 # Chapitre 1 « La Station Bureaucratique » — 2. Salle d'Attente (docs/CHAPTER1.md §4, §9).
 # Rendu 3D : src/three/rooms/station.ts (stAttente). `art:` = repli 2D.
 # Mini-puzzle : l'afficheur (9 847), M. Patience et son ticket 9 848 (main serrée), B.O.B. aspire
-# le ticket ; fausse piste au distributeur. M. Ficus (plante) : payoff différé (couloir B, Conseil).
+# le ticket ; fausse piste au distributeur. M. Ficus (plante) est à la cafétéria, à côté de PERCO-JUNIOR.
 # Sortie vers le guichet (st-guichet, Mme Guichard) une fois le ticket 9 848 en poche.
 id: st-attente
 title: Salle d'Attente
@@ -71,25 +71,9 @@ hotspots:
         - say: "Il y a une hiérarchie des tickets. Je l'ignorais. Je suis tout en bas, avec mon ticket de douane."
       fragment: "L'éclat dans le distributeur ? Il en sortirait un ticket « ∞ ». Et on attendrait encore plus longtemps."
 
-  - id: plante
-    label: Plante en plastique
-    useLabel: Prendre
-    rect: [1030, 270, 130, 210]
-    if: { notItems: [plante] }
-    art:
-      - { rect: [1070, 420, 50, 50], color: "#8a5a3a" }
-      - { circle: [1095, 360, 55], color: "#3e8f4a" }
-    look: "Un ficus en plastique, dans un pot. Étiquette : « M. FICUS — MEMBRE HON. DU C... ». La fin est effacée. Quelqu'un l'a beaucoup caressé. Il a l'air important. Pour une plante en plastique."
-    use:
-      - give: plante
-      - say: "narrateur: Gary prend M. Ficus sous le bras. Le pot est vissé au sol ; il ne le prend pas, seulement la plante. Elle se laisse faire. Elle est en plastique, comme tout le monde ici."
-      - say: "Je ne sais pas pourquoi. J'ai le sentiment qu'il me servira. Plus tard. Beaucoup plus tard. Les plantes en plastique, ça a de la mémoire."
-    useItem:
-      fragment: "L'éclat sur le ficus ? Il pourrait se mettre à pousser. Ou à voter. On n'a pas le temps pour l'un ni pour l'autre."
-
   - id: bob
     label: B.O.B.
-    # à droite, entre le distributeur et M. Ficus : équilibre M. Patience (à gauche) ;
+    # à droite, à côté du distributeur : équilibre M. Patience (à gauche) ;
     # yeux au-dessus du HUD, face/¾ caméra (docs/CHAPTERS.md)
     rect: [880, 415, 150, 80]
     art:

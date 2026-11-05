@@ -16,6 +16,7 @@ import { GameState } from '../src/engine/GameState';
 import { parseStationMap, zoneState } from '../src/engine/stationMap';
 import { concluded, deduce, hasCarnet, knownClues } from '../src/engine/clues';
 import { CHAPTERS, walkChapter } from '../src/engine/walkthrough';
+import { resolveCombine } from '../src/engine/combine';
 import { ROOT, readRawContent } from './readContent';
 
 const verbose = process.argv.includes('-v');
@@ -105,7 +106,16 @@ async function main() {
         if (!caseA || !caseA.save.flags.includes('st_reclasse') || caseA.save.items.includes('copies_dossier')) throw new Error('Acte II : case A sans reclassement ou copies non agrafées');
         // Acte III (docs/CHAPTER1.md §6.22–33) : grève → p.o. → café → encre → VU → réveil → signature → 3 exemplaires
         for (const f of ['st_greve_connue', 'st_voit_delegation', 'st_accord_signe', 'st_greve_finie', 'st_encreur_cafe', 'st_cafe2', 'st_tamponnet_encre', 'st_case_b', 'st_delaigue_reveille', 'st_case_d', 'st_case_c']) if (!state.hasFlag(f)) throw new Error(`Acte III : flag ${f} absent`);
-        for (const gone of ['accord', 'encreur', 'gobelet']) if (s3.hasItem(gone)) throw new Error(`Acte III : « ${gone} » encore en poche à la fin`);
+        for (const gone of ['accord', 'encreur', 'gobelet', 'cuillere']) if (s3.hasItem(gone)) throw new Error(`Acte III : « ${gone} » encore en poche à la fin`);
+        // encreur + gobelet sans la cuillère de la cafétéria : gag, rien n'est imbibé ni consommé
+        const noSpoon = GameState.fromSave({ ...c3.save, flags: c3.save.flags.filter((f) => f !== 'st_encreur_cafe' && f !== 'st_gobelet_vide'), items: ['encreur', 'gobelet'] });
+        const sets: string[] = [];
+        for (const step of [resolveCombine(content, 'encreur', 'gobelet') ?? []].flat()) {
+          if (typeof step === 'string' || !noSpoon.check(step.if)) continue;
+          if (step.set) sets.push(...[step.set].flat());
+          if (step.stop) break;
+        }
+        if (sets.includes('st_encreur_cafe')) throw new Error('Acte III : l\'encreur ne doit pas s\'imbiber sans la cuillère');
         const unsigned = checkpoints.find((c) => c.label === 'utiliser accord sur perco');
         if (!unsigned || unsigned.save.flags.includes('st_greve_finie') || !unsigned.save.items.includes('accord')) throw new Error('Acte III : un accord non signé ne doit pas finir la grève');
         const asleep = checkpoints.find((c) => c.label === 'utiliser formulaire sur delaigue');

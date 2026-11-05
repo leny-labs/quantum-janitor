@@ -661,12 +661,12 @@ export const stCafeteria: RoomBuild = {
     s.spot('tables', at(tables, tr_.x, 0, tr_.z));
     // cuillère en plastique beige en travers du plateau (hotspot `cuillere`, payoff Acte III : encreur)
     const spoon = new THREE.Group();
-    spoon.add(at(box(0.26, 0.018, 0.035, '#e8dcc0'), 0.05, 0, 0));
-    const bowl = at(sphere(0.055, '#efe4c8', { seg: 12 }), -0.12, 0.004, 0);
-    bowl.scale.set(1.3, 0.3, 0.9);
+    spoon.add(at(box(0.34, 0.022, 0.045, '#fff3d6'), 0.07, 0, 0));
+    const bowl = at(sphere(0.07, '#fff8e6', { seg: 14 }), -0.15, 0.006, 0);
+    bowl.scale.set(1.35, 0.32, 0.9);
     spoon.add(bowl);
-    spoon.rotation.y = -0.5;
-    s.spot('cuillere', at(spoon, tr_.x - 0.12, tH + 0.07, tr_.z + 0.18));
+    spoon.rotation.y = 0.35;
+    s.spot('cuillere', at(spoon, tr_.x - 0.28, tH + 0.045, tr_.z + 0.38));
 
     bobHere(s);
 

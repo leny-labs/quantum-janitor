@@ -38,6 +38,8 @@ export function repairState(state: GameState): void {
   if (state.hasFlag('st_greve_finie') && state.hasItem('accord')) state.take('accord');
   if (state.hasFlag('st_accord_pris') && !state.hasFlag('st_greve_finie') && !state.hasItem('accord')) state.give('accord');
   if (state.hasFlag('st_tamponnet_encre') && state.hasItem('encreur')) state.take('encreur');
+  // la cuillère de la cafétéria fond en remuant le café dans l'encreur
+  if (state.hasFlag('st_encreur_cafe') && state.hasItem('cuillere')) state.take('cuillere');
   if (state.hasFlag('st_encreur_pris') && !state.hasFlag('st_tamponnet_encre') && !state.hasItem('encreur')) state.give('encreur');
   // Acte IV : M. Ficus siège au Conseil, la capsule part par tube, le ticket reste chez Sabot ;
   // SYLVIE rend le badge et délivre le permis (jusqu'au décollage)

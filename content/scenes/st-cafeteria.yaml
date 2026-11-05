@@ -1,8 +1,10 @@
 # Chapitre 1 « La Station Bureaucratique » — Cafétéria d'accueil (docs/CHAPTER1.md §4, lieu 2 bis).
 # Rendu 3D : src/three/rooms/station.ts (stCafeteria). `art:` = repli 2D.
-# Scaffold (pas de puzzle) : lieu d'ambiance, porte au fond de la Salle d'Attente. Distinct de
+# Détour d'ambiance (pas de puzzle lourd), porte au fond de la Salle d'Attente. Distinct de
 # `st-pause` (Salle de Pause / grève de PERCO, aile B). Lore : d'où vient le sandwich de
 # Mme Guichard depuis 41 ans (sandwich consigné, rendu le soir, revendu le lendemain).
+# Deux ramassages à payoff différé : M. Ficus (`plante`, à côté de PERCO-JUNIOR → couloir B,
+# Conseil) et la cuillère du plateau (`cuillere`, pour remuer le café dans l'encreur, Acte III).
 id: st-cafeteria
 title: Cafétéria
 sector: Station Bureaucratique · Niveau 0 · Restauration administrative
@@ -41,34 +43,17 @@ hotspots:
     look:
       - say: "Une vitrine réfrigérée. Trois sandwichs jambon-beurre, sous film. Le pain a la couleur et la souplesse d'une dalle de béton. La salade est devenue un concept."
       - say: "Étiquette : « SANDWICH CONSIGNÉ — À RAPPORTER EN FIN DE SERVICE. REMIS EN VENTE LE LENDEMAIN. » En dessous, une fiche : « COMMANDE PERMANENTE N° 1 — Mme O. GUICHARD — RECONDUCTION TACITE »."
+      - say: "En haut, une place vide et un carton « RÉSERVÉ MME G. », repassé au feutre tant de fois qu'il a plus de couches d'encre que de carton. Même le vide a une commande permanente, ici."
       - say: "Donc c'est ça. Le même sandwich depuis quarante et un ans. Elle l'achète le matin, le rapporte le soir, le rachète le lendemain. Ce n'est pas un repas. C'est un abonnement."
-    use: "narrateur: Gary tire sur la porte vitrée. Elle est scellée par un plomb et une étiquette : « NE PAS OUVRIR AVANT LE RÉAPPROVISIONNEMENT ». Le dernier réapprovisionnement date d'avant le plomb."
+    use:
+      - say: "narrateur: Gary tire sur la porte vitrée. Elle est scellée par un plomb tamponné « 10/11/1985 — 10 H 11 » et une étiquette : « NE PAS OUVRIR AVANT LE RÉAPPROVISIONNEMENT »."
+      - say: "Ce plomb a plus d'ancienneté que moi. Il aura sans doute une meilleure retraite."
     talk: "Courage, les gars. Quelqu'un finira par vous manger. Ou par vous classer aux Archives. Les deux se valent, ici."
     useItem:
       ticket_douane: "« TICKET NON VALABLE EN RESTAURATION ». Évidemment. Il faudrait un ticket-repas. Qu'on obtient sans doute au guichet. Contre un ticket."
       ticket_9848: "Le 9 848 de M. Patience ? Non. Ce ticket est pour le guichet. On ne mange pas le ticket d'un mort. Même ici."
       fragment: "Si je pose l'éclat sur la vitrine, les sandwichs pourraient redevenir frais. Ou se mettre à parler. Je ne veux entendre ni l'un ni l'autre."
-
-  # zooms examine sur la vitrine (après `vitrine` : zones plus petites, prioritaires au clic)
-  - id: reserve
-    label: Carton « RÉSERVÉ MME G. »
-    smart: look
-    rect: [488, 270, 84, 34]
-    look:
-      - say: "Une place vide sur l'étagère du haut, et un carton plié : « RÉSERVÉ MME G. ». Écrit au feutre, repassé au feutre, repassé encore. Le carton a plus de couches d'encre que de carton."
-      - say: "Même le vide a une commande permanente, ici. Le sandwich est sorti ce matin. Il reviendra ce soir. Comme tous les soirs depuis quarante et un ans."
-    use: "Je ne touche pas au carton. Quarante et un ans de reconduction tacite, ça se respecte. Et ça se tamponne, sûrement."
-    useItem:
-      fragment: "Poser l'éclat à la place du sandwich de Mme Guichard ? Elle le mangerait sans voir la différence. C'est bien ça qui m'inquiète."
-
-  - id: plomb
-    label: Plomb « NE PAS OUVRIR »
-    smart: look
-    rect: [484, 324, 106, 34]
-    look:
-      - say: "Un bandeau rouge et un plomb de scellé : « NE PAS OUVRIR AVANT LE RÉAPPROVISIONNEMENT ». Le plomb porte un tampon : « 10/11/1985 — 10 H 11 »."
-      - say: "Il a plus d'ancienneté que moi. Il aura sans doute une meilleure retraite."
-    use: "narrateur: Gary tire doucement sur le bandeau. Le plomb ne bouge pas. Quelque part dans la Station, un tampon se lève, prêt à frapper."
+      cuillere: "Remettre la cuillère en vitrine ? Elle a déjà servi. Ici, ça veut dire qu'elle est périmée et toujours en vente."
 
   - id: comptoir
     label: Comptoir
@@ -86,6 +71,7 @@ hotspots:
     useItem:
       badge: "« GARRY PLUNK ». La caisse ne lit pas les badges. Elle ne lit rien, en fait. C'est une caisse à manivelle."
       plante: "Je pose M. Ficus sur le comptoir, pour voir. Il fait plus client que moi. Mais il n'a pas faim non plus."
+      cuillere: "Rendre la cuillère à la caisse ? Elle est ouverte de 10 h 12 à 10 h 14. Je la rendrai quand il sera 10 h 12. C'est-à-dire jamais."
 
   - id: cafe
     label: Machine à café « PERCO-JUNIOR »
@@ -104,10 +90,31 @@ hotspots:
     useItem:
       fragment: "Un expresso à l'improbabilité ? Il sortirait du thé. Ou un ours. Je ne prends pas le risque avant mon café. Je n'ai pas de café."
       ticket_douane: "La fente à pièces refuse le ticket. Elle refuse aussi les pièces, en fait. Solidarité."
+      plante: "M. Ficus et PERCO-JUNIOR se connaissent depuis quarante et un ans. Je ne vais pas les séparer deux fois."
+      cuillere: "Remuer l'eau tiède de PERCO-JUNIOR ? Il la reprendrait avant. Il faut un vrai café. Un café syndiqué. Plus tard."
+
+  # M. Ficus, à côté de PERCO-JUNIOR (devant, entre le comptoir et la machine) : payoff différé
+  # (couloir B, puis le Conseil). Après `comptoir` et `cafe` : plus petit, prioritaire au clic.
+  - id: plante
+    label: Plante en plastique
+    useLabel: Prendre
+    rect: [895, 315, 90, 185]
+    if: { notItems: [plante] }
+    art:
+      - { rect: [920, 440, 40, 50], color: "#8a5a3a" }
+      - { circle: [940, 385, 42], color: "#3e8f4a" }
+    look:
+      - say: "Un ficus en plastique, dans un pot, à côté de PERCO-JUNIOR. Étiquette : « M. FICUS — MEMBRE HON. DU C... ». La fin est effacée. Quelqu'un l'a beaucoup caressé. Il a l'air important. Pour une plante en plastique."
+      - say: "Ses feuilles sont tachées de café, côté machine. Quarante et un ans de vapeur d'eau tiède. Il est le seul client régulier de la cafétéria."
+    use:
+      - give: plante
+      - say: "narrateur: Gary prend M. Ficus sous le bras. Le pot est vissé au sol ; il ne le prend pas, seulement la plante. Elle se laisse faire. Elle est en plastique, comme tout le monde ici."
+      - say: "Je ne sais pas pourquoi. J'ai le sentiment qu'il me servira. Plus tard. Beaucoup plus tard. Les plantes en plastique, ça a de la mémoire."
+    useItem:
+      fragment: "L'éclat sur le ficus ? Il pourrait se mettre à pousser. Ou à voter. On n'a pas le temps pour l'un ni pour l'autre."
 
   - id: tables
     label: Tables
-    smart: look
     rect: [1105, 300, 165, 200]
     art:
       - { rect: [1115, 380, 145, 20], color: "#d8d2c0" }
@@ -115,7 +122,29 @@ hotspots:
     look:
       - say: "Des tables rondes, vissées au sol, comme les chaises de la salle d'attente. Sur l'une, un plateau abandonné : un gobelet vide, une serviette pliée en formulaire, et un ticket de caisse de 1985."
       - say: "Le montant total est « LE MÊME ». La TVA aussi."
+      - if: { notItems: [cuillere], notFlags: [st_encreur_cafe] }
+        say: "Et une cuillère en plastique, posée en travers du plateau. Le seul couvert de la Station qui n'a pas été tamponné."
     use: "narrateur: Gary s'assoit une seconde. La chaise grince, puis affiche sur un petit écran : « TEMPS D'ATTENTE ESTIMÉ AVANT SERVICE : 41 ANS »."
+    useItem:
+      cuillere: "Je la repose ? Non. Quelqu'un la tamponnerait « OBJET TROUVÉ » et elle attendrait quarante et un ans de plus."
+
+  # cuillère du plateau abandonné (après `tables` : plus petite, prioritaire au clic) → Acte III :
+  # remuer le café dans l'encreur sec (items.yaml, encreur + gobelet)
+  - id: cuillere
+    label: Cuillère en plastique
+    useLabel: Prendre
+    rect: [1160, 386, 80, 30]
+    if: { notItems: [cuillere], notFlags: [st_encreur_cafe] }
+    art:
+      - { rect: [1170, 398, 60, 8], color: "#e8dcc0" }
+    look: "Une cuillère en plastique beige, sur le plateau abandonné. Gravé sur le manche : « PROPRIÉTÉ DE LA RESTAURATION ADMINISTRATIVE — NE PAS EMPORTER ». Gravé en dessous, plus petit : « SAUF NÉCESSITÉ DE SERVICE »."
+    use:
+      - give: cuillere
+      - say: "narrateur: Gary glisse la cuillère dans sa poche de combinaison. Personne ne crie. La caisse ne fait même pas « tchac »."
+      - say: "Elle a survécu à quarante et un plats du jour. LE MÊME. Elle peut survivre à moi."
+      - say: "bob: Nécessité de service, Gary. Je témoignerai. Je suis un aspirateur, mon témoignage vaut une miette."
+    useItem:
+      fragment: "L'éclat sur la cuillère ? Elle se tordrait toute seule. On n'a pas besoin de magie, ici, on a besoin de remuer."
 
   - id: bob
     label: B.O.B.

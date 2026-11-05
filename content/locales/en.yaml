@@ -166,8 +166,6 @@ keys:
   scene.st-attente.hotspot.afficheur.label: “NOW SERVING No.” display
   scene.st-attente.hotspot.squelette.label: Mr Patience
   scene.st-attente.hotspot.distributeur.label: Ticket dispenser
-  scene.st-attente.hotspot.plante.label: Plastic plant
-  scene.st-attente.hotspot.plante.useLabel: Take
   scene.st-attente.hotspot.bob.label: B.O.B.
   scene.st-attente.hotspot.horloge.label: Clock
   scene.st-attente.hotspot.horaires.label: “DESK 10:12 – 10:14” poster
@@ -180,11 +178,13 @@ keys:
   scene.st-cafeteria.sector: Bureaucratic Station · Level 0 · Administrative catering
   scene.st-cafeteria.hotspot.menu.label: “DISH OF THE DAY” board
   scene.st-cafeteria.hotspot.vitrine.label: Sandwich display case
-  scene.st-cafeteria.hotspot.reserve.label: “RESERVED MRS G.” card
-  scene.st-cafeteria.hotspot.plomb.label: “DO NOT OPEN” seal
   scene.st-cafeteria.hotspot.comptoir.label: Counter
   scene.st-cafeteria.hotspot.cafe.label: “PERCO-JUNIOR” coffee machine
+  scene.st-cafeteria.hotspot.plante.label: Plastic plant
+  scene.st-cafeteria.hotspot.plante.useLabel: Take
   scene.st-cafeteria.hotspot.tables.label: Tables
+  scene.st-cafeteria.hotspot.cuillere.label: Plastic spoon
+  scene.st-cafeteria.hotspot.cuillere.useLabel: Take
   scene.st-cafeteria.hotspot.bob.label: B.O.B.
   scene.st-cafeteria.exit.vers_attente.label: Waiting Room
   scene.st-guichet.title: Reception Desk
@@ -285,6 +285,8 @@ keys:
   scene.st-sous-chef.exit.vers_couloir.label: Infinite Corridor B
   item.accord.name: Break agreement P-15
   item.gobelet.name: Cup of lukewarm coffee
+  item.cuillere.name: Plastic spoon
+  item.cuillere.glyph: SPOON
   character.perco.name: PERCO, staff delegate
   character.delaigue.name: Mr Hubert Delaigue, acting deputy assistant manager
   # Acte IV : Ascenseur, Conseil, Direction, Fourrière

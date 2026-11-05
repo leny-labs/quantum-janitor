@@ -192,9 +192,10 @@ export const CHAPTERS: ChapterDef[] = [
       { look: 'squelette' }, // M. Patience tient le 9 848
       { useItem: ['ticket_douane', 'distributeur'] }, // fausse piste : le distributeur le recrache
       { use: 'squelette' }, // main serrée : il faut aspirer
-      { use: 'plante' }, // +plante (payoff différé : couloir infini B, puis le Conseil)
-      { go: 'st-cafeteria' }, // détour d'ambiance : la vitrine (sandwich consigné de Mme Guichard)
+      { go: 'st-cafeteria' }, // détour : la vitrine (sandwich consigné de Mme Guichard), M. Ficus, la cuillère
       { look: 'vitrine' },
+      { use: 'plante' }, // +plante, à côté de PERCO-JUNIOR (payoff différé : couloir infini B, puis le Conseil)
+      { use: 'cuillere' }, // +cuillere, sur le plateau des tables (payoff Acte III : remuer le café dans l'encreur)
       { go: 'st-attente' },
       { talk: 'bob', pick: [0] }, // « Il n'en a plus besoin… » → éloge funèbre, +ticket_9848
       { section: 'Station · le Guichet d\'Accueil (Mme Guichard)' },
@@ -281,7 +282,7 @@ export const CHAPTERS: ChapterDef[] = [
       { go: 'st-pause' },
       { useItem: ['accord', 'perco'] }, // FIN DU CONFLIT (st_greve_finie) −accord
       { talk: 'perco' }, // café tiède, un à la fois : +gobelet
-      { combine: ['encreur', 'gobelet'] }, // encreur imbibé (st_encreur_cafe), gobelet vide (st_gobelet_vide)
+      { combine: ['encreur', 'gobelet'] }, // remué à la cuillère : encreur imbibé (st_encreur_cafe), −cuillere, gobelet vide (st_gobelet_vide)
       { useItem: ['gobelet', 'perco'] }, // resservi (st_cafe2)
       { go: 'st-couloir-b' },
       { go: 'st-tampons' },

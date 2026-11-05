@@ -82,8 +82,8 @@ Portraits : SYLVIE et B.O.B. existants ; fonctionnaires = portraits fixes GenAI
 | # | id | Lieu | Description | On y trouve | Sorties |
 |---|---|---|---|---|---|
 | 1 | `st-sas` | **Sas d'Arrivée** · Douane dimensionnelle | Portique de scan, tapis roulant à l'arrêt, borne SYLVIE, panneau « BIENVENUE — VOTRE VISITE EST ENREGISTRÉE ». Le vaisseau encastré est remorqué à l'arrivée. | `ticket_douane` ; borne (statut de Gary) ; panneau « LES ANIMAUX DOIVENT ÊTRE ACCOMPAGNÉS » | `st-attente` (après `st_laisse`), `st-fourriere` |
-| 2 | `st-attente` | **Salle d'Attente** | Chaises vissées, afficheur « 9 847 », distributeur de tickets vide (« RUPTURE — FORMULAIRE DE RÉAPPROVISIONNEMENT AU GUICHET »), squelette M. Patience. | `ticket_9848` (via B.O.B.), `plante` (M. Ficus) | `st-sas`, `st-cafeteria`, `st-guichet` |
-| 2 bis | `st-cafeteria` | **Cafétéria d'accueil** (idée Leny t225) | Porte de service au fond de la salle d'attente. Menu « PLAT DU JOUR : LE MÊME — PRIX : LE MÊME », vitrine réfrigérée scellée (sandwichs jambon-beurre fossilisés, place « RÉSERVÉ MME G. »), caisse ouverte de 10 h 12 à 10 h 14 (comme le guichet), PERCO-JUNIOR en « service minimum » solidaire de la grève. **Lore** : le sandwich de Mme Guichard est *consigné* — acheté le matin, rendu le soir, remis en vente le lendemain, « commande permanente n° 1, reconduction tacite » : le même depuis 41 ans. Lieu d'ambiance, sans puzzle (distinct de `st-pause`, aile B). | — (looks) | `st-attente` |
+| 2 | `st-attente` | **Salle d'Attente** | Chaises vissées, afficheur « 9 847 », distributeur de tickets vide (« RUPTURE — FORMULAIRE DE RÉAPPROVISIONNEMENT AU GUICHET »), squelette M. Patience. | `ticket_9848` (via B.O.B.) | `st-sas`, `st-cafeteria`, `st-guichet` |
+| 2 bis | `st-cafeteria` | **Cafétéria d'accueil** (idée Leny t225) | Porte de service au fond de la salle d'attente. Menu « PLAT DU JOUR : LE MÊME — PRIX : LE MÊME », vitrine réfrigérée scellée (sandwichs jambon-beurre fossilisés, place « RÉSERVÉ MME G. »), caisse ouverte de 10 h 12 à 10 h 14 (comme le guichet), PERCO-JUNIOR en « service minimum » solidaire de la grève. **Lore** : le sandwich de Mme Guichard est *consigné* — acheté le matin, rendu le soir, remis en vente le lendemain, « commande permanente n° 1, reconduction tacite » : le même depuis 41 ans. Détour d'ambiance sans puzzle lourd (distinct de `st-pause`, aile B), mais deux ramassages à payoff différé : M. Ficus à côté de PERCO-JUNIOR, une cuillère en plastique sur le plateau abandonné des tables. Zooms examine : menu, vitrine, comptoir, PERCO-JUNIOR (t258/t259). | `plante` (M. Ficus), `cuillere` | `st-attente` |
 | 3 | `st-guichet` | **Guichet d'Accueil** | Hygiaphone, rideau métallique, horloge 10 h 11, horaires « 10 h 12 – 10 h 14 », pupitre de remplissage. Mme Guichard derrière la vitre. | `formulaire` ; horloge (puzzle de l'éclat) | `st-attente`, `st-couloir-b`, gros plan `st-formulaire` (pupitre) |
 | 4 | `st-couloir-b` | **Couloir Infini B** · hub | Portes B-1, B-2… qui bouclent : on revient toujours au même extincteur. Une fois « dénoué » : hub des bureaux. | (puzzle de la plante) | `st-guichet`, `st-archives`, `st-tampons`, `st-reclamations`, `st-pause`, `st-sous-chef`, `st-ascenseur` (toutes après `st_couloir_resolu`) |
 | 5 | `st-archives` | **Archives Centrales** | Rayonnages jusqu'au plafond (et au-delà), fichier à tiroirs A–Z, photocopieuse « EN PANNE DE PAPIER », M. Duplicata. | dossier « PLUNK, GARRY » (copies) ; photocopieuse (réutilisée) | `st-couloir-b` |
@@ -165,11 +165,12 @@ l'arbre §6.
 | Badge « Garry » | `badge` | départ (0) | 14 (fichier des archives) | **14** | Payoff du double R. Duplicata le garde comme pièce justificative ; rendu par SYLVIE à l'étape 43. |
 | Éclat contenu 1/4096 | `fragment` | départ (0) | 8, 42 (horloge), 43 (coffre) | 8 / 34 / 1 | **Réutilisé** : l'improbabilité fait avancer l'horloge ; fusionne avec le 2e éclat. |
 | Ticket de douane | `ticket_douane` | 2 (sas) | 44 (fourrière) | **42** | Le plus long payoff du chapitre ; fausse piste au distributeur de tickets. |
-| Plante en plastique (M. Ficus) | `plante` | 5 (attente) | 11 (couloir), 36 (Conseil) | 6 / **31** | **Double usage** : repère dans le couloir infini, puis membre honoraire au quorum. |
+| Plante en plastique (M. Ficus) | `plante` | 5 (cafétéria, à côté de PERCO-JUNIOR) | 11 (couloir), 36 (Conseil) | 6 / **31** | **Double usage** : repère dans le couloir infini, puis membre honoraire au quorum. |
 | Ticket n° 9848 | `ticket_9848` | 6 (B.O.B. l'aspire) | 9 (guichet) | 3 | Court, tutoriel du chapitre. |
 | Formulaire B-7/12 | `formulaire` | 9 (guichet) | 20, 29, 32, 33, 34, 40, 42 | — | **Fil rouge** réutilisé 7 fois ; état par flags `st_case_a…e`. |
 | Tampon « ANNULÉ » | `tampon_annule` | 15 (tampons) | 39 (Conseil), 45 (fourrière) | **24 / 30** | **Réutilisé** ; fausse piste sur la borne du sas (« on n'annule pas un statut »). |
-| Encreur sec → imbibé | `encreur` | 16 (tampons) | 28 (combinaison), 29 (Tamponnet) | **12 / 13** | Combinaison avec le café. |
+| Encreur sec → imbibé | `encreur` | 16 (tampons) | 28 (combinaison), 29 (Tamponnet) | **12 / 13** | Combinaison avec le café (remué à la cuillère). |
+| Cuillère en plastique | `cuillere` | 5 (cafétéria, plateau des tables) | 28 (remuer le café dans l'encreur) | **23** | Sans elle, le café « reste en surface du feutre ». Consommée (fond à moitié). |
 | Liasse de réclamations vierges | `liasse` | 18 (réclamations) | 19 (photocopieuse) | 1 | Le papier reste dans le bac : resservira à l'étape 33 (via la machine). |
 | Capsule pneumatique | `capsule` | 18 (réclamations) | 37 (PERCO → Conseil) | **19** | Vote par procuration. |
 | Copies du dossier Plunk | `copies_dossier` | 19 (archives) | 20 (combinaison avec le formulaire) | 1 | Remplit la case A. |
@@ -177,14 +178,14 @@ l'arbre §6.
 | Gobelet de café tiède | `gobelet` | 27 (PERCO) | 28 (combinaison), 31 (Delaigue) | 1 / 4 | Rempli deux fois (étapes 27 et 30) ; Delaigue le garde. |
 | Permis de quitter la dimension | `permis` | 43 (SYLVIE) | 46 (quai) | 3 | Rendu du badge au même moment. |
 
-**Total : 14 objets** (2 hérités + 12 nouveaux). **En poche simultanément** : 2–5 à
+**Total : 15 objets** (2 hérités + 13 nouveaux). **En poche simultanément** : 2–5 à
 l'acte I, 6–8 aux actes II–III (pic à 8 aux étapes 18–19, 22–25, 27–28), 4–6 à
 l'acte IV. **6 objets à écart ≥ 5** : `ticket_douane` (42), `plante` (31),
 `tampon_annule` (24/30), `capsule` (19), `badge` (14), `encreur` (12), plus `fragment`
 (34 entre ses deux usages d'horloge).
 
 **Combinaisons** : `copies_dossier` + `formulaire` → case A ; `encreur` + `gobelet` →
-encreur imbibé ; (refus drôles) `plante` + `gobelet` (« elle est en plastique, Gary ;
+encreur imbibé (requiert `cuillere`, consommée) ; (refus drôles) `plante` + `gobelet` (« elle est en plastique, Gary ;
 elle n'a pas soif, elle a des principes »), `ticket_9848` + `ticket_douane`
 (« deux tickets ne font pas un rendez-vous »), `tampon_annule` + `formulaire`
 (« tu veux annuler ta propre demande ? C'est très local, comme réflexe »).
@@ -211,7 +212,8 @@ PROPRIÉTAIRE : B.O.B. » ; le vaisseau part en fourrière ; SYLVIE annonce que
 │       permis de la Direction » → objectif final semé.)
 │   4. Attente : regarder le squelette (ticket 9848), l'afficheur (9 847), le
 │      distributeur vide.                                                    [st_voit_patience]
-│   5. Attente : prendre la plante en plastique.                             +plante
+│   5. Cafétéria (porte du fond de l'attente) : prendre M. Ficus, à côté de PERCO-JUNIOR,
+│      et la cuillère en plastique du plateau abandonné.            +plante +cuillere
 │   6. Attente : parler à B.O.B. (option « Il n'en a plus besoin… ») → B.O.B. aspire le
 │      ticket ; éloge funèbre.                                 [st_ticket_9848] +ticket_9848
 │   7. Guichet : rideau baissé, horloge 10 h 11, horaires 10 h 12–10 h 14.   [st_voit_horloge]
@@ -266,8 +268,8 @@ PROPRIÉTAIRE : B.O.B. » ; le vaisseau part en fourrière ; SYLVIE annonce que
 │  26. Pause : accord signé sur PERCO → fin de grève, les gobelets rentrent au
 │      dépôt.                                                     [st_greve_finie] −accord
 │  27. Pause : parler à PERCO → café tiède dans un gobelet (« UN À LA FOIS »). +gobelet
-│  28. Combiner encreur + gobelet → encreur imbibé de café (brun, « conforme »).
-│                                                                   [st_encreur_cafe]
+│  28. Combiner encreur + gobelet → remué à la cuillère, encreur imbibé de café (brun,
+│      « conforme ») ; sans cuillère, le café reste en surface.  [st_encreur_cafe] −cuillere
 │  29. Tampons : encreur sur Tamponnet → CLONK de joie ; formulaire sur Tamponnet →
 │      « VU » (requiert case A).                                   [st_case_b] −encreur
 │  30. Pause : gobelet sur PERCO → 2e café.                                  [st_cafe2]
@@ -419,7 +421,7 @@ la sortie vers `st-fourriere` idem.
 | Fichiers | `content/scenes/st-sas.yaml`, `content/scenes/st-attente.yaml`, `content/story/st_arrivee.ink`, `content/story/st_bob.ink` (knots `st_arrivee`, `st_bob`, `st_patience`) |
 | Ids de scènes | `st-sas`, `st-attente` (stubs suivants : `st-guichet`, `st-couloir-b`, `st-fourriere`) |
 | Hotspots `st-sas` | `portique` (look ; take → `ticket_douane`), `borne` (look : statut ; `useItem tampon_annule` plus tard), `vaisseau` (look : remorqué, `if: notFlags st_vaisseau_fourriere`), `bob` (talk → `st_laisse`) |
-| Hotspots `st-attente` | `squelette` (look → `st_voit_patience`), `afficheur` (look « 9 847 »), `distributeur` (look ; `useItem ticket_douane` = fausse piste), `plante` (take → `plante`), `bob` (talk ; option aspirer si `st_voit_patience`) |
+| Hotspots `st-attente` | `squelette` (look → `st_voit_patience`), `afficheur` (look « 9 847 »), `distributeur` (look ; `useItem ticket_douane` = fausse piste), `bob` (talk ; option aspirer si `st_voit_patience`) |
 | Flags | `st` (état), `st_arrive`, `st_vaisseau_fourriere`, `st_ticket_douane`, `st_laisse`, `st_voit_patience`, `st_ticket_9848` |
 | Objets (`items.yaml`) | `ticket_douane`, `ticket_9848`, `plante` (icônes : glyphes texte au stub) ; `look` de `badge` / `fragment` gardés par `st` |
 | État initial `ch1` | `startScene: 'st-sas'` tant que l'interlude n'existe pas ; `items: ['badge', 'fragment']`, `flags: ['st', 'ch0_termine', 'combi_portee']` |
@@ -445,10 +447,12 @@ inventaire ; `npm run playthrough` passe ch0 inchangé + stub ch1.
 - **Attente** (mini-puzzle) : `afficheur` (9 847, `st_voit_afficheur`) + `squelette` (regarder →
   `st_voit_patience`, utiliser → `st_main_serree`) → B.O.B. (`st_patience`, indices gradués)
   aspire le ticket 9848 ; fausse piste `ticket_douane` sur le `distributeur` ; `plante` (M. Ficus).
-- **Cafétéria** (`st-cafeteria`, sortie `vers_cafeteria` au fond de l'attente, `dir: up`) : looks
-  `menu`, `vitrine`, `comptoir`, `cafe` (PERCO-JUNIOR), `tables`, `bob` ; réplique d'arrivée.
+- **Cafétéria** (`st-cafeteria`, sortie `vers_cafeteria` au fond de l'attente, `dir: up`) : zooms
+  examine (`smart: look`) réduits à `menu`, `vitrine`, `comptoir`, `cafe` (PERCO-JUNIOR) ; `tables`, `bob`
+  en look simple ; réplique d'arrivée. Ramassages : `plante` (M. Ficus, devant entre le comptoir et
+  PERCO-JUNIOR) et `cuillere` (plateau des tables, requise pour `encreur` + `gobelet`, Acte III).
   Pièce 3D `stCafeteria` ; GenAI `public/props/st/platdujour-{fr,en}.jpg` (menu à lettres) et
-  `sandwich.png` (détouré, vitrine + hublot de la porte). Pas d'objet ni de flag : hors chemin critique.
+  `sandwich.png` (détouré, vitrine + hublot de la porte). Sur le chemin critique depuis t259 (plante, cuillère).
 - **Guichet** (`st-guichet`, sortie `vers_guichet` de l'attente, `requires: ticket_9848`) : salle
   jouable. Pièce 3D `stGuichet` (mauve administratif, accents `#8a6db0`) : comptoir à deux baies,
   Mme Guichard derrière la vitre (billboard GenAI `public/props/st/guichard-sheet.png`, 2 cellules
@@ -593,7 +597,7 @@ Checkpoint en salle, cases A, B, D, C remplies : `ChapterDef.endFlag` du ch1 = *
   `st_delaigue_reveille` ; 32. formulaire (réveillé + « VU ») → `st_case_d`.
 - **Tampons** : 29. `encreur` imbibé sur Tamponnet → −encreur, `st_tamponnet_encre` ; formulaire → `st_case_b`.
   **Archives** : 33. formulaire sur la photocopieuse (`st_case_d` + `st_papier`) → `st_case_c`.
-- **Combinaison** 28 : `encreur` + `gobelet` → `st_encreur_cafe` + `st_gobelet_vide` (le gobelet reste).
+- **Combinaison** 28 : `encreur` + `gobelet` (avec `cuillere`, prise à la cafétéria) → `st_encreur_cafe` + `st_gobelet_vide` (le gobelet reste), −`cuillere`. Sans cuillère : gag, rien ne change.
   Icônes à variantes (Studio `GENAI_VARIANTS`) : `accord-signe`, `gobelet-vide`, `encreur-cafe`.
 - **B.O.B.** : `st_bob_acte3.ink` (après la case A ; reprend Tamponnet/« VU » de l'Acte II). **Carnet** :
   `greve_p15`, `delegation`, `greve_finie`, `delaigue_dort`, `cases_bdc`. **`repair.ts`** : accord rendu tant
