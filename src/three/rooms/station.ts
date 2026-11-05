@@ -436,6 +436,9 @@ export const stAttente: RoomBuild = {
 /** Sandwich consigné (GenAI, détouré) : vitrine de la cafétéria, hublot de sa porte. */
 const SANDWICH_URL = `${import.meta.env.BASE_URL}props/st/sandwich.png`;
 const SANDWICH_ASPECT = 401 / 384;
+/** Même sandwich redressé de 17° et détouré au ras de l'alpha : base à plat, pour la poser sur une tablette. */
+const SANDWICH_SHELF_URL = `${import.meta.env.BASE_URL}props/st/sandwich-pose.png`;
+const SANDWICH_SHELF_ASPECT = 412 / 341;
 
 /**
  * 2 bis. Cafétéria d'accueil (porte au fond de la Salle d'Attente). Lieu d'ambiance, sans puzzle :
@@ -445,11 +448,13 @@ const SANDWICH_ASPECT = 401 / 384;
 export const stCafeteria: RoomBuild = {
   camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
   shots: {
-    menu: { fill: 0.5 },
-    vitrine: { fill: 0.75, orbit: -6 },
-    comptoir: { fill: 0.75 },
-    cafe: { fill: 0.75, orbit: 6 },
-    tables: { fill: 0.7, orbit: 8 },
+    menu: { fill: 0.82, fov: 38 },
+    vitrine: { px: [470, 300], fill: 1.05, orbit: -5, fov: 38 },
+    reserve: { of: 'vitrine', px: [522, 286], fill: 1.8, orbit: -4, fov: 34 },
+    plomb: { of: 'vitrine', px: [532, 336], fill: 1.6, orbit: 5, fov: 34 },
+    comptoir: { fill: 0.9, orbit: -4 },
+    cafe: { px: [1030, 290], fill: 0.85, orbit: 3 },
+    tables: { px: [1190, 400], fill: 0.78, orbit: 6 },
   },
   build(s) {
     shell(s, { floor: { a: '#6a5a44', b: '#e0d6bc', joint: '#4a3e30', tile: 0.6 }, wall: { top: '#d2c39a', bottom: '#8a7a58' }, trim: '#5a4630', left: -9, right: 9 });
@@ -497,11 +502,16 @@ export const stCafeteria: RoomBuild = {
     for (const y of shelfY) case_.add(at(box(vr.w * 0.9, 0.035, cd * 0.8, '#eef4f8', { edges: false }), 0, y, 0));
     const sw = Math.min(vr.w * 0.28, caseH * 0.42);
     // étage du bas : deux sandwichs ; étage du haut : un sandwich, et la place vide de Mme Guichard
+    // visuel redressé (base à plat), pied au ras du dessus de la tablette, un peu en avant pour la
+    // lecture ; ombre de contact plaquée sur la tablette (pas l'ombre « sol » du billboard, 4 cm plus haut)
+    const shelfTop = 0.035 / 2;
     for (const [x, y] of [[-0.25, 0], [0.18, 0], [-0.2, 1]] as const) {
-      const sand = at(billboard(SANDWICH_URL, sw / SANDWICH_ASPECT, SANDWICH_ASPECT, { tint: '#e8f0f4', shadow: sw * 0.4 }), x * vr.w, shelfY[y] + 0.02, -0.05);
+      const sand = at(billboard(SANDWICH_SHELF_URL, sw / SANDWICH_SHELF_ASPECT, SANDWICH_SHELF_ASPECT, { tint: '#e8f0f4', shadow: sw * 0.42 }), x * vr.w, shelfY[y] + shelfTop - 0.002, 0.04);
+      sand.children[0].position.y = 0.004;
       case_.add(sand);
     }
-    case_.add(at(label(tr('props.station.reserved'), vr.w * 0.26, caseH * 0.14, { color: '#c0392b', bg: '#f6efdc', bold: true }), vr.w * 0.2, shelfY[1] + caseH * 0.1, 0.1));
+    const reserved = at(label(tr('props.station.reserved'), vr.w * 0.26, caseH * 0.14, { color: '#c0392b', bg: '#f6efdc', bold: true }), vr.w * 0.2, shelfY[1] + caseH * 0.1, 0.1);
+    case_.add(reserved);
     // vitre (froid bleuté) + plomb « NE PAS OUVRIR » ; lueur du groupe froid qui respire
     case_.add(at(plane(vr.w * 0.94, caseH * 0.98, '#bfe6ff', { opacity: 0.2 }), 0, baseH + caseH / 2, cd / 2));
     const seal = at(label(tr('props.station.sealed'), vr.w * 0.34, caseH * 0.1, { color: '#ffffff', bg: '#c0392b', bold: true }), vr.w * 0.25, baseH + caseH * 0.2, cd / 2 + 0.01);
@@ -510,6 +520,8 @@ export const stCafeteria: RoomBuild = {
     case_.add(seal, cold);
     s.animate((t) => (cold.material.opacity = 0.14 + Math.sin(t * 0.9) * 0.05));
     s.spot('vitrine', at(case_, vr.x, 0, against(vr.z, cd)));
+    s.spot('reserve', reserved);
+    s.spot('plomb', seal);
 
     // ── comptoir : caisse à manivelle, cloche « SONNEZ », pile de plateaux, horaires du guichet ──
     const cr = s.stand(s.rect('comptoir'));

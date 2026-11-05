@@ -171,6 +171,8 @@ keys:
   scene.st-cafeteria.sector: Bureaucratic Station · Level 0 · Administrative catering
   scene.st-cafeteria.hotspot.menu.label: “DISH OF THE DAY” board
   scene.st-cafeteria.hotspot.vitrine.label: Sandwich display case
+  scene.st-cafeteria.hotspot.reserve.label: “RESERVED MRS G.” card
+  scene.st-cafeteria.hotspot.plomb.label: “DO NOT OPEN” seal
   scene.st-cafeteria.hotspot.comptoir.label: Counter
   scene.st-cafeteria.hotspot.cafe.label: “PERCO-JUNIOR” coffee machine
   scene.st-cafeteria.hotspot.tables.label: Tables

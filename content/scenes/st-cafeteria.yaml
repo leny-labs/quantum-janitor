@@ -45,6 +45,25 @@ hotspots:
       ticket_9848: "Le 9 848 de M. Patience ? Non. Ce ticket est pour le guichet. On ne mange pas le ticket d'un mort. Même ici."
       fragment: "Si je pose l'éclat sur la vitrine, les sandwichs pourraient redevenir frais. Ou se mettre à parler. Je ne veux entendre ni l'un ni l'autre."
 
+  # zooms examine sur la vitrine (après `vitrine` : zones plus petites, prioritaires au clic)
+  - id: reserve
+    label: Carton « RÉSERVÉ MME G. »
+    rect: [488, 270, 84, 34]
+    look:
+      - say: "Une place vide sur l'étagère du haut, et un carton plié : « RÉSERVÉ MME G. ». Écrit au feutre, repassé au feutre, repassé encore. Le carton a plus de couches d'encre que de carton."
+      - say: "Même le vide a une commande permanente, ici. Le sandwich est sorti ce matin. Il reviendra ce soir. Comme tous les soirs depuis quarante et un ans."
+    use: "Je ne touche pas au carton. Quarante et un ans de reconduction tacite, ça se respecte. Et ça se tamponne, sûrement."
+    useItem:
+      fragment: "Poser l'éclat à la place du sandwich de Mme Guichard ? Elle le mangerait sans voir la différence. C'est bien ça qui m'inquiète."
+
+  - id: plomb
+    label: Plomb « NE PAS OUVRIR »
+    rect: [484, 324, 106, 34]
+    look:
+      - say: "Un bandeau rouge et un plomb de scellé : « NE PAS OUVRIR AVANT LE RÉAPPROVISIONNEMENT ». Le plomb porte un tampon : « 10/11/1985 — 10 H 11 »."
+      - say: "Il a plus d'ancienneté que moi. Il aura sans doute une meilleure retraite."
+    use: "narrateur: Gary tire doucement sur le bandeau. Le plomb ne bouge pas. Quelque part dans la Station, un tampon se lève, prêt à frapper."
+
   - id: comptoir
     label: Comptoir
     rect: [615, 255, 320, 215]
