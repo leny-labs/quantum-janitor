@@ -17,8 +17,11 @@ art:
   - { rect: [0, 0, 1280, 470], color: "#c9bb94" }
 
 hotspots:
+  # `smart: look` : clic gauche = Regarder = travel d'examen (stCafeteria.shots) ; les gags
+  # « Utiliser » (cloche, expresso, chaise…) restent au verb coin.
   - id: menu
     label: Panneau « PLAT DU JOUR »
+    smart: look
     rect: [690, 70, 220, 165]
     art:
       - { rect: [700, 80, 200, 145], color: "#1a1a1a", stroke: "#c9ced6", text: "PLAT DU JOUR\nLE MÊME", size: 18 }
@@ -31,6 +34,7 @@ hotspots:
 
   - id: vitrine
     label: Vitrine à sandwichs
+    smart: look
     rect: [330, 235, 280, 230]
     art:
       - { rect: [340, 300, 260, 160], color: "#bfe6ff", stroke: "#8d93a0", text: "SANDWICHS", size: 14 }
@@ -48,6 +52,7 @@ hotspots:
   # zooms examine sur la vitrine (après `vitrine` : zones plus petites, prioritaires au clic)
   - id: reserve
     label: Carton « RÉSERVÉ MME G. »
+    smart: look
     rect: [488, 270, 84, 34]
     look:
       - say: "Une place vide sur l'étagère du haut, et un carton plié : « RÉSERVÉ MME G. ». Écrit au feutre, repassé au feutre, repassé encore. Le carton a plus de couches d'encre que de carton."
@@ -58,6 +63,7 @@ hotspots:
 
   - id: plomb
     label: Plomb « NE PAS OUVRIR »
+    smart: look
     rect: [484, 324, 106, 34]
     look:
       - say: "Un bandeau rouge et un plomb de scellé : « NE PAS OUVRIR AVANT LE RÉAPPROVISIONNEMENT ». Le plomb porte un tampon : « 10/11/1985 — 10 H 11 »."
@@ -66,6 +72,7 @@ hotspots:
 
   - id: comptoir
     label: Comptoir
+    smart: look
     rect: [615, 255, 320, 215]
     art:
       - { rect: [625, 330, 300, 130], color: "#6d5a48", stroke: "#4a3a2c", text: "CAISSE", size: 16 }
@@ -82,6 +89,7 @@ hotspots:
 
   - id: cafe
     label: Machine à café « PERCO-JUNIOR »
+    smart: look
     sfx: clonk
     rect: [960, 140, 140, 325]
     art:
@@ -99,6 +107,7 @@ hotspots:
 
   - id: tables
     label: Tables
+    smart: look
     rect: [1105, 300, 165, 200]
     art:
       - { rect: [1115, 380, 145, 20], color: "#d8d2c0" }

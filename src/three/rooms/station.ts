@@ -535,7 +535,7 @@ export const stCafeteria: RoomBuild = {
     // frise carrelée à mi-mur (cantine) et menu GenAI « PLAT DU JOUR : LE MÊME »
     const fr = s.fit([0, 228, 1280, 18], 0.03);
     s.add(at(plane(18, fr.h, '#ffffff', { map: stripeTexture('#e6dcc0', '#b5562a', 48) }), 0, fr.y, 0.03));
-    poster(s, s.rect('menu'), 'platdujour');
+    s.spot('menu', poster(s, s.rect('menu'), 'platdujour'));
     inkStamp(s, 560, 150, tr('props.station.stampSeen'));
     // passe-plat « RETOUR PLATEAUX » (rideau baissé), au-dessus de B.O.B.
     const hatch = s.fit([150, 110, 200, 110], 0.05);
