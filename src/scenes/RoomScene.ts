@@ -17,7 +17,7 @@ import { BobAspirRig } from '../three/rooms/bobaspire';
 import type { BobIdle } from '../three/rooms/bobidle';
 import { BobRig } from '../three/rooms/bobrepas';
 import { BobVoice } from '../three/rooms/bobvoix';
-import { CouloirWalkRig } from '../three/rooms/couloirWalk';
+import { CouloirWalkRig, EXIT_DOOR } from '../three/rooms/couloirWalk';
 import { FuseRig } from '../three/rooms/fusible';
 import { LecteurRig } from '../three/rooms/lecteur';
 import { VendingRig } from '../three/rooms/vending';
@@ -103,6 +103,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   private zoomPick: string | null = null;
   /** Plan d'arrivée en cours de travel : coupe sèche vers la vue de la pièce. */
   private skipCine: (() => void) | null = null;
+  /** `# couloir_out` reçu pendant le dialogue : sortie de boucle à jouer à la fin de l'interaction. */
+  private couloirOut = false;
   /** Carte de transition affichée (écran noir) : la pièce suivante apparaît au prochain `goto`. */
   private reveal: (() => Promise<void>) | null = null;
 
@@ -244,8 +246,13 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     // `# aspir` du dialogue (st_patience) : B.O.B. aspire le ticket de M. Patience
     const onAspir = () => void this.bobAspir();
     this.events.on('ink-aspir', onAspir);
+    // `# couloir_out` (st_couloir_suivre, dénouement) : on reprend la porte une fois le dialogue fini
+    this.couloirOut = false;
+    const onCouloirOut = () => (this.couloirOut = true);
+    this.events.on('ink-couloir-out', onCouloirOut);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.events.off('ink-aspir', onAspir);
+      this.events.off('ink-couloir-out', onCouloirOut);
       this.mapOverlay?.close();
       this.carnetOverlay?.close();
       this.press?.cancel();
@@ -389,6 +396,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     setCursor(this, 'default');
     try {
       await fn();
+      if (this.couloirOut) await this.corridorExit();
     } catch (e) {
       console.error(e);
     } finally {
@@ -568,7 +576,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.scenes.spots(false);
     const walking = rig.walk(door);
     // armé un peu après : le clic qui a poussé la porte ne doit pas couper la marche aussitôt
-    this.time.delayedCall(150, () => {
+    this.time.delayedCall(220, () => {
       if (!rig.walking) return;
       this.skipCine = () => {
         this.skipCine = null;
@@ -582,6 +590,35 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       if (this.sys.isActive()) this.scenes.spots(true);
     }
     await this.runner.run(i);
+  }
+
+  /**
+   * Couloir Infini B dénoué (`# couloir_out`) : la bulle se ferme, Gary reprend la porte B-1
+   * (plongée battant → noir, pas), l'écran se rallume sur le couloir droit (bureaux, sorties).
+   * Clic / touche = coupe sèche, même armement que la marche.
+   */
+  private async corridorExit(): Promise<void> {
+    this.couloirOut = false;
+    const rig = this.room.rig<CouloirWalkRig>(CouloirWalkRig.ID);
+    if (!rig || !this.sys.isActive() || this.session.state.scene !== 'st-couloir-b') return;
+    this.dialogueBox.close();
+    this.scenes.spots(false);
+    const exiting = rig.exit(EXIT_DOOR, () => {
+      if (this.sys.isActive()) this.cameras.main.fadeIn(650, 0, 0, 0);
+    });
+    this.time.delayedCall(220, () => {
+      if (!rig.walking) return;
+      this.skipCine = () => {
+        this.skipCine = null;
+        rig.skip();
+      };
+    });
+    try {
+      await exiting;
+    } finally {
+      this.skipCine = null;
+      if (this.sys.isActive()) this.scenes.spots(true);
+    }
   }
 
   /** Verbe d'un hotspot ; certains gestes clés ont leur petite animation. */

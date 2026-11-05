@@ -35,4 +35,4 @@ export function parseTag(raw: string): InkTag {
   return { key: m[1].toLowerCase(), value: (m[2] ?? '').trim() };
 }
 
-export const INK_TAG_KEYS = ['give', 'take', 'set', 'unset', 'goto', 'end', 'card', 'shake', 'aspir', 'mood'] as const;
+export const INK_TAG_KEYS = ['give', 'take', 'set', 'unset', 'goto', 'end', 'card', 'shake', 'aspir', 'couloir_out', 'mood'] as const;

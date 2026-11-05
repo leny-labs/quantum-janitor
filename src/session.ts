@@ -93,6 +93,7 @@ export class Session {
         this.activeScene?.events.emit('ink-shake');
       },
       aspir: () => this.activeScene?.events.emit('ink-aspir'),
+      couloirOut: () => this.activeScene?.events.emit('ink-couloir-out'),
     });
     const autosave = this.save.autoSave(state);
     // flags persistants : notés dès qu'ils apparaissent (hors mode debug)

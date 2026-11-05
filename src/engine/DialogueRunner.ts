@@ -26,7 +26,7 @@ export class DialogueRunner {
   constructor(
     private content: GameContent,
     private state: GameState,
-    private hooks: { shake: () => void; aspir?: () => void },
+    private hooks: { shake: () => void; aspir?: () => void; couloirOut?: () => void },
   ) {
     const { story, errors } = compileInk(content.inkSource);
     if (!story) throw new Error('Erreur Ink :\n' + errors.join('\n'));
@@ -115,6 +115,10 @@ export class DialogueRunner {
       case 'aspir':
         // B.O.B. aspire le ticket de M. Patience (st-attente) : animation 3D, sans attendre
         this.hooks.aspir?.();
+        break;
+      case 'couloir_out':
+        // Couloir Infini B dénoué : on sort de la boucle par la porte, à la fin du dialogue
+        this.hooks.couloirOut?.();
         break;
       case 'goto':
         deferred.push({ goto: value });

@@ -58,7 +58,7 @@ Trois directions. Les trois ont un panneau « AILE B ». Un seul a une plante en
     Les néons clignent. La porte B-1 devient « ARCHIVES ». La B-2 devient « TAMPONS ». La B-3 devient « RÉCLAMATIONS ». Au bout, un casier gris : « STOCK B-7/12 ». # shake
     bob: Il s'est dénoué, Gary ! Le couloir s'est dénoué ! Une plante en plastique vient de faire ce que trois réformes n'ont jamais réussi ! # mood: surprised
     Gary ramasse M. Ficus. Il a l'air exactement aussi content que d'habitude. C'est-à-dire pas du tout, avec dignité. # give: plante
-    gary: Merci, Monsieur Ficus. Vous êtes un repère. # set: st_couloir_resolu
+    gary: Merci, Monsieur Ficus. Vous êtes un repère. # set: st_couloir_resolu # couloir_out
     -> END
 
 // Payoff : le dernier B-7/12, dans le casier « STOCK B-7/12 » (YAML : give formulaire, set st_formulaire).

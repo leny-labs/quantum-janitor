@@ -82,7 +82,7 @@ export function runningContext(): AudioContext | null {
   return audio && audio.state === 'running' ? audio : null;
 }
 
-function tone(a: AudioContext, type: OscillatorType, f0: number, f1: number, t: number, dur: number, vol: number): void {
+function tone(a: AudioContext, type: OscillatorType, f0: number, f1: number, t: number, dur: number, vol: number, out: AudioNode = sfxOut(a)): void {
   const osc = a.createOscillator();
   const gain = a.createGain();
   osc.type = type;
@@ -91,12 +91,12 @@ function tone(a: AudioContext, type: OscillatorType, f0: number, f1: number, t: 
   gain.gain.setValueAtTime(0, t);
   gain.gain.linearRampToValueAtTime(vol, t + 0.008);
   gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  osc.connect(gain).connect(sfxOut(a));
+  osc.connect(gain).connect(out);
   osc.start(t);
   osc.stop(t + dur + 0.02);
 }
 
-function noise(a: AudioContext, t: number, dur: number, vol: number, freq: number, freq1 = freq): void {
+function noise(a: AudioContext, t: number, dur: number, vol: number, freq: number, freq1 = freq, out: AudioNode = sfxOut(a)): void {
   const len = Math.ceil(a.sampleRate * dur);
   const buf = a.createBuffer(1, len, a.sampleRate);
   const data = buf.getChannelData(0);
@@ -111,7 +111,7 @@ function noise(a: AudioContext, t: number, dur: number, vol: number, freq: numbe
   const gain = a.createGain();
   gain.gain.setValueAtTime(vol, t);
   gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  src.connect(filter).connect(gain).connect(sfxOut(a));
+  src.connect(filter).connect(gain).connect(out);
   src.start(t);
 }
 
@@ -421,6 +421,38 @@ export function distantPlouf(): void {
   tone(a, 'sine', 380, 70, t, 0.5, 0.08);
   noise(a, t + 0.03, 0.6, 0.035, 700, 180);
   cosmicHarp([0, 7, 14], 62, 0.16, { dur: 0.9, vol: 0.016, shimmer: 0.004 });
+}
+
+const footLog: string[] = [];
+
+/**
+ * Pas sur le lino (marche du Couloir Infini B) : talon mat (sine grave) + frottement de semelle
+ * (bruit court filtré), puis la pointe du pied juste après. `side` -1 / 1 = pied gauche / droit
+ * (léger panoramique), pitch un peu aléatoire pour que deux pas ne sonnent jamais pareil.
+ */
+export function footstep(side: -1 | 1 = 1, vol = 1): void {
+  if (import.meta.env.DEV) {
+    footLog.push(side < 0 ? 'L' : 'R');
+    console.debug(`[sfx] footstep ${side < 0 ? 'L' : 'R'} #${footLog.length}`);
+  }
+  const a = ctx();
+  if (!a) return;
+  const t = a.currentTime;
+  const out = a.createStereoPanner();
+  out.pan.value = side * 0.22;
+  out.connect(sfxOut(a));
+  const p = 0.9 + Math.random() * 0.22;
+  // talon
+  tone(a, 'sine', 125 * p, 52 * p, t, 0.14, 0.2 * vol, out);
+  noise(a, t, 0.05, 0.16 * vol, 1300 * p, 500 * p, out);
+  // semelle qui frotte puis pointe du pied
+  noise(a, t + 0.02, 0.09, 0.05 * vol, 2600 * p, 1500 * p, out);
+  noise(a, t + 0.075, 0.035, 0.08 * vol, 1800 * p, 900 * p, out);
+  tone(a, 'sine', 160 * p, 80 * p, t + 0.075, 0.06, 0.06 * vol, out);
+}
+
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  Object.assign((window as unknown as { qjSfx: object }).qjSfx, { footstep, footLog });
 }
 
 // ── Props physiques (engine/propSfx.ts) : un son à CHAQUE actionnement ──────
