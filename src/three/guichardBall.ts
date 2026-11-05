@@ -5,6 +5,11 @@
  * (élastiques jaunes / rouges / bleus / gris) aux axes tirés au hasard, contour cartoon par
  * coque inversée. Géométries et matériaux partagés (créés une fois au niveau du module) :
  * reconstruire la pièce ne réalloue rien.
+ *
+ * « Derrière la vitre » : Mme Guichard est vue à travers le plexi du guichet (#cfe8ff, 16 %), mais
+ * une balle aux couleurs pleines et au trait noir se lit collée à la caméra. Couleurs voilées vers
+ * le bleu-gris de la vitre et un poil assombries, contour fin et violacé (pas d'encre pure), balle
+ * recollée au plan du sprite : elle prend la même « peau » de verre que le buste peint.
  */
 import * as THREE from 'three';
 import { mat } from './kit';
@@ -15,6 +20,15 @@ const CELL_H = 768;
 const BALL = { x: 598, y: 481, r: 43 };
 
 const COLORS = ['#f2c230', '#e8b52a', '#d8483c', '#c23a33', '#4f86b8', '#3f6f9c', '#9aa2ab', '#e07a3a'];
+/** Voile du plexi : teinte de la vitre du guichet, part du mélange, assombrissement. */
+const GLASS = new THREE.Color('#cfe8ff');
+const VEIL = 0.2;
+const DIM = 0.8;
+
+/** Couleur « vue à travers la vitre » : désaturée vers le bleu-gris du plexi, un peu moins lumineuse. */
+function seen(c: THREE.ColorRepresentation): THREE.Color {
+  return new THREE.Color(c).lerp(GLASS, VEIL).multiplyScalar(DIM);
+}
 
 let shared: { core: THREE.SphereGeometry; ink: THREE.SphereGeometry; bands: THREE.TorusGeometry[]; mats: THREE.Material[]; coreMat: THREE.Material; inkMat: THREE.Material } | undefined;
 
@@ -22,12 +36,12 @@ function assets() {
   if (shared) return shared;
   shared = {
     core: new THREE.SphereGeometry(0.93, 20, 14),
-    ink: new THREE.SphereGeometry(1.13, 20, 14),
+    ink: new THREE.SphereGeometry(1.08, 20, 14), // trait plus fin : la vitre adoucit le contour
     // trois rayons légèrement différents : les bandes se chevauchent au lieu de se fondre
     bands: [0.96, 1.0, 1.04].map((r) => new THREE.TorusGeometry(r, 0.1, 5, 36)),
-    mats: COLORS.map((c) => mat(c)),
-    coreMat: mat('#9c4632'),
-    inkMat: new THREE.MeshBasicMaterial({ color: 0x1a1018, side: THREE.BackSide }),
+    mats: COLORS.map((c) => mat(seen(c))),
+    coreMat: mat(seen('#9c4632')),
+    inkMat: new THREE.MeshBasicMaterial({ color: seen('#241a2c'), side: THREE.BackSide }),
   };
   return shared;
 }
@@ -74,7 +88,9 @@ export function guichardBall(w: number, h: number, cell = 4): GuichardBall {
   tilt.add(spin, ink);
   tilt.scale.setScalar(r);
   object.add(tilt);
-  object.position.set(baseX, baseY, 0.04);
+  // recollée au plan du sprite (0,04 → 0,01) : même profondeur que le doigt peint, bien derrière la
+  // vitre (zb + 0,02) ; opaque, elle est dessinée avant la vitre transparente qui la voile ensuite
+  object.position.set(baseX, baseY, 0.01);
   object.visible = false;
 
   let pop = 0;
