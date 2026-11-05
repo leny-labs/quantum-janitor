@@ -32,12 +32,12 @@ import { DialogueBox } from '../ui/DialogueBox';
 import { HoverLabel } from '../ui/HoverLabel';
 import { ProgressCue } from '../ui/ProgressCue';
 import { drawNavButton, verbCursor, type VerbIcon } from '../ui/chrome';
-import { t, tl } from '../i18n';
+import { lang, t, tl } from '../i18n';
 import { isTouch, uiPx } from '../ui/input';
 import { playMusic, themeForScene } from '../ui/music';
 import { makeMapToggle } from '../ui/MapToggle';
 import { CarnetOverlay, freshClues, hasUnread, makeCarnetToggle, notifyNoted, type CarnetButton } from '../ui/Carnet';
-import { hasCarnet, type Carnet, type ClueDef } from '../engine/clues';
+import { clueText, freshReadyDeductions, hasCarnet, markNudged, readyDeductions, type Carnet, type ClueDef } from '../engine/clues';
 import { makeMusicToggle } from '../ui/MusicToggle';
 import { PressRing } from '../ui/PressRing';
 import { RoomPlaque } from '../ui/RoomPlaque';
@@ -83,6 +83,10 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   private carnetOverlay: CarnetOverlay | null = null;
   /** Indices fraîchement notés : fiche « Noté au carnet » dès que l'écran est libre. */
   private notedPending: ClueDef[] = [];
+  /** État changé : revérifier si une déduction est devenue possible (relance de B.O.B.). */
+  private deduceDirty = true;
+  /** Pastille CARNET après une relance de B.O.B., jusqu'à l'ouverture du carnet. */
+  private deduceUnread = false;
   private debugText: Phaser.GameObjects.Text | null = null;
   private heldItem!: Phaser.GameObjects.Text;
   /** Objet en main : son icône GenAI suit le curseur (repli : étiquette `heldItem`). */
@@ -167,6 +171,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       .setVisible(hasStationMap(state));
     this.carnetOverlay = null;
     this.notedPending = [];
+    this.deduceDirty = true;
+    this.deduceUnread = false;
     this.carnetButton = makeCarnetToggle(this, this.mapButton.x, menu.y, menu.height, t('hud.carnet'), () => this.openCarnet()).setDepth(700) as CarnetButton;
     freshClues(state, this.carnet); // référence : ce qui est déjà noté au chargement n'est pas « nouveau »
     this.layoutCarnetButton();
@@ -230,6 +236,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       // nouvel indice : petite fiche « Noté au carnet » + pastille sur le bouton
       // (jouée à la fin de l'interaction : jamais sous une bulle de dialogue)
       this.notedPending.push(...freshClues(state, this.carnet));
+      this.deduceDirty = true;
       this.layoutCarnetButton();
     });
     // `# aspir` du dialogue (st_patience) : B.O.B. aspire le ticket de M. Patience
@@ -264,7 +271,27 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       const size = this.menuButton.height;
       notifyNoted(this, this.carnetButton.x + size / 2, this.carnetButton.y + size / 2, this.notedPending);
       this.notedPending = [];
+    } else if (this.deduceDirty && !this.blocked && this.carnetButton.visible) {
+      this.nudgeDeduction();
     }
+  }
+
+  /**
+   * B.O.B. signale (une fois par déduction et par session) qu'une paire du carnet est réunie
+   * mais pas encore déduite ; une seule réplique par passage, les suivantes au prochain écran libre.
+   */
+  private nudgeDeduction(): void {
+    const { state } = this.session;
+    const [d] = freshReadyDeductions(state, this.carnet);
+    if (!d) {
+      this.deduceDirty = false;
+      return;
+    }
+    markNudged(state, [d.id]);
+    this.deduceUnread = true;
+    this.carnetButton.setUnread(true);
+    const line = d.nudge ? clueText(d.nudge, lang()) : t('carnet.nudge');
+    void this.locked(() => this.say(line));
   }
 
   private refresh(): void {
@@ -561,13 +588,16 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     const size = this.menuButton.height;
     this.carnetButton.setVisible(hasCarnet(state, this.carnet));
     this.carnetButton.setX(this.mapButton.visible ? this.mapButton.x - size - 8 : this.mapButton.x);
-    this.carnetButton.setUnread(hasUnread(state, this.carnet));
+    this.carnetButton.setUnread(hasUnread(state, this.carnet) || this.deduceUnread);
   }
 
   /** Carnet de déduction : overlay modal ; une déduction validée pose son flag (sauvegarde comprise). */
   private openCarnet(): void {
     const { state, content } = this.session;
     if (this.blocked || !hasCarnet(state, this.carnet)) return;
+    // carnet ouvert : le joueur y est déjà, B.O.B. n'a plus à relancer ces déductions-là
+    markNudged(state, readyDeductions(state, this.carnet).map((d) => d.id));
+    this.deduceUnread = false;
     state.select(null);
     this.hover.set(null);
     this.carnetOverlay = new CarnetOverlay(

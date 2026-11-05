@@ -230,6 +230,7 @@ export const fr = {
       'Rejeté pour vice de forme. La forme vous prie de l’excuser.',
       'Rapprochement non prévu au Catalogue des Rapprochements (édition 1987).',
     ],
+    nudge: 'bob: Tu as de quoi déduire. Le carnet n’est pas décoratif. Ouvre-le.',
     close: 'Ranger le carnet',
     closeKicker: 'ÉCHAP · C',
   },

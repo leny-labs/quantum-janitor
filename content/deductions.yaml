@@ -4,6 +4,8 @@
 #   set    flag posé quand la déduction est validée (= sauvegarde) ; la conclusion devient une
 #          pièce combinable à son tour (section « CONCLUSIONS » du carnet)
 #   line   réplique affichée sous la conclusion (« bob: … », « narrateur: … » ou Gary)
+#   nudge  relance de B.O.B. quand la paire est réunie mais pas déduite (une fois par session ;
+#          repli : carnet.nudge dans src/i18n)
 # Mauvaise paire : réplique absurde (src/i18n, carnet.rejected), aucune pénalité.
 deductions:
   - id: d_minute
@@ -16,6 +18,9 @@ deductions:
     line:
       fr: "bob: Une minute de retard en quarante et un ans, Gary. Pour un service public, c'est presque de la ponctualité."
       en: "bob: One minute late in forty-one years, Gary. For a public service, that's practically punctual."
+    nudge:
+      fr: "bob: Deux constatations se regardent de travers dans ton carnet. Ouvre-le avant qu'elles ne déposent un préavis."
+      en: "bob: Two findings are glaring at each other in your notebook. Open it before they file a grievance."
 
   - id: d_horloge
     # D1 + tremblement/éclat, ou directement l'horloge 10 h 11 + tremblement (le joueur voit le lien sans passer par D1).
@@ -28,6 +33,9 @@ deductions:
     line:
       fr: "bob: Éclat sur l'horloge, au bon moment. Si ça marche, je te tiens la laisse jusqu'au guichet. Si ça rate, je dirai que je ne te connais pas."
       en: "bob: Shard on the clock, at the right moment. If it works, I'll hold your leash all the way to the desk. If it fails, I'll say I don't know you."
+    nudge:
+      fr: "bob: Tu as la minute. Tu as le tremblement. Il manque juste que tu les fasses se parler. Carnet."
+      en: "bob: You have the minute. You have the tremor. All that's missing is introducing them. Notebook."
 
   - id: d_formulaire
     needs: [guichet_ouvert, guichard_rupture]
@@ -39,3 +47,6 @@ deductions:
     line:
       fr: "narrateur: Gary souligne « boucle » deux fois. Puis une troisième, pour le principe."
       en: "narrateur: Gary underlines “loop” twice. Then a third time, on principle."
+    nudge:
+      fr: "bob: Guichet ouvert, rupture au tableau. C'est le moment de déduire, pas de faire la queue derrière M. Patience."
+      en: "bob: Desk open, out of stock on the board. Time to deduce, not to queue behind Mr Patience."

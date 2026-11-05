@@ -202,6 +202,7 @@ export const en: PartialCatalog = {
       'Rejected on a technicality. The technicality apologises.',
       'Connection not listed in the Catalogue of Connections (1987 edition).',
     ],
+    nudge: 'bob: You have enough to deduce something. The notebook is not decorative. Open it.',
     close: 'Put the notebook away',
     closeKicker: 'ESC · C',
   },

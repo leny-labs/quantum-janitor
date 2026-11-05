@@ -34,6 +34,8 @@ export interface DeductionDef {
   set: string;
   /** Réplique affichée sous la conclusion (« bob: … », « narrateur: … » ou texte de Gary). */
   line?: MapText;
+  /** Relance de B.O.B. quand la paire est réunie mais pas encore déduite (« bob: … ») ; repli i18n `carnet.nudge`. */
+  nudge?: MapText;
   icon?: string;
 }
 
@@ -91,4 +93,35 @@ export function deduce(state: GameState, c: Carnet, a: string, b: string): Deduc
   const d = c.deductions.find((x) => deductionPairs(x).some(([p, q]) => (p === a && q === b) || (p === b && q === a)));
   if (!d) return { kind: 'rejected' };
   return state.hasFlag(d.set) ? { kind: 'already', deduction: d } : { kind: 'ok', deduction: d };
+}
+
+/**
+ * Déductions prêtes : une paire `needs` entièrement combinable (indices notés / conclusions)
+ * et flag `set` pas encore posé. Ordre du YAML.
+ * (Plus tard : piste « prochaine hypothèse » dans la fiche du carnet, façon Detective Grimoire.)
+ */
+export function readyDeductions(state: GameState, c: Carnet): DeductionDef[] {
+  const usable = usableIds(state, c);
+  return c.deductions.filter((d) => !state.hasFlag(d.set) && deductionPairs(d).some(([a, b]) => usable.has(a) && usable.has(b)));
+}
+
+/** Relances de B.O.B. (« une déduction est possible ») : une seule par déduction et par session. */
+const nudges = new WeakMap<GameState, Set<string>>();
+
+function nudged(state: GameState): Set<string> {
+  let s = nudges.get(state);
+  if (!s) nudges.set(state, (s = new Set()));
+  return s;
+}
+
+/** Déductions prêtes jamais annoncées cette session (ne marque rien : voir `markNudged`). */
+export function freshReadyDeductions(state: GameState, c: Carnet): DeductionDef[] {
+  const done = nudged(state);
+  return readyDeductions(state, c).filter((d) => !done.has(d.id));
+}
+
+/** Retient qu'une déduction a été annoncée (ou vue carnet ouvert) : plus jamais relancée. */
+export function markNudged(state: GameState, ids: Iterable<string>): void {
+  const done = nudged(state);
+  for (const id of ids) done.add(id);
 }

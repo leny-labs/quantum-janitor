@@ -14,7 +14,7 @@ import { migrateSave, SAVE_VERSION } from '../src/engine/saveMigration';
 import type { SaveData } from '../src/engine/types';
 import { GameState } from '../src/engine/GameState';
 import { parseStationMap, zoneState } from '../src/engine/stationMap';
-import { concluded, deduce, hasCarnet, knownClues } from '../src/engine/clues';
+import { concluded, deduce, hasCarnet, knownClues, readyDeductions } from '../src/engine/clues';
 import { CHAPTERS, walkChapter } from '../src/engine/walkthrough';
 import { resolveCombine } from '../src/engine/combine';
 import { ROOT, readRawContent } from './readContent';
@@ -184,6 +184,10 @@ async function main() {
         if (deduce(atD1, carnet, 'horaires', 'horloge_1011').kind !== 'already') throw new Error('carnet : D1 devrait être conclue (ordre libre)');
         if (deduce(atD1, carnet, 'ticket_9848', 'horaires').kind !== 'rejected') throw new Error('carnet : mauvaise paire acceptée');
         if (deduce(atD1, carnet, 'guichet_ouvert', 'guichard_rupture').kind !== 'rejected') throw new Error('carnet : pièce non notée acceptée');
+        // relance de B.O.B. : D1 prête juste avant d'être déduite, plus après
+        const beforeD1 = GameState.fromSave(checkpoints[checkpoints.indexOf(d1) - 1].save);
+        if (!readyDeductions(beforeD1, carnet).some((d) => d.id === 'd_minute')) throw new Error('carnet : d_minute devrait être prête avant D1');
+        if (readyDeductions(atD1, carnet).some((d) => d.id === 'd_minute')) throw new Error('carnet : d_minute encore prête après D1');
         const clues = knownClues(state, carnet).length;
         console.log(`✓ carnet : ${clues}/${carnet.clues.length} indices, ${concluded(state, carnet).length}/${carnet.deductions.length} conclusions, guichet ouvert à 10 h 12`);
       }
