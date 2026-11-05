@@ -326,9 +326,10 @@ export const stAttente: RoomBuild = {
     s.spot('afficheur', at(board, af.x, af.y, 0.06));
 
     // rangée de chaises vissées, le long du mur du fond : sièges GenAI (même dessin que la chaise de
-    // M. Patience, qui fait partie de son sprite), du plus loin au plus près pour un tri propre
+    // M. Patience, qui fait partie de son sprite), du plus loin au plus près pour un tri propre.
+    // La rangée s'arrête à 550 px (plus de chaises à 645 / 740) : la porte CAFÉTÉRIA (772 px) respire.
     const seatH = 1.12;
-    for (let px = 75; px <= 740; px += 95) {
+    for (let px = 75; px <= 550; px += 95) {
       if (px === PATIENCE_CHAIR) continue;
       const c = s.floorAt(px, 470);
       s.add(at(billboard(SIEGE_URL, seatH, SIEGE_ASPECT, { tint: '#fff2de', shadow: 0.3 }), c.x, 0, against(c.z, 0.7) + 0.05));
@@ -717,7 +718,10 @@ export const stGuichet: RoomBuild = {
     // transparente : buste visible ≈ 71 % de la hauteur / 67 % de la largeur du cadre (v1 : ≈ 99 %),
     // soit ≈ 2,24 de haut et ≈ 2,07 de large dans une baie de ≈ 3,49. Base top − 0,08 (v1 : − 0,05).
     // Le rebord relevé (top) masque le bas du buste ; l'assise (seat) ne bouge pas.
-    const gBase = seat - 0.08;
+    // Cadrage v4 : buste remonté de ≈ 22 px (assise visuelle 372 → 350 px) pour que le visage
+    // soit net dans la vitre, menton au-dessus de l'hygiaphone ; la taille (gh) ne change pas.
+    const lift = s.wallAt(640, 350, zb).y - seat;
+    const gBase = seat - 0.08 + lift;
     const gh = Math.min((g.y + g.h / 2) - (seat - 0.05), g.w / GUICHARD_ASPECT);
     const guichard = billboardSheet(GUICHARD_SHEET, GUICHARD_FRAMES, gh, GUICHARD_ASPECT, { tint: '#fff2f6', shadow: 0.01 });
     const gs = guichard.userData.sprite as THREE.Sprite;
@@ -731,7 +735,7 @@ export const stGuichet: RoomBuild = {
     });
     // rideau métallique du guichet 1, à moitié baissé : lames horizontales, barre de charge
     const shutter = new THREE.Group();
-    const sh = glassH * 0.22;
+    const sh = glassH * 0.12; // v4 : 0,22 → 0,12, un peu d'air au-dessus du chignon
     for (let i = 0; i < 7; i++) shutter.add(at(box(w1 - 0.14, sh / 7 - 0.01, 0.03, i % 2 ? '#9aa0a8' : '#a9afb8', { edges: false }), 0, -i * (sh / 7), 0));
     shutter.add(at(box(w1 - 0.1, 0.06, 0.06, '#5a5f6a'), 0, -sh, 0));
     const shutterY = fasciaB - sh / 14;

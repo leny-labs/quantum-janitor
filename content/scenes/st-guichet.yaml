@@ -44,9 +44,9 @@ hotspots:
   - id: hygiaphone
     label: Hygiaphone
     sfx: clonk
-    rect: [470, 306, 190, 52]
+    rect: [470, 316, 190, 52]
     art:
-      - { rect: [480, 312, 170, 40], color: "#c9ced6", stroke: "#2a2830", text: "HYGIAPHONE", size: 12 }
+      - { rect: [480, 322, 170, 40], color: "#c9ced6", stroke: "#2a2830", text: "HYGIAPHONE", size: 12 }
     look:
       - say: "L'hygiaphone : un disque de plastique percé de petits trous, au milieu de la vitre. Il laisse passer la voix, les microbes, et les refus. Dans un sens seulement."
       - say: "Un autocollant dessous : « PARLEZ DISTINCTEMENT. VOTRE DEMANDE SERA ÉGALEMENT REFUSÉE DISTINCTEMENT. »"
