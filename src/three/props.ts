@@ -975,20 +975,28 @@ export const GUICHARD_ACTOR: ActorLoops = {
  * au comptoir (GenAI gpt-image-2.6-sunburst, style de guichard.png ; _briefs/acte2/genai/build.py).
  * Planches 2 cellules : 0 repos · 1 marmonne (visage « parle » recollé sur le repos). Comme Mme
  * Guichard, jamais synchronisées sur le dialogue : seul le portrait de la boîte de dialogue parle.
+ * M. Duplicata a 3 cellules de plus (_briefs/acte2/genai/build_duplicata_busy.py) : 2 lit, tête
+ * baissée · 3 coup d'œil soupçonneux au tampon du bureau · 4 tasse ses deux feuilles.
  */
 export const DUPLICATA_SHEET = `${import.meta.env.BASE_URL}props/st/duplicata-sheet.png`;
 export const DUPLICATA_ASPECT = 708 / 768;
-/** Il marmonne tout deux fois, de temps en temps, pour lui-même. */
+/**
+ * Toujours absorbé par ses papiers (jamais face caméra, même quand il parle) : il lit, tasse ses
+ * feuilles, jette un œil au tampon, relit. Le repos face caméra (0) et la frame qui marmonne (1)
+ * restent sur la planche mais sortent du cycle.
+ */
 export const DUPLICATA_ACTOR: ActorLoops = {
   idle: [
-    { frame: 0, duration: 4200 },
-    { frame: 1, duration: 260 },
-    { frame: 0, duration: 180 },
-    { frame: 1, duration: 260 },
-    { frame: 0, duration: 5600 },
-    { frame: 1, duration: 240 },
-    { frame: 0, duration: 160 },
-    { frame: 1, duration: 240 },
+    { frame: 2, duration: 4800 },
+    { frame: 4, duration: 700 },
+    { frame: 2, duration: 3600 },
+    { frame: 3, duration: 1500 },
+    { frame: 2, duration: 5200 },
+    { frame: 4, duration: 600 },
+    { frame: 2, duration: 300 },
+    { frame: 4, duration: 600 },
+    { frame: 2, duration: 2800 },
+    { frame: 3, duration: 1200 },
   ],
 };
 export const TAMPONNET_SHEET = `${import.meta.env.BASE_URL}props/st/tamponnet-sheet.png`;

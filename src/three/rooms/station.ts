@@ -1322,14 +1322,16 @@ function doorToCorridor(s: Stage, color: string): void {
 }
 
 /**
- * Fonctionnaire en buste derrière un comptoir (planche GenAI 2 cellules, jamais synchronisée sur le
+ * Fonctionnaire en buste derrière un comptoir (planche GenAI ≥ 2 cellules, jamais synchronisée sur le
  * dialogue) : le bas du buste passe sous le plateau `top` (y monde) du comptoir placé devant.
  */
 function clerk(s: Stage, id: string, sheet: string, aspect: number, loops: Parameters<typeof actorFrame>[1], z: number, top: number, tint: string, sink = 0.3): THREE.Group {
   const g = s.fit(s.rect(id), z);
   const base = top - sink;
   const h = Math.min(g.y + g.h / 2 - base, (g.w * 1.25) / aspect);
-  const npc = billboardSheet(sheet, 2, h, aspect, { tint, shadow: 0.01 });
+  // nombre de cellules = plus haute frame citée par les boucles (planche 2 cellules au minimum)
+  const frames = Math.max(2, ...[...loops.idle, ...(loops.talk ?? [])].map((st) => st.frame + 1));
+  const npc = billboardSheet(sheet, frames, h, aspect, { tint, shadow: 0.01 });
   const sp = npc.userData.sprite as THREE.Sprite;
   const sy = sp.scale.y;
   s.spot(id, at(npc, g.x, base, z));
