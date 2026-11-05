@@ -39,10 +39,13 @@ export function bob(w: number): THREE.Group {
   const eyeR = r * 0.16;
   const eyeY = h * 0.62;
   const eyeZ = r * 0.9;
+  // pivot de chaque groupe-œil au centre de l'œil (et non au sol, origine du robot) : clignements
+  // (BobIdle, setFace) et plissements des rigs (scale.y/x) écrasent l'œil sur place au lieu de le
+  // tasser vers le pare-choc, sous la plaque « B.O.B. ». Pupille : même décalage qu'avant (un poil bas).
   const eyes = [-1, 1].map((sx) => {
-    const eye = at(sphere(eyeR, '#ffffff', { seg: 10 }), sx * r * 0.36, eyeY, eyeZ);
-    const pupil = at(sphere(r * 0.07, '#11131a', { glow: true, seg: 8 }), sx * r * 0.36, h * 0.55, r * 1.04);
-    return group([eye, pupil]);
+    const eye = sphere(eyeR, '#ffffff', { seg: 10 });
+    const pupil = at(sphere(r * 0.07, '#11131a', { glow: true, seg: 8 }), 0, h * 0.55 - eyeY, r * 1.04 - eyeZ);
+    return group([eye, pupil], sx * r * 0.36, eyeY, eyeZ);
   });
   // sourcils-plaques au-dessus des yeux (la déprime, en low-poly), orientés
   // selon l'humeur (setBrows, poses de engine/brows.ts) ; hors des groupes
