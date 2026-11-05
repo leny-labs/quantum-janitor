@@ -30,6 +30,10 @@ characters:
     name: M. Jean-Claude Sabot, agent de fourrière
     color: "#d9762a"
     portrait: "FOURRIÈRE\n(¬_¬)"
+  - id: remorque
+    name: M. Roger Remorque, gardien de fourrière
+    color: "#c8e02a"
+    portrait: "ENLÈVEMENT\n(=_=)"
   - id: guichard
     name: Mme Odile Guichard, guichet d'accueil
     color: "#8a6db0"

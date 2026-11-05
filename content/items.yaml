@@ -303,5 +303,5 @@ items:
     icon: { color: "#e8dcc0", glyph: "PERMIS" }
     look: "« PERMIS DE QUITTER LA DIMENSION — DÉLIVRÉ PAR LA DIRECTION GÉNÉRALE DE L'EXISTENCE ». Bord guilloché, sceau violet, et un petit hologramme en forme d'éclat. À présenter à la fourrière, avec le ticket d'entrée."
     combine:
-      ticket_douane: "Le ticket d'entrée et le permis de sortie, ensemble. Pour la première fois, j'ai les deux bouts d'un séjour. C'est M. Sabot qui doit les voir."
+      ticket_douane: "Le ticket d'entrée et le permis de sortie, ensemble. Pour la première fois, j'ai les deux bouts d'un séjour. C'est le gardien de la fourrière qui doit les voir."
       tampon_annule: "Annuler mon permis ? Je resterais ici pour toujours. Intérimaire. Avec un sandwich. Non."

@@ -342,7 +342,7 @@ export const CHAPTERS: ChapterDef[] = [
       { go: 'st-sas' },
       { go: 'st-fourriere' }, // avec le permis (st_eclat2)
       { useItem: ['permis', 'capsule_vaisseau'] }, // VÉHICULE IMMOBILISÉ (rien n'est consommé)
-      { useItem: ['ticket_douane', 'sabot'] }, // amende 4 096 crédits (st_amende) −ticket_douane
+      { useItem: ['ticket_douane', 'remorque'] }, // amende 4 096 crédits (st_amende) −ticket_douane
       { useItem: ['tampon_annule', 'amende'] }, // « ça, c'est réglementaire » (st_vaisseau_libere)
       { useItem: ['permis', 'capsule_vaisseau'] }, // décollage : fin du chapitre 1 (`end: st_suite`)
     ],

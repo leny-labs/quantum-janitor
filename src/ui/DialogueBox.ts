@@ -63,6 +63,8 @@ const FACES: Record<string, { mouth: MouthOptions; blink?: BlinkOptions }> = {
   scribe: { mouth: { width: 0, showClosed: false }, blink: { enabled: false } },
   // M. Sabot : repli si sa planche (portraits/sabot-sheet.png) manque ; bouche sous la moustache, fermée au repos
   sabot: { mouth: { x: 0.51, y: 0.515, width: 0.1, showClosed: false, style: { lipColor: '#7a3a30' } }, blink: { enabled: false } },
+  // M. Remorque : planche GenAI (portraits/remorque-sheet.png) ; bouche basse, gilet fluo
+  remorque: { mouth: { x: 0.5, y: 0.55, width: 0.1, showClosed: false, style: { lipColor: '#5a4038' } }, blink: { enabled: false } },
   // PERCO : écran-visage pixelisé, pas de bouche dessinée par-dessus
   perco: { mouth: { width: 0, showClosed: false }, blink: { enabled: false } },
 };

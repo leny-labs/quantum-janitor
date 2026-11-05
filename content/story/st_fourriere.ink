@@ -1,39 +1,41 @@
 // Chapitre 1 « La Station Bureaucratique » : Fourrière & Quai des Navettes (st-fourriere), docs/CHAPTER1.md §6.44–46.
-//   ticket de douane (YAML, permis en poche) → st_sabot_amende   [st_amende] −ticket_douane
-//   tampon ANNULÉ sur l'amende (YAML)        → st_sabot_annule   [st_vaisseau_libere]
+//   ticket de douane (YAML, permis en poche) → st_remorque_amende   [st_amende] −ticket_douane
+//   tampon ANNULÉ sur l'amende (YAML)        → st_remorque_annule  [st_vaisseau_libere]
 
-=== st_sabot_quai ===
+=== st_remorque_quai ===
 { not has_flag("st_amende"):
-    sabot: Retrait du véhicule CS-07 : ticket d'entrée et permis de la Direction. Les deux. Pas l'un ou l'autre. Les deux. # mood: calm
+    remorque: Véhicule CS-07. Garé en travers d'une dimension. Immobilisé depuis ce matin. Pour lui, ça fait une éternité. Pour moi, c'est un mardi. # mood: calm
+    remorque: Pour le retrait : le ticket d'entrée et le permis de la Direction. Les deux. Un seul, c'est un demi-départ. Les demi-départs, je les enlève aussi. # mood: suspicious
     { has_item("permis"):
         bob: Tu as les deux, Gary. Le ticket de douane, celui du tout début. Tu l'as gardé tout ce temps. # mood: love
     }
     -> END
 }
 { not has_flag("st_vaisseau_libere"):
-    sabot: L'amende est sur le pare-brise. 4 096 crédits. Je fais pas les ventes, je fais pas les ristournes. # mood: calm
+    remorque: L'amende est sous l'essuie-glace. 4 096 crédits. Je ne négocie pas. Je ne fais que les enlèvements. Et les condoléances, à la rigueur. # mood: calm
     -> END
 }
-sabot: Le sabot est levé. Vous pouvez partir. Je dirais bien « bon voyage », mais je fais pas les vœux. # mood: calm
+remorque: Le sabot est rangé. Il a rejoint ses frères. Partez, avant que je change d'avis. Je ne change jamais d'avis, mais c'est la formule. # mood: calm
 -> END
 
 // Ticket de douane + permis (YAML : take ticket_douane, set st_amende).
-=== st_sabot_amende ===
-Gary tend le ticket de douane « D-0001 », un peu froissé, et le permis de la Direction. M. Sabot les tamponne tous les deux. CLONK. CLONK.
-sabot: Ticket d'entrée : conforme. Permis de la Direction : conforme. Retrait possible. # mood: calm
-sabot: Amende : 4 096 crédits. Stationnement en travers d'une dimension. # mood: suspicious
-Il glisse un papier jaune sous l'essuie-glace de la capsule. Puis il garde le ticket de douane : « pièce de sortie ».
+=== st_remorque_amende ===
+Gary tend le ticket de douane « D-0001 », un peu froissé, et le permis de la Direction. M. Remorque les examine longuement, de très haut. Son trousseau de sabots tinte.
+remorque: Ticket d'entrée : conforme. Permis de la Direction : conforme. C'est bien la première fois. Je suis presque déçu. # mood: surprised
+Il lève son tampon « ENLÈVEMENT », hésite, le repose. Il prend un carnet jaune à la place.
+remorque: Amende : 4 096 crédits. Stationnement en travers d'une dimension. Avec circonstances aggravantes : vous l'avez fait exprès d'arriver. # mood: suspicious
+Il glisse le papier jaune sous l'essuie-glace de la capsule. Puis il garde le ticket de douane : « pièce de sortie ».
 gary: Je n'ai pas de crédits.
-sabot: Je fais pas les ventes. Je fais pas les crédits non plus. Une amende, ça se paie. Ou ça s'annule, si c'est réglementaire. Rien n'est jamais réglementaire. # mood: calm
+remorque: Personne n'a de crédits. C'est pour ça que la fourrière est pleine. Une amende, ça se paie. Ou ça s'annule, si c'est réglementaire. En quarante et un ans, je n'ai jamais rien vu de réglementaire. # mood: calm
 -> END
 
 // Tampon ANNULÉ sur l'amende (YAML : set st_vaisseau_libere).
-=== st_sabot_annule ===
+=== st_remorque_annule ===
 Gary sort le tampon « ANNULÉ ». Il le pose sur l'amende, sous l'essuie-glace. CLONK.
-M. Sabot sort de sa guérite. Il regarde l'amende. Il regarde le tampon. Il regarde Gary. Il relit le panneau des tarifs, tout en bas : « TOUTE AMENDE TAMPONNÉE PAR LE BUREAU DES TAMPONS FAIT FOI. »
-sabot: …Je fais pas les ventes. Mais ça, c'est réglementaire. # mood: surprised
-Il se penche, déverrouille le sabot jaune du patin avant, et le hisse sur son épaule. CLONK. # shake
-sabot: Bon. Vous pouvez y aller. Le permis sur le tableau de bord. Et garez-vous droit, la prochaine fois. Il y a d'autres dimensions qui attendent. # mood: calm
+M. Remorque déplie sa grande carcasse hors de la guérite. Il regarde l'amende. Il regarde le tampon. Il relit le panneau des tarifs, tout en bas : « TOUTE AMENDE TAMPONNÉE PAR LE BUREAU DES TAMPONS FAIT FOI. »
+remorque: …Un tampon « ANNULÉ ». Officiel. Jamais servi. C'est réglementaire. Je déteste quand c'est réglementaire. # mood: surprised
+Il s'agenouille, déverrouille le sabot jaune du patin avant, et l'accroche à son trousseau, avec les autres. CLONK. # shake
+remorque: Vous pouvez y aller. Le permis sur le tableau de bord. Et garez-vous droit, la prochaine fois. Je vous attendrai. J'attends toujours. # mood: calm
 bob: Gary, on est libres. Avec un tampon que personne n'utilisait. Je vais le dire à Mme Tamponnet. Je vais lui écrire. En trois exemplaires. # mood: love
 -> END
 

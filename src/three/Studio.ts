@@ -108,7 +108,7 @@ export const overlayUrl = (id: string) => `portraits/${id}-robot.png`;
  * parlant, jamais de bouche). M. Sabot : planche GenAI (clignement, agacé, bouche sous la moustache).
  * Mme Guichard (guichet) : planche v3 tirée d'une grille GenAI 3 × 2 (docs/PORTRAIT_GENAI.md).
  */
-const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png', sabot: 'portraits/sabot-portrait.png', guichard: 'portraits/guichard-portrait.png', duplicata: 'portraits/duplicata-portrait.png', tamponnet: 'portraits/tamponnet-portrait.png', delaigue: 'portraits/delaigue-portrait.png', perco: 'portraits/perco-portrait.png', paraphe: 'portraits/paraphe-portrait.png' };
+const GENAI_PORTRAITS: Record<string, string> = { scribe: 'portraits/scribe-portrait.png', sabot: 'portraits/sabot-portrait.png', guichard: 'portraits/guichard-portrait.png', duplicata: 'portraits/duplicata-portrait.png', tamponnet: 'portraits/tamponnet-portrait.png', delaigue: 'portraits/delaigue-portrait.png', perco: 'portraits/perco-portrait.png', paraphe: 'portraits/paraphe-portrait.png', remorque: 'portraits/remorque-portrait.png' };
 
 /** Une frame de planche : expression + micro-mouvement du buste. */
 interface SheetFrame extends FacePose {
@@ -209,7 +209,7 @@ export const PORTRAIT_IDS = Object.keys(PORTRAITS);
  * Planches GenAI (docs/PORTRAIT_GENAI.md) : jamais rebakées, ni par
  * `bake:portraits` ni au runtime — le 3D suit l'image, pas l'inverse.
  */
-export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob', 'reine', 'scribe', 'sabot', 'guichard', 'duplicata', 'tamponnet', 'delaigue', 'perco', 'paraphe']);
+export const GENAI_SHEETS: ReadonlySet<string> = new Set(['gary', 'sylvie', 'bob', 'reine', 'scribe', 'sabot', 'guichard', 'duplicata', 'tamponnet', 'delaigue', 'perco', 'paraphe', 'remorque']);
 
 function makeRenderer(): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });

@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { lang, t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
-import { CAPSULE_ASPECT, CAPSULE_SHEET, DELAIGUE_ASPECT, DELAIGUE_SHEET, DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PARAPHE_ACTOR, PARAPHE_ASPECT, PARAPHE_SHEET, PATIENCE_SHEET, PERCO_ASPECT, PERCO_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet, sylvie } from '../props';
+import { CAPSULE_ASPECT, CAPSULE_SHEET, DELAIGUE_ASPECT, DELAIGUE_SHEET, DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PARAPHE_ACTOR, PARAPHE_ASPECT, PARAPHE_SHEET, PATIENCE_SHEET, PERCO_ASPECT, PERCO_SHEET, REMORQUE_ACTOR, REMORQUE_ASPECT, REMORQUE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet, sylvie } from '../props';
 import { BobAspirRig } from './bobaspire';
 import { guichardBall } from '../guichardBall';
 import { bobSpot } from './bobspot';
@@ -2249,7 +2249,7 @@ export const stDirection: RoomBuild = {
 
 /**
  * 13. Fourrière & Quai des Navettes : la capsule CS-07 (billboard GenAI : 0 sabot · 1 libérée,
- * `st_vaisseau_libere`), M. Sabot dans sa guérite (planche GenAI existante), panneau des tarifs (GenAI),
+ * `st_vaisseau_libere`), M. Remorque dans sa guérite (planche GenAI ≠ Sabot du sas), panneau des tarifs (GenAI),
  * l'amende jaune sur le pare-brise (`st_amende`), marquage au sol de quai.
  */
 /** Largeur / profondeur (monde, × largeur du sprite) de l'ombre de contact CS-07. */
@@ -2277,7 +2277,7 @@ function softShadowTexture(): THREE.Texture {
 export const stFourriere: RoomBuild = {
   camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
   shots: {
-    sabot: { fill: 0.75, orbit: -6, fov: 42 },
+    remorque: { fill: 0.75, orbit: -6, fov: 42 },
     amendes: { fill: 0.85, fov: 36 },
     capsule_vaisseau: { fill: 0.7, orbit: 6, fov: 46 },
     amende: { fill: 1.1, fov: 34 },
@@ -2306,19 +2306,19 @@ export const stFourriere: RoomBuild = {
 
     s.spot('amendes', poster(s, s.rect('amendes'), 'amendes'));
 
-    // ── M. Sabot dans sa guérite (planche GenAI du sas) ──
-    const sb = s.stand(s.rect('sabot'));
+    // ── M. Remorque dans sa guérite (planche GenAI, ≠ Sabot du sas) ──
+    const sb = s.stand(s.rect('remorque'));
     const booth = new THREE.Group();
-    booth.add(at(box(sb.w * 1.05, sb.h * 0.45, 0.7, '#d9762a'), 0, sb.h * 0.22, 0.2));
-    booth.add(at(box(sb.w * 1.1, 0.1, 0.9, '#8a4a1a'), 0, sb.h * 1.02, 0));
-    for (const sx of [-1, 1]) booth.add(at(box(0.08, sb.h, 0.08, '#8a4a1a'), sx * sb.w * 0.52, sb.h / 2, 0.5));
+    booth.add(at(box(sb.w * 1.05, sb.h * 0.45, 0.7, '#c8e02a'), 0, sb.h * 0.22, 0.2));
+    booth.add(at(box(sb.w * 1.1, 0.1, 0.9, '#5a6a12'), 0, sb.h * 1.02, 0));
+    for (const sx of [-1, 1]) booth.add(at(box(0.08, sb.h, 0.08, '#5a6a12'), sx * sb.w * 0.52, sb.h / 2, 0.5));
     booth.add(at(label(tr('props.station.pound'), sb.w * 0.8, 0.25, { color: '#f6efdc', bg: '#2a2830', bold: true }), 0, sb.h * 0.95, 0.46));
-    // la guérite est posée devant le mur : M. Sabot derrière le comptoir, jamais dans le mur (z > 0)
+    // la guérite est posée devant le mur : M. Remorque derrière le comptoir, jamais dans le mur (z > 0)
     const bz = Math.max(sb.z, 0.9);
     s.add(at(booth, sb.x, 0, bz));
-    const sab = billboardSheet(SABOT_SHEET, 5, sb.h * 0.62, SABOT_ASPECT, { tint: '#fff2e8', shadow: 0.01 });
-    s.spot('sabot', at(sab, sb.x, sb.h * 0.25, bz - 0.15));
-    s.animate((t) => sab.userData.setFrame(actorFrame('sabot', SABOT_ACTOR, t)));
+    const rem = billboardSheet(REMORQUE_SHEET, 2, sb.h * 0.72, REMORQUE_ASPECT, { tint: '#fff2e8', shadow: 0.01 });
+    s.spot('remorque', at(rem, sb.x, sb.h * 0.28, bz - 0.15));
+    s.animate((t) => rem.userData.setFrame(actorFrame('remorque', REMORQUE_ACTOR, t)));
 
     // ── la capsule CS-07 (billboard GenAI : sabot / libérée), amende sur le pare-brise ──
     const FREE: Condition = { flags: ['st_vaisseau_libere'] };

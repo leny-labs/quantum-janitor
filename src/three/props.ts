@@ -920,6 +920,29 @@ export const GARY_PRONE_ASPECT = 1024 / 397;
 /** M. Jean-Claude Sabot, agent de fourrière, tampon levé (GenAI, 772 × 1024). */
 export const SABOT_URL = `${import.meta.env.BASE_URL}props/st/sabot.png`;
 export const SABOT_ASPECT = 772 / 1024;
+/** M. Roger Remorque, gardien de fourrière (GenAI, ≠ Sabot du sas) — 0 repos · 1 parle. */
+export const REMORQUE_SHEET = `${import.meta.env.BASE_URL}props/st/remorque-sheet.png`;
+export const REMORQUE_ASPECT = 642 / 768;
+export const REMORQUE_URL = `${import.meta.env.BASE_URL}props/st/remorque.png`;
+/** Il marmonne un règlement, de temps en temps, en tintant son trousseau de sabots. */
+export const REMORQUE_ACTOR: ActorLoops = {
+  idle: [
+    { frame: 0, duration: 4800 },
+    { frame: 1, duration: 280 },
+    { frame: 0, duration: 200 },
+    { frame: 1, duration: 260 },
+    { frame: 0, duration: 6200 },
+    { frame: 1, duration: 240 },
+  ],
+  talk: [
+    { frame: 1, duration: 160 },
+    { frame: 0, duration: 120 },
+    { frame: 1, duration: 180 },
+    { frame: 0, duration: 110 },
+  ],
+  listen: 0,
+};
+
 /**
  * Mme Odile Guichard derrière l'hygiaphone, coupée à la ligne du comptoir (GenAI v3/v4 OpenAI
  * gpt-image-2.6-sunburst, édition de guichard.png, badge « Mme Guichard » ; _briefs/guichet/genai/v4).

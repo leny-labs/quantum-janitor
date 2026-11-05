@@ -204,6 +204,7 @@ keys:
   item.ticket_9848.name: Ticket No. 9848
   item.plante.name: Mr Ficus (plastic plant)
   character.sabot.name: Mr Jean-Claude Sabot, impound officer
+  character.remorque.name: Mr Roger Remorque, impound lot keeper
   character.guichard.name: Mrs Odile Guichard, reception desk
   scene.st-sas.hotspot.borne.useLabel: Ask for a map
   item.plan_station.name: Station map
@@ -319,7 +320,7 @@ keys:
   scene.st-direction.exit.vers_ascenseur.label: Form Elevator
   scene.st-fourriere.title: Impound & Shuttle Dock
   scene.st-fourriere.sector: Bureaucratic Station · Level −1 · Dock
-  scene.st-fourriere.hotspot.sabot.label: Mr Sabot
+  scene.st-fourriere.hotspot.remorque.label: Mr Remorque
   scene.st-fourriere.hotspot.amendes.label: Fines board
   scene.st-fourriere.hotspot.capsule_vaisseau.label: Pod CS-07
   scene.st-fourriere.hotspot.amende.label: Fine (on the windscreen)

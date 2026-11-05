@@ -256,5 +256,5 @@ clues:
     when: { flags: [st_eclat2] }
     title: { fr: "Permis + ticket d'entrée", en: "Permit + entry ticket" }
     text:
-      fr: "Éclats fusionnés (2/4096), badge rendu, permis de quitter la dimension. M. Sabot, à la fourrière : ticket d'entrée + permis. Une amende tamponnée par le Bureau des Tampons fait foi."
-      en: "Shards fused (2/4096), badge returned, permit to leave the dimension. Mr Sabot at the impound: entry ticket + permit. A fine stamped by the Stamp Office is binding."
+      fr: "Éclats fusionnés (2/4096), badge rendu, permis de quitter la dimension. M. Remorque, à la fourrière : ticket d'entrée + permis. Une amende tamponnée par le Bureau des Tampons fait foi."
+      en: "Shards fused (2/4096), badge returned, permit to leave the dimension. Mr Remorque at the impound: entry ticket + permit. A fine stamped by the Stamp Office is binding."

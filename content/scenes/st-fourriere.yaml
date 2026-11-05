@@ -1,7 +1,7 @@
 # Chapitre 1 « La Station Bureaucratique » — 13. Fourrière & Quai des Navettes (docs/CHAPTER1.md §4, §6.44–46, §8).
 # Rendu 3D : src/three/rooms/station.ts (stFourriere). `art:` = repli 2D.
-# La capsule CS-07, sabot aux patins ; M. Sabot dans sa guérite ; panneau des amendes en dimensions.
-#   ticket de douane sur Sabot (permis en poche) → amende 4 096 crédits           [st_amende] −ticket_douane
+# La capsule CS-07, sabot aux patins ; M. Remorque (gardien, ≠ M. Sabot du sas) dans sa guérite ; panneau des amendes.
+#   ticket de douane sur Remorque (permis en poche) → amende 4 096 crédits           [st_amende] −ticket_douane
 #   tampon ANNULÉ sur l'amende                   → « ça, c'est réglementaire »      [st_vaisseau_libere]
 #   permis sur la capsule                        → décollage → `end: st_suite`     −permis
 # Accès depuis le sas, avec le permis de la Direction (st_eclat2).
@@ -13,7 +13,7 @@ background: "#14181c"
 
 onFirstEnter:
   - say: "La Fourrière. Un quai noyé de néons jaunes, une guérite, et notre capsule CS-07, garée en travers, un sabot jaune sur le patin avant."
-  - say: "sabot: Vous revoilà. Avec un permis, cette fois. Ça change tout. Enfin, ça change ce qui peut changer. C'est-à-dire l'amende."
+  - say: "remorque: Un piéton. Sur mon quai. Avec un permis à la main. Mon collègue Sabot m'a prévenu. Il a dit : « Il reviendra jamais. » Il se trompe rarement. Je note."
   - say: "bob: Notre capsule, Gary ! Elle a l'air vexée. Elle n'a jamais été garée en travers de quoi que ce soit. À part une dimension."
     mood: love
 
@@ -22,31 +22,31 @@ art:
   - { rect: [0, 0, 1280, 470], color: "#4a5056" }
 
 hotspots:
-  - id: sabot
-    label: M. Sabot
+  - id: remorque
+    label: M. Remorque
     rect: [100, 130, 270, 300]
     art:
-      - { rect: [110, 140, 250, 280], color: "#d9762a", stroke: "#ffffff", text: "M. SABOT", size: 16 }
-    look: "M. Sabot, dans sa guérite. Casquette, moustache, tampon levé. Il me regarde comme on regarde un véhicule mal garé. Je suis un véhicule mal garé, techniquement."
+      - { rect: [110, 140, 250, 280], color: "#d9762a", stroke: "#ffffff", text: "M. REMORQUE", size: 14 }
+    look: "M. Remorque, gardien de la fourrière. Long comme un jour sans navette, gilet fluo, casquette à damier trop grande, et un trousseau de petits sabots jaunes qui tinte à chaque soupir. Il me regarde comme un croque-mort regarde un client qui respire encore."
     talk:
-      - dialogue: st_sabot_quai
+      - dialogue: st_remorque_quai
     useItem:
       ticket_douane:
         - if: { notItems: [permis] }
-          say: "sabot: Pas sans le permis. Gardez votre ticket. Le jour où vous avez les deux, on fait affaire."
+          say: "remorque: Un ticket tout seul, ça ne sort pas un véhicule. Ça sort un regret. Revenez avec le permis. Je garde la place. Je garde tout, c'est mon métier."
           stop: true
-        - dialogue: st_sabot_amende
+        - dialogue: st_remorque_amende
           take: ticket_douane
           set: st_amende
-      permis: "sabot: Le permis, très bien. Et le ticket d'entrée ? On ne sort pas sans être entré. C'est la base de la sortie."
+      permis: "remorque: Joli permis. Il manque son jumeau : le ticket d'entrée. Un véhicule qui sort sans être entré, c'est un fantôme. Les fantômes, on les enlève aussi. Mais c'est plus long."
       tampon_annule:
         - if: { flags: [st_amende], notFlags: [st_vaisseau_libere] }
-          say: "sabot: Pas sur moi. Sur l'amende. Elle est sur le pare-brise. Moi, je suis réglementaire."
+          say: "remorque: On ne tamponne pas le gardien. Le gardien n'est pas en infraction. L'amende est sous l'essuie-glace. C'est là qu'elle souffre."
           stop: true
-        - say: "sabot: Annuler quoi ? Il n'y a rien à annuler tant qu'il n'y a pas d'amende. Et il n'y a pas d'amende tant qu'il n'y a pas de retrait."
-      badge: "sabot: Je fais pas les badges. Je fais pas les ventes. Je fais la fourrière."
-      fragment: "sabot: Deux éclats, maintenant ? Ça ne change rien à l'amende. Ça la double, peut-être. Rangez ça."
-    useItemDefault: "sabot: Je fais pas les ventes."
+        - say: "remorque: Annuler quoi ? Pas d'amende sans retrait, pas de retrait sans ticket et permis. Pour l'instant, votre capsule n'est même pas en infraction. Elle est juste triste."
+      badge: "remorque: Un badge, c'est pour entrer. Ici, on ne fait que sortir. Ou rester. Surtout rester."
+      fragment: "remorque: Un caillou qui brille. Si je le tamponne « ENLÈVEMENT », il disparaît ? Non ? Alors ça ne m'intéresse pas. Rangez ça."
+    useItemDefault: "remorque: Je n'enlève pas ça. Je n'enlève que les véhicules. Et les espoirs."
 
   - id: amendes
     label: Panneau des amendes
@@ -82,7 +82,7 @@ hotspots:
           end: st_suite
       tampon_annule:
         - if: { flags: [st_amende], notFlags: [st_vaisseau_libere] }
-          dialogue: st_sabot_annule
+          dialogue: st_remorque_annule
           set: st_vaisseau_libere
           stop: true
         - if: { flags: [st_vaisseau_libere] }
@@ -102,7 +102,7 @@ hotspots:
     use: "Je ne vais pas payer 4 096 crédits. Je ne sais même pas ce qu'est un crédit. Je sais ce qu'est un tampon."
     useItem:
       tampon_annule:
-        - dialogue: st_sabot_annule
+        - dialogue: st_remorque_annule
           set: st_vaisseau_libere
       permis: "Le permis ne paie pas l'amende. Il permet de partir. L'amende, elle, permet de rester. Pour toujours."
     useItemDefault: "Ça ne paie pas une amende. Ça ne l'annule pas non plus. Il me faut quelque chose d'officiel. Et d'inutilisé."
