@@ -8,6 +8,7 @@ import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, to
 import { CAPSULE_ASPECT, CAPSULE_SHEET, DELAIGUE_ASPECT, DELAIGUE_SHEET, DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PARAPHE_ACTOR, PARAPHE_ASPECT, PARAPHE_SHEET, PATIENCE_SHEET, PERCO_ASPECT, PERCO_SHEET, REMORQUE_ACTOR, REMORQUE_ASPECT, REMORQUE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet, sylvie } from '../props';
 import { BobAspirRig } from './bobaspire';
 import { guichardBall } from '../guichardBall';
+import { officeChair } from '../officeChair';
 import { bobSpot } from './bobspot';
 import { pressable } from '../press';
 import { speaking } from '../../engine/speaking';
@@ -780,7 +781,7 @@ export const stGuichet: RoomBuild = {
 
     // ── le guichet : comptoir, deux baies vitrées, bandeau haut (horloge, afficheur) ──
     const zb = 1.1; // façade du guichet
-    const zg = 0.28; // Mme Guichard, assise derrière (un poil en retrait, plus collée au comptoir)
+    const zg = 0.45; // Mme Guichard, assise derrière
     const L = s.wallAt(395, 400, zb).x;
     const R = s.wallAt(915, 400, zb).x;
     const W = R - L;
@@ -2318,7 +2319,11 @@ export const stFourriere: RoomBuild = {
     s.add(at(booth, sb.x, 0, bz));
     const rem = billboardSheet(REMORQUE_SHEET, 2, sb.h * 0.72, REMORQUE_ASPECT, { tint: '#fff2e8', shadow: 0.01 });
     // un poil en retrait derrière le comptoir (plus collé au desk), toujours devant le mur
-    s.spot('remorque', at(rem, sb.x, sb.h * 0.28, bz - 0.32));
+    s.spot('remorque', at(rem, sb.x, sb.h * 0.28, bz - 0.48));
+    // siège de bureau 3D (procédural) derrière le comptoir, décalé à côté de M. Remorque :
+    // le dossier dépasse du comptoir jaune → la profondeur de la guérite se lit (meuble entre NPC et mur)
+    const chair = officeChair(sb.h * 0.56); // dossier ~0.45 au-dessus du comptoir
+    s.add(at(chair, sb.x + sb.w * 0.27, 0, bz - 0.4, -0.45)); // tourné vers lui ; dossier z>0 (jamais dans le mur), piètement caché par le comptoir
     s.animate((t) => rem.userData.setFrame(actorFrame('remorque', REMORQUE_ACTOR, t)));
 
     // ── la capsule CS-07 (billboard GenAI : sabot / libérée), amende sur le pare-brise ──
