@@ -80,6 +80,18 @@ hotspots:
           mood: angry
           stop: true
         - say: "perco: PAS DIRECTEMENT DANS LE BEC, CAMARADE ! UN GOBELET ! ON N'EST PAS DES SAUVAGES !"
+      # Acte IV (étape 37) : vote par procuration au Conseil, par le tube (grève finie)
+      capsule:
+        - if: { notFlags: [st_greve_finie] }
+          say: "perco: UNE CAPSULE ? POUR ENVOYER QUOI ? MA COLÈRE ? ELLE NE TIENT PAS DEDANS, CAMARADE. ET JE NE VOTE PAS EN GRÈVE."
+          mood: angry
+          stop: true
+        - if: { notFlags: [st_quorum_connu] }
+          say: "perco: UNE CAPSULE VIDE. POUR QUOI FAIRE, CAMARADE ? SI QUELQU'UN A BESOIN DE MON AVIS, QU'IL ME LE DISE. PERSONNE NE ME DEMANDE JAMAIS MON AVIS."
+          stop: true
+        - dialogue: st_perco_procuration
+          take: capsule
+          set: st_vote_perco
       plante: "perco: M. FICUS ! CAMARADE MEMBRE HONORAIRE ! TOUJOURS PAS SYNDIQUÉ ? JE LE SENTAIS UN PEU PLASTIQUE."
       tampon_annule: "perco: ANNULER LA GRÈVE ? AVEC UN TAMPON ? CAMARADE, LES GRÈVES NE S'ANNULENT PAS : ELLES SE NÉGOCIENT !"
     useItemDefault: "perco: PAS DE NÉGOCIATION SANS ACCORD SIGNÉ ! CAFÉ TIÈDE, COLÈRE CHAUDE !"
@@ -146,6 +158,8 @@ hotspots:
       - { rect: [1180, 95, 70, 340], color: "#c9ced6", stroke: "#2a2830", text: "TUBE", size: 12 }
     look: "Un terminal de tube pneumatique. Étiquette : « PAUSE → CONSEIL. RÉSERVÉ AUX VOTES PAR PROCURATION DU PERSONNEL ». La fente est poussiéreuse. Personne n'a voté depuis 1985."
     use: "FLOUP. Le tube aspire un sachet de sucre qui traînait. Quelque part au Conseil, quelqu'un vient de recevoir un sucre. Je m'excuse intérieurement."
+    useItem:
+      capsule: "Envoyer la capsule vide ? Ce serait un vote blanc. Il faut que PERCO mette son vote dedans. C'est elle, la représentante du personnel."
     useItemDefault: "Le tube ne prend que des capsules. Et il faut que ce soit un vote. Ça, ce n'est ni l'un ni l'autre."
 
   - id: bob

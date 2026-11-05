@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { lang, t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
-import { DELAIGUE_ASPECT, DELAIGUE_SHEET, DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, PERCO_ASPECT, PERCO_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet } from '../props';
+import { CAPSULE_ASPECT, CAPSULE_SHEET, DELAIGUE_ASPECT, DELAIGUE_SHEET, DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PARAPHE_ACTOR, PARAPHE_ASPECT, PARAPHE_SHEET, PATIENCE_SHEET, PERCO_ASPECT, PERCO_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet, sylvie } from '../props';
 import { BobAspirRig } from './bobaspire';
 import { bobSpot } from './bobspot';
 import { pressable } from '../press';
@@ -121,6 +121,12 @@ const SIGNS = {
   greve: { fr: 1.5, en: 1.5 },
   yaourt: { fr: 2 / 3, en: 2 / 3 },
   delegation: { fr: 2 / 3, en: 2 / 3 },
+  // Acte IV : _briefs/acte4/genai/
+  ascenseur: { fr: 1.5, en: 1.5 },
+  membres: { fr: 2 / 3, en: 2 / 3 },
+  direction: { fr: 1.5, en: 1.5 },
+  objets: { fr: 1.5, en: 1.5 },
+  amendes: { fr: 1.5, en: 1.5 },
 } as const;
 type SignId = keyof typeof SIGNS;
 
@@ -292,6 +298,12 @@ export const stSas: RoomBuild = {
     const sign = at(label(tr('props.station.waitRoom'), d.d * 1.1, 0.35, { color: '#f6efdc', bg: '#1f7f73', bold: true }), 8.95, d.y + d.h / 2 + 0.3, d.z);
     sign.rotation.y = -Math.PI / 2;
     s.add(sign);
+    // Acte IV : le quai des navettes s'ouvre avec le permis de la Direction (sortie vers_fourriere)
+    const q = s.fitX(s.rect('vers_fourriere'), -9);
+    const quai = at(label(tr('props.station.dock'), q.d * 1.1, 0.35, { color: '#1a1a1a', bg: '#ffd166', bold: true }), -8.95, q.y + q.h / 2 + 0.3, q.z);
+    quai.rotation.y = Math.PI / 2;
+    const quaiGlow = at(plane(q.d * 0.8, q.h * 0.9, '#ffe6a0', { glow: true }), -8.97, q.y, q.z, Math.PI / 2);
+    s.when({ flags: ['st_eclat2'] }, quai, quaiGlow);
   },
 };
 
@@ -1164,6 +1176,17 @@ export const stCouloirB: RoomBuild = {
 
     bobHere(s);
 
+    // Acte IV : porte d'ascenseur inox sur le mur de droite, après le casier (case D requise)
+    const ld = s.fitX(s.rect('vers_ascenseur'), 9);
+    const lift = new THREE.Group();
+    lift.add(at(box(0.3, ld.h, ld.d * 1.15, '#5a5f6a'), 0, 0, 0));
+    for (const sz of [-1, 1]) lift.add(at(box(0.08, ld.h * 0.94, ld.d * 0.48, '#a9b0b8'), -0.16, -ld.h * 0.03, (sz * ld.d) / 4));
+    lift.add(at(sphere(0.05, '#4fe07a', { glow: true }), -0.2, ld.h / 2 - 0.15, 0));
+    s.add(at(lift, 9, ld.y, ld.z));
+    const lsign = at(label(tr('props.station.liftShort'), ld.d * 1.3, 0.32, { color: '#f6efdc', bg: '#1f5f5a', bold: true }), 8.95, ld.y + ld.h / 2 + 0.28, ld.z);
+    lsign.rotation.y = -Math.PI / 2;
+    s.when(RESOLU, lift, lsign);
+
     // ── porte de gauche : retour au Guichet d'Accueil ──
     const d = s.fitX(s.rect('vers_guichet'), -9);
     const door = new THREE.Group();
@@ -1890,5 +1913,396 @@ export const stSousChef: RoomBuild = {
     bobHere(s);
     doorToCorridor(s, BLUE);
     s.add(at(pool('#ffe0a0', 3, 2, 0.1), 0, 0.01, 4));
+  },
+};
+
+// ── Acte IV « Le Conseil et la Restitution » : Ascenseur, Conseil, Direction, Fourrière (lieux 10–13) ──
+
+/** Porte de gauche (mur latéral) vers `exitId`, plaque `text` sur `color`. */
+function sideDoor(s: Stage, exitId: string, text: string, color: string): void {
+  const d = s.fitX(s.rect(exitId), -9);
+  const door = new THREE.Group();
+  door.add(at(box(0.3, d.h, d.d * 1.12, '#3e3448'), 0, 0, 0), at(box(0.1, d.h * 0.94, d.d, '#7c6e86'), 0.15, -d.h * 0.03, 0));
+  s.add(at(door, -9, d.y, d.z));
+  const sign = at(label(text, d.d * 1.1, 0.35, { color: '#f6efdc', bg: color, bold: true }), -8.95, d.y + d.h / 2 + 0.3, d.z);
+  sign.rotation.y = Math.PI / 2;
+  s.add(sign);
+}
+
+/**
+ * 10. Ascenseur à Formulaires : cabine inox sans boutons, une fente à dossiers (diode verte), cadran
+ * d'étages dont l'aiguille tremble, portes de droite qui s'ouvrent sur l'étage choisi par le dossier.
+ */
+export const stAscenseur: RoomBuild = {
+  camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    fente: { fill: 1.1, fov: 34 },
+    panneau: { fill: 0.85, fov: 38 },
+  },
+  intro: 'fente',
+  build(s) {
+    const TEAL = '#1f5f5a';
+    shell(s, { floor: { a: '#3a4044', b: '#42484c', joint: '#22262a', tile: 0.5 }, wall: { top: '#b8c2ca', bottom: '#6a747c' }, trim: '#2a3034', left: -9, right: 9 });
+    // parois en inox brossé : bandes verticales
+    for (let x = -8.5; x <= 8.5; x += 1.2) s.add(at(box(1.15, 9, 0.03, x % 2.4 ? '#a9b0b8' : '#9aa2aa', { edges: false, shadow: false }), x, 4.5, 0.02));
+    s.lights({
+      sky: '#eef6ff',
+      ground: '#22262a',
+      ambient: 1.1,
+      key: { color: '#f0f8ff', intensity: 2, pos: [0, 9, 6], target: [0, 0, 0] },
+      points: [{ color: '#7fffd4', intensity: 2, pos: [0, 2.4, 1.2], distance: 3 }],
+      rim: { color: '#7fffd4', intensity: 0.5, pos: [6, 5, -4] },
+      fill: { color: '#9aa8ff', intensity: 0.3, pos: [-6, 3, 6] },
+      fog: { color: '#161a1e', near: 9, far: 24 },
+      vignette: { color: '#0a0c10', strength: 0.6, warm: '#e0fff814' },
+    });
+    neonTubes(s, s.wallAt(640, 10, 2).y, [-3, 3], 2.4);
+
+    // plaque GenAI + cadran à aiguille (COULOIR B · 7 · 12)
+    const plate = poster(s, s.rect('panneau'), 'ascenseur');
+    s.spot('panneau', plate);
+    const dial = new THREE.Group();
+    const dr = 0.38;
+    const face = at(cyl(dr, dr, 0.04, '#f6efdc', { seg: 28 }), 0, 0, 0);
+    face.rotation.x = Math.PI / 2;
+    dial.add(face, at(torus(dr, 0.03, '#c9a24a'), 0, 0, 0.02));
+    for (const [txt, a] of [['B', -0.9], ['7', 0], ['12', 0.9]] as [string, number][]) dial.add(at(label(txt, 0.18, 0.14, { color: '#1a1a1a', bold: true }), Math.sin(a) * dr * 0.7, Math.cos(a) * dr * 0.7, 0.03)); // i18n-ignore (étages)
+    const needle = at(box(0.025, dr * 0.8, 0.01, '#c0392b', { edges: false }), 0, 0, 0.04);
+    needle.geometry.translate(0, dr * 0.4, 0);
+    dial.add(needle);
+    const dp = s.wallAt(980, 110, 0.08);
+    s.add(at(dial, dp.x, dp.y, 0.08));
+    s.animate((t) => {
+      const target = s.is({ flags: ['st_ascenseur_direction'] }) ? 0.9 : s.is({ flags: ['st_ascenseur_conseil'] }) ? 0 : -0.9;
+      needle.rotation.z = -target + Math.sin(t * 7) * 0.03 + Math.sin(t * 1.3) * 0.05;
+    });
+
+    // fente à dossiers bordée de laiton, diode verte
+    const f = s.fit(s.rect('fente'), 0.1);
+    const slot = new THREE.Group();
+    slot.add(at(box(f.w * 0.9, f.h * 0.8, 0.08, '#5a5f6a'), 0, 0, 0));
+    slot.add(at(box(f.w * 0.7, 0.06, 0.1, '#14120e', { edges: false }), 0, 0, 0.02));
+    slot.add(at(box(f.w * 0.76, 0.02, 0.1, '#c9a24a', { edges: false }), 0, 0.045, 0.03), at(box(f.w * 0.76, 0.02, 0.1, '#c9a24a', { edges: false }), 0, -0.045, 0.03));
+    const led = at(sphere(0.035, '#4fe07a', { glow: true }), f.w * 0.36, f.h * 0.28, 0.06);
+    slot.add(led, at(label(tr('props.station.insertFile'), f.w * 0.7, f.h * 0.22, { color: '#f6efdc', bold: true }), 0, -f.h * 0.3, 0.05));
+    s.animate((t) => led.scale.setScalar(1 + Math.sin(t * 3) * 0.2));
+    s.spot('fente', at(slot, f.x, f.y, 0.1));
+
+    // portes de droite (palière) : elles s'ouvrent sur l'étage que le dossier a choisi
+    const rd = s.fitX(s.rect('vers_conseil'), 9);
+    const leaves = [-1, 1].map((sz) => at(box(0.1, rd.h * 0.94, rd.d * 0.5, '#a9b0b8'), 8.9, rd.y - rd.h * 0.03, rd.z + (sz * rd.d) / 4));
+    s.add(at(box(0.3, rd.h, rd.d * 1.15, '#5a5f6a'), 9.05, rd.y, rd.z), ...leaves);
+    const glowGap = at(plane(rd.d * 0.9, rd.h * 0.9, '#fff2c0', { glow: true }), 8.98, rd.y, rd.z, -Math.PI / 2);
+    s.add(glowGap);
+    const ARRIVED: Condition = { flags: ['st_ascenseur_conseil'] };
+    let open = 0;
+    s.animate(() => {
+      open += ((s.is(ARRIVED) ? 1 : 0) - open) * 0.05;
+      leaves.forEach((l, i) => (l.position.z = rd.z + ((i ? 1 : -1) * rd.d) / 4 + (i ? 1 : -1) * open * rd.d * 0.18));
+      glowGap.visible = open > 0.05;
+    });
+
+    bobHere(s);
+    sideDoor(s, 'vers_couloir', tr('props.station.corridorB'), TEAL);
+    s.add(at(pool('#d8f0ff', 3, 2, 0.1), 0, 0.01, 4));
+  },
+};
+
+/**
+ * 11. Salle du Conseil : table ovale pour douze, onze chaises vides, Mme Paraphe (billboard GenAI),
+ * tableau des membres (GenAI), siège du membre honoraire (M. Ficus avec `st_ficus`), urne transparente
+ * (bulletins ; « ANNULÉ » avec `st_case_e`), tube pneumatique d'arrivée (capsule de PERCO).
+ */
+export const stConseil: RoomBuild = {
+  camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    paraphe: { fill: 0.7 },
+    tableau: { fill: 0.9, orbit: -6, fov: 36 },
+    siege: { fill: 0.85, orbit: 6, fov: 40 },
+    urne: { fill: 1.1, lift: 0.3, fov: 34 },
+    tube: { fill: 0.8, orbit: 8, fov: 42 },
+  },
+  intro: 'paraphe',
+  build(s) {
+    const NAVY = '#2a3a6a';
+    shell(s, { floor: { a: '#3a2a3a', b: '#443444', joint: '#221822', tile: 0.9 }, wall: { top: '#9a9cb8', bottom: '#4a4c6a' }, trim: '#22243a', left: -9, right: 9 });
+    wallPanels(s, '#7a7c98', -9, 9, 1.8, 8);
+    s.lights({
+      sky: '#f0f0ff',
+      ground: '#221822',
+      ambient: 1.05,
+      key: { color: '#fff4e6', intensity: 1.9, pos: [0, 9, 6], target: [0, 0, 0] },
+      points: [{ color: '#ffd08a', intensity: 2.6, pos: [0, 3.6, 2], distance: 4.5 }],
+      rim: { color: '#8a6db0', intensity: 0.7, pos: [-6, 5, -4] },
+      fill: { color: '#9aa8ff', intensity: 0.35, pos: [6, 3, 6] },
+      fog: { color: '#14121e', near: 9, far: 24 },
+      vignette: { color: '#0a0812', strength: 0.62, warm: '#ffe8d014' },
+    });
+    // lustre administratif (trois globes)
+    const ly = s.wallAt(640, 15, 2.2).y;
+    for (const dx of [-0.5, 0, 0.5]) s.add(at(sphere(0.12, '#fff2c0', { glow: true }), dx, ly, 2.2));
+    s.add(at(glow('#ffe0a0', 3, 0.3), 0, ly, 2.2));
+
+    s.spot('tableau', poster(s, s.rect('tableau'), 'membres'));
+
+    // ── table ovale (vue de face : un grand plateau), chaises vides, Mme Paraphe derrière ──
+    const zb = 1.3;
+    const zg = 0.6;
+    const top = s.wallAt(640, 360, zb).y;
+    const table = new THREE.Group();
+    const tw = 7;
+    const slab = at(cyl(1, 1, 0.08, '#6a3a2a', { seg: 32 }), 0, top, 0);
+    slab.scale.set(tw / 2, 1, 0.9);
+    table.add(slab, at(box(tw * 0.85, top - 0.1, 0.4, '#4a2a1a'), 0, (top - 0.1) / 2, 0.3));
+    // sous-mains vides et petits chevalets « ABSENT »
+    for (let i = 0; i < 6; i++) {
+      const x = -tw * 0.38 + i * (tw * 0.76 / 5);
+      if (Math.abs(x) < 0.8) continue;
+      table.add(at(box(0.5, 0.01, 0.32, '#2a3a2a', { edges: false }), x, top + 0.05, 0.4));
+      table.add(at(label(tr('props.station.absent'), 0.42, 0.12, { color: '#1a1a1a', bg: '#f6efdc', bold: true }), x, top + 0.13, 0.62));
+    }
+    s.add(at(table, 0, 0, zb));
+    // chaises à haut dossier derrière la table
+    for (let i = 0; i < 8; i++) {
+      const x = -3.6 + i * 1.03;
+      if (Math.abs(x) < 1) continue;
+      const ch = new THREE.Group();
+      ch.add(at(box(0.6, 1.6, 0.08, '#5a3a6a'), 0, 0.8 + top * 0.4, 0), at(box(0.62, 0.08, 0.5, '#4a2a5a'), 0, top * 0.6, 0.25));
+      s.add(at(ch, x, 0, 0.35));
+    }
+    const g = s.fit(s.rect('paraphe'), zg);
+    const base = top - 0.3;
+    const h = Math.min(g.y + g.h / 2 - base, (g.w * 1.25) / PARAPHE_ASPECT);
+    const npc = billboardSheet(PARAPHE_SHEET, 2, h, PARAPHE_ASPECT, { tint: '#fff6ec', shadow: 0.01 });
+    const sp = npc.userData.sprite as THREE.Sprite;
+    const sy = sp.scale.y;
+    s.spot('paraphe', at(npc, g.x, base, zg));
+    s.animate((t) => {
+      npc.userData.setFrame(actorFrame('paraphe', PARAPHE_ACTOR, t));
+      sp.scale.y = sy * (1 + Math.sin(t * 1.1) * 0.005);
+    });
+
+    // ── urne transparente sur la table : bulletins ; « ANNULÉ » sur le CONTRE avec la case E ──
+    const u = s.fit(s.rect('urne'), zb + 0.3);
+    const urn = new THREE.Group();
+    const uw = Math.min(u.w * 0.8, 0.6);
+    const glass = at(box(uw, uw * 0.9, uw * 0.7, '#d8f0ff', { edges: true }), 0, uw * 0.45, 0);
+    (glass.material as THREE.MeshStandardMaterial).transparent = true;
+    (glass.material as THREE.MeshStandardMaterial).opacity = 0.3;
+    urn.add(glass, at(box(uw * 0.5, 0.02, 0.06, '#14120e', { edges: false }), 0, uw * 0.91, 0));
+    const ballot = (txt: string, color: string, dx: number, rz: number) => {
+      const b = at(label(txt, uw * 0.5, uw * 0.3, { color, bg: '#f6efdc', bold: true }), dx, uw * 0.25, 0.02);
+      b.rotation.z = rz;
+      return b;
+    };
+    const contre = ballot(tr('props.station.voteAgainst'), '#2a3a6a', 0, 0.1);
+    const pour = ballot(tr('props.station.voteFor'), '#5a3a22', -uw * 0.15, -0.2);
+    const abst = ballot(tr('props.station.voteAbstain'), '#3e8f4a', uw * 0.15, 0.25);
+    const annul = at(label(tr('props.station.stampCancelled'), uw * 0.55, uw * 0.18, { color: '#c0392b', bold: true }), 0, uw * 0.27, 0.04);
+    annul.rotation.z = -0.15;
+    urn.add(contre, pour, abst, annul);
+    s.when({ flags: ['st_vote_egalite'] }, pour, abst);
+    s.when({ flags: ['st_case_e'] }, annul);
+    s.spot('urne', at(urn, u.x, top + 0.04, zb + 0.3));
+
+    // ── siège du membre honoraire : chaise dorée, plaque ; M. Ficus y siège ──
+    const sg = s.stand(s.rect('siege'));
+    const seat = new THREE.Group();
+    seat.add(at(box(sg.w * 0.7, sg.h * 0.9, 0.1, '#8a6a2a'), 0, sg.h * 0.45, -0.25), at(box(sg.w * 0.74, 0.1, 0.55, '#6a4a1a'), 0, sg.h * 0.32, 0));
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) seat.add(at(box(0.06, sg.h * 0.32, 0.06, '#5a3a1a'), (sx * sg.w * 0.32), sg.h * 0.16, sz * 0.22));
+    seat.add(at(label(tr('props.station.honorary'), sg.w * 0.6, 0.16, { color: '#2a2830', bg: '#e8c26a', bold: true }), 0, sg.h * 0.75, -0.19));
+    s.spot('siege', at(seat, sg.x, 0, sg.z));
+    const fic = at(ficus(sg.h * 0.55), sg.x, sg.h * 0.37, sg.z + 0.05);
+    s.when({ flags: ['st_ficus'] }, fic);
+    s.animate((t) => (fic.rotation.z = Math.sin(t * 0.5) * 0.008));
+
+    pneumaticTube(s);
+    // la capsule de PERCO arrivée dans le bac du tube (procuration + gobelet)
+    const tf = s.fit(s.rect('tube'), 0.35);
+    const arrived = new THREE.Group();
+    const cap = at(cyl(0.12, 0.12, 0.5, '#d8f0ff', { seg: 14, edges: false }), 0, 0, 0);
+    cap.rotation.z = Math.PI / 2;
+    arrived.add(cap, at(cyl(0.06, 0.05, 0.12, '#f6efdc', { seg: 10 }), 0.45, 0.02, 0.05));
+    s.when({ flags: ['st_vote_perco'] }, at(arrived, tf.x - 0.2, 0.55, 0.75));
+
+    bobHere(s);
+    sideDoor(s, 'vers_ascenseur', tr('props.station.liftShort'), NAVY);
+    s.add(at(pool('#ffe0b0', 3, 2, 0.08), 0, 0.01, 4));
+  },
+};
+
+/**
+ * 12. Direction Générale de l'Existence : SYLVIE en personne (grand écran-visage, anneau, mur d'écrans),
+ * trône-photocopieuse, coffre des Objets Trouvés (vitre levée avec `st_coffre_ouvert`, éclat n° 2 qui
+ * pulse jusqu'à `st_eclat2`), plaque en laiton (GenAI).
+ */
+export const stDirection: RoomBuild = {
+  camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    sylvie: { fill: 0.75, fov: 42 },
+    trone: { fill: 0.85, fov: 40 },
+    coffre: { fill: 0.85, orbit: 6, fov: 40 },
+    plaque: { fill: 0.9, orbit: -6, fov: 36 },
+  },
+  intro: 'sylvie',
+  build(s) {
+    shell(s, { floor: { a: '#18222c', b: '#1e2a34', joint: '#0c1218', tile: 1 }, wall: { top: '#3a4a5a', bottom: '#1a2430' }, trim: '#0c1218', left: -9, right: 9 });
+    s.lights({
+      sky: '#d8fff4',
+      ground: '#0c1218',
+      ambient: 0.9,
+      key: { color: '#e0fff8', intensity: 1.6, pos: [0, 9, 6], target: [0, 0, 0] },
+      points: [
+        { color: '#7fffd4', intensity: 3, pos: [0, 3.5, 1.5], distance: 5 },
+        { color: '#b56cff', intensity: 2.4, pos: [5.4, 2.4, 1.4], distance: 3.2 },
+      ],
+      rim: { color: '#7fffd4', intensity: 0.9, pos: [-6, 5, -4] },
+      fill: { color: '#9aa8ff', intensity: 0.3, pos: [6, 3, 6] },
+      fog: { color: '#060a10', near: 9, far: 24 },
+      vignette: { color: '#04060a', strength: 0.7, warm: '#d0fff014' },
+    });
+
+    s.spot('plaque', poster(s, s.rect('plaque'), 'direction'));
+
+    // ── mur d'écrans : SYLVIE au centre (écran-visage, bouche quand elle parle), petits écrans autour ──
+    const sv = s.fit(s.rect('sylvie'), 0.3);
+    const wall = new THREE.Group();
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) {
+      if (i === 1 || i === 2) continue;
+      const x = (i - 1.5) * sv.w * 0.26;
+      const y = (j - 0.5) * sv.h * 0.45;
+      wall.add(at(box(sv.w * 0.22, sv.h * 0.38, 0.12, '#16314a'), x, y, 0), at(box(sv.w * 0.2, sv.h * 0.34, 0.01, '#1f7f73', { glow: true }), x, y, 0.065));
+      wall.add(at(label(tr('props.station.stampSeen'), sv.w * 0.12, sv.h * 0.12, { color: '#d9fff4', bold: true }), x, y, 0.08));
+    }
+    const face = sylvie(sv.h * 0.95);
+    face.position.set(0, -sv.h * 0.5, 0.15);
+    wall.add(face);
+    s.spot('sylvie', at(wall, sv.x, sv.y, 0.3));
+    s.animate((t) => {
+      const talking = speaking.id === 'sylvie' && speaking.talking;
+      face.userData.setFace?.({ mouth: talking ? 0.4 + Math.abs(Math.sin(t * 14)) * 0.6 : 0, blink: Math.sin(t * 0.9) > 0.985, phase: t });
+    });
+
+    // ── trône-photocopieuse : capot relevé en dossier, bac en accoudoir ──
+    const tr0 = s.stand(s.rect('trone'));
+    const throne = new THREE.Group();
+    const tw = tr0.w * 0.9;
+    throne.add(at(box(tw, tr0.h * 0.5, 1, '#d8cfb8'), 0, tr0.h * 0.25, 0));
+    const back = at(box(tw * 0.9, tr0.h * 0.9, 0.08, '#bfb59c'), 0, tr0.h * 0.75, -0.45);
+    back.rotation.x = -0.15;
+    throne.add(back, at(box(0.3, 0.06, 0.6, '#8a8070'), tw / 2 + 0.1, tr0.h * 0.45, 0), at(box(0.3, 0.06, 0.6, '#8a8070'), -tw / 2 - 0.1, tr0.h * 0.45, 0));
+    throne.add(at(box(tw * 0.7, 0.02, 0.7, '#cfe8ff', { glow: true }), 0, tr0.h * 0.505, 0.05));
+    s.spot('trone', at(throne, tr0.x, 0, tr0.z));
+
+    // ── coffre des Objets Trouvés : caisson acier, plaque GenAI, vitre blindée, éclat n° 2 ──
+    const OPEN: Condition = { flags: ['st_coffre_ouvert'] };
+    const cf = s.stand(s.rect('coffre'));
+    const safe = new THREE.Group();
+    const cw = cf.w * 0.9;
+    const chh = cf.h * 0.92;
+    safe.add(at(box(cw, chh, 0.8, '#5a5f6a'), 0, chh / 2, 0));
+    safe.add(at(box(cw * 0.7, chh * 0.45, 0.02, '#0c1018', { edges: false }), 0, chh * 0.6, 0.41));
+    const ps = stSign('objets', cw * 0.8, chh * 0.2);
+    safe.add(at(ps.mesh, 0, chh * 0.2, 0.41));
+    const shard = new THREE.Group();
+    const cr = at(box(0.18, 0.32, 0.18, '#b56cff', { glow: true }), 0, 0, 0);
+    cr.rotation.set(0.4, 0.6, 0.3);
+    shard.add(cr, at(glow('#b56cff', 1.2, 0.6), 0, 0, 0.1));
+    const shardObj = at(shard, 0, chh * 0.6, 0.3);
+    safe.add(shardObj);
+    s.when({ notFlags: ['st_eclat2'] }, shardObj);
+    const pane = at(box(cw * 0.72, chh * 0.47, 0.03, '#cfe8ff'), 0, chh * 0.6, 0.44);
+    (pane.material as THREE.MeshStandardMaterial).transparent = true;
+    (pane.material as THREE.MeshStandardMaterial).opacity = 0.35;
+    safe.add(pane);
+    let lift = 0;
+    s.animate((t) => {
+      lift += ((s.is(OPEN) ? 1 : 0) - lift) * 0.04;
+      pane.position.y = chh * 0.6 + lift * chh * 0.45;
+      shard.rotation.y = t * 0.8;
+      shard.scale.setScalar(1 + Math.sin(t * 3.2) * 0.08);
+    });
+    s.spot('coffre', at(safe, cf.x, 0, cf.z));
+
+    bobHere(s);
+    sideDoor(s, 'vers_ascenseur', tr('props.station.liftShort'), '#1f7f73');
+    s.add(at(pool('#7fffd4', 3, 2, 0.08), 0, 0.01, 4));
+  },
+};
+
+/**
+ * 13. Fourrière & Quai des Navettes : la capsule CS-07 (billboard GenAI : 0 sabot · 1 libérée,
+ * `st_vaisseau_libere`), M. Sabot dans sa guérite (planche GenAI existante), panneau des tarifs (GenAI),
+ * l'amende jaune sur le pare-brise (`st_amende`), marquage au sol de quai.
+ */
+export const stFourriere: RoomBuild = {
+  camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    sabot: { fill: 0.75, orbit: -6, fov: 42 },
+    amendes: { fill: 0.85, fov: 36 },
+    capsule_vaisseau: { fill: 0.7, orbit: 6, fov: 46 },
+    amende: { fill: 1.1, fov: 34 },
+  },
+  intro: 'capsule_vaisseau',
+  build(s) {
+    shell(s, { floor: { a: '#2a2e32', b: '#30343a', joint: '#16181c', tile: 1.2 }, wall: { top: '#5a6066', bottom: '#2a2e32' }, trim: '#16181c', left: -9, right: 9 });
+    wallPanels(s, '#4a5056', -9, 9, 2, 8);
+    s.lights({
+      sky: '#fff6d8',
+      ground: '#16181c',
+      ambient: 1,
+      key: { color: '#ffe8b0', intensity: 1.8, pos: [0, 9, 6], target: [0, 0, 0] },
+      points: [
+        { color: '#ffd166', intensity: 2.4, pos: [-4.2, 3, 1.6], distance: 4 },
+        { color: '#8fd0ff', intensity: 1.6, pos: [3.5, 2, 2.5], distance: 4 },
+      ],
+      rim: { color: '#ffd166', intensity: 0.7, pos: [6, 5, -4] },
+      fill: { color: '#9aa8ff', intensity: 0.3, pos: [-6, 3, 6] },
+      fog: { color: '#0e1012', near: 9, far: 24 },
+      vignette: { color: '#060708', strength: 0.65, warm: '#fff0c018' },
+    });
+    neonTubes(s, s.wallAt(640, 10, 2).y, [-5, 0, 5], 2.4);
+    // marquage de quai : bandes jaunes et noires
+    for (let i = 0; i < 10; i++) s.add(at(box(0.9, 0.012, 0.35, i % 2 ? '#ffd166' : '#1a1a1a', { edges: false, shadow: false }), -4.5 + i * 0.9, 0.007, 3.2));
+
+    s.spot('amendes', poster(s, s.rect('amendes'), 'amendes'));
+
+    // ── M. Sabot dans sa guérite (planche GenAI du sas) ──
+    const sb = s.stand(s.rect('sabot'));
+    const booth = new THREE.Group();
+    booth.add(at(box(sb.w * 1.05, sb.h * 0.45, 0.7, '#d9762a'), 0, sb.h * 0.22, 0.2));
+    booth.add(at(box(sb.w * 1.1, 0.1, 0.9, '#8a4a1a'), 0, sb.h * 1.02, 0));
+    for (const sx of [-1, 1]) booth.add(at(box(0.08, sb.h, 0.08, '#8a4a1a'), sx * sb.w * 0.52, sb.h / 2, 0.5));
+    booth.add(at(label(tr('props.station.pound'), sb.w * 0.8, 0.25, { color: '#f6efdc', bg: '#2a2830', bold: true }), 0, sb.h * 0.95, 0.46));
+    // la guérite est posée devant le mur : M. Sabot derrière le comptoir, jamais dans le mur (z > 0)
+    const bz = Math.max(sb.z, 0.9);
+    s.add(at(booth, sb.x, 0, bz));
+    const sab = billboardSheet(SABOT_SHEET, 5, sb.h * 0.62, SABOT_ASPECT, { tint: '#fff2e8', shadow: 0.01 });
+    s.spot('sabot', at(sab, sb.x, sb.h * 0.25, bz - 0.15));
+    s.animate((t) => sab.userData.setFrame(actorFrame('sabot', SABOT_ACTOR, t)));
+
+    // ── la capsule CS-07 (billboard GenAI : sabot / libérée), amende sur le pare-brise ──
+    const FREE: Condition = { flags: ['st_vaisseau_libere'] };
+    const cv = s.stand(s.rect('capsule_vaisseau'));
+    const ch = cv.h * 0.98;
+    const pod = billboardSheet(CAPSULE_SHEET, 2, ch, CAPSULE_ASPECT, { tint: '#ffffff', shadow: ch * CAPSULE_ASPECT * 0.45 });
+    s.spot('capsule_vaisseau', at(pod, cv.x, 0, cv.z));
+    const nozzle = at(glow('#8fd0ff', 1.2, 0.5), cv.x + ch * CAPSULE_ASPECT * 0.38, ch * 0.62, cv.z - 0.05);
+    s.add(nozzle);
+    s.animate((t) => {
+      const free = s.is(FREE);
+      pod.userData.setFrame(free ? 1 : 0);
+      nozzle.visible = free;
+      nozzle.material.opacity = 0.35 + Math.sin(t * 6) * 0.15;
+      pod.position.y = free ? Math.abs(Math.sin(t * 1.6)) * 0.02 : 0;
+    });
+    const am = s.fit(s.rect('amende'), cv.z + 0.4);
+    const ticketMesh = at(label(tr('props.station.fine'), am.w * 0.8, am.h * 0.75, { color: '#1a1a1a', bg: '#ffd166', bold: true }), am.x, am.y, cv.z + 0.4);
+    ticketMesh.rotation.z = 0.08;
+    s.spot('amende', ticketMesh);
+
+    bobHere(s);
+    sideDoor(s, 'vers_sas', tr('props.station.toSas'), '#d9762a');
+    s.add(at(pool('#ffe6a0', 3, 2, 0.1), 0, 0.01, 4));
   },
 };

@@ -82,6 +82,14 @@ hotspots:
         - if: { flags: [st_guichet_ouvert] }
           say: "Il est déjà 10 h 12. Si je la pousse encore, elle passe à 10 h 13 et on perd la moitié des heures d'ouverture."
           stop: true
+        # Acte IV (étape 42) : SYLVIE a refermé le guichet (10 h 11) ; deuxième passage, sans perte (§6.5)
+        - if: { flags: [st_sylvie_refuse] }
+          say: "narrateur: Gary attend la 59e seconde, lève l'éclat. La grande aiguille passe, comme la première fois. CLAC. 10 h 12. Le rideau remonte."
+          set: st_guichet_ouvert
+        - if: { flags: [st_sylvie_refuse] }
+          say: "bob: Tu l'as déjà fait, Gary. Mais c'est beau quand même. Vite : le dossier à Mme Guichard."
+          mood: love
+          stop: true
         # carnet : « l'improbable pousse l'aiguille » (st_deduit_horloge) → on vise la minute
         - if: { flags: [st_deduit_horloge] }
           say: "narrateur: Gary attend que la trotteuse hésite sur la 59e seconde... et lève l'éclat pile à ce moment-là. La grande aiguille frissonne, tremble, et passe. CLAC. 10 h 12."

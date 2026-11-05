@@ -63,6 +63,9 @@ items:
     name: Badge « Garry »
     icon: { color: "#e0e0e0", glyph: "ID" }
     look:
+      - if: { flags: [st_eclat2] }
+        say: "Mon badge « GARRY », rendu par SYLVIE, avec deux petits trous d'agrafe. Deux R. Je sais maintenant qui les a tapés. Je ne le ferai jamais corriger."
+        stop: true
       - if: { flags: [st] }
         say: "« GARRY PLUNK — Agent d'entretien (intérim) ». Deux R. Ici, il ne prouve rien : le portique dit que les animaux n'ont pas de badge. Moi, je dis que les animaux n'ont pas de RH."
         stop: true
@@ -91,6 +94,9 @@ items:
     name: Éclat du Réacteur (1/4096)
     icon: { color: "#b56cff", glyph: "1/4096" }
     look:
+      - if: { flags: [st_eclat2] }
+        say: "L'éclat, fusionné avec son frère du coffre : « 2/4096 ». Plus gros, plus chaud. Il ronronne vers… le tableau de bord de la capsule. Vers un grain de poussière. C'est inquiétant."
+        stop: true
       - if: { flags: [st] }
         say: "L'éclat 1/4096, dans la poche de poitrine de la combi. Tiède. Depuis qu'on est à la Station, il ronronne vers le fond du bâtiment. Vers le n° 2, je parie."
         stop: true
@@ -152,6 +158,9 @@ items:
     icon: { color: "#e8dcc0", glyph: "B-7/12" }
     look:
       # tableau de bord : les cases suivent les flags st_case_* (docs/CHAPTER1.md §2, §6)
+      - if: { flags: [st_case_e] }
+        say: "Le Formulaire B-7/12, complet. Cinq cases sur cinq : HUMAIN, « VU », TROIS EXEMPLAIRES, SIGNÉ « p.i. », et l'avis FAVORABLE du Conseil, paraphé deux fois. À déposer au guichet. À 10 h 12."
+        stop: true
       - if: { flags: [st_case_c] }
         say: "Le Formulaire B-7/12, épais comme un vrai dossier. A : HUMAIN, INTÉRIMAIRE. B : « VU » au café. D : signature « p.i. ». C : trois exemplaires CERTIFIÉS CONFORMES. E, l'avis du Conseil : vide."
         stop: true
@@ -265,3 +274,12 @@ items:
     combine:
       plante: "Arroser M. Ficus au café ? Il est en plastique, Gary. Il n'a pas soif. Il a des principes."
       capsule: "Envoyer du café par tube au Conseil ? Ce n'est pas un vote, c'est un pot de départ. Pas encore."
+
+  # Acte IV « Le Conseil et la Restitution » : délivré par SYLVIE avec le badge (étape 43), présenté à la fourrière (46)
+  - id: permis
+    name: Permis de quitter la dimension
+    icon: { color: "#e8dcc0", glyph: "PERMIS" }
+    look: "« PERMIS DE QUITTER LA DIMENSION — DÉLIVRÉ PAR LA DIRECTION GÉNÉRALE DE L'EXISTENCE ». Bord guilloché, sceau violet, et un petit hologramme en forme d'éclat. À présenter à la fourrière, avec le ticket d'entrée."
+    combine:
+      ticket_douane: "Le ticket d'entrée et le permis de sortie, ensemble. Pour la première fois, j'ai les deux bouts d'un séjour. C'est M. Sabot qui doit les voir."
+      tampon_annule: "Annuler mon permis ? Je resterais ici pour toujours. Intérimaire. Avec un sandwich. Non."

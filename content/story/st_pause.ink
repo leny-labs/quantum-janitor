@@ -64,6 +64,16 @@ perco: UN À LA FOIS. SANS LIMITE. RAPPELLE-TOI, CAMARADE : LE CAFÉ EST UN DROI
 -> END
 
 // B.O.B. à la Salle de Pause : réplique de lieu, puis indices gradués.
+// Acte IV : capsule sur PERCO (YAML, grève finie) → procuration + café par tube au Conseil [st_vote_perco] −capsule
+=== st_perco_procuration ===
+Gary tend la capsule pneumatique vide. PERCO la regarde, longuement. Son petit écran affiche des points de suspension.
+perco: UN VOTE ? AU CONSEIL ? PAR PROCURATION ? CAMARADE, ÇA FAIT QUARANTE ET UN ANS QU'ON NE M'A PAS DEMANDÉ MON AVIS. # mood: surprised
+Glouglou. PERCO remplit un minuscule gobelet, le glisse dans la capsule avec un bulletin qu'elle tamponne elle-même, au café.
+perco: « POUR ». UN CAFÉ = UN POUR. C'EST LE TARIF SYNDICAL. # mood: love
+Gary visse le bouchon et glisse la capsule dans le tube. FLOUP. Elle monte vers le Conseil.
+bob: Le représentant du personnel a voté, Gary. Par tube. Je crois qu'on vient d'inventer la démocratie pneumatique. # mood: love
+-> END
+
 === st_bob_pause ===
 { not has_flag("st_greve_connue"):
     bob: Une déléguée du personnel, Gary. Et l'encre de Mme Tamponnet, c'était son café. Parle-lui. Poliment. Elle a de la vapeur. # mood: suspicious

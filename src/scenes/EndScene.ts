@@ -34,8 +34,8 @@ const END_BY_CHAPTER: Record<string, { flag: string; shot: 'roaches' | 'stub'; n
   // la faille du Nid est franchie. TOUTES les sorties du Nid (couronnement `# end: ch1_suite`,
   // sortie « La Faille » `to: fin`, Reine avec la combi) arrivent ici.
   ch0: { flag: 'ch0_termine', shot: 'stub', next: 'ch1', hook: ['go_station2', 'fin_ch0'] },
-  // fin provisoire du stub de la Station (`st_stub_fin`) : pas encore `st_termine`
-  ch1: { flag: 'st_stub_termine', shot: 'stub' },
+  // fin du chapitre 1 (`st_suite`, permis sur la capsule à la fourrière) : la Station est derrière nous
+  ch1: { flag: 'st_termine', shot: 'stub' },
 };
 
 /** Cliffhanger du chapitre (ch.0 : la dimension des cafards), puis « À suivre… ». */

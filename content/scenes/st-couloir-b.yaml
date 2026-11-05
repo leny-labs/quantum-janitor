@@ -9,7 +9,7 @@
 # (st_couloir_resolu), les hotspots porte_b1/b2/b3 laissent la place aux sorties (même rect) vers les
 # Archives (st-archives), les Tampons (st-tampons) et les Réclamations (st-reclamations) — Acte II.
 # Acte III : deux petites portes B-4 / B-5 apparaissent entre la B-2 et la B-3 (Salle de Pause, Sous-Chef).
-# Ascenseur : au fond, « À SUIVRE » (zone `planned` du PLAN).
+# Acte IV : à droite, après le casier, l'Ascenseur à Formulaires (sortie vers_ascenseur, case D requise).
 id: st-couloir-b
 title: Couloir Infini B
 sector: Station Bureaucratique · Niveau 0 · Aile B
@@ -81,7 +81,7 @@ hotspots:
       - if: { flags: [st_couloir_resolu] }
         say: "« AILE B — VOUS ÊTES ICI (ENCORE) ». Le petit plan circulaire a l'air vexé. Le couloir, lui, est redevenu droit."
       - if: { flags: [st_couloir_resolu] }
-        say: "Une flèche, plus bas : « ASCENSEUR À FORMULAIRES → AU FOND ». Un autocollant par-dessus : « DOSSIERS COMPLETS AUX TROIS QUARTS UNIQUEMENT — À SUIVRE »."
+        say: "Une flèche, plus bas : « ASCENSEUR À FORMULAIRES → AU FOND ». Un autocollant par-dessus : « DOSSIERS COMPLETS AUX TROIS QUARTS UNIQUEMENT »."
         stop: true
       - say: "« AILE B — VOUS ÊTES ICI (ENCORE) ». Le plan est un cercle. Le point rouge est sur le cercle. Partout sur le cercle."
       - say: "bob: C'est le panneau le plus honnête de la Station, Gary. Il ne t'a jamais menti. Il t'a juste prévenu trop tard."
@@ -229,3 +229,16 @@ exits:
     dir: up
     if: { flags: [st_couloir_resolu] }
     rect: [800, 215, 100, 205]
+
+  # Acte IV : sur le mur de droite, après le casier, l'Ascenseur à Formulaires
+  - id: vers_ascenseur
+    label: Ascenseur à Formulaires
+    to: st-ascenseur
+    dir: right
+    if: { flags: [st_couloir_resolu] }
+    requires: { flags: [st_case_d] }
+    lockedText:
+      - say: "sylvie: ASCENSEUR À FORMULAIRES. DOSSIER INCOMPLET (3/4). LA CABINE NE SE DÉPLACE PAS POUR MOINS QUE ÇA."
+        mood: calm
+      - say: "Trois quarts. Il me faut le « VU » et la signature. Au moins."
+    rect: [1228, 120, 52, 340]

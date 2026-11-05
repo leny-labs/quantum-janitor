@@ -225,3 +225,36 @@ clues:
     text:
       fr: "« VU » au café (Tamponnet), signature « p.i. » (Delaigue), trois exemplaires certifiés conformes (Duplicata). Il manque la case E : l'avis du Conseil. L'ascenseur ne monte que les dossiers complets aux trois quarts."
       en: "Coffee “SEEN” (Tamponnet), “acting” signature (Delaigue), three certified copies (Duplicata). Box E is missing: the Council's opinion. The elevator only takes files three-quarters complete."
+
+  # Acte IV « Le Conseil et la Restitution »
+  - id: quorum
+    icon: speech
+    when: { flags: [st_quorum_connu] }
+    title: { fr: "Quorum : trois membres", en: "Quorum: three members" }
+    text:
+      fr: "Mme Paraphe, seule présente, exige le quorum. Membres : la présidente, PERCO (représentant du personnel, qui ne quitte pas la pause) et M. Ficus (membre honoraire, « en plastique depuis le déménagement »)."
+      en: "Mrs Paraphe, the only one present, demands a quorum. Members: the chair, PERCO (staff rep, never leaves the break room) and Mr Ficus (honorary member, “plastic since the move”)."
+
+  - id: vote_egalite
+    icon: stamp
+    when: { flags: [st_vote_egalite] }
+    title: { fr: "Égalité : avis ajourné", en: "Tie: opinion postponed" }
+    text:
+      fr: "PERCO POUR (par tube, au café), M. Ficus abstention, Mme Paraphe CONTRE « par principe ». Personne n'a jamais annulé son vote. Ici, on n'annule jamais rien."
+      en: "PERCO FOR (by tube, with coffee), Mr Ficus abstains, Mrs Paraphe AGAINST “on principle”. Nobody has ever cancelled her vote. Nothing is ever cancelled here."
+
+  - id: depot_guichet
+    icon: clock
+    when: { flags: [st_sylvie_refuse] }
+    title: { fr: "« Dépôt au guichet uniquement »", en: "“Desk submission only”" }
+    text:
+      fr: "SYLVIE ne reçoit pas le public : le dossier doit arriver par le guichet, à 10 h 12. Le guichet a refermé. L'éclat sait faire passer la minute."
+      en: "SYLVIE doesn't receive the public: the file must come through the desk, at 10:12. The desk has closed again. The shard knows how to push the minute."
+
+  - id: permis_sortie
+    icon: ticket
+    when: { flags: [st_eclat2] }
+    title: { fr: "Permis + ticket d'entrée", en: "Permit + entry ticket" }
+    text:
+      fr: "Éclats fusionnés (2/4096), badge rendu, permis de quitter la dimension. M. Sabot, à la fourrière : ticket d'entrée + permis. Une amende tamponnée par le Bureau des Tampons fait foi."
+      en: "Shards fused (2/4096), badge returned, permit to leave the dimension. Mr Sabot at the impound: entry ticket + permit. A fine stamped by the Stamp Office is binding."

@@ -6,7 +6,7 @@
 Voir [`CHAPTERS.md`](CHAPTERS.md) (numérotation, transitions, ids), le chapitre
 précédent [`CHAPTER0_BLATTARIA.md`](CHAPTER0_BLATTARIA.md), l'interlude d'arrivée
 [`INTERLUDE_VAISSEAU.md`](INTERLUDE_VAISSEAU.md) et la bible [`STORY.md`](STORY.md).
-Statut : **design** (rien n'est codé). Préfixes : scènes `st-*`, flags `st_*`,
+Statut : **jouable de bout en bout** (Actes I–IV, §9.1–9.6) ; le design ci-dessous reste la référence. Préfixes : scènes `st-*`, flags `st_*`,
 knots `st_*`.
 
 ## 1. Pitch
@@ -599,6 +599,40 @@ Checkpoint en salle, cases A, B, D, C remplies : `ChapterDef.endFlag` du ch1 = *
   `greve_p15`, `delegation`, `greve_finie`, `delaigue_dort`, `cases_bdc`. **`repair.ts`** : accord rendu tant
   que la grève dure, retiré après ; encreur rendu jusqu'à Tamponnet, retiré après.
 - **GenAI** : `_briefs/acte3/genai/` ; captures `_briefs/acte3/shoot.mjs` → `/tmp/qj-acte3/`.
+
+### 9.6 Acte IV v1 — « Le Conseil et la Restitution » : fin du chapitre
+
+Le chapitre se termine : permis sur la capsule à la fourrière → **`end: st_suite`** (EndScene, flag
+`st_termine`) ; `ChapterDef.endKnot` du ch1 = `st_suite`, plus d'`endFlag`. `st_stub_fin` reste dans
+`st_fin.ink` (non appelé).
+
+- **Couloir B** : sortie `vers_ascenseur` sur le mur de droite (porte inox), `requires` `st_case_d`
+  (« DOSSIER INCOMPLET (3/4) »). **Sas** : sortie `vers_fourriere` (mur gauche, « QUAI · FOURRIÈRE ») avec `st_eclat2`.
+- **`st-ascenseur`** (`stAscenseur`, Ink `st_ascenseur.ink`) : fente à dossiers, cadran d'étages ; 34. formulaire
+  (A–D) → `st_ascenseur_conseil` + goto Conseil ; 40. formulaire complet → `st_ascenseur_direction` + goto
+  Direction. Porte de droite : Conseil puis Direction selon le dernier étage choisi.
+- **`st-conseil`** (`stConseil`, Ink `st_conseil.ink`) : Mme Paraphe (GenAI planche + portrait ; « … A.P. »),
+  tableau des membres (GenAI), siège honoraire, urne, tube d'arrivée. 35. parler → `st_quorum_connu` ;
+  36. plante sur le siège → −plante, `st_ficus` ; 38. parler (quorum) → `st_vote_egalite` ; 39. tampon ANNULÉ
+  sur l'urne → `st_case_e` (refusé avant le vote). **Pause** : 37. capsule sur PERCO (grève finie + quorum
+  connu) → −capsule, `st_vote_perco`.
+- **`st-direction`** (`stDirection`, Ink `st_direction.ink`) : SYLVIE (modèle `sylvie()` + mur d'écrans « VU »),
+  trône-photocopieuse, coffre des Objets Trouvés (GenAI). 41. parler → « DÉPÔT AU GUICHET UNIQUEMENT »,
+  `st_sylvie_refuse`, **unset `st_guichet_ouvert`** (l'horloge revient à 10 h 11) ; après le dépôt, parler →
+  `st_coffre_ouvert` ; 43. éclat sur le coffre → `st_sylvie_restitution` (fusion 2/4096, craquage §8), +badge
+  +`permis`, `st_eclat2`. Fausse piste : éclat sur le coffre avant le dépôt.
+- **Guichet** : 42. éclat sur l'horloge (après le refus) → `st_guichet_ouvert` à nouveau ; formulaire sur
+  Mme Guichard (case E + refus + ouvert) → `st_guichard_depot`, −formulaire, `st_dossier_depose`.
+- **`st-fourriere`** (`stFourriere`, Ink `st_fourriere.ink`) : capsule CS-07 (GenAI 0 sabot · 1 libérée), M. Sabot
+  dans sa guérite, panneau des tarifs (GenAI). 44. ticket de douane (permis en poche) → −ticket, `st_amende` ;
+  45. tampon ANNULÉ sur l'amende → `st_vaisseau_libere` ; 46. permis sur la capsule → −permis, `end: st_suite`.
+- **Objets** : `permis` (GenAI) ; variante d'icône `fragment2` (2/4096, `st_eclat2`) ; `look` du badge rendu, de
+  l'éclat fusionné, du formulaire complet. **B.O.B.** : `st_bob_acte4.ink`. **Carnet** : `quorum`,
+  `vote_egalite`, `depot_guichet`, `permis_sortie`. **`repair.ts`** : `st_ficus` ⇒ pas de plante, `st_vote_perco`
+  ⇒ pas de capsule, `st_amende` ⇒ pas de ticket, `st_eclat2` ⇒ badge + permis (avant la fin).
+- **GenAI** : `_briefs/acte4/genai/` ; captures `_briefs/acte4/shoot.mjs` → `/tmp/qj-acte4/`.
+- **Pas encore** : gros plan `st-formulaire` (le `look` du formulaire sert de tableau de bord) ; pièces
+  3D à enrichir (Direction, Ascenseur) ; textes peints FR seuls sur la capsule et PERCO.
 
 ## 10. Notes techniques (pour plus tard)
 

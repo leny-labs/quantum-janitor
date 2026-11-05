@@ -1,0 +1,145 @@
+# Chapitre 1 « La Station Bureaucratique » — 11. Salle du Conseil (docs/CHAPTER1.md §4, §6.35–39).
+# Rendu 3D : src/three/rooms/station.ts (stConseil). `art:` = repli 2D.
+# Mme Augustine Paraphe, présidente (seule membre présente), vote contre « par principe ». Paraphe chaque phrase.
+#   parler à Paraphe              → quorum de 3 (tableau des membres)                [st_quorum_connu]
+#   plante sur le siège honoraire → M. Ficus siège                                    [st_ficus] −plante
+#   (Pause : capsule sur PERCO → procuration par le tube)                             [st_vote_perco]
+#   parler à Paraphe (quorum)     → POUR / abstention / CONTRE : égalité, AJOURNÉ     [st_vote_egalite]
+#   tampon ANNULÉ sur l'urne      → « ON N'ANNULE JAMAIS RIEN… DONC C'EST VALABLE »   [st_case_e]
+id: st-conseil
+title: Salle du Conseil
+sector: Station Bureaucratique · Niveau 7 · Conseil
+icon: console
+background: "#1a1c2c"
+
+onFirstEnter:
+  - say: "La Salle du Conseil. Une table ovale pour douze. Onze chaises vides. Sur la douzième, une dame très droite qui me regarde comme un amendement."
+  - say: "paraphe: Séance permanente. Vous êtes en retard de quarante et un ans. A.P."
+  - say: "bob: Elle a signé sa phrase, Gary. Avec ses initiales. Je crois qu'elle paraphe tout ce qu'elle dit."
+    mood: suspicious
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#2a2c3c" }
+  - { rect: [0, 0, 1280, 470], color: "#7a7c98" }
+
+hotspots:
+  - id: paraphe
+    label: Mme Paraphe
+    rect: [510, 110, 260, 240]
+    art:
+      - { rect: [520, 120, 240, 220], color: "#2a3a6a", stroke: "#f6efdc", text: "MME PARAPHE", size: 16 }
+    look:
+      - say: "Une dame grande et mince, chignon d'argent, pince-nez, veste bleu marine à col montant, écharpe de présidente. Elle tient un stylo-plume comme un sceptre."
+      - say: "Badge : « A. PARAPHE ». Devant elle, une pile de bulletins. Tous marqués « CONTRE ». Ils ont l'air d'avoir été remplis à l'avance. Depuis 1985."
+    use: "Je lui tends la main. Elle la regarde, sort son stylo, et paraphe le dos de ma main. « A.P. » Je ne sais pas ce que je viens d'approuver."
+    talk:
+      - dialogue: st_paraphe
+    useItem:
+      formulaire:
+        - if: { flags: [st_case_e] }
+          say: "paraphe: Déjà paraphé, jeune homme. Je ne paraphe jamais deux fois. Sauf mes phrases. A.P."
+          stop: true
+        - say: "paraphe: Un avis du Conseil exige un vote du Conseil. Un vote exige le quorum. Le quorum exige trois membres. Je suis une. A.P."
+      plante: "paraphe: Il vote déjà mieux que vous. Mais pas sur la table, jeune homme. À son siège. A.P."
+      tampon_annule:
+        - if: { flags: [st_vote_egalite], notFlags: [st_case_e] }
+          say: "paraphe: Pas sur moi, jeune homme. Sur mon bulletin. Dans l'urne. On n'annule pas une présidente. On annule un vote. A.P."
+          stop: true
+        - say: "paraphe: Annuler quoi ? Il n'y a encore rien eu. Ici, on n'annule jamais rien. Surtout pas avant. A.P."
+      fragment: "paraphe: Un miracle ? Nous votons contre les miracles depuis 1985. Par principe. A.P."
+      capsule: "paraphe: Une capsule vide ne vote pas, jeune homme. Il faut une procuration dedans. Et un procurant. A.P."
+    useItemDefault: "paraphe: Hors ordre du jour. A.P."
+
+  - id: tableau
+    label: Tableau des membres
+    smart: look
+    rect: [130, 60, 200, 300]
+    art:
+      - { rect: [135, 65, 190, 290], color: "#f6efdc", stroke: "#2a2830", text: "MEMBRES", size: 14 }
+    look:
+      - say: "« CONSEIL — MEMBRES. PRÉSIDENTE : A. PARAPHE. REPRÉSENTANT DU PERSONNEL : PERCO. MEMBRE HONORAIRE : M. FICUS. QUORUM : 3. »"
+      - say: "M. Ficus. Membre honoraire. « En plastique depuis le déménagement », précise une note au crayon. Je l'ai dans ma poche depuis une heure."
+        if: { notFlags: [st_ficus] }
+      - say: "Et PERCO, représentant du personnel. Elle ne quitte jamais la Salle de Pause. Il faudrait qu'elle vote… à distance."
+        if: { notFlags: [st_vote_perco] }
+
+  - id: siege
+    label: Siège du membre honoraire
+    rect: [880, 230, 170, 230]
+    art:
+      - { rect: [885, 235, 160, 220], color: "#5a3a6a", stroke: "#2a2830", text: "SIÈGE\nHONORAIRE", size: 12 }
+    look:
+      - if: { flags: [st_ficus] }
+        say: "M. Ficus siège au Conseil. Droit, vert, en plastique. Il a l'air parfaitement à sa place. Il l'a toujours eue, en fait."
+        stop: true
+      - say: "Une chaise à haut dossier, plaque dorée : « MEMBRE HONORAIRE ». Sur l'assise, un rond de poussière exactement de la taille d'un pot de fleurs."
+    use:
+      - if: { flags: [st_ficus] }
+        say: "Je ne déplace pas un membre du Conseil en pleine séance. Même s'il ne dit rien. Surtout s'il ne dit rien."
+        stop: true
+      - say: "Je m'assieds. Mme Paraphe me fixe. « Vous n'êtes pas honoraire, jeune homme. Vous êtes intérimaire. » Je me relève. A.P."
+    useItem:
+      plante:
+        - say: "narrateur: Gary pose M. Ficus sur le siège du membre honoraire. Le pot tombe pile dans le rond de poussière. Comme s'il revenait du déménagement."
+          take: plante
+          set: st_ficus
+        - say: "paraphe: Monsieur Ficus. Vous voilà. Vous êtes en retard de quarante et un ans, mais vous êtes présent. Présent. A.P."
+        - say: "bob: Il a dénoué un couloir, il siège au Conseil. M. Ficus a eu une meilleure carrière que nous deux réunis, Gary."
+          mood: love
+    useItemDefault: "Ce siège est réservé au membre honoraire. Ça, ce n'est pas un membre. C'est un objet."
+
+  - id: urne
+    label: Urne
+    rect: [370, 290, 130, 110]
+    art:
+      - { rect: [375, 295, 120, 100], color: "#cfe8ff", stroke: "#2a2830", text: "URNE", size: 12 }
+    look:
+      - if: { flags: [st_case_e] }
+        say: "L'urne. Le bulletin de Mme Paraphe porte un grand « ANNULÉ » rouge par-dessus son « CONTRE ». Et, dans la marge, ses initiales. Elle l'a paraphé. Elle a l'air presque émue."
+        stop: true
+      - if: { flags: [st_vote_egalite] }
+        say: "L'urne transparente. Trois bulletins : « POUR » (taché de café), « ABSTENTION » (une feuille en plastique) et « CONTRE », paraphé. Égalité. Au-dessus du sien, rien ne dit qu'on ne peut pas l'annuler."
+        stop: true
+      - say: "Une urne transparente, vide, sauf un bulletin « CONTRE » paraphé, posé là par habitude. Personne n'a jamais rien annulé dedans. Personne n'a jamais rien mis d'autre dedans."
+    useItem:
+      tampon_annule:
+        - if: { flags: [st_case_e] }
+          say: "Déjà annulé. On n'annule pas une annulation. Ce serait revenir en arrière. Ici, on ne revient jamais en arrière. Sauf moi."
+          stop: true
+        - if: { notFlags: [st_vote_egalite] }
+          say: "Annuler quoi ? Il n'y a pas encore eu de vote. Pour l'instant, le seul bulletin, c'est un vieux « CONTRE » de principe. Il faut un vrai vote d'abord."
+          stop: true
+        - dialogue: st_conseil_annule
+          set: st_case_e
+      formulaire: "On ne met pas le dossier dans l'urne. On met des votes dans l'urne, et l'avis sur le dossier. Je commence à comprendre ce métier. C'est inquiétant."
+    useItemDefault: "L'urne ne prend que des bulletins. Et des annulations. Surtout pas d'objets."
+
+  - id: tube
+    label: Tube pneumatique (arrivée)
+    rect: [1150, 80, 100, 360]
+    art:
+      - { rect: [1160, 85, 80, 350], color: "#c9ced6", stroke: "#2a2830", text: "TUBE", size: 12 }
+    look:
+      - if: { flags: [st_vote_perco] }
+        say: "Le tube d'arrivée. La capsule de PERCO est arrivée : une procuration tamponnée au café, et un gobelet de café. « UN CAFÉ = UN POUR ». Le café est tiède. Le vote aussi, mais il compte."
+        stop: true
+      - say: "Le tube d'arrivée des votes par procuration. Étiquettes : « RÉCLAMATIONS », « PAUSE ». Il n'est jamais rien arrivé, à part un sachet de sucre, tout récemment."
+
+  - id: bob
+    label: B.O.B.
+    rect: [650, 415, 150, 80]
+    art:
+      - { rect: [655, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+    look: "B.O.B. compte les chaises vides. Onze. Il recompte. Onze. Il a l'air de vouloir s'asseoir sur une, par solidarité."
+    talk:
+      - dialogue: st_bob_conseil
+    useItemDefault:
+      - say: "bob: Je ne vote pas, Gary. Je suis un appareil. Les appareils s'abstiennent. C'est notre seule liberté."
+        mood: sad
+
+exits:
+  - id: vers_ascenseur
+    label: Ascenseur à Formulaires
+    to: st-ascenseur
+    dir: left
+    rect: [10, 140, 100, 320]

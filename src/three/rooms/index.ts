@@ -9,7 +9,7 @@ import { galerie } from './galerie';
 import { labo } from './labo';
 import { nid } from './nid';
 import { placard } from './placard';
-import { stArchives, stAttente, stCafeteria, stCouloirB, stGuichet, stPause, stReclamations, stSas, stSousChef, stTampons } from './station';
+import { stArchives, stAscenseur, stAttente, stCafeteria, stConseil, stCouloirB, stDirection, stFourriere, stGuichet, stPause, stReclamations, stSas, stSousChef, stTampons } from './station';
 import { temple } from './temple';
 
 export interface RoomBuild {
@@ -52,6 +52,11 @@ export const ROOMS: Record<string, RoomBuild> = {
   // Acte III
   'st-pause': stPause,
   'st-sous-chef': stSousChef,
+  // Acte IV
+  'st-ascenseur': stAscenseur,
+  'st-conseil': stConseil,
+  'st-direction': stDirection,
+  'st-fourriere': stFourriere,
 };
 
 /**

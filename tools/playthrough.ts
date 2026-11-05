@@ -91,17 +91,21 @@ async function main() {
         if (jump.save.items.includes('combi_chitine')) throw new Error('interlude : la combi devait être enfilée (hors inventaire)');
         for (const kept of ['fragment', 'badge']) if (!jump.save.items.includes(kept)) throw new Error(`interlude : « ${kept} » perdu`);
         if (state.hasFlag('ch1')) throw new Error('la Station ne doit jamais poser le flag ch1 (acte Blattaria)');
+        // fin de l'Acte III (case C, Archives) : instantané de référence des Actes I–III
+        const c3 = checkpoints.find((c) => c.label === 'utiliser formulaire sur photocopieuse');
+        if (!c3) throw new Error('Acte III : trois exemplaires (case C) non joués');
+        const s3 = GameState.fromSave(c3.save);
         // stub de la Station : objets à payoff différé gardés jusqu'à la fin provisoire
-        for (const kept of ['ticket_douane', 'plante', 'ticket_9848', 'fragment', 'plan_station']) if (!state.hasItem(kept)) throw new Error(`Station : « ${kept} » absent à la fin du stub`);
+        for (const kept of ['ticket_douane', 'plante', 'ticket_9848', 'fragment', 'plan_station']) if (!s3.hasItem(kept)) throw new Error(`Station : « ${kept} » absent à la fin du stub`);
         // Acte II (docs/CHAPTER1.md §6.13–21) : archives → tampons → réclamations → copies → case A
         for (const f of ['st_cherche_gary', 'st_dossier_trouve', 'st_tamponnet', 'st_chatiere', 'st_papier', 'st_case_a', 'st_reclasse', 'st_sait_greve']) if (!state.hasFlag(f)) throw new Error(`Acte II : flag ${f} absent`);
-        for (const kept of ['formulaire', 'tampon_annule', 'capsule']) if (!state.hasItem(kept)) throw new Error(`Acte II : « ${kept} » absent à la fin`);
-        for (const gone of ['badge', 'liasse', 'copies_dossier']) if (state.hasItem(gone)) throw new Error(`Acte II : « ${gone} » encore en poche à la fin`);
+        for (const kept of ['formulaire', 'tampon_annule', 'capsule']) if (!s3.hasItem(kept)) throw new Error(`Acte II : « ${kept} » absent à la fin`);
+        for (const gone of ['badge', 'liasse', 'copies_dossier']) if (s3.hasItem(gone)) throw new Error(`Acte II : « ${gone} » encore en poche à la fin`);
         const caseA = checkpoints.find((c) => c.label === 'combiner copies_dossier + formulaire');
         if (!caseA || !caseA.save.flags.includes('st_reclasse') || caseA.save.items.includes('copies_dossier')) throw new Error('Acte II : case A sans reclassement ou copies non agrafées');
         // Acte III (docs/CHAPTER1.md §6.22–33) : grève → p.o. → café → encre → VU → réveil → signature → 3 exemplaires
         for (const f of ['st_greve_connue', 'st_voit_delegation', 'st_accord_signe', 'st_greve_finie', 'st_encreur_cafe', 'st_cafe2', 'st_tamponnet_encre', 'st_case_b', 'st_delaigue_reveille', 'st_case_d', 'st_case_c']) if (!state.hasFlag(f)) throw new Error(`Acte III : flag ${f} absent`);
-        for (const gone of ['accord', 'encreur', 'gobelet']) if (state.hasItem(gone)) throw new Error(`Acte III : « ${gone} » encore en poche à la fin`);
+        for (const gone of ['accord', 'encreur', 'gobelet']) if (s3.hasItem(gone)) throw new Error(`Acte III : « ${gone} » encore en poche à la fin`);
         const unsigned = checkpoints.find((c) => c.label === 'utiliser accord sur perco');
         if (!unsigned || unsigned.save.flags.includes('st_greve_finie') || !unsigned.save.items.includes('accord')) throw new Error('Acte III : un accord non signé ne doit pas finir la grève');
         const asleep = checkpoints.find((c) => c.label === 'utiliser formulaire sur delaigue');
@@ -119,28 +123,40 @@ async function main() {
         for (const f of ['st_arrive', 'st_laisse', 'st_ticket_9848']) if (!state.hasFlag(f)) throw new Error(`Station : flag ${f} absent`);
         // Aile B (fin de l'Acte I) : 47bis → couloir → plante → formulaire, M. Ficus rendu à Gary
         for (const f of ['st_acces_aile_b', 'st_couloir_boucle', 'st_plante_posee', 'st_couloir_resolu', 'st_formulaire']) if (!state.hasFlag(f)) throw new Error(`Aile B : flag ${f} absent`);
-        if (!state.hasItem('formulaire')) throw new Error('Aile B : le Formulaire B-7/12 devait être en poche');
+        if (!s3.hasItem('formulaire')) throw new Error('Aile B : le Formulaire B-7/12 devait être en poche');
         const posee = checkpoints.find((c) => c.label === 'utiliser plante sur emplacement');
         if (!posee || posee.save.items.includes('plante')) throw new Error('Aile B : M. Ficus devait quitter l\'inventaire une fois posé');
         const wrong = checkpoints.find((c) => c.label === 'utiliser porte_b3');
         if (!wrong || wrong.save.flags.includes('st_couloir_resolu')) throw new Error('Aile B : la mauvaise direction devait boucler');
         const early47 = checkpoints.find((c) => c.label === 'regarder lecteur');
         if (!early47 || early47.save.flags.includes('st_acces_aile_b')) throw new Error('Aile B : accès 47bis avant la conversation');
-        // carte : les salles du stub warpables (on finit dans le couloir B), la fourrière refusée, la Direction inconnue
+        // carte à la fin de l'Acte III (aux Archives) : bureaux warpables, ascenseur pas encore visité, fourrière refusée
         const map = parseStationMap(readFileSync(join(ROOT, 'content', 'station-map.yaml'), 'utf8'));
         const zone = (id: string) => map.bands.flatMap((b) => b.zones).find((z) => z.scene === id)!;
         const exists = (id: string) => content.scenes.has(id);
-        const expect = { 'st-sas': 'open', 'st-attente': 'open', 'st-cafeteria': 'open', 'st-guichet': 'open', 'st-couloir-b': 'open', 'st-archives': 'here', 'st-reclamations': 'open', 'st-tampons': 'open', 'st-pause': 'open', 'st-sous-chef': 'open', 'st-ascenseur': 'locked', 'st-fourriere': 'locked', 'st-direction': 'locked' } as const;
+        const expect = { 'st-sas': 'open', 'st-attente': 'open', 'st-cafeteria': 'open', 'st-guichet': 'open', 'st-couloir-b': 'open', 'st-archives': 'here', 'st-reclamations': 'open', 'st-tampons': 'open', 'st-pause': 'open', 'st-sous-chef': 'open', 'st-ascenseur': 'seen', 'st-conseil': 'locked', 'st-fourriere': 'locked', 'st-direction': 'locked' } as const;
         // repérée et accessible mais jamais visitée : pas de warp (on y va à pied d'abord)
-        const early = chapterStateAt(state, 'st-sas', ['st-sas']);
+        const early = chapterStateAt(s3, 'st-sas', ['st-sas']);
         if (zoneState(early, zone('st-attente'), exists) !== 'seen') throw new Error('carte : salle d\'attente non visitée devrait être « seen »');
         // avant le ticket 9848 : guichet repéré (afficheur vu) mais refusé
         const pre = checkpoints.find((c) => c.label === 'utiliser plante');
         if (!pre || zoneState(GameState.fromSave(pre.save), zone('st-guichet'), exists) !== 'locked') throw new Error('carte : guichet avant le ticket 9848 devrait être « locked »');
         for (const [id, want] of Object.entries(expect)) {
-          const got = zoneState(state, zone(id), exists);
+          const got = zoneState(s3, zone(id), exists);
           if (got !== want) throw new Error(`carte : ${id} « ${got} » au lieu de « ${want} »`);
         }
+        // Acte IV (docs/CHAPTER1.md §6.34–46) : Conseil, Direction, dépôt, restitution, fourrière, décollage
+        for (const f of ['st_ascenseur_conseil', 'st_quorum_connu', 'st_ficus', 'st_vote_perco', 'st_vote_egalite', 'st_case_e', 'st_ascenseur_direction', 'st_sylvie_refuse', 'st_dossier_depose', 'st_coffre_ouvert', 'st_eclat2', 'st_amende', 'st_vaisseau_libere', 'st_termine']) if (!state.hasFlag(f)) throw new Error(`Acte IV : flag ${f} absent`);
+        for (const kept of ['badge', 'fragment', 'tampon_annule']) if (!state.hasItem(kept)) throw new Error(`Acte IV : « ${kept} » absent à la fin`);
+        for (const gone of ['plante', 'capsule', 'formulaire', 'ticket_douane', 'permis']) if (state.hasItem(gone)) throw new Error(`Acte IV : « ${gone} » encore en poche à la fin`);
+        const early4 = checkpoints.find((c) => c.label === 'utiliser fragment sur coffre');
+        if (!early4 || early4.save.flags.includes('st_eclat2')) throw new Error('Acte IV : l\'éclat sur le coffre avant le dépôt ne doit rien ouvrir');
+        const closed = checkpoints.find((c) => c.label === 'utiliser formulaire sur guichard');
+        if (!closed || closed.save.flags.includes('st_dossier_depose') || !closed.save.items.includes('formulaire')) throw new Error('Acte IV : dépôt accepté guichet fermé');
+        const urne = checkpoints.find((c) => c.label === 'utiliser tampon_annule sur urne');
+        if (!urne || urne.save.flags.includes('st_case_e')) throw new Error('Acte IV : annulation acceptée avant le vote');
+        const boot = checkpoints.find((c) => c.label === 'utiliser permis sur capsule_vaisseau');
+        if (!boot || !boot.save.items.includes('permis') || boot.save.ended) throw new Error('Acte IV : décollage avec le sabot');
         // carnet de déduction : la chaîne de l'horloge ouvre le guichet (docs/CHAPTER1.md)
         const carnet = content.carnet!;
         const start = GameState.fromSave(checkpoints.find((c) => c.label.startsWith('début'))!.save);

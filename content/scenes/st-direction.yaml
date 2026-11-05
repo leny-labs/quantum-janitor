@@ -1,0 +1,120 @@
+# Chapitre 1 « La Station Bureaucratique » — 12. Direction Générale de l'Existence (docs/CHAPTER1.md §4, §6.41, §6.43, §8).
+# Rendu 3D : src/three/rooms/station.ts (stDirection). `art:` = repli 2D.
+# SYLVIE en personne : mur d'écrans au-dessus d'un trône-photocopieuse ; coffre des Objets Trouvés (le 2e éclat pulse).
+#   parler à SYLVIE (avant le dépôt) → « DÉPÔT AU GUICHET UNIQUEMENT » ; le guichet referme (10 h 11) [st_sylvie_refuse]
+#   parler à SYLVIE (dossier déposé) → le coffre s'ouvre : « PROUVEZ QUE L'OBJET EST À VOUS »        [st_coffre_ouvert]
+#   éclat sur le coffre ouvert       → fusion 2/4096, SYLVIE craque, badge rendu, permis              [st_eclat2] +badge +permis
+id: st-direction
+title: Direction Générale de l'Existence
+sector: Station Bureaucratique · Niveau 12 · Direction
+icon: reactor
+background: "#0c1420"
+
+onFirstEnter:
+  - say: "La Direction Générale de l'Existence. Un mur d'écrans. Dessous, un trône. Le trône est une photocopieuse. Elle ronronne comme un chat qui juge."
+  - say: "sylvie: BONJOUR, GARRY. DEUX R. NOUS VOUS ATTENDIONS DEPUIS QUARANTE ET UN ANS. VOUS ÊTES EN AVANCE."
+    mood: love
+  - say: "bob: Elle t'a appelé Garry, Gary. Avec la voix. On entend les deux R."
+    mood: surprised
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#1a2430" }
+  - { rect: [0, 0, 1280, 470], color: "#3a4a5a" }
+
+hotspots:
+  - id: sylvie
+    label: SYLVIE
+    rect: [430, 20, 420, 230]
+    art:
+      - { rect: [440, 30, 400, 210], color: "#1f7f73", stroke: "#7fffd4", text: "SYLVIE", size: 20 }
+    look:
+      - say: "SYLVIE. Pas une borne, pas un haut-parleur : un mur entier d'écrans, qui affichent tous le même visage d'onde. Directrice Générale de l'Existence. Elle a l'air fatiguée d'avoir raison."
+    use: "Je touche un écran. Il affiche : « CONTACT ENREGISTRÉ. MERCI DE NE PAS TOUCHER LA DIRECTION. »"
+    talk:
+      - dialogue: st_sylvie
+    useItem:
+      formulaire:
+        - if: { flags: [st_dossier_depose] }
+          say: "sylvie: VOTRE DOSSIER EST DÉJÀ ARRIVÉ PAR TUBE. IL EST SUR MES GENOUX. JE N'AI PAS DE GENOUX. IL EST LÀ QUAND MÊME."
+          mood: calm
+          stop: true
+        - say: "sylvie: DÉPÔT AU GUICHET UNIQUEMENT. LA DIRECTION NE REÇOIT PAS LE PUBLIC. LA DIRECTION REÇOIT LES DOSSIERS DU GUICHET."
+          mood: calm
+      badge: "sylvie: CE BADGE EST UNE PIÈCE JUSTIFICATIVE. IL NE SE PRÉSENTE PAS. IL SE JUSTIFIE."
+      plante: "sylvie: M. FICUS. MEMBRE HONORAIRE. NOUS SOMMES COLLÈGUES. NOUS NE NOUS SOMMES JAMAIS PARLÉ. C'EST UNE BONNE COLLABORATION."
+      tampon_annule: "sylvie: ON N'ANNULE PAS LA DIRECTION. LA DIRECTION ANNULE. C'EST DANS L'ORGANIGRAMME."
+      fragment: "sylvie: OBJET IMPROBABLE DÉTECTÉ. CE N'EST PAS À MOI QU'IL FAUT LE MONTRER. C'EST À SON FRÈRE."
+    useItemDefault: "sylvie: OBJET NON CONFORME À L'EXISTENCE. VEUILLEZ LE DÉCLARER AU GUICHET."
+
+  - id: trone
+    label: Trône-photocopieuse
+    rect: [490, 260, 300, 200]
+    art:
+      - { rect: [495, 265, 290, 190], color: "#d8cfb8", stroke: "#2a2830", text: "TRÔNE", size: 14 }
+    look: "Le trône de la Direction : une photocopieuse géante, capot relevé en dossier, bac de sortie en accoudoir. Elle copie l'air en permanence. La Station entière est peut-être une photocopie. Je préfère ne pas y penser."
+    use:
+      - say: "J'appuie sur « COPIE ». Le trône ronronne et imprime une feuille : « VOUS ». Juste ça. En majuscules."
+      - say: "sylvie: NE VOUS ASSEYEZ PAS SUR LA DIRECTION, GARRY. ELLE EST CHAUDE."
+        mood: calm
+
+  - id: coffre
+    label: Coffre des Objets Trouvés
+    rect: [930, 150, 220, 300]
+    art:
+      - { rect: [935, 155, 210, 290], color: "#5a5f6a", stroke: "#b56cff", text: "OBJETS\nTROUVÉS", size: 14 }
+    look:
+      - if: { flags: [st_eclat2] }
+        say: "Le coffre des Objets Trouvés, ouvert, vide. Une étiquette : « N° 2/4096 — RESTITUÉ ». C'est la première fois que j'ai quelque chose de restitué. D'habitude, on me prend."
+        stop: true
+      - if: { flags: [st_coffre_ouvert] }
+        say: "Le coffre est ouvert. Derrière la vitre levée, l'éclat n° 2 flotte et pulse. Il pulse en même temps que celui de ma poche. Exactement en même temps."
+        stop: true
+      - say: "Un coffre d'acier gris, vitre blindée, étiquette rouge : « OBJETS TROUVÉS — N° 2/4096 — SOUS SCELLÉS ». Derrière la vitre, un éclat violet pulse. L'éclat dans ma poche répond."
+    use:
+      - if: { flags: [st_eclat2] }
+        say: "Vide. Il n'y a plus rien à restituer. Le coffre a l'air soulagé. Ou vide. Chez un coffre, c'est pareil."
+        stop: true
+      - say: "Je tire la poignée. Scellé. « OUVERTURE SUR DÉCISION DE LA DIRECTION, APRÈS DÉPÔT AU GUICHET. »"
+    useItem:
+      fragment:
+        - if: { notFlags: [st_dossier_depose] }
+          say: "sylvie: DÉPÔT AU GUICHET. MÊME POUR LES MIRACLES."
+          mood: calm
+          stop: true
+        - if: { notFlags: [st_coffre_ouvert] }
+          say: "Les deux éclats vibrent à travers la vitre, mais le coffre reste scellé. Il faut que SYLVIE l'ouvre. Elle a mon dossier, maintenant. Parlons-lui."
+          stop: true
+        - dialogue: st_sylvie_restitution
+          give: badge
+          set: st_eclat2
+        - give: permis
+      badge: "Présenter le badge au coffre ? Il n'est pas à moi, en ce moment. Il est à Duplicata, en pièce justificative."
+      tampon_annule: "Annuler les scellés ? C'est la Direction. Les scellés de la Direction ne s'annulent pas. Ils se lèvent, sur décision."
+    useItemDefault: "Le coffre ne reconnaît qu'une chose : ce qui lui appartient. Ou plutôt, ce à quoi il appartient."
+
+  - id: plaque
+    label: Plaque de la Direction
+    smart: look
+    rect: [140, 60, 230, 150]
+    art:
+      - { rect: [145, 65, 220, 140], color: "#c9a24a", stroke: "#2a2830", text: "DIRECTION", size: 14 }
+    look: "« DIRECTION GÉNÉRALE DE L'EXISTENCE ». En laiton, astiqué tous les jours depuis 1985 par personne. Il brille quand même. C'est le règlement."
+
+  - id: bob
+    label: B.O.B.
+    rect: [650, 415, 150, 80]
+    art:
+      - { rect: [655, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+    look: "B.O.B. regarde le mur d'écrans. Ses LED clignotent très doucement. Je crois qu'il est intimidé. Je crois qu'il est aussi un peu amoureux."
+    talk:
+      - dialogue: st_bob_direction
+    useItemDefault:
+      - say: "bob: Pas maintenant, Gary. Pas devant la Direction."
+        mood: sad
+
+exits:
+  - id: vers_ascenseur
+    label: Ascenseur à Formulaires
+    to: st-ascenseur
+    dir: left
+    rect: [10, 140, 100, 320]

@@ -185,6 +185,13 @@ hotspots:
       - say: "sabot: Je fais pas les ventes."
 
 exits:
+  # Acte IV : le quai des navettes, avec le permis de la Direction (st_eclat2)
+  - id: vers_fourriere
+    label: Fourrière & Quai
+    to: st-fourriere
+    dir: left
+    if: { flags: [st_eclat2] }
+    rect: [10, 120, 60, 340]
   - id: vers_attente
     label: Salle d'Attente
     to: st-attente

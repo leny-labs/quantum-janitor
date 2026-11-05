@@ -9,17 +9,15 @@ bands:
     label: { fr: "NIVEAU 12 · DIRECTION GÉNÉRALE", en: "LEVEL 12 · GENERAL DIRECTORATE" }
     zones:
       - scene: st-direction
-        planned: true
         label: { fr: "Direction Générale de l'Existence", en: "General Directorate of Existence" }
         visible: { flags: [st_case_c] }
-        unlock: { flags: [st_case_e] }
+        unlock: { flags: [st_ascenseur_direction] }
         refused: { fr: "AVIS DU CONSEIL REQUIS", en: "COUNCIL OPINION REQUIRED" }
 
   - id: conseil
     label: { fr: "NIVEAU 7 · CONSEIL", en: "LEVEL 7 · COUNCIL" }
     zones:
       - scene: st-conseil
-        planned: true
         label: { fr: "Salle du Conseil", en: "Council Chamber" }
         visible: { flags: [st_case_d] }
         unlock: { flags: [st_ascenseur_conseil] }
@@ -29,7 +27,6 @@ bands:
     label: { fr: "NIVEAU ? · ASCENSEUR À FORMULAIRES", en: "LEVEL ? · FORM ELEVATOR" }
     zones:
       - scene: st-ascenseur
-        planned: true
         label: { fr: "Ascenseur à Formulaires", en: "Form Elevator" }
         visible: { flags: [st_couloir_resolu] }
         unlock: { flags: [st_case_d] }
@@ -97,7 +94,6 @@ bands:
     label: { fr: "NIVEAU −1 · QUAI & FOURRIÈRE", en: "LEVEL −1 · DOCK & IMPOUND" }
     zones:
       - scene: st-fourriere
-        planned: true
         label: { fr: "Fourrière & Quai des Navettes", en: "Impound & Shuttle Dock" }
         visible: { flags: [st_sabot_vu] }
         unlock: { flags: [st_eclat2] }

@@ -44,8 +44,8 @@
 { not has_flag("st_case_c"):
     -> case_c
 }
-bob: Quatre cases sur cinq, Gary. A, B, D, C. Il ne manque que l'avis du Conseil. L'ascenseur à formulaires nous attend au fond du couloir. Il est très strict sur les fractions. # mood: love
--> END
+// cases A, B, D, C : Acte IV (st_bob_acte4)
+-> st_bob_acte4
 
 = greve
 { st_bob_acte3.greve > 1:

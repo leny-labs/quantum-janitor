@@ -987,6 +987,23 @@ export const DELAIGUE_SHEET = `${import.meta.env.BASE_URL}props/st/delaigue-shee
 export const DELAIGUE_ASPECT = 764 / 768;
 export const PERCO_SHEET = `${import.meta.env.BASE_URL}props/st/perco-sheet.png`;
 export const PERCO_ASPECT = 548 / 1024;
+/**
+ * Acte IV : Mme Augustine Paraphe (0 repos · 1 parle, planche jamais synchronisée sur le dialogue) et la
+ * capsule CS-07 vue du quai (0 sabot · 1 libérée, `st_vaisseau_libere`) — _briefs/acte4/genai/build.py.
+ */
+export const PARAPHE_SHEET = `${import.meta.env.BASE_URL}props/st/paraphe-sheet.png`;
+export const PARAPHE_ASPECT = 667 / 768;
+/** Elle pince les lèvres, puis paraphe dans le vide (« A.P. »). */
+export const PARAPHE_ACTOR: ActorLoops = {
+  idle: [
+    { frame: 0, duration: 5200 },
+    { frame: 1, duration: 420 },
+    { frame: 0, duration: 6400 },
+    { frame: 1, duration: 300 },
+  ],
+};
+export const CAPSULE_SHEET = `${import.meta.env.BASE_URL}props/st/capsule-sheet.png`;
+export const CAPSULE_ASPECT = 752 / 768;
 /** M. Patience assis sur sa chaise, ticket 9 848 tendu ; variante main vide (même cadre) une fois le ticket pris. */
 export const PATIENCE_URL = `${import.meta.env.BASE_URL}props/st/patience.png`;
 export const PATIENCE_EMPTY_URL = `${import.meta.env.BASE_URL}props/st/patience-vide.png`;

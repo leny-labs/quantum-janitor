@@ -287,6 +287,44 @@ keys:
   item.gobelet.name: Cup of lukewarm coffee
   character.perco.name: PERCO, staff delegate
   character.delaigue.name: Mr Hubert Delaigue, acting deputy assistant manager
+  # Acte IV : Ascenseur, Conseil, Direction, Fourrière
+  scene.st-couloir-b.exit.vers_ascenseur.label: Form Elevator
+  scene.st-sas.exit.vers_fourriere.label: Impound & Dock
+  scene.st-ascenseur.title: Form Elevator
+  scene.st-ascenseur.sector: Bureaucratic Station · Level ?
+  scene.st-ascenseur.hotspot.fente.label: File slot
+  scene.st-ascenseur.hotspot.panneau.label: Cabin plate
+  scene.st-ascenseur.hotspot.bob.label: B.O.B.
+  scene.st-ascenseur.exit.vers_couloir.label: Infinite Corridor B
+  scene.st-ascenseur.exit.vers_conseil.label: Council Chamber (Level 7)
+  scene.st-ascenseur.exit.vers_direction.label: General Directorate (Level 12)
+  scene.st-conseil.title: Council Chamber
+  scene.st-conseil.sector: Bureaucratic Station · Level 7 · Council
+  scene.st-conseil.hotspot.paraphe.label: Mrs Paraphe
+  scene.st-conseil.hotspot.tableau.label: Members' board
+  scene.st-conseil.hotspot.siege.label: Honorary member's seat
+  scene.st-conseil.hotspot.urne.label: Ballot box
+  scene.st-conseil.hotspot.tube.label: Pneumatic tube (arrivals)
+  scene.st-conseil.hotspot.bob.label: B.O.B.
+  scene.st-conseil.exit.vers_ascenseur.label: Form Elevator
+  scene.st-direction.title: General Directorate of Existence
+  scene.st-direction.sector: Bureaucratic Station · Level 12 · Directorate
+  scene.st-direction.hotspot.sylvie.label: SYLVIE
+  scene.st-direction.hotspot.trone.label: Photocopier throne
+  scene.st-direction.hotspot.coffre.label: Lost Property safe
+  scene.st-direction.hotspot.plaque.label: Directorate plate
+  scene.st-direction.hotspot.bob.label: B.O.B.
+  scene.st-direction.exit.vers_ascenseur.label: Form Elevator
+  scene.st-fourriere.title: Impound & Shuttle Dock
+  scene.st-fourriere.sector: Bureaucratic Station · Level −1 · Dock
+  scene.st-fourriere.hotspot.sabot.label: Mr Sabot
+  scene.st-fourriere.hotspot.amendes.label: Fines board
+  scene.st-fourriere.hotspot.capsule_vaisseau.label: Pod CS-07
+  scene.st-fourriere.hotspot.amende.label: Fine (on the windscreen)
+  scene.st-fourriere.hotspot.bob.label: B.O.B.
+  scene.st-fourriere.exit.vers_sas.label: Arrivals Airlock
+  item.permis.name: Permit to leave the dimension
+  character.paraphe.name: Mrs Augustine Paraphe, Council chair
 
 ink:
   # bob.ink — B.O.B. en compagnon (exemple de traduction de dialogue Ink)

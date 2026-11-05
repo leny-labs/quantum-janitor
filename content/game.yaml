@@ -52,6 +52,11 @@ characters:
     name: M. Hubert Delaigue, sous-chef adjoint p.i.
     color: "#7c8fa8"
     portrait: "p.i.\n(-_-) zzz"
+  # Acte IV : Salle du Conseil
+  - id: paraphe
+    name: Mme Augustine Paraphe, présidente du Conseil
+    color: "#2a3a6a"
+    portrait: "CONSEIL\n(¬ ¬) A.P."
   - id: narrateur
     name: ""
     color: "#000000"

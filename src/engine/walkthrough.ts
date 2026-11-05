@@ -162,10 +162,8 @@ export const CHAPTERS: ChapterDef[] = [
     from: 'ch0',
     // ch.0 fini : éclat contenu, combi de chitine (enfilée dans l'interlude), badge ; B.O.B. suit
     initial: { items: ['badge', 'fragment', 'combi_chitine'], flags: ['st', 'ch0_termine', 'chapitre0_termine', 'bob_suit'] },
-    // knot de fin nominal (EndScene) ; deviendra `st_suite`. Checkpoint actuel : fin de l'Acte III
-    // « La Grève », en salle, cases A, B, D, C remplies (`endFlag`) : pas de porte `to: fin`
-    endKnot: 'st_stub_fin',
-    endFlag: 'st_case_c',
+    // fin du chapitre : permis sur la capsule à la fourrière (`end: st_suite`, EndScene, flag st_termine)
+    endKnot: 'st_suite',
     steps: [
       { section: 'Interlude — la Capsule de Service CS-07' },
       { look: 'pare_brise' },
@@ -299,6 +297,53 @@ export const CHAPTERS: ChapterDef[] = [
       { go: 'st-couloir-b' },
       { go: 'st-archives' },
       { useItem: ['formulaire', 'photocopieuse'] }, // case C, trois exemplaires certifiés (st_case_c) : fin de l'Acte III
+      { section: 'Acte IV · l\'Ascenseur à Formulaires et le Conseil' },
+      { go: 'st-couloir-b' },
+      { go: 'st-ascenseur' }, // mur de droite : case D requise
+      { useItem: ['formulaire', 'fente'] }, // AVIS DU CONSEIL REQUIS → Niveau 7 (st_ascenseur_conseil)
+      { talk: 'paraphe' }, // quorum de 3 (st_quorum_connu)
+      { look: 'tableau' }, // PERCO (personnel), M. FICUS (honoraire)
+      { useItem: ['plante', 'paraphe'] }, // « il vote déjà mieux que vous » (rien n'est consommé)
+      { useItem: ['plante', 'siege'] }, // M. Ficus siège (st_ficus) −plante
+      { talk: 'paraphe' }, // quorum non atteint : PERCO absente
+      { useItem: ['tampon_annule', 'urne'] }, // rien à annuler avant le vote
+      { go: 'st-ascenseur' },
+      { go: 'st-couloir-b' },
+      { go: 'st-pause' },
+      { useItem: ['capsule', 'perco'] }, // procuration + café par tube (st_vote_perco) −capsule
+      { go: 'st-couloir-b' },
+      { go: 'st-ascenseur' },
+      { go: 'st-conseil' }, // la porte de droite mène au Conseil (st_ascenseur_conseil)
+      { talk: 'paraphe' }, // POUR / abstention / CONTRE : égalité, AJOURNÉ (st_vote_egalite)
+      { talk: 'bob' }, // « un tampon que personne n'utilise »
+      { useItem: ['tampon_annule', 'urne'] }, // ON N'ANNULE JAMAIS RIEN… DONC C'EST VALABLE (st_case_e)
+      { section: 'Acte IV · la Direction, le dépôt, la restitution' },
+      { go: 'st-ascenseur' },
+      { useItem: ['formulaire', 'fente'] }, // DOSSIER COMPLET → Niveau 12 (st_ascenseur_direction)
+      { useItem: ['fragment', 'coffre'] }, // DÉPÔT AU GUICHET. MÊME POUR LES MIRACLES.
+      { talk: 'sylvie' }, // DÉPÔT AU GUICHET UNIQUEMENT ; le guichet referme (st_sylvie_refuse)
+      { go: 'st-ascenseur' },
+      { go: 'st-couloir-b' },
+      { go: 'st-guichet' },
+      { useItem: ['formulaire', 'guichard'] }, // fermé, 10 h 11
+      { useItem: ['fragment', 'horloge'] }, // 2e passage : 10 h 12 (st_guichet_ouvert)
+      { useItem: ['formulaire', 'guichard'] }, // dépôt, tube vers la Direction (st_dossier_depose) −formulaire
+      { go: 'st-couloir-b' },
+      { go: 'st-ascenseur' },
+      { go: 'st-direction' },
+      { talk: 'sylvie' }, // dossier reçu, le coffre s'ouvre (st_coffre_ouvert)
+      { useItem: ['fragment', 'coffre'] }, // fusion 2/4096, SYLVIE craque ; +badge +permis (st_eclat2)
+      { section: 'Acte IV · la Fourrière et le décollage' },
+      { go: 'st-ascenseur' },
+      { go: 'st-couloir-b' },
+      { go: 'st-guichet' },
+      { go: 'st-attente' },
+      { go: 'st-sas' },
+      { go: 'st-fourriere' }, // avec le permis (st_eclat2)
+      { useItem: ['permis', 'capsule_vaisseau'] }, // VÉHICULE IMMOBILISÉ (rien n'est consommé)
+      { useItem: ['ticket_douane', 'sabot'] }, // amende 4 096 crédits (st_amende) −ticket_douane
+      { useItem: ['tampon_annule', 'amende'] }, // « ça, c'est réglementaire » (st_vaisseau_libere)
+      { useItem: ['permis', 'capsule_vaisseau'] }, // décollage : fin du chapitre 1 (`end: st_suite`)
     ],
   },
 ];

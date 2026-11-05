@@ -396,6 +396,16 @@ export const fr = {
       deputyDesk: 'SOUS-CHEF ADJ. p.i.',
       faxMeeting: 'RÉUNION\nREPORTÉE',
       zzz: 'Z z z',
+      /** Acte IV (stAscenseur, stConseil, stDirection, stFourriere). */
+      dock: 'QUAI · FOURRIÈRE',
+      liftShort: 'ASCENSEUR',
+      insertFile: 'INSÉREZ LE DOSSIER',
+      absent: 'ABSENT',
+      voteAgainst: 'CONTRE',
+      voteFor: 'POUR',
+      voteAbstain: 'ABST.',
+      honorary: 'MEMBRE HON.',
+      fine: 'AMENDE\n4 096',
     },
     cockpit: {
       plate: 'CAPSULE DE SERVICE CS-07\nÉQUIPAGE PRÉVU : 12 · PLACES : 1\nINSTALLÉE PAR LE MOINS-DISANT',

@@ -1,0 +1,127 @@
+# Chapitre 1 « La Station Bureaucratique » — 13. Fourrière & Quai des Navettes (docs/CHAPTER1.md §4, §6.44–46, §8).
+# Rendu 3D : src/three/rooms/station.ts (stFourriere). `art:` = repli 2D.
+# La capsule CS-07, sabot aux patins ; M. Sabot dans sa guérite ; panneau des amendes en dimensions.
+#   ticket de douane sur Sabot (permis en poche) → amende 4 096 crédits           [st_amende] −ticket_douane
+#   tampon ANNULÉ sur l'amende                   → « ça, c'est réglementaire »      [st_vaisseau_libere]
+#   permis sur la capsule                        → décollage → `end: st_suite`     −permis
+# Accès depuis le sas, avec le permis de la Direction (st_eclat2).
+id: st-fourriere
+title: Fourrière & Quai des Navettes
+sector: Station Bureaucratique · Niveau −1 · Quai
+icon: console
+background: "#14181c"
+
+onFirstEnter:
+  - say: "La Fourrière. Un quai noyé de néons jaunes, une guérite, et notre capsule CS-07, garée en travers, un sabot jaune sur le patin avant."
+  - say: "sabot: Vous revoilà. Avec un permis, cette fois. Ça change tout. Enfin, ça change ce qui peut changer. C'est-à-dire l'amende."
+  - say: "bob: Notre capsule, Gary ! Elle a l'air vexée. Elle n'a jamais été garée en travers de quoi que ce soit. À part une dimension."
+    mood: love
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#24282c" }
+  - { rect: [0, 0, 1280, 470], color: "#4a5056" }
+
+hotspots:
+  - id: sabot
+    label: M. Sabot
+    rect: [100, 130, 270, 300]
+    art:
+      - { rect: [110, 140, 250, 280], color: "#d9762a", stroke: "#ffffff", text: "M. SABOT", size: 16 }
+    look: "M. Sabot, dans sa guérite. Casquette, moustache, tampon levé. Il me regarde comme on regarde un véhicule mal garé. Je suis un véhicule mal garé, techniquement."
+    talk:
+      - dialogue: st_sabot_quai
+    useItem:
+      ticket_douane:
+        - if: { notItems: [permis] }
+          say: "sabot: Pas sans le permis. Gardez votre ticket. Le jour où vous avez les deux, on fait affaire."
+          stop: true
+        - dialogue: st_sabot_amende
+          take: ticket_douane
+          set: st_amende
+      permis: "sabot: Le permis, très bien. Et le ticket d'entrée ? On ne sort pas sans être entré. C'est la base de la sortie."
+      tampon_annule:
+        - if: { flags: [st_amende], notFlags: [st_vaisseau_libere] }
+          say: "sabot: Pas sur moi. Sur l'amende. Elle est sur le pare-brise. Moi, je suis réglementaire."
+          stop: true
+        - say: "sabot: Annuler quoi ? Il n'y a rien à annuler tant qu'il n'y a pas d'amende. Et il n'y a pas d'amende tant qu'il n'y a pas de retrait."
+      badge: "sabot: Je fais pas les badges. Je fais pas les ventes. Je fais la fourrière."
+      fragment: "sabot: Deux éclats, maintenant ? Ça ne change rien à l'amende. Ça la double, peut-être. Rangez ça."
+    useItemDefault: "sabot: Je fais pas les ventes."
+
+  - id: amendes
+    label: Panneau des amendes
+    smart: look
+    rect: [480, 60, 250, 150]
+    art:
+      - { rect: [485, 65, 240, 140], color: "#ffd166", stroke: "#2a2830", text: "TARIFS", size: 14 }
+    look:
+      - say: "« FOURRIÈRE — TARIFS. STATIONNEMENT GÊNANT : 12 DIMENSIONS. EN TRAVERS D'UNE DIMENSION : 4 096. RETRAIT : TICKET + PERMIS. »"
+      - say: "En bas, en tout petit : « TOUTE AMENDE TAMPONNÉE PAR LE BUREAU DES TAMPONS FAIT FOI. » Je retiens. Je retiens tout."
+
+  - id: capsule_vaisseau
+    label: Capsule CS-07
+    rect: [620, 150, 520, 300]
+    art:
+      - { rect: [630, 160, 500, 280], color: "#e8e8e0", stroke: "#d9762a", text: "CS-07", size: 22 }
+    look:
+      - if: { flags: [st_vaisseau_libere] }
+        say: "La capsule CS-07, libérée. Plus de sabot. Les petites tuyères bleuissent doucement. Elle attend un permis. Elle a l'habitude d'attendre, maintenant : elle a passé la journée ici."
+        stop: true
+      - say: "Notre capsule, garée en travers. Un sabot jaune verrouillé sur le patin avant, une étiquette rouge : « FOURRIÈRE — RETRAIT SUR PRÉSENTATION DU TICKET D'ENTRÉE ET DU PERMIS DE LA DIRECTION »."
+    use:
+      - if: { flags: [st_vaisseau_libere] }
+        say: "La porte s'ouvre. Le siège en carapace m'attend. Mais le tableau de bord affiche : « PERMIS DE QUITTER LA DIMENSION ? ». Il veut le voir."
+        stop: true
+      - say: "Je tire sur le sabot. Il ne bouge pas. Je tire sur la porte. Elle s'ouvre de deux centimètres, puis le sabot fait CLONK. Je referme."
+    useItem:
+      permis:
+        - if: { notFlags: [st_vaisseau_libere] }
+          say: "Je plaque le permis contre le hublot. Le tableau de bord s'allume : « PERMIS VALIDE ». Puis le sabot fait CLONK. « VÉHICULE IMMOBILISÉ ». Il faut d'abord régler la fourrière."
+          stop: true
+        - take: permis
+          end: st_suite
+      tampon_annule:
+        - if: { flags: [st_amende], notFlags: [st_vaisseau_libere] }
+          dialogue: st_sabot_annule
+          set: st_vaisseau_libere
+          stop: true
+        - if: { flags: [st_vaisseau_libere] }
+          say: "Déjà annulée. Une amende annulée deux fois redeviendrait valable. Ici, je ne prends pas le risque."
+          stop: true
+        - say: "Tamponner « ANNULÉ » sur la capsule ? Je ne veux pas annuler la capsule. Je veux juste partir avec."
+      fragment: "L'éclat sur le tableau de bord ? Pas encore. La capsule a un sabot et une amende. L'improbabilité, ça ne règle pas une fourrière."
+    useItemDefault: "La capsule ne démarre ni avec ça, ni sans permis. Elle est très stricte, pour une capsule installée par le moins-disant."
+
+  - id: amende
+    label: Amende (sur le pare-brise)
+    if: { flags: [st_amende], notFlags: [st_vaisseau_libere] }
+    rect: [800, 200, 130, 80]
+    art:
+      - { rect: [805, 205, 120, 70], color: "#ffd166", stroke: "#c0392b", text: "AMENDE", size: 12 }
+    look: "L'amende, glissée sous l'essuie-glace : « 4 096 CRÉDITS — STATIONNEMENT EN TRAVERS D'UNE DIMENSION ». Je n'ai pas de crédits. Je n'ai que des objets. Dont un tampon que personne n'utilise."
+    use: "Je ne vais pas payer 4 096 crédits. Je ne sais même pas ce qu'est un crédit. Je sais ce qu'est un tampon."
+    useItem:
+      tampon_annule:
+        - dialogue: st_sabot_annule
+          set: st_vaisseau_libere
+      permis: "Le permis ne paie pas l'amende. Il permet de partir. L'amende, elle, permet de rester. Pour toujours."
+    useItemDefault: "Ça ne paie pas une amende. Ça ne l'annule pas non plus. Il me faut quelque chose d'officiel. Et d'inutilisé."
+
+  - id: bob
+    label: B.O.B.
+    rect: [650, 415, 150, 80]
+    art:
+      - { rect: [655, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+    look: "B.O.B. tourne autour de la capsule en reniflant le sabot. Il le trouve mal entretenu. C'est la première fois qu'il critique quelque chose. Il est en train de grandir."
+    talk:
+      - dialogue: st_bob_fourriere
+    useItemDefault:
+      - say: "bob: Garde-le, Gary. On part bientôt. On aura besoin de tout. Surtout de ce qui ne sert à rien."
+        mood: love
+
+exits:
+  - id: vers_sas
+    label: Sas d'Arrivée
+    to: st-sas
+    dir: left
+    rect: [10, 140, 80, 320]

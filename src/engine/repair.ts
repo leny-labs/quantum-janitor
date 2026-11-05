@@ -39,6 +39,15 @@ export function repairState(state: GameState): void {
   if (state.hasFlag('st_accord_pris') && !state.hasFlag('st_greve_finie') && !state.hasItem('accord')) state.give('accord');
   if (state.hasFlag('st_tamponnet_encre') && state.hasItem('encreur')) state.take('encreur');
   if (state.hasFlag('st_encreur_pris') && !state.hasFlag('st_tamponnet_encre') && !state.hasItem('encreur')) state.give('encreur');
+  // Acte IV : M. Ficus siège au Conseil, la capsule part par tube, le ticket reste chez Sabot ;
+  // SYLVIE rend le badge et délivre le permis (jusqu'au décollage)
+  if (state.hasFlag('st_ficus') && state.hasItem('plante')) state.take('plante');
+  if (state.hasFlag('st_vote_perco') && state.hasItem('capsule')) state.take('capsule');
+  if (state.hasFlag('st_amende') && state.hasItem('ticket_douane')) state.take('ticket_douane');
+  if (state.hasFlag('st_eclat2') && !state.ended) {
+    if (!state.hasItem('badge')) state.give('badge');
+    if (!state.hasItem('permis')) state.give('permis');
+  }
   // le formulaire ne quitte jamais l'inventaire avant le dépôt au guichet
   if (state.hasFlag('st_formulaire') && !state.hasFlag('st_dossier_depose') && !state.hasItem('formulaire')) state.give('formulaire');
 }

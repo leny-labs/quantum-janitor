@@ -1,0 +1,94 @@
+# Chapitre 1 « La Station Bureaucratique » — 10. Ascenseur à Formulaires (docs/CHAPTER1.md §4, §6.34, §6.40).
+# Rendu 3D : src/three/rooms/station.ts (stAscenseur). `art:` = repli 2D.
+# Une cabine sans boutons : une fente. On y glisse le dossier, l'ascenseur lit la case la plus avancée.
+#   formulaire (A, B, D, C)      → « AVIS DU CONSEIL REQUIS » → Niveau 7         [st_ascenseur_conseil]
+#   formulaire complet (+ E)     → DIRECTION GÉNÉRALE → Niveau 12                [st_ascenseur_direction]
+# Accès depuis le couloir B (porte du fond) : case D requise (« DOSSIER INCOMPLET (3/4) »).
+id: st-ascenseur
+title: Ascenseur à Formulaires
+sector: Station Bureaucratique · Niveau ?
+icon: console
+background: "#1c2226"
+
+onFirstEnter:
+  - say: "L'Ascenseur à Formulaires. Une cabine en inox, pas de boutons, pas de numéros d'étage. Juste une fente, à hauteur de poitrine, avec une petite lumière verte."
+  - say: "sylvie: BIENVENUE DANS L'ASCENSEUR À FORMULAIRES. VEUILLEZ INSÉRER VOTRE DOSSIER. L'ASCENSEUR DÉCIDE. VOUS, VOUS ATTENDEZ."
+    mood: calm
+  - say: "bob: Un ascenseur qui lit, Gary. J'espère qu'il ne lit pas trop vite. Moi, je suis sujet au mal des transports administratifs."
+    mood: suspicious
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#2a3034" }
+  - { rect: [0, 0, 1280, 470], color: "#9aa6ae" }
+
+hotspots:
+  - id: fente
+    label: Fente à dossiers
+    sfx: clonk
+    rect: [560, 230, 160, 100]
+    art:
+      - { rect: [565, 235, 150, 90], color: "#2a2830", stroke: "#7fffd4", text: "FENTE", size: 14 }
+    look:
+      - say: "Une fente à dossiers, bordée de laiton, avec une diode verte. Gravé dessous : « L'ASCENSEUR LIT LA CASE LA PLUS AVANCÉE. NE PAS FORCER. NE PAS PLIER. NE PAS ESPÉRER. »"
+    use:
+      - say: "Je mets la main dans la fente. Elle est tiède. L'ascenseur hésite, puis recrache poliment l'idée."
+      - say: "sylvie: MAIN NON CONFORME. AUCUNE CASE DÉTECTÉE. VEUILLEZ INSÉRER UN DOSSIER."
+        mood: calm
+    useItem:
+      formulaire:
+        - if: { notFlags: [st_case_c] }
+          say: "sylvie: DOSSIER INCOMPLET. LA CABINE NE PREND QUE LES DOSSIERS COMPLETS AUX TROIS QUARTS. LE VÔTRE EST AUX DEUX TIERS. CE N'EST PAS UNE FRACTION RECONNUE."
+          stop: true
+        - if: { flags: [st_case_e] }
+          dialogue: st_ascenseur_direction
+          set: st_ascenseur_direction
+          goto: st-direction
+          stop: true
+        - dialogue: st_ascenseur_conseil
+          set: st_ascenseur_conseil
+          goto: st-conseil
+      plante: "M. Ficus dans la fente ? Il ne rentre pas. Et il n'a qu'une case : « PLASTIQUE ». Même l'ascenseur trouve ça un peu juste."
+      tampon_annule: "Je tamponne « ANNULÉ » sur la fente. La diode clignote : « ANNULATION NON MOTORISÉE ». Rien ne bouge. Heureusement."
+      fragment: "L'éclat dans la fente ? L'ascenseur pourrait m'emmener à un étage qui n'existe pas. Ici, ça finirait au service des réclamations."
+    useItemDefault: "sylvie: OBJET NON RECONNU. CECI N'EST PAS UN DOSSIER. CECI EST UN OBJET."
+
+  - id: panneau
+    label: Plaque de la cabine
+    smart: look
+    rect: [480, 40, 320, 150]
+    art:
+      - { rect: [485, 45, 310, 140], color: "#1f5f5a", stroke: "#f6efdc", text: "ASCENSEUR", size: 16 }
+    look:
+      - say: "« ASCENSEUR À FORMULAIRES — DOSSIERS COMPLETS AUX TROIS QUARTS ». Dessous, un cadran à aiguille : COULOIR B · CONSEIL (7) · DIRECTION (12). L'aiguille tremble entre deux étages. Comme moi."
+
+  - id: bob
+    label: B.O.B.
+    rect: [650, 415, 150, 80]
+    art:
+      - { rect: [655, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+    look: "B.O.B. s'est collé contre la paroi, capteurs fermés. Il n'aime pas les cabines. Il dit que ça lui rappelle l'intérieur de lui-même."
+    talk:
+      - dialogue: st_bob_ascenseur
+    useItemDefault:
+      - say: "bob: Ne me mets pas dans la fente, Gary. Je ne suis pas complet aux trois quarts. Je suis complet à un quart, les bons jours."
+        mood: sad
+
+exits:
+  - id: vers_couloir
+    label: Couloir Infini B
+    to: st-couloir-b
+    dir: left
+    rect: [10, 140, 100, 320]
+  # l'ascenseur « choisit l'étage » : la porte de droite mène là où le dossier l'a envoyé
+  - id: vers_conseil
+    label: Salle du Conseil (Niveau 7)
+    to: st-conseil
+    dir: right
+    if: { flags: [st_ascenseur_conseil], notFlags: [st_ascenseur_direction] }
+    rect: [1170, 140, 100, 320]
+  - id: vers_direction
+    label: Direction Générale (Niveau 12)
+    to: st-direction
+    dir: right
+    if: { flags: [st_ascenseur_direction] }
+    rect: [1170, 140, 100, 320]

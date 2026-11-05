@@ -171,9 +171,42 @@ bob: Gary. Elle vient de nous rendre service. En quarante et un ans, c'est la pr
 
 // B-7/12 trouvé dans le couloir (st_formulaire) : Mme Guichard constate.
 === st_guichard_formulaire ===
+// Acte IV (docs/CHAPTER1.md §6.42) : dépôt du dossier complet, à 10 h 12, après le refus de SYLVIE
+{ has_flag("st_dossier_depose"):
+    guichard: Votre dossier est parti par tube. C'est pas moi qui décide, maintenant. C'est la Direction. Bon courage.
+    -> END
+}
+{ has_flag("st_case_e"):
+    { not has_flag("st_sylvie_refuse"):
+        guichard: Un dossier complet ? Cinq cases ? Ça monte à la Direction. Par l'ascenseur. Pas par moi. C'est pas moi qui décide.
+        -> END
+    }
+    { not has_flag("st_guichet_ouvert"):
+        guichard: C'est fermé. Il est 10 h 11. Revenez à 10 h 12. Vous savez faire, il paraît.
+        -> END
+    }
+    -> st_guichard_depot
+}
+{ has_flag("st_case_a"):
+    Gary plaque le formulaire contre la vitre. Mme Guichard compte les cases remplies, du bout de son sandwich.
+    guichard: C'est pas complet. Revenez quand c'est complet. Et à 10 h 12. Les deux. C'est pas moi qui décide.
+    -> END
+}
 Gary plaque le Formulaire B-7/12 contre la vitre. Mme Guichard le regarde longtemps. Elle enlève ses lunettes. Elle les remet.
 guichard: Le dernier B-7/12. Il est revenu de l'Aile B.
 guichard: Rien ne revient jamais de l'Aile B.
 bob: Nous, si. Avec le formulaire. Et le ficus. # mood: love
 guichard: Remplissez-le. Tamponnez-le. Faites-le signer. En trois exemplaires. Les bureaux de l'Aile B s'en chargent. Dès que le règlement le permettra.
+-> END
+
+// Dépôt du dossier complet au guichet (étape 42) : tube pneumatique vers la Direction.
+=== st_guichard_depot ===
+Gary glisse le Formulaire B-7/12 dans la fente sous l'hygiaphone. Épais comme un vrai dossier, il passe de justesse. Mme Guichard pose son sandwich. Pour la première fois en quarante et un ans.
+guichard: Cinq cases. Rempli. Tamponné. Signé. En trois exemplaires. Avec avis du Conseil.
+guichard: …À 10 h 12.
+Elle prend un tampon dans son tiroir. Un tampon « REÇU ». Il n'avait jamais servi non plus. CLONK.
+guichard: Dépôt enregistré. Le dossier part à la Direction. # take: formulaire # set: st_dossier_depose
+Elle roule le formulaire dans une capsule et la glisse dans le tube derrière elle. FLOUP.
+guichard: C'est pas moi qui décide. Mais c'est moi qui ai envoyé. Ça compte un peu, quand même.
+bob: Elle a posé son sandwich, Gary. Pour toi. Je crois que c'est la plus haute distinction de la Station. # mood: love
 -> END
