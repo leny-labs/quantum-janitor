@@ -467,7 +467,7 @@ export const stAttente: RoomBuild = {
     }
     // enseigne sous le linteau, en haut des vantaux (au-dessus des hublots) : sur le linteau elle
     // touchait encore le bas de l'afficheur « NOUS SERVONS LE N° » ; masquée pendant le zoom examine.
-    const cafSign = at(label(tr('props.station.toCafe'), cf.w * 0.7, 0.24, { color: '#f6efdc', bg: '#b5562a', bold: true }), 0, cf.h / 2 - ft - 0.18, 0.14);
+    const cafSign = at(label(tr('props.station.toCafe'), cf.w * 0.7, 0.18, { color: '#f6efdc', bg: '#b5562a', bold: true }), 0, cf.h / 2 - ft / 2, 0.14);
     cafDoor.add(cafSign);
     s.animate(() => (cafSign.visible = s.examining !== 'afficheur'));
     const note = s.fitX([1180, 250, 70, 70], 9);
