@@ -264,7 +264,7 @@ export const stSas: RoomBuild = {
     // M. Sabot (planche GenAI) derrière la vitre : le comptoir lui cache les jambes ; il cligne, tamponne,
     // parle avec la boîte de dialogue et vous toise, agacé, entre deux répliques
     const sabot = billboardSheet(SABOT_SHEET, 5, gr.h * 0.92, SABOT_ASPECT, { tint: '#fff4e6', shadow: 0.01 });
-    sabot.position.set(0, 0, -0.15);
+    sabot.position.set(0, 0, -0.32); // un poil en retrait de la vitre : plus « collé » au comptoir
     booth.add(sabot, glass);
     s.spot('guerite', at(booth, gr.x, 0, against(gr.z, 1)));
     s.animate((t) => sabot.userData.setFrame(actorFrame('sabot', SABOT_ACTOR, t)));
@@ -780,7 +780,7 @@ export const stGuichet: RoomBuild = {
 
     // ── le guichet : comptoir, deux baies vitrées, bandeau haut (horloge, afficheur) ──
     const zb = 1.1; // façade du guichet
-    const zg = 0.45; // Mme Guichard, assise derrière
+    const zg = 0.28; // Mme Guichard, assise derrière (un poil en retrait, plus collée au comptoir)
     const L = s.wallAt(395, 400, zb).x;
     const R = s.wallAt(915, 400, zb).x;
     const W = R - L;
@@ -1316,7 +1316,7 @@ export const stArchives: RoomBuild = {
 
     // ── bureau de Duplicata (comptoir bas) et M. Duplicata derrière ──
     const zb = 1.15;
-    const zg = 0.5;
+    const zg = 0.33; // un poil en retrait du comptoir
     const d = s.fit(s.rect('duplicata'), zb);
     const top = s.wallAt(640, 352, zb).y;
     const desk = new THREE.Group();
@@ -1493,7 +1493,7 @@ export const stTampons: RoomBuild = {
 
     // ── comptoir et Mme Tamponnet ──
     const zb = 1.15;
-    const zg = 0.5;
+    const zg = 0.33; // un poil en retrait du comptoir
     const top = s.wallAt(640, 350, zb).y;
     const L = s.wallAt(380, 350, zb).x;
     const R = s.wallAt(980, 350, zb).x;
@@ -1861,7 +1861,7 @@ export const stSousChef: RoomBuild = {
 
     // ── bureau, fax, stylo enchaîné ; M. Delaigue derrière ──
     const zb = 1.2;
-    const zg = 0.55;
+    const zg = 0.38; // un poil en retrait du bureau
     const top = s.wallAt(640, 360, zb).y;
     const L = s.wallAt(470, 360, zb).x;
     const R = s.wallAt(830, 360, zb).x;
@@ -2063,7 +2063,7 @@ export const stConseil: RoomBuild = {
 
     // ── table ovale (vue de face : un grand plateau), chaises vides, Mme Paraphe derrière ──
     const zb = 1.3;
-    const zg = 0.6;
+    const zg = 0.45; // un poil en retrait de la table
     const top = s.wallAt(640, 360, zb).y;
     const table = new THREE.Group();
     const tw = 7;
@@ -2317,7 +2317,8 @@ export const stFourriere: RoomBuild = {
     const bz = Math.max(sb.z, 0.9);
     s.add(at(booth, sb.x, 0, bz));
     const rem = billboardSheet(REMORQUE_SHEET, 2, sb.h * 0.72, REMORQUE_ASPECT, { tint: '#fff2e8', shadow: 0.01 });
-    s.spot('remorque', at(rem, sb.x, sb.h * 0.28, bz - 0.15));
+    // un poil en retrait derrière le comptoir (plus collé au desk), toujours devant le mur
+    s.spot('remorque', at(rem, sb.x, sb.h * 0.28, bz - 0.32));
     s.animate((t) => rem.userData.setFrame(actorFrame('remorque', REMORQUE_ACTOR, t)));
 
     // ── la capsule CS-07 (billboard GenAI : sabot / libérée), amende sur le pare-brise ──
