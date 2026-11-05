@@ -13,6 +13,7 @@ import { officeChair } from '../officeChair';
 import { bobSpot } from './bobspot';
 import { CouloirWalkRig, type WalkDoor } from './couloirWalk';
 import { pressable } from '../press';
+import { percoScreen } from '../percoFace';
 import { speaking } from '../../engine/speaking';
 import type { Condition } from '../../engine/types';
 import type { RoomBuild } from './index';
@@ -1823,12 +1824,16 @@ export const stPause: RoomBuild = {
     const p = s.stand(s.rect('perco'));
     const ph = p.h * 0.98;
     const perco = billboardSheet(PERCO_SHEET, 2, ph, PERCO_ASPECT, { tint: '#fff6ee', shadow: ph * PERCO_ASPECT * 0.45 });
+    // écran vivant par-dessus le visage peint : yeux par humeur + onde ambre quand elle parle
+    const screen = percoScreen(ph, PERCO_ASPECT);
+    perco.add(screen.mesh);
     s.spot('perco', at(perco, p.x, 0, pz));
     const steam = at(glow('#ffffff', 0.7, 0.5), p.x + ph * PERCO_ASPECT * 0.22, ph * 0.98, pz + 0.05);
     s.add(steam);
     s.animate((t) => {
       const on = s.is(GREVE_FINIE);
       perco.userData.setFrame(on ? 1 : 0);
+      screen.update(t, on);
       // en grève : tremblement de colère + bouffées ; au travail : ronron, vapeur douce
       perco.position.x = p.x + (on ? 0 : Math.sin(t * 31) * 0.006 * (Math.sin(t * 0.9) > 0.6 ? 1 : 0));
       const k = (t * (on ? 0.35 : 0.9)) % 1;

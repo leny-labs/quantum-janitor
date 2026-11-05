@@ -5,20 +5,7 @@
 import Phaser from 'phaser';
 import type { Mood } from '../engine/mood';
 import { PORTRAIT_WAVES, type PortraitWave } from '../three/Studio';
-
-/** Fréquence (crêtes sur la largeur), vitesse, dents de scie (0 = sinus doux). */
-const FLAVOR: Record<Mood, { freq: number; speed: number; jag: number }> = {
-  calm: { freq: 11, speed: 1, jag: 0.6 },
-  suspicious: { freq: 8, speed: 0.6, jag: 0.4 },
-  angry: { freq: 15, speed: 1.7, jag: 1 },
-  love: { freq: 6, speed: 0.8, jag: 0 },
-  surprised: { freq: 9, speed: 1.3, jag: 0.3 },
-  sad: { freq: 5, speed: 0.5, jag: 0.1 },
-};
-
-const POINTS = 72;
-const CYAN = 0x7fffd4;
-const CORE = 0xe8fffa;
+import { WAVE_CORE, WAVE_GLOW, wavePoints } from './waveShape';
 
 export const waveFor = (id: string): PortraitWave | null => PORTRAIT_WAVES[id] ?? null;
 
@@ -60,48 +47,21 @@ export class WaveMouth {
   }
 
   private draw(): void {
-    const { x0, x1, y, amp } = this.def;
-    // inclinaison autour du centre de l'onde (grille-bouche penchée)
-    const rad = Phaser.Math.DegToRad(this.def.angle ?? 0);
-    const cos = Math.cos(rad);
-    const sin = Math.sin(rad);
-    const cx = (x0 + x1) / 2;
-    const f = FLAVOR[this.mood];
-    const t = this.t * f.speed;
-    // enveloppe de parole : syllabes (deux sinus décalés) + un peu de bruit
-    const speech = this.level * (0.35 + 0.65 * Math.abs(Math.sin(t * 7.3) * Math.sin(t * 3.1 + 1.3))) * (0.85 + Math.random() * 0.15);
-    const r0 = this.def.rest ?? 0.09;
-    const rest = r0 * (1 + (4 / 9) * Math.sin(t * 1.7));
-    const a = Math.max(rest, speech) * amp;
-    const pts: Phaser.Math.Vector2[] = [];
-    for (let i = 0; i <= POINTS; i++) {
-      const u = i / POINTS;
-      // bouts plats (comme la planche de ref), crêtes au milieu
-      const win = Phaser.Math.SmoothStep(u, 0.04, 0.2) * (1 - Phaser.Math.SmoothStep(u, 0.8, 0.96));
-      const ph = u * Math.PI * 2 * f.freq - t * 9;
-      const sine = Math.sin(ph);
-      // dents de scie : on pousse le sinus vers un triangle pointu
-      const saw = (2 / Math.PI) * Math.asin(sine);
-      const wave = sine * (1 - f.jag) + saw * f.jag;
-      // relief qui voyage (une crête plus haute, comme le pic de la ref)
-      const bump = 0.55 + 0.45 * Math.sin(u * Math.PI * 2 * 1.3 - t * 2.2);
-      const dx = x0 + (x1 - x0) * u - cx;
-      const dy = -wave * bump * win * a;
-      pts.push(new Phaser.Math.Vector2(this.left + (cx + dx * cos - dy * sin) * this.k, this.top + (y + dx * sin + dy * cos) * this.k));
-    }
-    const g = this.g;
     const k = this.k;
-    const glow = this.def.color ?? CYAN;
-    const core = this.def.core ?? CORE;
+    const pts = wavePoints(this.def, this.mood, this.t, this.level).map((p) => new Phaser.Math.Vector2(this.left + p.x * k, this.top + p.y * k));
+    const g = this.g;
+    const glow = this.def.color ?? WAVE_GLOW;
+    const core = this.def.core ?? WAVE_CORE;
+    const w = k * (this.def.thick ?? 1);
     g.clear();
     // halo, lueur, cœur
-    g.lineStyle(9 * k, glow, 0.12);
+    g.lineStyle(9 * w, glow, 0.12);
     g.strokePoints(pts);
-    g.lineStyle(5 * k, glow, 0.3);
+    g.lineStyle(5 * w, glow, 0.3);
     g.strokePoints(pts);
-    g.lineStyle(2.4 * k, glow, 0.95);
+    g.lineStyle(2.4 * w, glow, 0.95);
     g.strokePoints(pts);
-    g.lineStyle(1 * k, core, 0.9);
+    g.lineStyle(1 * w, core, 0.9);
     g.strokePoints(pts);
   }
 }

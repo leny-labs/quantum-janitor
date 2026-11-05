@@ -3,6 +3,7 @@
  * bouche bouge (frappe en cours). Écrit par ui/DialogueBox, lu par les
  * billboards animés des pièces (three/props.ts `actorFrame`) pour jouer leur
  * frame « parle » en même temps que le portrait. `open` : boîte de dialogue
- * affichée (les plans de fin se recadrent au-dessus du panneau).
+ * affichée (les plans de fin se recadrent au-dessus du panneau). `mood` : humeur de la
+ * réplique en cours (écran 3D de PERCO).
  */
-export const speaking: { id: string | null; talking: boolean; open: boolean } = { id: null, talking: false, open: false };
+export const speaking: { id: string | null; talking: boolean; open: boolean; mood?: string } = { id: null, talking: false, open: false };

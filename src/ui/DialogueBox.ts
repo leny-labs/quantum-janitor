@@ -65,7 +65,7 @@ const FACES: Record<string, { mouth: MouthOptions; blink?: BlinkOptions }> = {
   sabot: { mouth: { x: 0.51, y: 0.515, width: 0.1, showClosed: false, style: { lipColor: '#7a3a30' } }, blink: { enabled: false } },
   // M. Remorque : planche GenAI (portraits/remorque-sheet.png) ; bouche basse, gilet fluo
   remorque: { mouth: { x: 0.5, y: 0.55, width: 0.1, showClosed: false, style: { lipColor: '#5a4038' } }, blink: { enabled: false } },
-  // PERCO : écran-visage pixelisé, pas de bouche dessinée par-dessus
+  // PERCO : repli (sans planche) sur l'écran-visage pixelisé, pas de bouche dessinée par-dessus
   perco: { mouth: { width: 0, showClosed: false }, blink: { enabled: false } },
 };
 
@@ -87,7 +87,7 @@ export class DialogueBox implements DialogueView {
   /** Calques par-dessus la planche (drone de Gary), créés à la demande, par id. */
   private overlays = new Map<string, OverlayPlayer>();
   private overlayOn: OverlayPlayer | null = null;
-  /** Bouches-ondes procédurales (SYLVIE), créées à la demande, par id. */
+  /** Bouches-ondes procédurales (SYLVIE, B.O.B., PERCO), créées à la demande, par id. */
   private waves = new Map<string, WaveMouth>();
   private waveOn: WaveMouth | null = null;
   /** Sourcils procéduraux (B.O.B.), créés à la demande, par id. */
@@ -249,6 +249,7 @@ export class DialogueBox implements DialogueView {
 
   private setSpeaker(speaker: CharacterDef | null, mood?: Mood): void {
     speaking.id = speaker?.id ?? null;
+    speaking.mood = mood;
     const hasPortrait = !!speaker?.portrait;
     const key = speaker ? portraitKey(speaker.id) : '';
     const sheet = speaker ? speakerSheetKey(speaker.id, (f) => getSession().state.hasFlag(f)) : '';

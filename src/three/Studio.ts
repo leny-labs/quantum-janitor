@@ -12,6 +12,7 @@ import * as THREE from 'three';
 import { at, glow } from './kit';
 import type { Mood } from '../engine/mood';
 import { bob, gary, roach, setFace, sylvie, type FacePose } from './props';
+import { PERCO_LOOPS, PERCO_WAVE } from './percoFace';
 
 export const iconKey = (id: string) => `icon3d:${id}`;
 /**
@@ -79,8 +80,16 @@ export function itemIconKey(id: string, hasFlag: (f: string) => boolean): string
 }
 export const portraitKey = (id: string) => `portrait3d:${id}`;
 export const sheetKey = (id: string) => `portraitSheet:${id}`;
+/**
+ * Planches redessinées hors du nommage `<id>-sheet.png` (les originales restent) :
+ * PERCO sans bouche peinte, yeux par humeur (tools/perco-faces.py).
+ */
+const SHEET_URLS: Readonly<Record<string, string>> = {
+  perco: 'portraits/perco-humeurs-sheet.png',
+  'perco-travail': 'portraits/perco-travail-humeurs-sheet.png',
+};
 /** Chemin (relatif au site) de la planche de sprites d'un personnage. */
-export const sheetUrl = (id: string) => `portraits/${id}-sheet.png`;
+export const sheetUrl = (id: string) => SHEET_URLS[id] ?? `portraits/${id}-sheet.png`;
 /**
  * Variantes de planche selon les flags (même layout SHEET, mêmes calques,
  * humeurs et ancrages que la planche de base) : la première dont le flag est
@@ -442,7 +451,10 @@ export const PORTRAIT_MOODS: Readonly<Record<string, { fallback: Mood; loops: Re
         ],
       },
     },
-  },  bob: {
+  },
+  // PERCO (planche grève ou travail, même grille) : voir three/percoFace.ts
+  perco: { fallback: 'calm', loops: PERCO_LOOPS },
+  bob: {
     fallback: 'calm',
     loops: {
       calm: SHEET,
@@ -567,6 +579,16 @@ export interface PortraitWave {
   rest?: number;
   /** Inclinaison en degrés autour du centre de l'onde, positive = côté droit plus bas (défaut 0). */
   angle?: number;
+  /** Épaisseur du trait (multiplicateur, défaut 1). */
+  thick?: number;
+  /** Vitesse (multiplicateur de celle de l'humeur, défaut 1). */
+  speed?: number;
+  /** Syllabes plus sèches (0 = enveloppe douce de SYLVIE, défaut 0). */
+  punch?: number;
+  /** Dents de scie imposées (0..1), sinon celles de l'humeur. */
+  jag?: number;
+  /** Écran pixel : tracé en marches de `step` px de cellule (défaut : courbe lisse). */
+  step?: number;
 }
 
 export const PORTRAIT_WAVES: Readonly<Record<string, PortraitWave>> = {
@@ -574,6 +596,8 @@ export const PORTRAIT_WAVES: Readonly<Record<string, PortraitWave>> = {
   // B.O.B. : écran-grille de la bouche (entre les deux barres), cyan Bender,
   // ligne quasi plate au repos ; la grille penche de 3,2° (mesuré sur les barres)
   bob: { cell: 256, x0: 60, x1: 158, y: 188, amp: 7, angle: 3.2, color: 0x5ff6ff, core: 0xe6feff, rest: 0.04 },
+  // PERCO : ambre CRT, en marches de pixels, plus vive et plus sèche (three/percoFace.ts)
+  perco: PERCO_WAVE,
 };
 
 function shootSingle(renderer: THREE.WebGLRenderer, pose: Pose, size: number, bg?: [string, string]): HTMLCanvasElement {
