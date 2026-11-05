@@ -920,6 +920,23 @@ export const GARY_PRONE_ASPECT = 1024 / 397;
 /** M. Jean-Claude Sabot, agent de fourrière, tampon levé (GenAI, 772 × 1024). */
 export const SABOT_URL = `${import.meta.env.BASE_URL}props/st/sabot.png`;
 export const SABOT_ASPECT = 772 / 1024;
+/**
+ * Mme Odile Guichard derrière l'hygiaphone, accoudée au comptoir, sandwich en main (GenAI, coupée
+ * à la ligne du comptoir ; _briefs/guichet/genai). Planche 2 cellules : 0 repos · 1 parle.
+ */
+export const GUICHARD_URL = `${import.meta.env.BASE_URL}props/st/guichard.png`;
+export const GUICHARD_SHEET = `${import.meta.env.BASE_URL}props/st/guichard-sheet.png`;
+export const GUICHARD_ASPECT = 753 / 768;
+export const GUICHARD_ACTOR: ActorLoops = {
+  idle: [{ frame: 0, duration: 4000 }],
+  talk: [
+    { frame: 1, duration: 160 },
+    { frame: 0, duration: 120 },
+    { frame: 1, duration: 200 },
+    { frame: 0, duration: 150 },
+  ],
+  listen: 0,
+};
 /** M. Patience assis sur sa chaise, ticket 9 848 tendu ; variante main vide (même cadre) une fois le ticket pris. */
 export const PATIENCE_URL = `${import.meta.env.BASE_URL}props/st/patience.png`;
 export const PATIENCE_EMPTY_URL = `${import.meta.env.BASE_URL}props/st/patience-vide.png`;

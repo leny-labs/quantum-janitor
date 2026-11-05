@@ -91,11 +91,10 @@ bands:
         unlock: { flags: [st_laisse] }
         refused: { fr: "EN RÉAPPROVISIONNEMENT DE SANDWICHS", en: "SANDWICH RESTOCKING IN PROGRESS" }
       - scene: st-guichet
-        planned: true
         label: { fr: "Guichet d'Accueil", en: "Reception Desk" }
         visible: { flags: [st_voit_afficheur] }
-        unlock: { flags: [st_guichet_ouvert] }
-        refused: { fr: "10 H 12 – 10 H 14", en: "10:12 – 10:14 ONLY" }
+        unlock: { flags: [st_ticket_9848] }
+        refused: { fr: "TICKET 9848 REQUIS", en: "TICKET 9848 REQUIRED" }
 
   - id: quai
     label: { fr: "NIVEAU −1 · QUAI & FOURRIÈRE", en: "LEVEL −1 · DOCK & IMPOUND" }

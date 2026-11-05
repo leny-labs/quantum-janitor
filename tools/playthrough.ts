@@ -95,21 +95,30 @@ async function main() {
         const decoy = checkpoints.find((c) => c.label === 'utiliser ticket_douane sur distributeur');
         if (!decoy?.save.items.includes('ticket_douane')) throw new Error('fausse piste : le distributeur ne doit pas garder le ticket de douane');
         for (const f of ['st_arrive', 'st_laisse', 'st_ticket_9848']) if (!state.hasFlag(f)) throw new Error(`Station : flag ${f} absent`);
-        // carte : les 2 salles du stub warpables, le guichet repéré mais refusé, la Direction inconnue
+        // carte : les salles du stub warpables (on finit au guichet), la fourrière refusée, la Direction inconnue
         const map = parseStationMap(readFileSync(join(ROOT, 'content', 'station-map.yaml'), 'utf8'));
         const zone = (id: string) => map.bands.flatMap((b) => b.zones).find((z) => z.scene === id)!;
         const exists = (id: string) => content.scenes.has(id);
-        const expect = { 'st-sas': 'open', 'st-attente': 'here', 'st-guichet': 'locked', 'st-fourriere': 'locked', 'st-direction': 'unknown' } as const;
+        const expect = { 'st-sas': 'open', 'st-attente': 'open', 'st-cafeteria': 'open', 'st-guichet': 'here', 'st-fourriere': 'locked', 'st-direction': 'unknown' } as const;
         // repérée et accessible mais jamais visitée : pas de warp (on y va à pied d'abord)
         const early = chapterStateAt(state, 'st-sas', ['st-sas']);
         if (zoneState(early, zone('st-attente'), exists) !== 'seen') throw new Error('carte : salle d\'attente non visitée devrait être « seen »');
+        // avant le ticket 9848 : guichet repéré (afficheur vu) mais refusé
+        const pre = checkpoints.find((c) => c.label === 'utiliser plante');
+        if (!pre || zoneState(GameState.fromSave(pre.save), zone('st-guichet'), exists) !== 'locked') throw new Error('carte : guichet avant le ticket 9848 devrait être « locked »');
         for (const [id, want] of Object.entries(expect)) {
           const got = zoneState(state, zone(id), exists);
           if (got !== want) throw new Error(`carte : ${id} « ${got} » au lieu de « ${want} »`);
         }
       }
-      if (ended !== chapter.endKnot) throw new Error(`fin non atteinte (ended=${ended})`);
-      console.log(`\n✓ ${chapter.title} terminé — cliffhanger « ${ended} » atteint (${checkpoints.length} checkpoints).`);
+      if (chapter.endFlag) {
+        if (!state.hasFlag(chapter.endFlag)) throw new Error(`fin provisoire non atteinte (flag ${chapter.endFlag} absent)`);
+        if (ended) throw new Error(`stub ouvert : aucun cliffhanger attendu (ended=${ended})`);
+        console.log(`\n✓ ${chapter.title} — fin provisoire en salle (${chapter.endFlag}, ${state.scene}) atteinte (${checkpoints.length} checkpoints).`);
+      } else {
+        if (ended !== chapter.endKnot) throw new Error(`fin non atteinte (ended=${ended})`);
+        console.log(`\n✓ ${chapter.title} terminé — cliffhanger « ${ended} » atteint (${checkpoints.length} checkpoints).`);
+      }
       console.log(`  flags : ${[...state.flags].join(', ')}`);
     } catch (e) {
       console.error(`\n✗ ${chapter.title} — ${(e as Error).message}${current ? `\n  dernière étape : ${current}` : ''}`);

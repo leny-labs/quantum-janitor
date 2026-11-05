@@ -50,6 +50,11 @@ export interface ChapterDef {
   initial?: { items?: string[]; flags?: string[] };
   /** Knot de fin attendu (cliffhanger). */
   endKnot: string;
+  /**
+   * Chapitre encore ouvert (stub) : la solution s'arrête dès que ce flag est posé, sans
+   * cliffhanger (`endKnot` non joué). Le playthrough vérifie alors ce flag au lieu du knot.
+   */
+  endFlag?: string;
   /** Actes (le premier = départ du chapitre) ; voir `ActDef`. */
   acts?: ActDef[];
   /**
@@ -154,8 +159,10 @@ export const CHAPTERS: ChapterDef[] = [
     from: 'ch0',
     // ch.0 fini : éclat contenu, combi de chitine (enfilée dans l'interlude), badge ; B.O.B. suit
     initial: { items: ['badge', 'fragment', 'combi_chitine'], flags: ['st', 'ch0_termine', 'chapitre0_termine', 'bob_suit'] },
-    // fin provisoire du stub (sortie fermée faute de formulaire) ; deviendra `st_suite`
+    // knot de fin nominal (EndScene) ; deviendra `st_suite`. Le stub, lui, s'arrête en salle au
+    // guichet (`endFlag`) : plus de porte `to: fin`
     endKnot: 'st_stub_fin',
+    endFlag: 'st_guichard_ferme',
     steps: [
       { section: 'Interlude — la Capsule de Service CS-07' },
       { look: 'pare_brise' },
@@ -189,7 +196,12 @@ export const CHAPTERS: ChapterDef[] = [
       { look: 'vitrine' },
       { go: 'st-attente' },
       { talk: 'bob', pick: [0] }, // « Il n'en a plus besoin… » → éloge funèbre, +ticket_9848
-      { go: 'fin' }, // guichet fermé, formulaire B-7/12 manquant : fin provisoire du stub
+      { section: 'Station · le Guichet d\'Accueil (Mme Guichard)' },
+      { go: 'st-guichet' }, // porte du guichet : ticket 9848 requis
+      { look: 'horloge' }, // 10 h 11 (le guichet ouvre à 10 h 12)
+      { look: 'horaires' },
+      { useItem: ['ticket_9848', 'guichard'] }, // « c'est le suivant… de M. Patience » : animal, article 12
+      { talk: 'guichard' }, // fermé, formulaire B-7/12 « au guichet » : fin provisoire du stub (st_guichard_ferme)
     ],
   },
 ];

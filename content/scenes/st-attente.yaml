@@ -2,7 +2,7 @@
 # Rendu 3D : src/three/rooms/station.ts (stAttente). `art:` = repli 2D.
 # Mini-puzzle : l'afficheur (9 847), M. Patience et son ticket 9 848 (main serrée), B.O.B. aspire
 # le ticket ; fausse piste au distributeur. M. Ficus (plante) : payoff différé (couloir B, Conseil).
-# Sortie vers le guichet = fin du stub (`to: fin` → st_stub_fin) une fois le ticket en poche.
+# Sortie vers le guichet (st-guichet, Mme Guichard) une fois le ticket 9 848 en poche.
 id: st-attente
 title: Salle d'Attente
 sector: Station Bureaucratique · Niveau 0 · Patientez
@@ -116,10 +116,10 @@ exits:
     to: st-cafeteria
     dir: up
     rect: [772, 165, 88, 285]
-  # fin provisoire du stub : `to: fin` = st_stub_fin (le guichet est fermé, formulaire manquant)
+  # guichet d'accueil jouable (Mme Guichard, rideau, horloge 10 h 11) une fois le ticket en poche
   - id: vers_guichet
     label: Guichet d'Accueil
-    to: fin
+    to: st-guichet
     dir: right
     rect: [1170, 140, 100, 320]
     requires: { items: [ticket_9848] }

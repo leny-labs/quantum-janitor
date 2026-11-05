@@ -176,6 +176,17 @@ keys:
   scene.st-cafeteria.hotspot.tables.label: Tables
   scene.st-cafeteria.hotspot.bob.label: B.O.B.
   scene.st-cafeteria.exit.vers_attente.label: Waiting Room
+  scene.st-guichet.title: Reception Desk
+  scene.st-guichet.sector: Bureaucratic Station · Level 0 · Reception
+  scene.st-guichet.hotspot.guichard.label: Mrs Guichard
+  scene.st-guichet.hotspot.hygiaphone.label: Speaking grille
+  scene.st-guichet.hotspot.horloge.label: Clock
+  scene.st-guichet.hotspot.horaires.label: Opening hours
+  scene.st-guichet.hotspot.rideau.label: Metal shutter
+  scene.st-guichet.hotspot.pupitre.label: Form-filling desk
+  scene.st-guichet.hotspot.porte_b.label: “WING B” door
+  scene.st-guichet.hotspot.bob.label: B.O.B.
+  scene.st-guichet.exit.vers_attente.label: Waiting Room
   item.ticket_douane.name: Customs ticket
   item.ticket_9848.name: Ticket No. 9848
   item.plante.name: Mr Ficus (plastic plant)

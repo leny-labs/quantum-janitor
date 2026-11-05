@@ -1,0 +1,152 @@
+# Chapitre 1 « La Station Bureaucratique » — 3. Guichet d'Accueil (docs/CHAPTER1.md §4).
+# Rendu 3D : src/three/rooms/station.ts (stGuichet). `art:` = repli 2D.
+# Scaffold : Mme Guichard derrière l'hygiaphone (GenAI, planche repos/parle), rideau métallique,
+# horloge bloquée sur 10 h 11, horaires « 10 h 12 – 10 h 14 », pupitre du formulaire B-7/12.
+# Fin provisoire du stub = le dialogue en salle (st_guichard → flag st_guichard_ferme), plus d'EndScene.
+# À venir : puzzle de l'horloge (éclat → 10 h 12, `st_guichet_ouvert`), formulaire, couloir infini B.
+id: st-guichet
+title: Guichet d'Accueil
+sector: Station Bureaucratique · Niveau 0 · Accueil
+icon: corridor
+background: "#2c2634"
+
+onFirstEnter:
+  - say: "Le Guichet d'Accueil. Un hygiaphone, un rideau métallique à moitié baissé, une horloge sur 10 h 11. Et derrière la vitre, une dame qui mange un sandwich."
+  - say: "Il y a des bruits de mastication que l'on reconnaît tout de suite. Celui-ci mâche depuis quarante et un ans."
+
+art:
+  - { rect: [0, 470, 1280, 110], color: "#3e3448" }
+  - { rect: [0, 0, 1280, 470], color: "#b9abc4" }
+
+hotspots:
+  - id: guichard
+    label: Mme Guichard
+    rect: [440, 120, 250, 230]
+    art:
+      - { rect: [450, 130, 230, 210], color: "#8a6db0", stroke: "#2a2830", text: "MME GUICHARD", size: 16 }
+    look:
+      - say: "Une dame en gilet mauve, chignon gris, lunettes rondes. Badge : « MME O. GUICHARD — RÉCEPTION ». Elle mange un sandwich jambon-beurre avec la lenteur d'une procédure."
+      - say: "Le sandwich a l'air plus vieux que moi. Elle a l'air plus patiente que M. Patience. Et lui, il est mort."
+    use: "Je tapote la vitre. Mme Guichard lève les yeux, me regarde comme on regarde un formulaire mal rempli, et reprend une bouchée."
+    talk:
+      - dialogue: st_guichard
+    useItem:
+      ticket_9848:
+        - dialogue: st_guichard_ticket
+      ticket_douane: "Je glisse le ticket de douane sous la vitre. Il ressort aussitôt. « Pas le bon ticket. Pas le bon guichet. Pas la bonne vie. »"
+      badge: "« GARRY PLUNK ». Elle lit le badge, puis moi, puis le badge. « Deux R. » Elle a l'air de trouver ça suspect. Moi aussi, maintenant."
+      plante: "Je montre M. Ficus. Mme Guichard s'arrête de mâcher une demi-seconde. « Rangez-moi ça. Il n'a pas pris de ticket non plus. »"
+      fragment:
+        - say: "Je lui montre l'éclat. Elle le regarde comme une pièce de monnaie étrangère."
+        - say: "guichard: Les miracles, c'est au guichet. Revenez à 10 h 12."
+    useItemDefault: "Mme Guichard ne regarde même pas. « Ça ne se dépose pas ici. Rien ne se dépose ici. Avant 10 h 12. »"
+
+  - id: hygiaphone
+    label: Hygiaphone
+    sfx: clonk
+    rect: [470, 352, 190, 55]
+    art:
+      - { rect: [480, 360, 170, 40], color: "#c9ced6", stroke: "#2a2830", text: "HYGIAPHONE", size: 12 }
+    look:
+      - say: "L'hygiaphone : un disque de plastique percé de petits trous, au milieu de la vitre. Il laisse passer la voix, les microbes, et les refus. Dans un sens seulement."
+      - say: "Un autocollant dessous : « PARLEZ DISTINCTEMENT. VOTRE DEMANDE SERA ÉGALEMENT REFUSÉE DISTINCTEMENT. »"
+    use: "narrateur: Gary colle l'œil contre l'hygiaphone. De l'autre côté, un œil derrière des lunettes rondes le regarde fixement. Le sien a cligné en premier."
+    talk: "Allô ? ...Mme Guichard me répond « C'EST FERMÉ » sans lever les yeux. L'hygiaphone ajoute un petit écho métallique. Fermé-mé-mé."
+    useItem:
+      ticket_9848: "La fente sous l'hygiaphone est trop fine pour un ticket. Elle est faite pour les formulaires. Pliés en trois. En trois exemplaires."
+      fragment: "Je ne vais pas glisser l'éclat dans l'hygiaphone. Elle le mangerait avec son sandwich."
+
+  - id: horloge
+    label: Horloge
+    rect: [520, 20, 110, 95]
+    art:
+      - { circle: [575, 65, 42], color: "#f6efdc", stroke: "#2a2830" }
+    look:
+      - say: "Une horloge murale ronde. 10 h 11. La trotteuse avance, recule, avance, recule. Elle hésite entre la 59e seconde et la suivante. Depuis quarante et un ans."
+        set: st_voit_horloge
+      - say: "Le guichet ouvre à 10 h 12. Il manque une minute. Une seule. Il faudrait quelque chose de vraiment improbable pour la franchir."
+    use: "J'essaie de pousser la grande aiguille du bout du doigt. Elle est sous une vitre. Scellée. Tamponnée. Évidemment."
+    useItem:
+      fragment:
+        - say: "narrateur: Gary lève l'éclat vers l'horloge. La trotteuse frissonne, la grande aiguille tremble vers 10 h 12... puis retombe. CLAC."
+        - say: "Elle a senti quelque chose. Elle n'est pas prête. Moi non plus, d'ailleurs. Il faudra viser le bon moment. Plus tard."
+        - say: "bob: Note pour plus tard, Gary : l'horloge a peur de l'éclat. C'est la première chose ici qui a peur de quelque chose."
+          set: st_horloge_tremble
+      ticket_9848: "Montrer mon numéro à l'horloge ne la fera pas avancer. Elle n'est pas dans la file. Elle est la file."
+
+  - id: horaires
+    label: Horaires d'ouverture
+    rect: [930, 70, 120, 120]
+    art:
+      - { rect: [935, 75, 110, 110], color: "#f6efdc", stroke: "#2a2830", text: "10 H 12\n10 H 14", size: 16 }
+    look:
+      - say: "« GUICHET OUVERT DE 10 H 12 À 10 H 14. » Deux minutes par jour. Et il est 10 h 11 depuis 1985."
+      - say: "En petit en bas : « EN CAS DE FERMETURE, ADRESSEZ-VOUS AU GUICHET. »"
+
+  - id: rideau
+    label: Rideau métallique
+    sfx: clonk
+    rect: [715, 130, 180, 220]
+    art:
+      - { rect: [725, 140, 160, 200], color: "#8d93a0", stroke: "#2a2830", text: "FERMÉ", size: 16 }
+    look:
+      - say: "Le deuxième guichet. Rideau métallique baissé jusqu'en bas, cadenassé. Une étiquette : « GUICHET 2 — OUVERTURE PRÉVUE ». Pas de date. Juste « prévue »."
+      - say: "Le rideau du premier guichet, lui, est à moitié baissé au-dessus de Mme Guichard. Prêt à tomber à 10 h 14 pile. Il ne tombe jamais. Il n'est jamais 10 h 14."
+    use:
+      - say: "narrateur: Gary soulève le rideau de quelques centimètres. Il grince comme une circulaire. Derrière : un autre rideau. Plus petit."
+      - say: "Je repose tout doucement. On ne réveille pas un rideau administratif."
+    useItem:
+      fragment: "L'éclat sur le rideau ? Il pourrait s'ouvrir. Sur un troisième rideau. Je ne suis pas prêt."
+
+  - id: pupitre
+    label: Pupitre de remplissage
+    rect: [150, 290, 200, 185]
+    art:
+      - { rect: [160, 330, 180, 30], color: "#6d5a48" }
+      - { rect: [240, 360, 20, 110], color: "#4a3a2c" }
+    look:
+      - say: "Un pupitre incliné, à hauteur de coude. Un stylo attaché par une chaînette. Une étiquette : « REMPLISSEZ VOTRE FORMULAIRE ICI ». Il n'y a pas de formulaire."
+      - say: "Juste un emplacement vide, poli par des milliers de coudes, et la trace d'un tampon : « B-7/12 — STOCK ÉPUISÉ »."
+    use:
+      - say: "narrateur: Gary prend le stylo. La chaînette mesure exactement deux centimètres de moins que ce qu'il faudrait pour écrire."
+      - say: "Ça tombe bien. Je n'ai rien à remplir. Pour l'instant."
+    useItem:
+      ticket_9848: "Je pose le ticket 9 848 sur le pupitre. Le pupitre ne réagit pas. Il attend un formulaire. Comme tout le monde ici."
+      badge: "Je pourrais remplir mon nom. Avec deux R. Sur rien. Non."
+
+  - id: porte_b
+    label: Porte « AILE B »
+    # porte à deux battants au fond, à droite des horaires (les murs latéraux sont hors champ)
+    rect: [1085, 165, 120, 265]
+    art:
+      - { rect: [1090, 170, 110, 255], color: "#5a4a6a", stroke: "#2a2830", text: "AILE B", size: 14 }
+    look:
+      - say: "Une porte à deux battants : « AILE B — ACCÈS SUR PRÉSENTATION DU FORMULAIRE B-7/12 ». Derrière, un couloir. On entend un écho, puis l'écho de l'écho. Puis le même extincteur, deux fois."
+    use:
+      - say: "Un lecteur clignote à côté de la poignée : « AILE B — FORMULAIRE B-7/12 REQUIS ». Il lit les formulaires. Il ne lit pas les blattes en combinaison."
+    useItem:
+      ticket_9848: "Le lecteur avale un coin du ticket, le goûte, et le recrache : « TICKET ≠ FORMULAIRE ». Il a raison. C'est dur, quand les machines ont raison."
+      badge: "« BADGE NON HABILITÉ — AILE B ». Comme d'habitude. Mon badge n'a jamais ouvert que des placards."
+
+  - id: bob
+    label: B.O.B.
+    # à droite du comptoir, devant le rideau du guichet 2 : yeux au-dessus du HUD (docs/CHAPTERS.md)
+    rect: [930, 415, 150, 80]
+    art:
+      - { rect: [935, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
+    look: "B.O.B. fixe Mme Guichard avec une profonde admiration. « Quarante et un ans de service sans jamais servir. C'est de l'art. »"
+    talk:
+      - dialogue: st_bob_guichet
+    useItem:
+      ticket_9848: "bob: Garde-le, Gary. C'est le suivant. Le jour où l'afficheur avancera d'un cran, ce sera nous."
+      fragment: "bob: Pas sur moi. Sur l'horloge, peut-être. Plus tard. Quand on saura quoi faire de la minute qu'on gagnera."
+    useItemDefault:
+      - say: "bob: Je ne suis pas un guichet, Gary. Je n'ai même pas d'horaires."
+        mood: sad
+
+exits:
+  - id: vers_attente
+    label: Salle d'Attente
+    to: st-attente
+    dir: left
+    rect: [10, 140, 100, 320]

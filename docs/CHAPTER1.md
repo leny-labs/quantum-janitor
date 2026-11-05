@@ -150,7 +150,7 @@ refaire les couloirs).
 - **Rendu** : papier crème quadrillé bleu, en-tête « PLAN DE LA STATION — FORMULAIRE P-0 ·
   DIFFUSION RESTREINTE », tampons « VU » / « ACCÈS REFUSÉ », légende ; FR + EN ; zones de tap
   ≥ 48 px CSS ; Échap / « Fermer » / clic hors du plan pour refermer.
-- **Scaffold (stub)** : seuls `st-sas`, `st-attente` et `st-cafeteria` existent et sont warpables ; les autres
+- **Scaffold (stub)** : seuls `st-sas`, `st-attente`, `st-cafeteria` et `st-guichet` existent et sont warpables ; les autres
   zones s'affichent inconnues ou verrouillées (`planned: true` dans le YAML : pas de scène
   vide dans le jeu, `validate-content` n'exige pas leur scène).
 
@@ -449,11 +449,25 @@ inventaire ; `npm run playthrough` passe ch0 inchangé + stub ch1.
   `menu`, `vitrine`, `comptoir`, `cafe` (PERCO-JUNIOR), `tables`, `bob` ; réplique d'arrivée.
   Pièce 3D `stCafeteria` ; GenAI `public/props/st/platdujour-{fr,en}.jpg` (menu à lettres) et
   `sandwich.png` (détouré, vitrine + hublot de la porte). Pas d'objet ni de flag : hors chemin critique.
-- **Fin provisoire** : la sortie `vers_guichet` (`requires: ticket_9848`, `to: fin`) joue
-  `st_stub_fin` (Mme Guichard, rideau baissé, formulaire B-7/12 manquant) → écran « LA SUITE
-  ARRIVE… » avec Menu / Rejouer. `ChapterDef.endKnot` du ch1 = `st_stub_fin` (→ `st_suite` plus tard).
+- **Guichet** (`st-guichet`, sortie `vers_guichet` de l'attente, `requires: ticket_9848`) : salle
+  jouable. Pièce 3D `stGuichet` (mauve administratif, accents `#8a6db0`) : comptoir à deux baies,
+  Mme Guichard derrière la vitre (billboard GenAI `public/props/st/guichard-sheet.png`, 2 cellules
+  repos / parle, `GUICHARD_*` dans `three/props.ts`), rideau du guichet 1 à moitié baissé, guichet 2
+  cadenassé, hygiaphone, horloge 10 h 11 (trotteuse qui hésite), afficheur « EN COURS 9 847 »,
+  affiche GenAI `horaires`, pupitre sans formulaire, porte « AILE B » (lecteur « B-7/12 REQUIS »).
+  Hotspots : `guichard` (talk `st_guichard` ; `useItem ticket_9848` → `st_guichard_ticket` :
+  « c'est le suivant… de M. Patience »), `hygiaphone`, `horloge` (`st_voit_horloge` ; `fragment` →
+  l'aiguille tremble puis retombe, `st_horloge_tremble`, sans ouvrir le guichet), `horaires`,
+  `rideau`, `pupitre`, `porte_b` (hotspot verrouillé en texte : pas encore de `st-couloir-b`),
+  `bob` (`st_bob_guichet`, indices gradués ticket → horloge → éclat). Ink : `st_guichet.ink`.
+- **Fin provisoire** : plus de `to: fin` ni d'écran « LA SUITE ARRIVE… » par la porte du guichet.
+  Le stub s'arrête **en salle** : la première conversation avec Mme Guichard (fermé, horloge,
+  formulaire « au guichet ») pose `st_guichard_ferme` = `ChapterDef.endFlag` du ch1 (le playthrough
+  vérifie ce flag). `endKnot` reste `st_stub_fin` (EndScene, non joué par la porte) → `st_suite` plus tard.
+  À faire : puzzle de l'horloge (éclat → 10 h 12, `st_guichet_ouvert`, rideau qui remonte),
+  formulaire B-7/12 (`st-formulaire`), couloir infini B.
 - Objets différés en poche à la fin du stub : `ticket_douane`, `plante` (« À suivre » dans leur
-  `look`). Pas de salle vide : `st-guichet`, `st-couloir-b`, `st-fourriere`… restent dans ce document.
+  `look`). Pas de salle vide : `st-couloir-b`, `st-fourriere`… restent dans ce document.
 
 ## 10. Notes techniques (pour plus tard)
 

@@ -1,13 +1,15 @@
-// Chapitre 1 « La Station Bureaucratique » (docs/CHAPTER1.md) : sas d'arrivée, salle d'attente, cafétéria.
+// Chapitre 1 « La Station Bureaucratique » (docs/CHAPTER1.md) : sas d'arrivée, salle d'attente, cafétéria,
+// guichet d'accueil.
 // Une Klepsydra où le règlement a gagné : beige administratif, néons blafards, tout est
 // étiqueté, numéroté, tamponné. Objets de ces pièces aussi utilisés pour les icônes d'inventaire.
 import * as THREE from 'three';
 import { lang, t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
-import { PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, actorFrame, billboard, billboardSheet } from '../props';
+import { GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PATIENCE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, actorFrame, billboard, billboardSheet } from '../props';
 import { BobAspirRig } from './bobaspire';
 import { bobSpot } from './bobspot';
 import { pressable } from '../press';
+import { speaking } from '../../engine/speaking';
 import type { RoomBuild } from './index';
 import { against, backDoor, shell, wallPanels } from './shell';
 import type { Stage } from '../Stage';
@@ -589,5 +591,228 @@ export const stCafeteria: RoomBuild = {
     const sign = at(label(tr('props.station.waitRoom'), d.d * 1.1, 0.35, { color: '#f6efdc', bg: '#1f7f73', bold: true }), -8.95, d.y + d.h / 2 + 0.3, d.z);
     sign.rotation.y = Math.PI / 2;
     s.add(sign, at(pool('#ffd166', 3, 2, 0.1), 0, 0.01, 4));
+  },
+};
+
+/** Horloge murale ronde bloquée sur 10 h 11 (rayon `r`) ; trotteuse qui hésite sur la 59e seconde. */
+function clock1011(s: Stage, r: number): THREE.Group {
+  const clock = new THREE.Group();
+  const face = at(cyl(r, r, 0.06, '#f6efdc', { seg: 28 }), 0, 0, 0);
+  face.rotation.x = Math.PI / 2;
+  clock.add(face, at(torus(r, r * 0.09, '#2a2830'), 0, 0, 0.03));
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2;
+    clock.add(at(box(r * 0.05, r * (i % 3 ? 0.1 : 0.18), 0.01, '#1a1a1a', { edges: false }), Math.sin(a) * r * 0.82, Math.cos(a) * r * 0.82, 0.04).rotateZ(-a));
+  }
+  const hand = (len: number, w: number, z: number, color = '#1a1a1a') => {
+    const h = at(box(w, len, 0.02, color, { edges: false }), 0, 0, z);
+    h.geometry.translate(0, len / 2, 0);
+    return h;
+  };
+  const hour = hand(r * 0.5, r * 0.09, 0.05);
+  hour.rotation.z = -(10 / 12) * Math.PI * 2 - (11 / 60) * (Math.PI / 6);
+  const min = hand(r * 0.78, r * 0.07, 0.06);
+  min.rotation.z = -(11 / 60) * Math.PI * 2;
+  const sec = hand(r * 0.85, r * 0.025, 0.07, '#c0392b');
+  clock.add(hour, min, sec, at(sphere(r * 0.06, '#c0392b'), 0, 0, 0.08));
+  // la trotteuse avance jusqu'à 59 s, hésite, recule : il est 10 h 11 depuis 1985
+  s.animate((t) => {
+    const k = t % 2.4;
+    const step = k < 1.2 ? 0 : 1;
+    sec.rotation.z = -((58 + step) / 60) * Math.PI * 2 + Math.sin(t * 40) * 0.006 * step;
+  });
+  return clock;
+}
+
+/**
+ * 3. Guichet d'Accueil. Mme Guichard derrière l'hygiaphone (planche GenAI repos / parle), le rideau
+ * du guichet 1 à moitié baissé au-dessus d'elle, le guichet 2 fermé, l'horloge sur 10 h 11, les
+ * horaires « 10 h 12 – 10 h 14 », le pupitre sans formulaire et la porte de l'Aile B (verrouillée).
+ * Mauve administratif : la couleur de Mme Guichard (#8a6db0) en accents.
+ */
+export const stGuichet: RoomBuild = {
+  camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
+  shots: {
+    guichard: { fill: 0.6 },
+    hygiaphone: { fill: 0.45, lift: 0.1 },
+    horloge: { fill: 0.35 },
+    horaires: { fill: 0.4 },
+    rideau: { fill: 0.6, orbit: 6 },
+    pupitre: { fill: 0.7, orbit: -8 },
+  },
+  intro: 'guichard',
+  build(s) {
+    const MAUVE = '#8a6db0';
+    shell(s, { floor: { a: '#4e4656', b: '#5a5262', joint: '#2e2836', tile: 0.7 }, wall: { top: '#c6bccb', bottom: '#7c6e86' }, trim: '#3e3448', left: -9, right: 9 });
+    wallPanels(s, '#aa9db2', -9, 9, 1.6, 8);
+    s.lights({
+      sky: '#f6f0ff',
+      ground: '#2e2836',
+      ambient: 1.2,
+      key: { color: '#fff4e6', intensity: 2.1, pos: [1, 9, 6], target: [0, 0, 0] },
+      points: [
+        // lampe de bureau derrière la vitre (chaude), voyant de l'Aile B (rouge)
+        { color: '#ffcf8a', intensity: 3.5, pos: [-1.2, 2.4, 0.6], distance: 3.5 },
+        { color: '#ff4f5a', intensity: 2, pos: [8.2, 3, 3], distance: 3 },
+      ],
+      rim: { color: MAUVE, intensity: 0.7, pos: [6, 5, -4] },
+      fill: { color: '#9aa8ff', intensity: 0.35, pos: [-6, 3, 6] },
+      fog: { color: '#221c28', near: 9, far: 26 },
+      vignette: { color: '#100c14', strength: 0.6, warm: '#ffe0f018' },
+    });
+    neonTubes(s, s.wallAt(640, 10, 2).y, [-4.5, 4.5], 2.4);
+
+    // ── le guichet : comptoir, deux baies vitrées, bandeau haut (horloge, afficheur) ──
+    const zb = 1.1; // façade du guichet
+    const zg = 0.45; // Mme Guichard, assise derrière
+    const L = s.wallAt(395, 400, zb).x;
+    const R = s.wallAt(915, 400, zb).x;
+    const W = R - L;
+    const cx = (L + R) / 2;
+    const top = s.wallAt(640, 405, zb).y; // dessus du comptoir
+    const fasciaB = s.wallAt(640, 122, zb).y; // bas du bandeau
+    const fasciaT = s.wallAt(640, 0, zb).y + 0.4;
+    const desk = new THREE.Group();
+    // comptoir plein, plateau qui file jusque sous les coudes de Mme Guichard
+    desk.add(at(box(W, top, 0.5, '#5a4a6a'), cx, top / 2, zb - 0.25));
+    desk.add(at(box(W * 1.02, 0.07, zb - zg + 0.35, '#d8cfe0'), cx, top + 0.035, (zb + zg) / 2 - 0.05));
+    desk.add(at(box(W, top * 0.12, 0.04, MAUVE), cx, top * 0.82, zb + 0.01));
+    desk.add(at(box(W * 1.01, 0.1, 0.56, '#2e2836'), cx, 0.05, zb - 0.25));
+    // bandeau haut + enseigne
+    desk.add(at(box(W * 1.02, fasciaT - fasciaB, 0.3, '#6e5a82'), cx, (fasciaT + fasciaB) / 2, zb - 0.1));
+    desk.add(at(box(W * 1.03, 0.06, 0.34, MAUVE), cx, fasciaB + 0.03, zb - 0.1));
+    // enseigne à gauche de l'horloge
+    const sign = s.fit([400, 76, 112, 26], zb + 0.06);
+    desk.add(at(label(tr('props.station.reception'), sign.w, sign.h, { color: '#f6efdc', bg: '#3e3448', bold: true }), sign.x, sign.y, zb + 0.06));
+    // montants entre les baies
+    const posts = [395, 700, 708, 915].map((px) => s.wallAt(px, 300, zb).x);
+    for (const x of [posts[0] + 0.06, (posts[1] + posts[2]) / 2, posts[3] - 0.06]) desk.add(at(box(0.12, fasciaB - top, 0.16, '#3e3448'), x, (fasciaB + top) / 2, zb));
+    s.add(desk);
+
+    // ── baie 1 : vitre + hygiaphone, Mme Guichard derrière, rideau à moitié baissé ──
+    const w1 = posts[1] - posts[0];
+    const x1 = (posts[0] + posts[1]) / 2;
+    const glassH = fasciaB - top;
+    s.add(at(plane(w1 - 0.12, glassH, '#cfe8ff', { opacity: 0.16 }), x1, (fasciaB + top) / 2, zb + 0.02));
+    s.add(at(label(tr('props.station.desk1'), 0.9, 0.2, { color: '#3e3448', bg: '#f6efdc', bold: true }), x1 - w1 * 0.3, fasciaB - 0.16, zb + 0.04));
+    // arrière-guichet : mur mauve, classeurs, calendrier figé, lampe
+    const back = new THREE.Group();
+    back.add(at(box(w1 * 1.1, glassH + 0.3, 0.06, '#9f8bb4'), x1, (fasciaB + top) / 2, 0.06));
+    for (const sx of [-1, 1]) {
+      const cab = at(box(0.55, 1.6, 0.4, '#7c8794'), x1 + sx * w1 * 0.38, 0.8, 0.3);
+      back.add(cab);
+      for (let i = 0; i < 3; i++) back.add(at(box(0.3, 0.05, 0.02, '#c9ced6', { edges: false }), x1 + sx * w1 * 0.38, 0.35 + i * 0.5, 0.51));
+    }
+    back.add(at(label('1985', 0.36, 0.42, { color: '#c0392b', bg: '#f6efdc', bold: true }), x1 + w1 * 0.36, top + glassH * 0.62, 0.1));
+    const lamp = at(glow('#ffcf8a', 1.2, 0.35), x1 - w1 * 0.32, top + 0.5, zg);
+    back.add(lamp);
+    s.add(back);
+    const g = s.fit(s.rect('guichard'), zg);
+    const gh = Math.min((g.y + g.h / 2) - (top - 0.05), g.w / GUICHARD_ASPECT);
+    const guichard = billboardSheet(GUICHARD_SHEET, 2, gh, GUICHARD_ASPECT, { tint: '#fff2f6', shadow: 0.01 });
+    const gs = guichard.userData.sprite as THREE.Sprite;
+    const baseSY = gs.scale.y;
+    s.spot('guichard', at(guichard, x1, top - 0.05, zg));
+    s.animate((t) => {
+      guichard.userData.setFrame(actorFrame('guichard', GUICHARD_ACTOR, t));
+      gs.scale.y = baseSY * (1 + Math.sin(t * 1.1) * 0.006); // respiration de fonctionnaire
+    });
+    // rideau métallique du guichet 1, à moitié baissé : lames horizontales, barre de charge
+    const shutter = new THREE.Group();
+    const sh = glassH * 0.22;
+    for (let i = 0; i < 7; i++) shutter.add(at(box(w1 - 0.14, sh / 7 - 0.01, 0.03, i % 2 ? '#9aa0a8' : '#a9afb8', { edges: false }), 0, -i * (sh / 7), 0));
+    shutter.add(at(box(w1 - 0.1, 0.06, 0.06, '#5a5f6a'), 0, -sh, 0));
+    const shutterY = fasciaB - sh / 14;
+    s.add(at(shutter, x1, shutterY, zb - 0.06));
+    // il tressaille quand elle parle (prêt à tomber à 10 h 14)
+    s.animate((t) => (shutter.position.y = shutterY - (speaking.id === 'guichard' && speaking.talking ? Math.abs(Math.sin(t * 30)) * 0.01 : 0)));
+    // hygiaphone : disque perforé dans la vitre, fente passe-documents au ras du comptoir
+    const hy = s.fit(s.rect('hygiaphone'), zb + 0.03);
+    const hr = Math.min(hy.h * 0.48, 0.24);
+    const hyg = new THREE.Group();
+    const disc = at(cyl(hr, hr, 0.03, '#d8dde4', { seg: 28 }), 0, 0, 0);
+    disc.rotation.x = Math.PI / 2;
+    hyg.add(disc, at(torus(hr, hr * 0.1, '#5a5f6a'), 0, 0, 0.02));
+    for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) if (i * i + j * j <= 5) hyg.add(at(sphere(hr * 0.06, '#2a2830', { seg: 6 }), i * hr * 0.3, j * hr * 0.3, 0.02));
+    hyg.add(at(label(tr('props.station.speakHere'), hr * 2.6, hr * 0.7, { color: '#3e3448', bg: '#f6efdc', bold: true }), hr * 2.4, 0, 0.01));
+    const slot = at(box(w1 * 0.4, 0.05, 0.3, '#14120e', { edges: false }), 0, top + 0.03 - hy.y, -0.1);
+    hyg.add(slot);
+    s.spot('hygiaphone', at(hyg, hy.x, hy.y, zb + 0.03));
+
+    // ── baie 2 : rideau baissé jusqu'en bas, cadenassé ──
+    const w2 = posts[3] - posts[2];
+    const x2 = (posts[2] + posts[3]) / 2;
+    const closed = new THREE.Group();
+    const n = 16;
+    for (let i = 0; i < n; i++) closed.add(at(box(w2 - 0.14, glassH / n - 0.012, 0.04, i % 2 ? '#8d939c' : '#9aa0a8', { edges: false }), 0, top + glassH * (1 - (i + 0.5) / n), 0));
+    closed.add(at(box(w2 - 0.1, 0.07, 0.07, '#5a5f6a'), 0, top + 0.06, 0.01));
+    const lock = new THREE.Group();
+    lock.add(at(box(0.16, 0.14, 0.05, '#e8c26a'), 0, 0, 0), at(torus(0.05, 0.015, '#c9ced6'), 0, 0.09, 0));
+    closed.add(at(lock, 0, top + 0.02, 0.06));
+    closed.add(at(label(tr('props.station.desk2'), w2 * 0.66, 0.42, { color: '#f6efdc', bg: '#3e3448', bold: true }), 0, top + glassH * 0.62, 0.03));
+    s.spot('rideau', at(closed, x2, 0, zb - 0.02));
+
+    // ── bandeau : horloge 10 h 11, afficheur « EN COURS 9 847 » ──
+    const ck = s.fit(s.rect('horloge'), zb + 0.08);
+    s.spot('horloge', at(clock1011(s, Math.min(ck.w, ck.h) * 0.48), ck.x, ck.y, zb + 0.08));
+    const af = s.fit([690, 38, 150, 58], zb + 0.06);
+    const board = new THREE.Group();
+    board.add(at(box(af.w, af.h, 0.08, '#1a1418'), 0, 0, 0));
+    board.add(at(label(tr('props.station.nowServing'), af.w * 0.4, af.h * 0.5, { color: '#ffd166', bold: true }), -af.w * 0.27, 0, 0.05));
+    board.add(at(label('9 847', af.w * 0.5, af.h * 0.7, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true }), af.w * 0.22, 0, 0.05), at(glow('#ff4f5a', af.w, 0.15), af.w * 0.22, 0, 0.08));
+    s.add(at(board, af.x, af.y, zb + 0.06));
+
+    // horaires d'ouverture (affiche GenAI) au mur, à droite du guichet ; tampon « EN ATTENTE »
+    poster(s, s.rect('horaires'), 'horaires');
+    inkStamp(s, 210, 160, tr('props.station.stampPending'));
+
+    // ── pupitre de remplissage : pied, plateau incliné, stylo à chaînette, pas de formulaire ──
+    const pr = s.stand(s.rect('pupitre'));
+    const lect = new THREE.Group();
+    const ph = pr.h * 0.62;
+    lect.add(at(cyl(0.05, 0.06, ph, '#3e3448', { edges: false }), 0, ph / 2, 0), at(box(0.7, 0.05, 0.5, '#3e3448'), 0, 0.025, 0));
+    const tablet = new THREE.Group();
+    tablet.add(at(box(pr.w * 0.9, 0.05, 0.6, '#6d5a48'), 0, 0, 0));
+    tablet.add(at(box(pr.w * 0.9, 0.06, 0.04, '#4a3a2c'), 0, 0.03, 0.31));
+    const fill = at(label(tr('props.station.fillHere'), pr.w * 0.62, 0.2, { color: '#3e3448', bg: '#f6efdc', bold: true }), 0, 0.03, -0.12);
+    fill.rotation.x = -Math.PI / 2;
+    const empty = at(label(tr('props.station.outOfForms'), pr.w * 0.3, 0.16, { color: '#c0392b', bold: true }), pr.w * 0.18, 0.031, 0.1);
+    empty.rotation.x = -Math.PI / 2;
+    empty.rotation.z = 0.2;
+    const pen = at(cyl(0.012, 0.012, 0.22, '#1f4fa0', { edges: false }), -pr.w * 0.3, 0.04, 0.12);
+    pen.rotation.z = Math.PI / 2;
+    tablet.add(fill, empty, pen, at(box(0.01, 0.01, 0.12, '#c9ced6', { edges: false }), -pr.w * 0.38, 0.04, 0.08));
+    tablet.rotation.x = 0.45;
+    lect.add(at(tablet, 0, ph, 0));
+    s.spot('pupitre', at(lect, pr.x, 0, pr.z));
+
+    bobHere(s);
+
+    // ── portes : salle d'attente (gauche), Aile B (droite, lecteur de formulaire, voyant rouge) ──
+    const d = s.fitX(s.rect('vers_attente'), -9);
+    const door = new THREE.Group();
+    door.add(at(box(0.3, d.h, d.d * 1.12, '#3e3448'), 0, 0, 0), at(box(0.1, d.h * 0.94, d.d, '#7c6e86'), 0.15, -d.h * 0.03, 0));
+    s.add(at(door, -9, d.y, d.z));
+    const wsign = at(label(tr('props.station.waitRoom'), d.d * 1.1, 0.35, { color: '#f6efdc', bg: '#1f7f73', bold: true }), -8.95, d.y + d.h / 2 + 0.3, d.z);
+    wsign.rotation.y = Math.PI / 2;
+    s.add(wsign);
+    // Aile B : porte à deux battants au fond (hublots), lecteur de formulaire, voyant rouge
+    const { door: wing, f: bf } = backDoor(s, s.rect('porte_b'), 0.1, '#3e3448', '#5a4a6a');
+    wing.add(at(box(0.03, bf.h * 0.9, 0.04, '#2e2836'), 0, -bf.h * 0.05, 0.01));
+    for (const sx of [-1, 1]) {
+      const port = at(cyl(bf.w * 0.13, bf.w * 0.13, 0.03, '#bfe6ff', { seg: 18 }), (sx * bf.w) / 4, bf.h * 0.18, 0.02);
+      port.rotation.x = Math.PI / 2;
+      wing.add(port, at(torus(bf.w * 0.13, 0.025, '#2a2830'), (sx * bf.w) / 4, bf.h * 0.18, 0.04));
+      wing.add(at(box(bf.w * 0.06, 0.04, 0.06, '#c9ced6'), (sx * bf.w) / 4 - sx * bf.w * 0.17, -bf.h * 0.05, 0.03));
+    }
+    wing.add(at(label(tr('props.station.wingB'), bf.w * 0.9, 0.3, { color: '#f6efdc', bg: MAUVE, bold: true }), 0, bf.h / 2 + 0.22, 0.06));
+    const reader = new THREE.Group();
+    reader.add(at(box(0.36, 0.5, 0.08, '#2a2830'), 0, 0, 0));
+    const led = at(sphere(0.04, '#ff4f5a', { glow: true }), 0, -0.16, 0.05);
+    reader.add(at(label(tr('props.station.wingBReader'), 0.32, 0.22, { color: '#ff4f5a', bg: '#140a0a', bold: true, mono: true }), 0, 0.08, 0.045), led);
+    wing.add(at(reader, -bf.w / 2 - 0.3, -bf.h * 0.05, 0.02));
+    s.animate((t) => (led.visible = Math.floor(t * 1.5) % 2 === 0));
+    s.spot('porte_b', wing);
+    s.add(at(pool('#ffd166', 3, 2, 0.1), 0, 0.01, 4));
   },
 };
