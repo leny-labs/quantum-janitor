@@ -9,6 +9,7 @@ import { ROOM_H } from '../../ui/theme';
 import { at } from '../kit';
 import { bob } from '../props';
 import type { Stage, Standing } from '../Stage';
+import { BobIdle } from './bobidle';
 import { BobVoice } from './bobvoix';
 
 /** Marge (px écran) entre les yeux de B.O.B. et le haut de la barre d'inventaire. */
@@ -32,7 +33,7 @@ export interface BobSpot {
   stand: Standing;
 }
 
-/** Pose B.O.B. sur le rect `bob` de la salle, tourné vers la caméra, avec sa voix. */
+/** Pose B.O.B. sur le rect `bob` de la salle, tourné vers la caméra, avec sa voix et son idle. */
 export function bobSpot(s: Stage, opts: BobSpotOpts = {}): BobSpot {
   const stand = s.stand(s.rect('bob'), opts.floorY ?? 0);
   const w = stand.w * (opts.scale ?? 0.75);
@@ -43,7 +44,10 @@ export function bobSpot(s: Stage, opts: BobSpotOpts = {}): BobSpot {
   const robot = at(bob(w), stand.x, opts.floorY ?? 0, stand.z, face + side * (opts.turn ?? 0.25));
   robot.rotation.x = opts.tilt ?? 0;
   s.spot('bob', robot);
-  s.expose('bobVoix', new BobVoice(s, robot));
+  const voice = new BobVoice(s, robot);
+  s.expose('bobVoix', voice);
+  // idle léger permanent (clignements, respiration, antenne, soupirs) ; s'efface devant voix et rigs
+  new BobIdle(s, robot, voice);
   if (import.meta.env.DEV) checkEyes(s, robot, w);
   return { robot, w, stand };
 }

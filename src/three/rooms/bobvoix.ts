@@ -46,6 +46,11 @@ export class BobVoice {
     this.mood = mood;
   }
 
+  /** Vrai tant que la voix a la main (réplique en cours ou retour au repos pas fini) : BobIdle s'efface. */
+  get talking(): boolean {
+    return this.left > 0 || this.live;
+  }
+
   /** Réplique passée : il se tait, sourcils au calme. */
   hush(): void {
     this.left = 0;
@@ -57,7 +62,9 @@ export class BobVoice {
     this.left = Math.max(0, this.left - dt);
     this.amount += ((this.left > 0 ? 1 : 0) - this.amount) * Math.min(1, dt * 12);
     // sourcils : vers la pose de l'humeur, petits sursauts sur les syllabes
-    const to = BROW_POSES[this.mood];
+    // hors réplique, pose de repos proposée par BobIdle (soupir dépressif), sinon calm
+    const idle = robot.userData.idleBrows as BrowPair | undefined;
+    const to = this.left > 0 || !idle ? BROW_POSES[this.mood] : idle;
     const k = Math.min(1, dt * 10);
     ease(this.brows.l, to.l, k);
     ease(this.brows.r, to.r, k);
