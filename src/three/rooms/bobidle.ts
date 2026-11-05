@@ -11,6 +11,10 @@
 // sourcils). Un rig de cinématique tient userData.anim (bobrepas, bobaspire) → on ne
 // touche ni l'échelle, ni les yeux, ni l'antenne. Les sourcils passent toujours par
 // BobVoice : on lui propose seulement une pose de repos (userData.idleBrows).
+// Alerte (alert(), t283) : quand une déduction du carnet est prête, l'antenne frétille
+// (tige pivotée à sa base, pointe qui suit) et la pointe clignote, avec une rafale de
+// clignements d'yeux. Le frétillement continue sous la parole (BobVoice ne touche ni la
+// tige ni la position de la pointe) ; le clignotement de pointe et les yeux, seulement au repos.
 import * as THREE from 'three';
 import { BROW_POSES, type BrowPair, type BrowPose } from '../../engine/brows';
 import type { Stage } from '../Stage';
@@ -26,6 +30,12 @@ const BLINK_GAP: [number, number] = [2.2, 6.5];
 const SIGH_TIME = 3.6;
 const SIGH_GAP: [number, number] = [9, 17];
 const SIGH_DEPTH = 0.5;
+/** Alerte « déduction prête » : durée par défaut (s), angle max de la tige (rad), fréquence
+ *  du frétillement (Hz), période du clignotement de pointe (s). Lent et las, pas nerveux. */
+const ALERT_TIME = 2.8;
+const ALERT_SWING = 0.32;
+const ALERT_HZ = 3.2;
+const ALERT_FLASH = 0.32;
 
 const rand = ([a, b]: [number, number]) => a + Math.random() * (b - a);
 const mixPose = (a: BrowPose, b: BrowPose, k: number): BrowPose => ({
@@ -50,6 +60,20 @@ export class BobIdle {
   private breath = 0;
   /** Vrai si l'idle a la main sur l'échelle / les yeux à l'image précédente. */
   private owned = false;
+  /** Tige d'antenne (cylindre posé juste avant la pointe dans le groupe), pivot à sa base. */
+  private rod: THREE.Object3D | undefined;
+  private rodBase = new THREE.Vector3();
+  private rodRot = new THREE.Euler();
+  private tipPos = new THREE.Vector3();
+  /** Base de la tige (pivot) et décalage pivot → pointe, en local robot. */
+  private pivot = new THREE.Vector3();
+  private tipArm = new THREE.Vector3();
+  private rodArm = new THREE.Vector3();
+  /** Alerte en cours : temps restant / durée totale (s). */
+  private alertT = 0;
+  private alertDur = 0;
+  /** Vrai si l'alerte a déplacé l'antenne (à remettre en place à la fin). */
+  private alertOwned = false;
 
   constructor(
     stage: Stage,
@@ -59,7 +83,65 @@ export class BobIdle {
     this.eyes = (robot.userData.eyes as THREE.Object3D[] | undefined) ?? [];
     this.tip = robot.userData.tip as THREE.Object3D | undefined;
     this.tipBase = this.tip ? this.tip.scale.clone() : new THREE.Vector3(1, 1, 1);
+    if (this.tip) {
+      this.tipPos.copy(this.tip.position);
+      const kids = this.tip.parent?.children ?? [];
+      const prev = kids[kids.indexOf(this.tip) - 1];
+      const geo = prev instanceof THREE.Mesh ? prev.geometry : null;
+      if (geo instanceof THREE.CylinderGeometry) {
+        this.rod = prev;
+        this.rodBase.copy(prev.position);
+        this.rodRot.copy(prev.rotation);
+        this.pivot.copy(prev.position).y -= geo.parameters.height / 2;
+        this.rodArm.subVectors(prev.position, this.pivot);
+      } else this.pivot.copy(this.tipPos);
+      this.tipArm.subVectors(this.tipPos, this.pivot);
+    }
     stage.animate((t, dt) => this.tick(t, dt));
+  }
+
+  /**
+   * « Déduction prête » : l'antenne frétille et sa pointe clignote pendant `seconds`,
+   * avec une rafale de clignements d'yeux (triple) si B.O.B. est au repos.
+   */
+  alert(seconds = ALERT_TIME): void {
+    this.alertT = this.alertDur = Math.max(seconds, 0.5);
+    if (!this.voice.talking && !this.robot.userData.anim) {
+      this.blinkT = 0;
+      this.blinkMore = 2;
+    } else this.blinkIn = 0;
+  }
+
+  /** Frétillement de l'antenne : tige pivotée à sa base, pointe qui suit (vrai si actif). */
+  private stepAlert(dt: number): boolean {
+    const tip = this.tip;
+    if (!tip) return false;
+    if (this.alertT <= 0) {
+      if (this.alertOwned) {
+        tip.position.copy(this.tipPos);
+        if (this.rod) {
+          this.rod.position.copy(this.rodBase);
+          this.rod.rotation.copy(this.rodRot);
+        }
+        this.alertOwned = false;
+      }
+      return false;
+    }
+    this.alertT = Math.max(0, this.alertT - dt);
+    const u = 1 - this.alertT / this.alertDur;
+    // enveloppe : montée rapide, longue retombée lasse ; deux axes déphasés → petit tortillon
+    const env = Math.min(1, u * 6) * Math.pow(1 - u, 1.4);
+    const w = Math.PI * 2 * ALERT_HZ * this.alertDur * u;
+    const rz = ALERT_SWING * env * Math.sin(w);
+    const rx = ALERT_SWING * 0.45 * env * Math.sin(w * 0.73 + 1.1);
+    const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, 0, rz));
+    tip.position.copy(this.tipArm).applyQuaternion(q).add(this.pivot);
+    if (this.rod) {
+      this.rod.position.copy(this.rodArm).applyQuaternion(q).add(this.pivot);
+      this.rod.quaternion.setFromEuler(this.rodRot).premultiply(q);
+    }
+    this.alertOwned = true;
+    return true;
   }
 
   private tick(t: number, dt: number): void {
@@ -67,6 +149,8 @@ export class BobIdle {
     const robot = this.robot;
     // soupir : avance même pendant la parole (BobVoice ignore idleBrows tant qu'il parle)
     this.stepSigh(dt);
+    // frétillement d'antenne : tourne même sous la parole, mais pas sous un rig de cinématique
+    const alerting = robot.userData.anim ? false : this.stepAlert(dt);
     if (this.voice.talking || robot.userData.anim) {
       // la main est ailleurs : on lâche tout, sans rien écrire
       this.blinkT = -1;
@@ -90,9 +174,16 @@ export class BobIdle {
     for (const e of this.eyes) e.scale.y = 1 - 0.82 * lid;
     // antenne : pulsation douce, un battement tous les ~2,6 s, plus faible quand il soupire
     if (this.tip) {
-      const p = Math.pow(0.5 + 0.5 * Math.sin(t * 2.4), 3);
-      this.tip.scale.copy(this.tipBase).multiplyScalar(1 + 0.22 * p * (1 - 0.6 * sigh));
-      this.tip.visible = true;
+      if (alerting) {
+        // clignotement : la pointe s'éteint un tiers de chaque période, gonfle quand elle s'allume
+        const ph = ((this.alertDur - this.alertT) / ALERT_FLASH) % 1;
+        this.tip.visible = ph < 0.66;
+        this.tip.scale.copy(this.tipBase).multiplyScalar(1.15 + 0.3 * Math.sin(Math.PI * Math.min(1, ph / 0.66)));
+      } else {
+        const p = Math.pow(0.5 + 0.5 * Math.sin(t * 2.4), 3);
+        this.tip.scale.copy(this.tipBase).multiplyScalar(1 + 0.22 * p * (1 - 0.6 * sigh));
+        this.tip.visible = true;
+      }
     }
   }
 

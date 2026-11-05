@@ -14,6 +14,7 @@ import { actBreak, endKnotOf } from '../engine/walkthrough';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
 import { CLOSEUPS, ROOMS } from '../three/rooms';
 import { BobAspirRig } from '../three/rooms/bobaspire';
+import type { BobIdle } from '../three/rooms/bobidle';
 import { BobRig } from '../three/rooms/bobrepas';
 import { BobVoice } from '../three/rooms/bobvoix';
 import { FuseRig } from '../three/rooms/fusible';
@@ -291,7 +292,13 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.deduceUnread = true;
     this.carnetButton.setUnread(true);
     const line = d.nudge ? clueText(d.nudge, lang()) : t('carnet.nudge');
-    void this.locked(() => this.say(line));
+    // t283 : l'antenne frétille et clignote un temps avant la réplique (puis continue dessous)
+    const idle = this.room.rig<BobIdle>('bobIdle');
+    idle?.alert();
+    void this.locked(async () => {
+      if (idle) await new Promise((r) => this.time.delayedCall(550, r));
+      await this.say(line);
+    });
   }
 
   private refresh(): void {

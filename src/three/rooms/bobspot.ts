@@ -47,7 +47,7 @@ export function bobSpot(s: Stage, opts: BobSpotOpts = {}): BobSpot {
   const voice = new BobVoice(s, robot);
   s.expose('bobVoix', voice);
   // idle léger permanent (clignements, respiration, antenne, soupirs) ; s'efface devant voix et rigs
-  new BobIdle(s, robot, voice);
+  s.expose('bobIdle', new BobIdle(s, robot, voice));
   if (import.meta.env.DEV) checkEyes(s, robot, w);
   return { robot, w, stand };
 }
