@@ -18,7 +18,8 @@ deductions:
       en: "bob: One minute late in forty-one years, Gary. For a public service, that's practically punctual."
 
   - id: d_horloge
-    needs: [[d_minute, horloge_tremble], [d_minute, eclat]]
+    # D1 + tremblement/éclat, ou directement l'horloge 10 h 11 + tremblement (le joueur voit le lien sans passer par D1).
+    needs: [[d_minute, horloge_tremble], [d_minute, eclat], [horloge_1011, horloge_tremble]]
     set: st_deduit_horloge
     title: { fr: "L'improbable pousse l'aiguille", en: "The improbable pushes the hand" }
     text:
