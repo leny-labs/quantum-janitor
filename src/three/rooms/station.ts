@@ -2289,11 +2289,14 @@ export const stFourriere: RoomBuild = {
     const FREE: Condition = { flags: ['st_vaisseau_libere'] };
     const cv = s.stand(s.rect('capsule_vaisseau'));
     // Un cran plus bas / un peu plus petite : patins vers le marquage de quai (Leny t257).
-    const ch = cv.h * 0.88;
-    const podY = -0.08;
+    // Le sprite touche le bas de sa planche : jamais sous y = 0, sinon le sol mange le pied
+    // central + sabot IMPOUND. On le descend à l'écran en l'avançant (podZ) plutôt qu'en l'enfonçant.
+    const ch = cv.h * 0.84; // 0.88 avant podZ : compense la perspective (même taille à l’écran)
+    const podY = 0;
+    const podZ = cv.z + 0.35;
     const pod = billboardSheet(CAPSULE_SHEET, 2, ch, CAPSULE_ASPECT, { tint: '#ffffff', shadow: ch * CAPSULE_ASPECT * 0.45 });
-    s.spot('capsule_vaisseau', at(pod, cv.x, podY, cv.z));
-    const nozzle = at(glow('#8fd0ff', 1.2, 0.5), cv.x + ch * CAPSULE_ASPECT * 0.38, podY + ch * 0.62, cv.z - 0.05);
+    s.spot('capsule_vaisseau', at(pod, cv.x, podY, podZ));
+    const nozzle = at(glow('#8fd0ff', 1.2, 0.5), cv.x + ch * CAPSULE_ASPECT * 0.38, podY + ch * 0.62, podZ - 0.05);
     s.add(nozzle);
     s.animate((t) => {
       const free = s.is(FREE);
@@ -2302,8 +2305,8 @@ export const stFourriere: RoomBuild = {
       nozzle.material.opacity = 0.35 + Math.sin(t * 6) * 0.15;
       pod.position.y = podY + (free ? Math.abs(Math.sin(t * 1.6)) * 0.02 : 0);
     });
-    const am = s.fit(s.rect('amende'), cv.z + 0.4);
-    const ticketMesh = at(label(tr('props.station.fine'), am.w * 0.8, am.h * 0.75, { color: '#1a1a1a', bg: '#ffd166', bold: true }), am.x, am.y, cv.z + 0.4);
+    const am = s.fit(s.rect('amende'), podZ + 0.4);
+    const ticketMesh = at(label(tr('props.station.fine'), am.w * 0.8, am.h * 0.75, { color: '#1a1a1a', bg: '#ffd166', bold: true }), am.x, am.y, podZ + 0.4);
     ticketMesh.rotation.z = 0.08;
     s.spot('amende', ticketMesh);
 
