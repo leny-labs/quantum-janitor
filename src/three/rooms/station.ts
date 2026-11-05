@@ -7,6 +7,7 @@ import { lang, t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
 import { CAPSULE_ASPECT, CAPSULE_SHEET, DELAIGUE_ASPECT, DELAIGUE_SHEET, DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PARAPHE_ACTOR, PARAPHE_ASPECT, PARAPHE_SHEET, PATIENCE_SHEET, PERCO_ASPECT, PERCO_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet, sylvie } from '../props';
 import { BobAspirRig } from './bobaspire';
+import { guichardBall } from '../guichardBall';
 import { bobSpot } from './bobspot';
 import { pressable } from '../press';
 import { speaking } from '../../engine/speaking';
@@ -837,9 +838,15 @@ export const stGuichet: RoomBuild = {
     s.spot('guichard', at(guichard, x1, gBase, zg));
     // occupations de bureau lentes, jamais synchronisées sur le dialogue (la bouche ne bouge que
     // dans le portrait de la boîte de dialogue)
+    // frame 4 : la balle d'élastiques peinte est effacée de la planche, une vraie balle 3D tourne
+    // sur le bout du doigt à sa place (elle suit la respiration du sprite)
+    const ball = guichardBall(gs.scale.x, baseSY);
+    guichard.add(ball.object);
     s.animate((t) => {
-      guichard.userData.setFrame(actorFrame('guichard', GUICHARD_ACTOR, t));
+      const f = actorFrame('guichard', GUICHARD_ACTOR, t);
+      guichard.userData.setFrame(f);
       gs.scale.y = baseSY * (1 + Math.sin(t * 1.1) * 0.006); // respiration de fonctionnaire
+      ball.update(f, t, gs.scale.y / baseSY);
     });
     // rideau métallique du guichet 1, à moitié baissé : lames horizontales, barre de charge
     const shutter = new THREE.Group();
