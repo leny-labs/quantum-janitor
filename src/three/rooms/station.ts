@@ -504,10 +504,14 @@ export const stAttente: RoomBuild = {
   },
 };
 
-/** Sandwich consigné (GenAI `sandwich.png` redressé de 17° et détouré au ras de l'alpha) : base à plat,
- *  posé sur les tablettes de la vitrine de la cafétéria. */
-const SANDWICH_SHELF_URL = `${import.meta.env.BASE_URL}props/st/sandwich-pose.png`;
-const SANDWICH_SHELF_ASPECT = 412 / 341;
+/** Sandwichs consignés de la vitrine, tous différents et tous bien moisis (GenAI gpt-image-2.6-sunburst,
+ *  détourés au ras de l'alpha, base à plat) : club triangle, baguette jambon-beurre sous film, pain de mie
+ *  œuf-mayo en barquette. Bruts : `assets/st-sandwich-*-raw.png`. `w` : largeur en fraction de `sw`. */
+const SANDWICHES_SHELF = {
+  club: { url: `${import.meta.env.BASE_URL}props/st/sandwich-club.png`, aspect: 512 / 429, w: 1.0 },
+  baguette: { url: `${import.meta.env.BASE_URL}props/st/sandwich-baguette.png`, aspect: 512 / 173, w: 1.5 },
+  oeuf: { url: `${import.meta.env.BASE_URL}props/st/sandwich-oeuf.png`, aspect: 512 / 327, w: 1.0 },
+} as const;
 /** Cuillère du plateau abandonné : même PNG GenAI que l'icône d'inventaire (256 × 238). */
 const SPOON_URL = `${import.meta.env.BASE_URL}inventory/cuillere.png`;
 const SPOON_ASPECT = 256 / 238;
@@ -594,12 +598,15 @@ export const stCafeteria: RoomBuild = {
     const shelfY = [baseH + 0.04, baseH + caseH * 0.5];
     for (const y of shelfY) case_.add(at(box(vr.w * 0.9, 0.035, cd * 0.8, '#eef4f8', { edges: false }), 0, y, 0));
     const sw = Math.min(vr.w * 0.28, caseH * 0.42);
-    // étage du bas : deux sandwichs ; étage du haut : un sandwich, et la place vide de Mme Guichard
+    // étage du bas : club et œuf-mayo (à gauche du plomb pour rester lisibles) ; étage du haut : la
+    // baguette, et la place vide de Mme Guichard
     // visuel redressé (base à plat), pied au ras du dessus de la tablette, un peu en avant pour la
     // lecture ; ombre de contact plaquée sur la tablette (pas l'ombre « sol » du billboard, 4 cm plus haut)
     const shelfTop = 0.035 / 2;
-    for (const [x, y] of [[-0.25, 0], [0.18, 0], [-0.2, 1]] as const) {
-      const sand = at(billboard(SANDWICH_SHELF_URL, sw / SANDWICH_SHELF_ASPECT, SANDWICH_SHELF_ASPECT, { tint: '#e8f0f4', shadow: sw * 0.42 }), x * vr.w, shelfY[y] + shelfTop - 0.002, 0.04);
+    for (const [kind, x, y] of [['club', -0.3, 0], ['oeuf', -0.01, 0], ['baguette', -0.2, 1]] as const) {
+      const sp = SANDWICHES_SHELF[kind];
+      const w = sw * sp.w;
+      const sand = at(billboard(sp.url, w / sp.aspect, sp.aspect, { tint: '#e8f0f4', shadow: w * 0.42 }), x * vr.w, shelfY[y] + shelfTop - 0.002, 0.04);
       sand.children[0].position.y = 0.004;
       case_.add(sand);
     }
@@ -932,9 +939,12 @@ export const stGuichet: RoomBuild = {
     const n = 16;
     for (let i = 0; i < n; i++) closed.add(at(box(w2 - 0.14, glassH / n - 0.012, 0.04, i % 2 ? '#8d939c' : '#9aa0a8', { edges: false }), 0, top + glassH * (1 - (i + 0.5) / n), 0));
     closed.add(at(box(w2 - 0.1, 0.07, 0.07, '#5a5f6a'), 0, top + 0.06, 0.01));
+    // cadenas accroché devant la barre de charge, posé sur le plateau du comptoir (dessus à top + 0,07,
+    // nez à zb + 0,125) : avant, centré à top + 0,02, il était noyé dans le plateau et on n'en voyait
+    // que des liserés. Corps au ras du plateau, anse qui enjambe la barre, nez à z ≈ zb + 0,1.
     const lock = new THREE.Group();
-    lock.add(at(box(0.16, 0.14, 0.05, '#e8c26a'), 0, 0, 0), at(torus(0.05, 0.015, '#c9ced6'), 0, 0.09, 0));
-    closed.add(at(lock, 0, top + 0.02, 0.06));
+    lock.add(at(box(0.19, 0.16, 0.06, '#e8c26a'), 0, 0, 0), at(torus(0.06, 0.018, '#c9ced6'), 0, 0.1, -0.01));
+    closed.add(at(lock, 0, top + 0.07 + 0.085, 0.09));
     closed.add(at(label(tr('props.station.desk2'), w2 * 0.66, 0.42, { color: '#f6efdc', bg: '#3e3448', bold: true }), 0, top + glassH * 0.62, 0.03));
     s.spot('rideau', at(closed, x2, 0, zb - 0.02));
 
