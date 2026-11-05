@@ -72,8 +72,8 @@ export class VerbCoin {
     const s = this.scene;
     const touch = !!opts.touch;
     const n = Math.min(verbs.length, 4);
-    // diamètre : 60 px de jeu à la souris, ≥ 52 px CSS au doigt
-    const d = touch ? Math.max(68, cssToGame(s, 52)) : 60;
+    // diamètre : 68 px de jeu à la souris, ≥ 54 px CSS au doigt
+    const d = touch ? Math.max(72, cssToGame(s, 54)) : 68;
     const r = d / 2;
     const R = d + 12;
     const nameSize = touch ? uiPx(s, 17, 14) : 14;
@@ -136,7 +136,18 @@ export class VerbCoin {
     paintChip(title, false);
     root.add([chip, name, note]);
 
-    const iconPx = touch ? Math.round(d * 0.34) : 24;
+    const iconPx = touch ? Math.round(d * 0.32) : 22;
+    // bloc icône + libellé centré dans l'octogone (léger poids vers le haut)
+    const iconY = -r * 0.3;
+    const labelY = r * 0.27;
+    const labelPx = touch ? Math.max(9, Math.round(d * 0.135)) : 9;
+    // largeur utile du libellé : octogone intérieur (filet à r - 5) à hauteur
+    // du bas des capitales — les diagonales mordent vite sous le centre —,
+    // moins une marge visible de chaque côté
+    const inner = r - 5;
+    const capsBottom = labelY + labelPx * 0.38;
+    const halfW = Math.min(inner * Math.cos(Math.PI / 8), inner * (Math.cos(Math.PI / 8) + Math.sin(Math.PI / 8)) - capsBottom);
+    const labelMaxW = 2 * (halfW - 3);
     ARCS[n].forEach((deg, i) => {
       const v = verbs[i];
       const a = Phaser.Math.DegToRad(deg);
@@ -144,13 +155,13 @@ export class VerbCoin {
       const by = Math.sin(a) * R;
       const btn = s.add.container(0, 0).setScale(0.3).setAlpha(0);
       const g = s.add.graphics();
-      const icon = s.add.image(0, -5, verbIconTexture(s, v.icon, iconPx)).setScale(verbIconScale());
+      const icon = s.add.image(0, iconY, verbIconTexture(s, v.icon, iconPx)).setScale(verbIconScale());
       const short = v.label.split(' ')[0];
       const label = s.add
-        .text(0, r * 0.5, short.toUpperCase(), { fontFamily: FONT, fontSize: `${touch ? uiPx(s, 12, 10) : 10}px`, fontStyle: '700', color: COLORS.text })
+        .text(0, labelY, short.toUpperCase(), { fontFamily: FONT, fontSize: `${labelPx}px`, fontStyle: '700', color: COLORS.text })
         .setOrigin(0.5)
-        .setLetterSpacing(1);
-      if (label.width > d - 14) label.setScale((d - 14) / label.width);
+        .setLetterSpacing(0.3);
+      if (label.width > labelMaxW) label.setScale(labelMaxW / label.width);
       const key = s.add
         .text(r * 0.72, -r * 0.72, String(i + 1), { fontFamily: FONT, fontSize: '11px', fontStyle: '700', color: '#07050f', backgroundColor: COLORS.accent, padding: { x: 4, y: 1 } })
         .setOrigin(0.5)
