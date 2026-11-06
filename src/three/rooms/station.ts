@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { lang, t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
-import { CAPSULE_ASPECT, CAPSULE_SHEET, DELAIGUE_ASPECT, DELAIGUE_SHEET, DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PARAPHE_ACTOR, PARAPHE_ASPECT, PARAPHE_SHEET, PATIENCE_SHEET, PERCO_ASPECT, PERCO_SHEET, REMORQUE_ACTOR, REMORQUE_ASPECT, REMORQUE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet, sylvie } from '../props';
+import { CAPSULE_ASPECT, CAPSULE_SHEET, DELAIGUE_ASPECT, DELAIGUE_SHEET, DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PARAPHE_ACTOR, PARAPHE_ASPECT, PARAPHE_SHEET, PATIENCE_SHEET, PERCO_ASPECT, PERCO_SHEET, REMORQUE_ACTOR, REMORQUE_ASPECT, REMORQUE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet } from '../props';
 import { BobAspirRig } from './bobaspire';
 import { guichardBall } from '../guichardBall';
 import { guichardChain } from '../guichardChain';
@@ -14,6 +14,7 @@ import { bobSpot } from './bobspot';
 import { CouloirWalkRig, type WalkDoor } from './couloirWalk';
 import { pressable, CASIER_OPEN_ID, CASIER_OPEN_MS, type OpenRig } from '../press';
 import { percoScreen } from '../percoFace';
+import { DIRECTION_TRONE_ASPECT, DIRECTION_TRONE_URL, sylvieWall } from '../sylvieDirection';
 import { speaking } from '../../engine/speaking';
 import type { Condition } from '../../engine/types';
 import type { RoomBuild } from './index';
@@ -2289,8 +2290,8 @@ export const stConseil: RoomBuild = {
 };
 
 /**
- * 12. Direction Générale de l'Existence : SYLVIE en personne (grand écran-visage, anneau, mur d'écrans),
- * trône-photocopieuse, coffre des Objets Trouvés (vitre levée avec `st_coffre_ouvert`, éclat n° 2 qui
+ * 12. Direction Générale de l'Existence : SYLVIE en personne (mur de CRT GenAI, visage-onde vivant sur l'écran
+ * central : three/sylvieDirection.ts), trône-photocopieuse (billboard GenAI sur estrade), coffre des Objets Trouvés (vitre levée avec `st_coffre_ouvert`, éclat n° 2 qui
  * pulse jusqu'à `st_eclat2`), plaque en laiton (GenAI).
  */
 export const stDirection: RoomBuild = {
@@ -2321,35 +2322,41 @@ export const stDirection: RoomBuild = {
 
     s.spot('plaque', poster(s, s.rect('plaque'), 'direction'));
 
-    // ── mur d'écrans : SYLVIE au centre (écran-visage, bouche quand elle parle), petits écrans autour ──
-    const sv = s.fit(s.rect('sylvie'), 0.3);
-    const wall = new THREE.Group();
-    for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) {
-      if (i === 1 || i === 2) continue;
-      const x = (i - 1.5) * sv.w * 0.26;
-      const y = (j - 0.5) * sv.h * 0.45;
-      wall.add(at(box(sv.w * 0.22, sv.h * 0.38, 0.12, '#16314a'), x, y, 0), at(box(sv.w * 0.2, sv.h * 0.34, 0.01, '#1f7f73', { glow: true }), x, y, 0.065));
-      wall.add(at(label(tr('props.station.stampSeen'), sv.w * 0.12, sv.h * 0.12, { color: '#d9fff4', bold: true }), x, y, 0.08));
-    }
-    const face = sylvie(sv.h * 0.95);
-    face.position.set(0, -sv.h * 0.5, 0.15);
-    wall.add(face);
-    s.spot('sylvie', at(wall, sv.x, sv.y, 0.3));
-    s.animate((t) => {
-      const talking = speaking.id === 'sylvie' && speaking.talking;
-      face.userData.setFace?.({ mouth: talking ? 0.4 + Math.abs(Math.sin(t * 14)) * 0.6 : 0, blink: Math.sin(t * 0.9) > 0.985, phase: t });
-    });
+    // ── mur d'écrans (GenAI : CRT de bureau 1985, ondes, formulaires flous, visages-onde) debout contre le
+    // fond ; SYLVIE en personne sur le grand écran central (visage dessiné en direct, bouche-onde qui parle) ──
+    // hissé sur un socle d'acier (le visage reste au-dessus du dossier du trône) : 12 → 370 px à l'écran
+    const wz = 0.2;
+    const wTop = s.wallAt(640, 12, wz);
+    const wBot = s.wallAt(640, 370, wz).y;
+    const sylvieRig = sylvieWall(wTop.y - wBot);
+    const plinthW = (wTop.y - wBot) * 1.3;
+    s.add(at(box(plinthW, wBot, 0.5, '#232a33'), wTop.x, wBot / 2, wz - 0.1));
+    s.add(at(box(plinthW * 1.02, 0.05, 0.54, '#3a4552'), wTop.x, wBot, wz - 0.1));
+    s.spot('sylvie', at(sylvieRig.group, wTop.x, wBot, wz + 0.16));
+    s.animate((t) => sylvieRig.update(t));
 
-    // ── trône-photocopieuse : capot relevé en dossier, bac en accoudoir ──
+    // ── trône-photocopieuse (GenAI : capot relevé en dossier, bacs en accoudoirs, coussin) sur une estrade ;
+    // ronronne (respiration lente) et « copie l'air » (balayage de vitre toutes les quelques secondes) ──
     const tr0 = s.stand(s.rect('trone'));
     const throne = new THREE.Group();
-    const tw = tr0.w * 0.9;
-    throne.add(at(box(tw, tr0.h * 0.5, 1, '#d8cfb8'), 0, tr0.h * 0.25, 0));
-    const back = at(box(tw * 0.9, tr0.h * 0.9, 0.08, '#bfb59c'), 0, tr0.h * 0.75, -0.45);
-    back.rotation.x = -0.15;
-    throne.add(back, at(box(0.3, 0.06, 0.6, '#8a8070'), tw / 2 + 0.1, tr0.h * 0.45, 0), at(box(0.3, 0.06, 0.6, '#8a8070'), -tw / 2 - 0.1, tr0.h * 0.45, 0));
-    throne.add(at(box(tw * 0.7, 0.02, 0.7, '#cfe8ff', { glow: true }), 0, tr0.h * 0.505, 0.05));
+    const th = tr0.h * 1.02;
+    const tw = th * DIRECTION_TRONE_ASPECT;
+    const dais = 0.14;
+    throne.add(at(box(tw * 1.08, dais, 1.1, '#232a33'), 0, dais / 2, -0.1));
+    throne.add(at(box(tw * 0.9, 0.018, 0.02, '#3fae98', { glow: true }), 0, dais - 0.03, 0.46));
+    const seat = billboard(DIRECTION_TRONE_URL, th - dais, DIRECTION_TRONE_ASPECT, { tint: '#fff4e4', shadow: 0.01 });
+    seat.position.y = dais;
+    throne.add(seat);
+    const scan = at(glow('#cfffee', tw * 0.5, 0), 0, (th - dais) * 0.47 + dais, 0.08);
+    scan.scale.set(tw * 0.12, tw * 0.5, 1);
+    throne.add(scan);
     s.spot('trone', at(throne, tr0.x, 0, tr0.z));
+    s.animate((t) => {
+      seat.scale.set(1 + Math.sin(t * 2.2) * 0.004, 1 + Math.sin(t * 2.2) * 0.007, 1);
+      const k = (t % 4.5) / 1.4;
+      scan.material.opacity = k < 1 ? Math.sin(k * Math.PI) * 0.55 : 0;
+      scan.position.x = (k - 0.5) * tw * 0.5;
+    });
 
     // ── coffre des Objets Trouvés : caisson acier, plaque GenAI, vitre blindée, éclat n° 2 ──
     const OPEN: Condition = { flags: ['st_coffre_ouvert'] };

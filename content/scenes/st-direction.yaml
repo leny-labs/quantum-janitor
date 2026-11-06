@@ -48,7 +48,7 @@ hotspots:
 
   - id: trone
     label: Trône-photocopieuse
-    rect: [490, 260, 300, 200]
+    rect: [478, 248, 324, 212]
     art:
       - { rect: [495, 265, 290, 190], color: "#d8cfb8", stroke: "#2a2830", text: "TRÔNE", size: 14 }
     look: "Le trône de la Direction : une photocopieuse géante, capot relevé en dossier, bac de sortie en accoudoir. Elle copie l'air en permanence. La Station entière est peut-être une photocopie. Je préfère ne pas y penser."
