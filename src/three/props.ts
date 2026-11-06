@@ -846,14 +846,14 @@ export function billboardSheet(url: string, frames: number, h: number, aspect: n
  *   Patience (avec / sans ticket) : 0 repos · 1 mâchoire ouverte · 2 soupir (crâne penché)
  */
 /**
- * Reine : cellules 600 × 768 = l'art 576 × 768 centré avec 12 px transparents de chaque côté
- * (la cape et le balai touchaient la couture → le mipmap mélangeait les cellules). Nouveau nom
- * de fichier : l'ancienne `reine-sheet.png` à 3 cellules, gardée en cache par le navigateur avec
- * REINE_FRAMES = 2, affichait 1,5 cellule (une deuxième Reine coupée à droite).
+ * Reine : planche v2 (OpenAI gpt-image-2.6-sunburst, même ADN que le portrait d'encart ;
+ * _briefs/reine/regen-v2). Cellules 729 × 1024 = l'art 697 × 1024 centré avec 16 px transparents
+ * de chaque côté (anti sheet bleed au mipmap). Cadrage commun aux deux cellules (pas de jitter).
+ * Nouveau nom de fichier à chaque refonte : le navigateur garde l'ancienne planche en cache.
  */
-export const REINE_SHEET = `${import.meta.env.BASE_URL}props/ch1/reine-planche.png`;
+export const REINE_SHEET = `${import.meta.env.BASE_URL}props/ch1/reine-planche-v2.png`;
 export const REINE_FRAMES = 2;
-export const REINE_SHEET_ASPECT = 600 / 768;
+export const REINE_SHEET_ASPECT = 729 / 1024;
 export const SCRIBE_SHEET = `${import.meta.env.BASE_URL}props/ch1/scribe-sheet.png`;
 export const SABOT_SHEET = `${import.meta.env.BASE_URL}props/st/sabot-sheet.png`;
 export const PATIENCE_SHEET = `${import.meta.env.BASE_URL}props/st/patience-sheet.png`;
@@ -918,9 +918,9 @@ export const SIEGE_ASPECT = 589 / 768;
 export const SIEGE_CARAPACE_URL = `${import.meta.env.BASE_URL}props/interlude/siege-carapace.png`;
 export const SIEGE_CARAPACE_ASPECT = 610 / 1024;
 
-/** Sa Majesté Blattaria XIV en pied (GenAI, 768 × 1024, _briefs/ch1/genai-fix/cutout.py). */
+/** Sa Majesté Blattaria XIV en pied (GenAI v2 qualité portrait, 697 × 1024, _briefs/ch1/genai-fix/cutout.py). */
 export const REINE_URL = `${import.meta.env.BASE_URL}props/ch1/reine.png`;
-export const REINE_ASPECT = 768 / 1024;
+export const REINE_ASPECT = 697 / 1024;
 /** Frère Élytre, Grand Scribe, en pied (GenAI, 637 × 1024, _briefs/ch1/genai-fix/cutout.py). */
 export const SCRIBE_URL = `${import.meta.env.BASE_URL}props/ch1/scribe.png`;
 export const SCRIBE_ASPECT = 637 / 1024;
