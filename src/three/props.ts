@@ -845,8 +845,15 @@ export function billboardSheet(url: string, frames: number, h: number, aspect: n
  *   Sabot : 0 repos · 1 clignement · 2 parle · 3 agacé · 4 coup de tampon
  *   Patience (avec / sans ticket) : 0 repos · 1 mâchoire ouverte · 2 soupir (crâne penché)
  */
-export const REINE_SHEET = `${import.meta.env.BASE_URL}props/ch1/reine-sheet.png`;
+/**
+ * Reine : cellules 600 × 768 = l'art 576 × 768 centré avec 12 px transparents de chaque côté
+ * (la cape et le balai touchaient la couture → le mipmap mélangeait les cellules). Nouveau nom
+ * de fichier : l'ancienne `reine-sheet.png` à 3 cellules, gardée en cache par le navigateur avec
+ * REINE_FRAMES = 2, affichait 1,5 cellule (une deuxième Reine coupée à droite).
+ */
+export const REINE_SHEET = `${import.meta.env.BASE_URL}props/ch1/reine-planche.png`;
 export const REINE_FRAMES = 2;
+export const REINE_SHEET_ASPECT = 600 / 768;
 export const SCRIBE_SHEET = `${import.meta.env.BASE_URL}props/ch1/scribe-sheet.png`;
 export const SABOT_SHEET = `${import.meta.env.BASE_URL}props/st/sabot-sheet.png`;
 export const PATIENCE_SHEET = `${import.meta.env.BASE_URL}props/st/patience-sheet.png`;

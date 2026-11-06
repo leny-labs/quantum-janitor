@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { at, box, cyl, glow, mat, pool, sphere, torus } from '../kit';
-import { REINE_ASPECT, REINE_FRAMES, REINE_SHEET, ROACH_ACTOR, actorFrame, billboardSheet, seau } from '../props';
+import { REINE_FRAMES, REINE_SHEET, REINE_SHEET_ASPECT, ROACH_ACTOR, actorFrame, billboardSheet, seau } from '../props';
 import { bobSpot } from './bobspot';
 import { candle, crowd, drip, eggLamps, hive, mist, puddle, rib, shaft, vaultArch } from './hive';
 import type { RoomBuild } from './index';
@@ -135,7 +135,7 @@ export const nid: RoomBuild = {
     const top = s.wallAt(680, 44, qz).y;
     const qh = top - seatY;
     // planche 2 cellules (repos · mandibules) ; jamais synchronisée sur le dialogue (ROACH_ACTOR)
-    const queen = billboardSheet(REINE_SHEET, REINE_FRAMES, qh, REINE_ASPECT, { tint: '#fff2e2', shadow: u * 0.16 });
+    const queen = billboardSheet(REINE_SHEET, REINE_FRAMES, qh, REINE_SHEET_ASPECT, { tint: '#fff2e2', shadow: u * 0.16 });
     queen.position.set(tx + u * 0.02, seatY, qz);
     const qs = queen.userData.sprite as THREE.Sprite;
     const qBase = qs.scale.clone();

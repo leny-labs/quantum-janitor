@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import type { HeroShot } from '../Hero';
 import { at, box, cyl, glow, mat, sphere, Vignette } from '../kit';
-import { GARY_PRONE_ASPECT, GARY_PRONE_URL, REINE_ASPECT, REINE_FRAMES, REINE_SHEET, ROACH_2D, ROACH_ACTOR, actorFrame, billboardSheet, bob, roach, roachSprite, seau } from '../props';
+import { GARY_PRONE_ASPECT, GARY_PRONE_URL, REINE_FRAMES, REINE_SHEET, REINE_SHEET_ASPECT, ROACH_2D, ROACH_ACTOR, actorFrame, billboardSheet, bob, roach, roachSprite, seau } from '../props';
 import { skyPlane, skyTexture } from './backdrop';
 import { speaking } from '../../engine/speaking';
 
@@ -69,7 +69,7 @@ export function endShot(width: number, height: number): HeroShot {
 
   // la Reine et sa cour
   // Reine : sprite GenAI en pied (par défaut), ou l'ancien cafard 3D couronné (?roach2d=0)
-  const queen = ROACH_2D ? at(billboardSheet(REINE_SHEET, REINE_FRAMES, 6.2, REINE_ASPECT, { shadow: 1.6 }), -2.2, 0, -7) : at(roach(6, true), -2.2, 0, -7, -0.35);
+  const queen = ROACH_2D ? at(billboardSheet(REINE_SHEET, REINE_FRAMES, 6.2, REINE_SHEET_ASPECT, { shadow: 1.6 }), -2.2, 0, -7) : at(roach(6, true), -2.2, 0, -7, -0.35);
   scene.add(queen);
   const court: THREE.Object3D[] = [];
   for (const [x, z, sz, ry] of [[6, -11, 3.4, -2.6], [9.5, -6.5, 2.4, -2.2], [-9, -12, 2.8, 0.5], [3, -16, 2, -1.7], [-6, -4, 1.6, 0.9]] as const) {
