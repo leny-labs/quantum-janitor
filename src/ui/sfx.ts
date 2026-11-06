@@ -503,6 +503,15 @@ export function lever(): void {
   noise(a, c + 0.003, 0.04, 0.16, 4200, 2600);
 }
 
+/** Cran de molette (roue du carnet) : tout petit « tic » sec, ne réveille pas l'audio. */
+export function tick(): void {
+  const a = runningContext();
+  if (!a) return;
+  const t = a.currentTime;
+  noise(a, t, 0.014, 0.12, 3600, 2400);
+  tone(a, 'square', 1500, 1100, t, 0.012, 0.018);
+}
+
 /** Écran tactile (navigateur, borne) : tap + double bip montant. */
 export function touchBeep(): void {
   const a = ctx();

@@ -11,7 +11,7 @@ import { itemIconKey } from '../three/Studio';
 import { makeButton } from './Button';
 import { drawPanel } from './chrome';
 import { cssToGame, isTouch, TOUCH_TARGET_CSS } from './input';
-import { pickupCue, stampClonk, unlockCue } from './sfx';
+import { pickupCue, stampClonk, tick, unlockCue } from './sfx';
 import { COLORS, DISPLAY, FONT, H, MONO, W, hex } from './theme';
 
 const PAPER = 0xf3ecd8;
@@ -21,6 +21,8 @@ const INK_N = 0x2a2830;
 const RED = '#c0392b';
 const TEAL = '#1f7f73';
 const DIM = '#5a5870';
+/** Dents de la roue du carnet : un cran = une rangée de la liste. */
+const GEAR_TEETH = 14;
 
 // ── suivi « nouveau » (hors sauvegarde : un indice déjà là au chargement n'est pas « nouveau ») ──
 
@@ -365,6 +367,31 @@ export class CarnetOverlay {
   private readonly pw: number;
   private readonly ph: number;
   private readonly rejectedBag: string[] = [];
+  private readonly sheetAngle: number;
+  // ── liste défilante (colonne gauche) : conteneur racine masqué (Phaser ne masque que les
+  // conteneurs à la racine), calé sur la feuille ; la roue crantée vit dans la marge ──
+  private listRoot: Phaser.GameObjects.Container;
+  private inner: Phaser.GameObjects.Container;
+  private maskG: Phaser.GameObjects.Graphics;
+  private sticky!: Phaser.GameObjects.Text;
+  private wheel: Phaser.GameObjects.Container;
+  private gear: Phaser.GameObjects.Graphics;
+  private chevrons: Phaser.GameObjects.Graphics;
+  private wheelZone: Phaser.GameObjects.Zone;
+  /** Défilement vertical de la liste (≥ 0), conservé d'un render() à l'autre. */
+  private listScroll = 0;
+  private maxScroll = 0;
+  private rowH = 40;
+  private stickyLabels = { clues: '', conclusions: '', concY: 0 };
+  private zones: { zone: Phaser.GameObjects.Zone; y: number; h: number }[] = [];
+  private rowPos = new Map<string, { y: number; h: number }>();
+  private drag: { y: number; scroll: number; moved: boolean; wheel: boolean } | null = null;
+  private scrollTween: Phaser.Tweens.Tween | null = null;
+  private wheelTarget: number | null = null;
+  private wheelAcc = 0;
+  private notch = 0;
+  private lastTick = 0;
+  private offInput: () => void;
 
   constructor(
     private scene: Phaser.Scene,
@@ -377,7 +404,7 @@ export class CarnetOverlay {
     const touch = isTouch();
     this.root = scene.add.container(0, 0).setDepth(2500);
     const dim = scene.add.rectangle(0, 0, W, H, COLORS.ink, 0.72).setOrigin(0).setInteractive();
-    dim.on('pointerdown', () => this.close());
+    dim.on('pointerdown', () => !this.drag?.moved && this.close());
     this.root.add(dim);
 
     this.px = touch ? 16 : 56;
@@ -385,7 +412,8 @@ export class CarnetOverlay {
     this.pw = W - this.px * 2;
     this.ph = H - this.py * 2;
     const { pw, ph } = this;
-    const sheet = scene.add.container(this.px, this.py).setAngle(touch ? 0 : 0.4);
+    this.sheetAngle = touch ? 0 : 0.4;
+    const sheet = scene.add.container(this.px, this.py).setAngle(this.sheetAngle);
     // trombone sur le coin, fil arrière : posé avant la feuille, qui en masque la jambe
     const CLIP = 0x9aa0a8;
     const clipX = pw - 64;
@@ -427,14 +455,47 @@ export class CarnetOverlay {
     sheet.add(clip);
     this.dyn = scene.add.container(0, 0);
     sheet.add(this.dyn);
+    // roue crantée (fixe, dans la marge, au-dessus de la liste masquée)
+    const v = this.view;
+    const R = this.wheelR;
+    this.gear = scene.add.graphics();
+    this.chevrons = scene.add.graphics();
+    const socket = scene.add.graphics();
+    this.drawSocket(socket, R);
+    this.wheel = scene.add.container(this.wheelX, v.y + v.h / 2, [socket, this.gear, this.chevrons]);
+    this.drawGear(R);
+    this.wheelZone = scene.add.zone(0, v.y, this.view.x + 6, v.h).setOrigin(0).setInteractive({ cursor: 'ns-resize' });
+    sheet.add([this.wheel, this.wheelZone]);
     this.root.add(sheet);
     const close = makeButton(scene, this.px + pw - 24, this.py + ph - 34, t('carnet.close'), () => this.close(), { align: 'right', size: 16, kicker: t('carnet.closeKicker') });
     this.root.add(close);
+    this.listRoot = scene.add.container(this.px, this.py).setDepth(2501).setAngle(this.sheetAngle);
+    this.inner = scene.add.container(0, 0);
+    this.listRoot.add(this.inner);
+    this.maskG = scene.make.graphics({}, false).setPosition(this.px, this.py).setAngle(this.sheetAngle);
+    this.maskG.fillStyle(0xffffff).fillRect(v.x, v.y, v.w, v.h);
+    this.listRoot.setMask(this.maskG.createGeometryMask());
+    this.offInput = this.bindScroll();
 
     this.render();
+    const first = [...tracker(state, carnet).unread].find((id) => this.rowPos.has(id));
+    if (first) this.reveal(first, false);
     this.root.setAlpha(0).setScale(0.96).setPosition(W * 0.02, H * 0.02);
-    scene.tweens.add({ targets: this.root, alpha: 1, scale: 1, x: 0, y: 0, duration: 220, ease: 'Quad.easeOut' });
+    this.syncList();
+    scene.tweens.add({ targets: this.root, alpha: 1, scale: 1, x: 0, y: 0, duration: 220, ease: 'Quad.easeOut', onUpdate: () => this.syncList() });
     pickupCue();
+    if (import.meta.env.DEV) {
+      (window as unknown as { __qjCarnet?: object }).__qjCarnet = {
+        scrollTo: (y: number) => this.scrollTo(y, false),
+        scrollToEnd: () => this.scrollTo(this.maxScroll, false),
+        scroll: () => this.listScroll,
+        max: () => this.maxScroll,
+        /** Centre de la roue, coordonnées jeu. */
+        wheel: () => this.toWorld(this.wheelX, v.y + v.h / 2),
+        /** Point au milieu de la liste, coordonnées jeu. */
+        list: () => this.toWorld(v.x + v.w / 2, v.y + v.h / 2),
+      };
+    }
 
     this.onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' || e.key === 'c' || e.key === 'C' || e.key === 'n' || e.key === 'N') this.close();
@@ -458,28 +519,43 @@ export class CarnetOverlay {
 
   private render(): void {
     this.dyn.removeAll(true);
+    this.inner.removeAll(true);
+    this.zones = [];
+    this.rowPos.clear();
     const s = this.scene;
     const { clues, conclusions } = this.pieces();
     const all = [...clues, ...conclusions];
     const unread = tracker(this.state, this.carnet).unread;
 
-    // ── gauche : constatations (2 colonnes), puis conclusions ──
+    // ── gauche : constatations (2 colonnes), puis conclusions — hauteur de case fixe, la liste
+    // défile (masque + roue crantée) quand elle dépasse ──
+    const v = this.view;
     const x0 = 62;
     const colGap = 10;
     const colW = (this.split - x0 - 16 - colGap) / 2;
-    const top = 104;
-    const bottom = this.ph - 30;
-    const clueRows = Math.ceil(clues.length / 2);
-    const concRows = Math.max(1, Math.ceil(conclusions.length / 2));
-    const rowH = Math.max(isTouch() ? cssToGame(s, 40) : 30, Math.min(44, (bottom - top - 64) / (clueRows + concRows)));
-    this.dyn.add(s.add.text(x0, top - 2, `${t('carnet.clues')} (${clues.length})`, { fontFamily: FONT, fontSize: '13px', fontStyle: '700', color: DIM }).setLetterSpacing(2));
-    clues.forEach((p, i) => this.row(p, x0 + (i % 2) * (colW + colGap), top + 20 + Math.floor(i / 2) * rowH, colW, rowH - 5, unread.has(p.id)));
-    const cy = top + 20 + clueRows * rowH + 12;
-    this.dyn.add(s.add.text(x0, cy, `${t('carnet.conclusions')} (${conclusions.length})`, { fontFamily: FONT, fontSize: '13px', fontStyle: '700', color: RED }).setLetterSpacing(2));
+    const rowH = (this.rowH = Math.max(isTouch() ? cssToGame(s, 40) : 0, 40));
+    // en-tête collant (hors masque) : CONSTATATIONS, puis CONCLUSIONS quand on y arrive
+    this.stickyLabels.clues = `${t('carnet.clues')} (${clues.length})`;
+    this.stickyLabels.conclusions = `${t('carnet.conclusions')} (${conclusions.length})`;
+    this.sticky = s.add.text(x0, v.y - 20, this.stickyLabels.clues, { fontFamily: FONT, fontSize: '13px', fontStyle: '700', color: DIM }).setLetterSpacing(2);
+    this.dyn.add(this.sticky);
+    const y0 = v.y + 4;
+    clues.forEach((p, i) => this.row(p, x0 + (i % 2) * (colW + colGap), y0 + Math.floor(i / 2) * rowH, colW, rowH - 5, unread.has(p.id)));
+    const cy = (this.stickyLabels.concY = y0 + Math.ceil(clues.length / 2) * rowH + 8);
+    this.inner.add(s.add.text(x0, cy, this.stickyLabels.conclusions, { fontFamily: FONT, fontSize: '13px', fontStyle: '700', color: RED }).setLetterSpacing(2));
+    let end = cy + 22;
     if (!conclusions.length) {
-      this.dyn.add(s.add.text(x0, cy + 24, t('carnet.noConclusion'), { fontFamily: FONT, fontSize: '13px', fontStyle: 'italic', color: DIM, wordWrap: { width: this.split - x0 - 20 } }));
+      const none = s.add.text(x0, cy + 24, t('carnet.noConclusion'), { fontFamily: FONT, fontSize: '13px', fontStyle: 'italic', color: DIM, wordWrap: { width: this.split - x0 - 20 } });
+      this.inner.add(none);
+      end = none.y + none.height;
     }
     conclusions.forEach((p, i) => this.row(p, x0 + (i % 2) * (colW + colGap), cy + 22 + Math.floor(i / 2) * rowH, colW, rowH - 5, this.result?.kind === 'ok' && this.result.d.id === p.id));
+    end += Math.ceil(conclusions.length / 2) * rowH;
+    this.maxScroll = Math.max(0, Math.ceil(end + 6 - (v.y + v.h)));
+    const on = this.maxScroll > 0;
+    this.wheel.setVisible(on);
+    if (this.wheelZone.input) this.wheelZone.input.enabled = on;
+    this.applyScroll(this.listScroll, true);
 
     // ── droite : fiche de la pièce lue, emplacements A + B, verdict ──
     const rx = this.split + 22;
@@ -616,12 +692,270 @@ export class CarnetOverlay {
       const tag = s.add.text(w - 4, h - 3, t('carnet.newTag'), { fontFamily: FONT, fontSize: '10px', fontStyle: '700', color: '#ffffff', backgroundColor: RED, padding: { x: 3, y: 1 } }).setOrigin(1, 1);
       c.add(tag);
     }
-    const hit = s.add.zone(0, 0, w, h).setOrigin(0).setInteractive({ useHandCursor: true });
+    // zone cliquable rognée au champ visible (un GeometryMask ne coupe pas l'input)
+    const hit = s.add.zone(0, 0, w, h).setOrigin(0);
+    hit.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(0, 0, w, h),
+      hitAreaCallback: (r: Phaser.Geom.Rectangle, hx: number, hy: number) => Phaser.Geom.Rectangle.Contains(r, hx, hy) && this.inView(y + hy - this.listScroll),
+      useHandCursor: true,
+    });
     hit.on('pointerover', () => paint(true));
     hit.on('pointerout', () => paint(false));
-    hit.on('pointerup', () => this.pick(p.id));
+    hit.on('pointerup', () => !this.drag?.moved && this.pick(p.id));
     c.add(hit);
-    this.dyn.add(c);
+    this.zones.push({ zone: hit, y, h });
+    this.rowPos.set(p.id, { y, h });
+    this.inner.add(c);
+  }
+
+  // ── défilement de la liste ─────────────────────────────────────────
+
+  /** Champ visible de la liste (coordonnées feuille) : sous l'en-tête, jusqu'au bas de la feuille. */
+  private get view(): { x: number; y: number; w: number; h: number } {
+    const y = 124;
+    return { x: 50, y, w: this.split - 4 - 50, h: this.ph - 30 - y };
+  }
+
+  /** x du centre de la roue, dans la marge (entre perforations et filet rouge). */
+  private get wheelX(): number {
+    return 26;
+  }
+
+  /** Rayon de la roue (dents comprises) : assez grande pour le doigt, sans mordre sur la liste. */
+  private get wheelR(): number {
+    return isTouch() ? 21 : 19;
+  }
+
+  private inView(y: number): boolean {
+    const v = this.view;
+    return y >= v.y && y <= v.y + v.h;
+  }
+
+  /** Feuille → jeu (rotation de la feuille + échelle de l'ouverture). */
+  private toWorld(x: number, y: number): { x: number; y: number } {
+    const k = this.root.scaleX;
+    const a = Phaser.Math.DegToRad(this.sheetAngle);
+    return { x: this.root.x + k * (this.px + x * Math.cos(a) - y * Math.sin(a)), y: this.root.y + k * (this.py + x * Math.sin(a) + y * Math.cos(a)) };
+  }
+
+  /** Jeu → feuille. */
+  private toSheet(x: number, y: number): { x: number; y: number } {
+    const k = this.root.scaleX || 1;
+    const a = Phaser.Math.DegToRad(this.sheetAngle);
+    const dx = (x - this.root.x) / k - this.px;
+    const dy = (y - this.root.y) / k - this.py;
+    return { x: dx * Math.cos(a) + dy * Math.sin(a), y: -dx * Math.sin(a) + dy * Math.cos(a) };
+  }
+
+  /** Cale la liste masquée (conteneur racine) sur la feuille pendant l'animation d'ouverture. */
+  private syncList(): void {
+    const k = this.root.scaleX;
+    const x = this.root.x + this.px * k;
+    const y = this.root.y + this.py * k;
+    this.listRoot.setPosition(x, y).setScale(k).setAlpha(this.root.alpha);
+    this.maskG.setPosition(x, y).setScale(k);
+  }
+
+  /** Position de cran la plus proche (une rangée), la butée basse comptant pour un cran. */
+  private snap(v: number): number {
+    if (v >= this.maxScroll - this.rowH / 2) return this.maxScroll;
+    return Phaser.Math.Clamp(Math.round(v / this.rowH) * this.rowH, 0, this.maxScroll);
+  }
+
+  private applyScroll(v: number, silent = false): void {
+    const max = this.maxScroll;
+    this.listScroll = Phaser.Math.Clamp(v, 0, max);
+    this.inner.y = -this.listScroll;
+    // un cran de roue = une rangée
+    this.gear.rotation = -(this.listScroll / this.rowH) * ((Math.PI * 2) / GEAR_TEETH);
+    this.drawChevrons(this.listScroll > 0.5, this.listScroll < max - 0.5);
+    const crossed = this.stickyLabels.concY - this.listScroll < this.view.y - 4;
+    this.sticky.setText(crossed ? this.stickyLabels.conclusions : this.stickyLabels.clues).setColor(crossed ? RED : DIM);
+    // les zones hors champ restent cliquables pour Phaser : on coupe celles dont le centre est masqué
+    for (const z of this.zones) if (z.zone.input) z.zone.input.enabled = this.inView(z.y + z.h / 2 - this.listScroll);
+    const n = Math.round(this.listScroll / this.rowH);
+    if (n !== this.notch) {
+      this.notch = n;
+      const now = this.scene.time.now;
+      if (!silent && now - this.lastTick > 45) {
+        this.lastTick = now;
+        tick();
+      }
+    }
+  }
+
+  private scrollTo(v: number, animate = true): void {
+    this.scrollTween?.remove();
+    this.scrollTween = null;
+    const to = Phaser.Math.Clamp(v, 0, this.maxScroll);
+    if (!animate || Math.abs(to - this.listScroll) < 0.5) {
+      this.applyScroll(to);
+      this.wheelTarget = null;
+      return;
+    }
+    const o = { v: this.listScroll };
+    this.scrollTween = this.scene.tweens.add({
+      targets: o,
+      v: to,
+      duration: Phaser.Math.Clamp(Math.abs(to - this.listScroll) * 2.2, 110, 320),
+      ease: 'Quad.easeOut',
+      onUpdate: () => this.applyScroll(o.v),
+      onComplete: () => {
+        this.scrollTween = null;
+        this.wheelTarget = null;
+      },
+    });
+  }
+
+  /** Fait défiler pour que la pièce `id` soit entièrement visible. */
+  private reveal(id: string, animate = true): void {
+    const r = this.rowPos.get(id);
+    if (!r) return;
+    const v = this.view;
+    let to = this.listScroll;
+    if (r.y - to < v.y) to = r.y - v.y - 4;
+    else if (r.y + r.h - to > v.y + v.h) to = r.y + r.h - (v.y + v.h) + 6;
+    if (to !== this.listScroll) this.scrollTo(to, animate);
+  }
+
+  /** Molette (souris / pavé), glisser sur la liste (tactile, slop) ou sur la roue. */
+  private bindScroll(): () => void {
+    const s = this.scene;
+    const slop = () => cssToGame(s, 10);
+    const inLeft = (p: Phaser.Input.Pointer) => {
+      const q = this.toSheet(p.x, p.y);
+      const v = this.view;
+      return { q, list: q.x >= v.x && q.x <= v.x + v.w && q.y >= v.y && q.y <= v.y + v.h, wheel: q.x >= 0 && q.x < v.x + 6 && q.y >= v.y && q.y <= v.y + v.h };
+    };
+    const down = (p: Phaser.Input.Pointer) => {
+      if (this.closed || this.maxScroll <= 0) return;
+      const h = inLeft(p);
+      if (!h.list && !h.wheel) return;
+      this.scrollTween?.remove();
+      this.scrollTween = null;
+      this.wheelTarget = null;
+      this.drag = { y: p.y, scroll: this.listScroll, moved: h.wheel, wheel: h.wheel };
+    };
+    const move = (p: Phaser.Input.Pointer) => {
+      if (!this.drag || !p.isDown) return;
+      const dy = (p.y - this.drag.y) / (this.root.scaleX || 1);
+      if (!this.drag.moved && Math.abs(dy) < slop()) return;
+      this.drag.moved = true;
+      // la liste suit le doigt, et la roue entraîne le papier dans le même sens
+      this.applyScroll(this.drag.scroll - dy);
+    };
+    const up = () => {
+      if (!this.drag) return;
+      const moved = this.drag.moved;
+      // relâché au tour suivant : les « pointerup » des cases (émis avant) voient encore le glisser
+      s.time.delayedCall(0, () => (this.drag = null));
+      if (moved) this.scrollTo(this.snap(this.listScroll));
+    };
+    const wheel = (p: Phaser.Input.Pointer, _over: unknown, _dx: number, dy: number) => {
+      if (this.closed || !(p.event instanceof WheelEvent)) return;
+      const h = inLeft(p);
+      if (h.q.x > this.split || h.q.y < this.view.y - 30 || h.q.y > this.view.y + this.view.h) return;
+      p.event.preventDefault();
+      if (this.maxScroll <= 0 || !dy) return;
+      // un cran de molette souris (≈ 100 px) = une rangée ; le pavé tactile s'accumule
+      this.wheelAcc += dy;
+      const step = Math.abs(dy) >= 50 ? Math.sign(dy) : Math.abs(this.wheelAcc) >= 60 ? Math.sign(this.wheelAcc) : 0;
+      if (!step) return;
+      this.wheelAcc = 0;
+      // cran suivant / précédent, aligné sur une rangée (la butée basse compte pour un cran)
+      const from = (this.wheelTarget ?? this.snap(this.listScroll)) / this.rowH;
+      const to = (step > 0 ? Math.floor(from + 1e-6) + 1 : Math.ceil(from - 1e-6) - 1) * this.rowH;
+      this.wheelTarget = to >= this.maxScroll - this.rowH / 2 ? this.maxScroll : Phaser.Math.Clamp(to, 0, this.maxScroll);
+      this.scrollTo(this.wheelTarget);
+    };
+    s.input.on('pointerdown', down);
+    s.input.on('pointermove', move);
+    s.input.on('pointerup', up);
+    s.input.on('pointerupoutside', up);
+    s.input.on('wheel', wheel);
+    return () => {
+      s.input.off('pointerdown', down);
+      s.input.off('pointermove', move);
+      s.input.off('pointerup', up);
+      s.input.off('pointerupoutside', up);
+      s.input.off('wheel', wheel);
+    };
+  }
+
+  // ── roue crantée (laiton, encre) ───────────────────────────────────
+
+  /** Logement fixe de la roue : ombre, plaque rivetée sur la marge, repère d'encre. */
+  private drawSocket(g: Phaser.GameObjects.Graphics, R: number): void {
+    const hw = R + 5;
+    const hh = R + 24;
+    g.fillStyle(0x000000, 0.18);
+    g.fillRoundedRect(-hw + 2, -hh + 3, hw * 2, hh * 2, 6);
+    g.fillStyle(0xe4dac0, 1);
+    g.fillRoundedRect(-hw, -hh, hw * 2, hh * 2, 6);
+    g.lineStyle(1.5, INK_N, 0.55);
+    g.strokeRoundedRect(-hw, -hh, hw * 2, hh * 2, 6);
+    // rivets
+    g.fillStyle(0x8a7348, 1);
+    for (const [x, y] of [[-hw + 5, -hh + 5], [hw - 5, -hh + 5], [-hw + 5, hh - 5], [hw - 5, hh - 5]]) g.fillCircle(x, y, 1.8);
+    // creux sous la roue
+    g.fillStyle(0x3a3226, 0.35);
+    g.fillCircle(1, 2, R + 1);
+    // repère fixe (à droite, côté liste) : la dent alignée = la rangée en tête
+    g.fillStyle(hex(RED), 0.9);
+    g.fillTriangle(hw - 1, 0, hw + 6, -4, hw + 6, 4);
+  }
+
+  private drawGear(R: number): void {
+    const g = this.gear;
+    const n = GEAR_TEETH;
+    const rb = R - 4;
+    const pts: Phaser.Geom.Point[] = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      const w = Math.PI / n;
+      pts.push(new Phaser.Geom.Point(Math.cos(a - w * 0.62) * rb, Math.sin(a - w * 0.62) * rb));
+      pts.push(new Phaser.Geom.Point(Math.cos(a - w * 0.36) * R, Math.sin(a - w * 0.36) * R));
+      pts.push(new Phaser.Geom.Point(Math.cos(a + w * 0.36) * R, Math.sin(a + w * 0.36) * R));
+      pts.push(new Phaser.Geom.Point(Math.cos(a + w * 0.62) * rb, Math.sin(a + w * 0.62) * rb));
+    }
+    g.fillStyle(0xb8893a, 1);
+    g.fillPoints(pts, true);
+    g.lineStyle(1.6, INK_N, 0.9);
+    g.strokePoints(pts, true);
+    // flasque + reflet
+    g.fillStyle(0xd3a955, 1);
+    g.fillCircle(0, 0, rb - 3);
+    g.lineStyle(1, 0x7a5a22, 0.8);
+    g.strokeCircle(0, 0, rb - 3);
+    g.lineStyle(2, 0xf3d58c, 0.7);
+    g.beginPath();
+    g.arc(0, 0, rb - 6, Math.PI * 1.05, Math.PI * 1.45);
+    g.strokePath();
+    // ajours (3) : on voit la roue tourner
+    g.fillStyle(0x6a4e1e, 1);
+    for (let i = 0; i < 3; i++) {
+      const a = (i / 3) * Math.PI * 2 + Math.PI / 6;
+      g.fillCircle(Math.cos(a) * (rb * 0.52), Math.sin(a) * (rb * 0.52), Math.max(2.2, R * 0.16));
+    }
+    // moyeu + index rouge sur la jante
+    g.fillStyle(INK_N, 1);
+    g.fillCircle(0, 0, 3.4);
+    g.fillStyle(0xd3a955, 1);
+    g.fillCircle(0, 0, 1.4);
+    g.fillStyle(hex(RED), 1);
+    g.fillCircle(rb - 6, 0, 1.9);
+  }
+
+  /** Flèches d'encre au-dessus / au-dessous : estompées en butée. */
+  private drawChevrons(up: boolean, downOk: boolean): void {
+    const g = this.chevrons;
+    const R = this.wheelR;
+    const y = R + 14;
+    g.clear();
+    g.fillStyle(INK_N, up ? 0.8 : 0.18);
+    g.fillTriangle(-6, -y + 4, 6, -y + 4, 0, -y - 4);
+    g.fillStyle(INK_N, downOk ? 0.8 : 0.18);
+    g.fillTriangle(-6, y - 4, 6, y - 4, 0, y + 4);
   }
 
   /** Clic sur une pièce : on la lit, et on la pose en A (ou B) ; re-clic = on la retire. */
@@ -644,7 +978,7 @@ export class CarnetOverlay {
       if (!this.rejectedBag.length) this.rejectedBag.push(...Phaser.Utils.Array.Shuffle([...tl('carnet.rejected')]));
       this.result = { kind: 'rejected', line: this.rejectedBag.pop()! };
       stampClonk();
-      this.scene.tweens.add({ targets: this.dyn, x: 5, duration: 45, yoyo: true, repeat: 2, onComplete: () => this.dyn.setX(0) });
+      this.scene.tweens.add({ targets: [this.dyn, this.inner], x: 5, duration: 45, yoyo: true, repeat: 2, onComplete: () => (this.dyn.setX(0), this.inner.setX(0)) });
     } else {
       this.result = { kind: r.kind, d: r.deduction };
       this.slots = [null, null];
@@ -656,7 +990,11 @@ export class CarnetOverlay {
         stampClonk();
       }
     }
-    if (!this.closed) this.render();
+    if (!this.closed) {
+      this.render();
+      // conclusion fraîchement validée : on la ramène dans le champ
+      if (this.result?.kind !== 'rejected' && this.focus) this.reveal(this.focus);
+    }
   }
 
   close(): void {
@@ -664,6 +1002,12 @@ export class CarnetOverlay {
     this.closed = true;
     tracker(this.state, this.carnet).unread.clear();
     window.removeEventListener('keydown', this.onKey);
+    this.offInput();
+    this.scrollTween?.remove();
+    if (import.meta.env.DEV) delete (window as unknown as { __qjCarnet?: object }).__qjCarnet;
+    this.listRoot.clearMask(true);
+    this.listRoot.destroy();
+    this.maskG.destroy();
     this.root.destroy();
     this.onClose();
   }
