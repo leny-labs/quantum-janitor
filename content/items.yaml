@@ -128,7 +128,7 @@ items:
   - id: ticket_9848
     name: Ticket n° 9848
     icon: { color: "#ffd166", glyph: "9848" }
-    look: "Le ticket de M. Patience. « 9 848 ». L'afficheur en est au 9 847. Nous sommes les suivants. Depuis quarante et un ans, mais les suivants."
+    look: "Le ticket de M. Patience. « 9 848 ». L'afficheur en est au 9 847. Nous sommes les suivants. Nous l'étions déjà avant d'arriver."
     combine:
       ticket_douane: "Deux tickets ne font pas un rendez-vous. Je l'ai appris à mes dépens. Deux fois."
 
@@ -197,7 +197,7 @@ items:
   - id: tampon_annule
     name: Tampon « ANNULÉ »
     icon: { color: "#c0392b", glyph: "ANNULÉ" }
-    look: "Le tampon « ANNULÉ » de Mme Tamponnet. Quarante et un ans sur un crochet sans jamais servir. Le manche est encore propre. Ici, on n'annule jamais rien. Justement. (À suivre.)"
+    look: "Le tampon « ANNULÉ » de Mme Tamponnet. Toute une carrière sur un crochet sans jamais servir. Le manche est encore propre. Ici, on n'annule jamais rien. Justement. (À suivre.)"
     combine:
       encreur: "Encrer le tampon ANNULÉ sur l'encreur sec ? Il en ressort aussi sec. Annulé, mais à blanc."
       ticket_douane: "Annuler mon ticket de sortie ? Il ne me resterait plus que l'entrée. C'est déjà le problème de toute cette Station."
@@ -213,28 +213,26 @@ items:
         stop: true
       - say: "L'encreur de Mme Tamponnet. Feutre sec et craquelé, couleur lilas fatigué. « ENCRE OFFICIELLE — VOIR DÉLÉGUÉ DU PERSONNEL ». Il lui faudrait quelque chose de chaud et de syndiqué. (À suivre.)"
     combine:
-      # étape 28 : encreur + café → encreur imbibé ; le gobelet reste, vide (PERCO ressert sans limite)
+      # étape 28 : encreur + café → encreur imbibé ; il boit la moitié du gobelet à ras bord,
+      # l'autre moitié réveille Delaigue (st_gobelet_entame) : plus de retour PERCO pour un refill
       gobelet:
         - if: { flags: [st_encreur_cafe] }
           say: "Il est déjà imbibé. Encore un peu, et il deviendrait une boisson."
-          stop: true
-        - if: { flags: [st_gobelet_vide] }
-          say: "Le gobelet est vide. Une trace de café au fond, pas assez pour un encreur. PERCO ressert. Sans limite. Un à la fois."
           stop: true
         # cuillère optionnelle (dette #5) : même résultat mécanique avec ou sans ; avec, c'est le gag
         # « nécessité de service » (ramassée en cafétéria, plateau des tables), et elle est consommée
         # la branche « sans » passe AVANT le take : runList applique take tout de suite et
         # réévalue les if suivants sur l'état modifié (sinon les deux textes s'enchaînent)
         - if: { notItems: [cuillere] }
-          say: "narrateur: Gary verse le café tiède sur le feutre craquelé. Une goutte perle, hésite… puis le feutre se souvient. Il est sec depuis 1985, mais il reconnaît un café syndiqué. Il boit tout, d'une traite. Brun, luisant. Conforme."
+          say: "narrateur: Gary verse du café tiède sur le feutre craquelé. Une goutte perle, hésite… puis le feutre se souvient. Il est sec depuis la grève, mais il reconnaît un café syndiqué. Il boit, il boit… et s'arrête à mi-gobelet, repu. Brun, luisant. Conforme."
         - if: { items: [cuillere] }
-          say: "narrateur: Gary verse le café tiède sur le feutre craquelé et remue avec la cuillère de la cafétéria. Nécessité de service. L'encreur boit tout, avec un petit bruit de soulagement. Il devient brun, luisant. Conforme."
+          say: "narrateur: Gary verse du café tiède sur le feutre craquelé et remue avec la cuillère de la cafétéria. Nécessité de service. L'encreur boit la moitié du gobelet, avec un petit bruit de soulagement, et s'arrête, repu. Il devient brun, luisant. Conforme."
         - if: { items: [cuillere] }
           say: "narrateur: La cuillère, elle, a fondu à moitié. Elle a fait son service. Gary la dépose dans la corbeille, avec les honneurs."
           take: cuillere
         - set: st_encreur_cafe
-        - set: st_gobelet_vide
-        - say: "bob: De l'encre au café, Gary. Officiellement, c'est de l'encre. Officieusement, ça sent la pause."
+        - set: st_gobelet_entame
+        - say: "bob: De l'encre au café, Gary. Officiellement, c'est de l'encre. Officieusement, ça sent la pause. Et il reste un demi-gobelet. Pour quelqu'un qui dort, c'est une dose de cheval."
           mood: love
       fragment: "L'éclat sur l'encreur ? Il pourrait se remplir d'encre improbable. Elle tamponnerait des choses qui n'existent pas. Ici, ce serait mal vu."
       copies_dossier: "Les copies sont déjà « CONFORME ». Duplicata a léché son tampon. Pas besoin d'encre de plus."
@@ -256,7 +254,7 @@ items:
   - id: copies_dossier
     name: Copies du dossier « GARRY »
     icon: { color: "#e8e8e0", glyph: "×3" }
-    look: "Trois photocopies de ma fiche : « PLUNK, GARRY — STATUT : HUMAIN. INTÉRIMAIRE. RENOUVELABLE PAR PITIÉ. » Tampon brunâtre « CONFORME », qui sent le café de 1985. Pièces justificatives : à agrafer au formulaire."
+    look: "Trois photocopies de ma fiche : « PLUNK, GARRY — STATUT : HUMAIN. INTÉRIMAIRE. RENOUVELABLE PAR PITIÉ. » Tampon brunâtre « CONFORME », qui sent le café froid. Pièces justificatives : à agrafer au formulaire."
     combine:
       ticket_9848: "Agrafer le ticket de M. Patience à mon dossier ? Il a assez attendu pour nous deux. Je le laisse tranquille."
 
@@ -273,15 +271,15 @@ items:
       gobelet: "Tacher l'accord de café ? PERCO prendrait ça pour une provocation. Ou pour une signature. Dans les deux cas, je ne veux pas le savoir."
       tampon_annule: "Annuler l'accord de fin de grève ? On aurait une grève de la grève. Je n'ai pas le temps pour une grève de la grève."
 
-  # rempli à volonté par PERCO après la grève (« un à la fois ») ; vidé dans l'encreur, puis gardé par Delaigue
+  # servi à ras bord par PERCO à la reprise ; l'encreur en boit la moitié (st_gobelet_entame), Delaigue garde le reste
   - id: gobelet
     name: Gobelet de café tiède
     icon: { color: "#f6efdc", glyph: "CAFÉ" }
     look:
-      - if: { flags: [st_gobelet_vide] }
-        say: "Un gobelet en plastique, vide. Un rond de café au fond. PERCO le resservira. Un à la fois. Sans limite."
+      - if: { flags: [st_gobelet_entame] }
+        say: "Un gobelet à moitié plein. L'encreur a bu l'autre moitié. Ce qui reste fume encore un peu : pas assez pour désaltérer quelqu'un, largement assez pour le réveiller."
         stop: true
-      - say: "Un gobelet en plastique rempli de café tiède. Il fume à peine. Il a l'odeur exacte d'une réunion qui commence en retard."
+      - say: "Un gobelet en plastique rempli à ras bord de café tiède. Il fume à peine. Il a l'odeur exacte d'une réunion qui commence en retard."
     combine:
       plante: "Arroser M. Ficus au café ? Il est en plastique, Gary. Il n'a pas soif. Il a des principes."
       capsule: "Envoyer du café par tube au Conseil ? Ce n'est pas un vote, c'est un pot de départ. Pas encore."
@@ -290,7 +288,7 @@ items:
   - id: cuillere
     name: Cuillère en plastique
     icon: { color: "#e8dcc0", glyph: "CUILL" }
-    look: "Une cuillère en plastique beige de la cafétéria. « NE PAS EMPORTER — SAUF NÉCESSITÉ DE SERVICE ». Elle a survécu à quarante et un plats du jour. LE MÊME. Elle attend sa nécessité de service."
+    look: "Une cuillère en plastique beige de la cafétéria. « NE PAS EMPORTER — SAUF NÉCESSITÉ DE SERVICE ». Elle a survécu à tous les plats du jour. LE MÊME. Elle attend sa nécessité de service."
     combine:
       plante: "Rempoter M. Ficus à la cuillère ? Son pot est vissé au sol et sa terre est en plastique. Il n'y a rien à creuser. Il est très bien comme ça."
       fragment: "Touiller l'éclat ? Il tournerait dans l'autre sens. Et la cuillère avec. Et moi avec la cuillère."

@@ -17,7 +17,7 @@ background: "#1a1c2c"
 
 onFirstEnter:
   - say: "La Salle du Conseil. Une table ovale pour douze. Onze chaises vides. Sur la douzième, une dame très droite qui me regarde comme un amendement."
-  - say: "paraphe: Séance permanente. Vous êtes en retard de quarante et un ans. A.P."
+  - say: "paraphe: Séance permanente. Vous êtes en retard. Asseyez-vous où vous voulez : tout le monde est absent. A.P."
   - say: "bob: Elle a signé sa phrase, Gary. Avec ses initiales. Je crois qu'elle paraphe tout ce qu'elle dit."
     mood: suspicious
 
@@ -33,7 +33,7 @@ hotspots:
       - { rect: [520, 120, 240, 220], color: "#2a3a6a", stroke: "#f6efdc", text: "MME PARAPHE", size: 16 }
     look:
       - say: "Une dame grande et mince, chignon d'argent, pince-nez, veste bleu marine à col montant, écharpe de présidente. Elle tient un stylo-plume comme un sceptre."
-      - say: "Badge : « A. PARAPHE ». Devant elle, une pile de bulletins. Tous marqués « CONTRE ». Ils ont l'air d'avoir été remplis à l'avance. Depuis 1985."
+      - say: "Badge : « A. PARAPHE ». Devant elle, une pile de bulletins. Tous marqués « CONTRE ». Ils ont l'air d'avoir été remplis à l'avance. Il y a de la poussière sous l'encre."
     use: "Je lui tends la main. Elle la regarde, sort son stylo, et paraphe le dos de ma main. « A.P. » Je ne sais pas ce que je viens d'approuver."
     talk:
       - dialogue: st_paraphe
@@ -56,7 +56,7 @@ hotspots:
           say: "paraphe: Un tampon ? Sur une présidente, en pleine séance ? Hors ordre du jour. A.P."
           stop: true
         - say: "paraphe: Annuler quoi ? Il n'y a encore rien eu. Ici, on n'annule jamais rien. Surtout pas avant. A.P."
-      fragment: "paraphe: Un miracle ? Nous votons contre les miracles depuis 1985. Par principe. A.P."
+      fragment: "paraphe: Un miracle ? Nous votons contre les miracles. Par principe : un miracle, ça crée un précédent. A.P."
       capsule: "paraphe: Une capsule vide ne vote pas, jeune homme. Il faut une procuration dedans. Et un procurant. A.P."
     useItemDefault: "paraphe: Hors ordre du jour. A.P."
 
@@ -97,7 +97,7 @@ hotspots:
         - say: "narrateur: Gary pose M. Ficus sur le siège du membre honoraire. Le pot tombe pile dans le rond de poussière. Comme s'il revenait du déménagement."
           take: plante
           set: st_ficus
-        - say: "paraphe: Monsieur Ficus. Vous voilà. Vous êtes en retard de quarante et un ans, mais vous êtes présent. Présent. A.P."
+        - say: "paraphe: Monsieur Ficus. Vous voilà. Vous êtes en retard d'un déménagement, mais vous êtes présent. Je vous inscris. Au crayon, au cas où. A.P."
         - say: "bob: Il a dénoué un couloir, il siège au Conseil. M. Ficus a eu une meilleure carrière que nous deux réunis, Gary."
           mood: love
     useItemDefault: "Ce siège est réservé au membre honoraire. Ça, ce n'est pas un membre. C'est un objet."

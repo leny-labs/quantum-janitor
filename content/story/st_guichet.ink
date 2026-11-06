@@ -156,7 +156,7 @@ Elle note la phrase sur un formulaire de demande verbale. Le formulaire de deman
 guichard: Demande verbale 47bis enregistrée. Le lecteur de l'Aile B est prévenu. Vous avez jusqu'à 10 h 14.
 gary: Et après 10 h 14 ?
 guichard: Il n'est jamais 10 h 14.
-bob: Gary. Elle vient de nous rendre service. En quarante et un ans, c'est la première fois. Ne dis rien. Avance. # mood: love # set: st_acces_aile_b
+bob: Gary. Elle vient de nous rendre service. Je crois qu'elle ne s'en est pas rendu compte. Ne dis rien. Avance. # mood: love # set: st_acces_aile_b
 -> END
 
 // B-7/12 trouvé dans le couloir (st_formulaire) : Mme Guichard constate.
@@ -191,10 +191,10 @@ guichard: Remplissez-le. Tamponnez-le. Faites-le signer. En trois exemplaires. L
 
 // Dépôt du dossier complet au guichet (étape 42) : tube pneumatique vers la Direction.
 === st_guichard_depot ===
-Gary glisse le Formulaire B-7/12 dans la fente sous l'hygiaphone. Épais comme un vrai dossier, il passe de justesse. Mme Guichard lève les yeux. Pour la première fois en quarante et un ans.
+Gary glisse le Formulaire B-7/12 dans la fente sous l'hygiaphone. Épais comme un vrai dossier, il passe de justesse. Mme Guichard lève les yeux. Ils ne sont pas réglés pour cette hauteur : il leur faut une seconde pour faire le point.
 guichard: Cinq cases. Rempli. Tamponné. Signé. En trois exemplaires. Avec avis du Conseil.
 guichard: …À 10 h 12.
-Elle prend un tampon dans son tiroir. Un tampon « REÇU ». Il n'avait jamais servi non plus. CLONK.
+Elle prend un tampon dans son tiroir. Un tampon « REÇU ». Elle souffle dessus ; un petit nuage de poussière. CLONK.
 guichard: Dépôt enregistré. Le dossier part à la Direction. # take: formulaire # set: st_dossier_depose
 Elle roule le formulaire dans une capsule et la glisse dans le tube derrière elle. FLOUP.
 guichard: C'est pas moi qui décide. Mais c'est moi qui ai envoyé. Ça compte un peu, quand même.

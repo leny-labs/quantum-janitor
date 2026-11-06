@@ -73,7 +73,7 @@ hotspots:
       - if: { flags: [st_guichet_ouvert] }
         say: "10 h 12. La grande aiguille est passée, la trotteuse fait comme si de rien n'était. Elle a l'air un peu gênée d'avoir avancé."
         stop: true
-      - say: "Une horloge murale ronde. 10 h 11. La trotteuse avance, recule, avance, recule. Elle hésite entre la 59e seconde et la suivante. Depuis quarante et un ans."
+      - say: "Une horloge murale ronde. 10 h 11. La trotteuse avance, recule, avance, recule. Elle hésite entre la 59e seconde et la suivante. Elle n'a jamais tranché."
         set: st_voit_horloge
       - say: "Le guichet ouvre à 10 h 12. Il manque une minute. Une seule. Il faudrait quelque chose de vraiment improbable pour la franchir."
     use: "J'essaie de pousser la grande aiguille du bout du doigt. Elle est sous une vitre. Scellée. Tamponnée. Évidemment."
@@ -170,7 +170,7 @@ hotspots:
     rect: [930, 415, 150, 80]
     art:
       - { rect: [935, 430, 140, 50], color: "#7c8794", stroke: "#ffffff" }
-    look: "B.O.B. fixe Mme Guichard avec une profonde admiration. « Quarante et un ans de service sans jamais servir. C'est de l'art. »"
+    look: "B.O.B. fixe Mme Guichard avec une profonde admiration. « Toute une carrière de service sans jamais servir. C'est de l'art. »"
     talk:
       - dialogue: st_bob_guichet
     useItem:

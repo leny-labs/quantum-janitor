@@ -67,7 +67,7 @@ duplicata: Trois exemplaires. Trois exemplaires. Comme le veut l'usage.
 Il lèche un tampon, l'essuie sur sa manchette, et l'abat trois fois. Le tampon laisse une trace brunâtre, à peine lisible, qui sent le vieux café.
 duplicata: CONFORME. CONFORME. # mood: love
 gary: Le tampon marche ? Mme Tamponnet n'a plus d'encre, elle.
-duplicata: Je lèche les miens. Je lèche les miens. Il me reste du café de 1985 dans la moustache. Ne le dites à personne. À personne.
+duplicata: Je lèche les miens. Je lèche les miens. Il me reste du café du pot de départ de M. le Directeur dans la moustache. Ne le dites à personne. À personne.
 Le papier reste dans le bac. Il y en a pour des années.
 bob: Trois copies de toi, Gary. Toutes humaines. Maintenant, agrafe-les au formulaire. Case A, identité. # mood: calm
 -> END
@@ -95,7 +95,7 @@ Gary pose le Formulaire B-7/12 sur la vitre. Case A : cochée. Case B : « VU »
 duplicata: Un original ! Un original ! Vu et signé ! Vu et signé ! # mood: surprised
 La photocopieuse avale trois réclamations vierges du bac, chauffe, éclaire, recrache. Trois exemplaires du formulaire, encore tièdes.
 duplicata: Trois exemplaires. Trois exemplaires. # mood: love
-M. Duplicata lèche son tampon. Le café de 1985 de sa moustache suffit encore, de justesse. Il l'abat trois fois.
+M. Duplicata lèche son tampon. Le café du pot de départ, dans sa moustache, suffit encore. De justesse. Il l'abat trois fois.
 duplicata: CERTIFIÉS CONFORMES. CERTIFIÉS CONFORMES. Case C. Case C.
 Il agrafe les trois exemplaires derrière l'original. Le formulaire est maintenant épais comme un vrai dossier.
 gary: Quatre cases sur cinq.

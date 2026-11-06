@@ -66,9 +66,8 @@ const GENAI_VARIANTS: Record<string, IconVariant[]> = {
     { flags: ['ch1', 'ch1_seau_plein'], notFlags: ['ch1_eclat_stabilise'], icon: 'seau-eau' },
     { flags: ['ch1'], icon: 'seau-vide' },
   ],
-  // Acte III : accord signé p.o., gobelet vidé dans l'encreur, encreur imbibé de café
+  // Acte III : accord signé p.o., encreur imbibé de café (le gobelet n'est plus vidé : il en reste la moitié pour Delaigue)
   accord: [{ flags: ['st_accord_signe'], icon: 'accord-signe' }],
-  gobelet: [{ flags: ['st_gobelet_vide'], icon: 'gobelet-vide' }],
   encreur: [{ flags: ['st_encreur_cafe'], icon: 'encreur-cafe' }],
   // Acte IV : les deux éclats fusionnés (2/4096)
   fragment: [{ flags: ['st_eclat2'], icon: 'fragment2' }],

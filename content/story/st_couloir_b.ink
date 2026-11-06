@@ -66,7 +66,7 @@ Trois directions. Les trois ont un panneau « AILE B ». Un seul a une plante en
 === st_couloir_formulaire ===
 Gary ouvre le casier. Dedans : une étagère. Sur l'étagère : un seul formulaire, bien à plat, légèrement jauni, avec une étiquette « DERNIER EXEMPLAIRE — NE PAS UTILISER ».
 gary: Le Formulaire B-7/12. Le dernier. On l'a.
-bob: On l'a, Gary. Le premier formulaire retiré dans cette Station depuis 1985. Je vais pleurer. Je n'ai pas de glandes, mais je vais trouver. # mood: love
+bob: On l'a, Gary. Un formulaire. En main. Pas en rupture, pas en attente : en main. Je vais pleurer. Je n'ai pas de glandes, mais je vais trouver. # mood: love
 Gary le retourne. Au dos : cinq cases. Rempli. Tamponné. Signé. Conforme. Et une cinquième, sans titre.
 gary: Cinq cases. Aucune remplie.
 sylvie: AVIS À LA CLIENTÈLE. LE COULOIR B EST DÉNOUÉ. LES BUREAUX DE L'AILE B SONT OUVERTS AUX USAGERS MUNIS D'UN DOSSIER. MERCI DE VOTRE PATIENCE. # mood: love

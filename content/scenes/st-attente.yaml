@@ -53,7 +53,7 @@ hotspots:
     useItem:
       ticket_douane: "Lui proposer un échange ? Un ticket de douane contre son 9 848 ? Il ne fait pas d'échange. Il n'a même jamais fait la queue ailleurs."
       plante: "Je lui laisse M. Ficus pour lui tenir compagnie ? ...Non. M. Ficus vient avec moi. Je le sens. Il a un rôle à jouer."
-      badge: "« GARRY PLUNK ». Il ne regarde même pas. Il en a vu passer, des badges, en quarante et un ans."
+      badge: "« GARRY PLUNK ». Il ne regarde même pas. Il en a vu passer, des badges. Il les a tous vus repasser."
 
   - id: distributeur
     label: Distributeur de tickets
@@ -103,7 +103,7 @@ hotspots:
     rect: [1052, 56, 118, 116]
     look:
       - say: "« GUICHET — 10 H 12 – 10 H 14 ». Deux minutes d'ouverture. L'affiche est jaunie, cornée, punaisée quatre fois. Elle a vu passer beaucoup d'espoirs."
-      - say: "Et l'horloge, juste à côté, qui affiche 10 h 11. Ils se regardent en chiens de faïence depuis 1985."
+      - say: "Et l'horloge, juste à côté, qui affiche 10 h 11. Ils se regardent en chiens de faïence. Aucun des deux ne cède."
 
   - id: affiche_patience
     label: Affiche « LA PATIENCE EST UNE VERTU »
@@ -127,7 +127,7 @@ hotspots:
       - say: "Il ne lâche rien. Pas avec des doigts, en tout cas. Il faudrait quelque chose de plus... aspirant."
     useItem:
       ticket_douane: "Lui proposer un échange ? Un ticket de douane contre son 9 848 ? Il ne fait pas d'échange. Il n'a même jamais fait la queue ailleurs."
-      badge: "« GARRY PLUNK ». Il ne regarde même pas. Il en a vu passer, des badges, en quarante et un ans."
+      badge: "« GARRY PLUNK ». Il ne regarde même pas. Il en a vu passer, des badges. Il les a tous vus repasser."
 
 exits:
   - id: vers_sas

@@ -38,7 +38,7 @@ hotspots:
       - { rect: [365, 205, 550, 150], color: "#7a5a3a", stroke: "#2a2830", text: "RÉSERVÉ AU PERSONNEL", size: 14 }
     look:
       - if: { flags: [st_chatiere] }
-        say: "Le comptoir, vu d'ici, c'est-à-dire du côté du personnel. Il y a une chaise, une sonnette et une tasse. La tasse contient du café de 1985, solidifié en forme de tasse."
+        say: "Le comptoir, vu d'ici, c'est-à-dire du côté du personnel. Il y a une chaise, une sonnette et une tasse. La tasse contient du café d'une autre époque, solidifié en forme de tasse."
         stop: true
       - say: "Un comptoir en bois verni, une vitre, une sonnette. Une plaque rouge : « RÉSERVÉ AU PERSONNEL — ACCÈS INTERDIT ». Derrière, des étagères : des liasses de formulaires vierges. Des piles entières."
       - say: "Du papier. Du papier vierge. À deux mètres. Derrière une plaque."

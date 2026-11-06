@@ -6,7 +6,7 @@
 #   accord sur Delaigue (sans reclassement) → « UN ANIMAL NE SIGNE PAS » (garde-fou §6.24)
 #   accord sur Delaigue (reclassé + note, sans déduction) → Gary n'ose pas (les deux pièces ne se parlent pas encore)
 #   accord sur Delaigue (reclassé + note + carnet d_po)   → Gary signe « p.o. »         [st_accord_signe]
-#   gobelet plein sur Delaigue              → « …PRIME ? » réveillé, il garde le gobelet [st_delaigue_reveille] −gobelet
+#   gobelet (plein ou à moitié, après l'encreur) sur Delaigue → « …PRIME ? » réveillé, il garde le gobelet [st_delaigue_reveille] −gobelet
 #   formulaire sur Delaigue (réveillé + VU) → signature hiérarchique, ascenseur, quorum [st_case_d]
 id: st-sous-chef
 title: Bureau du Sous-Chef Adjoint
@@ -64,14 +64,13 @@ hotspots:
         - dialogue: st_souschef_signe
           set: st_accord_signe
       gobelet:
-        - if: { flags: [st_gobelet_vide] }
-          say: "Je lui agite le gobelet vide sous le nez. Il renifle. « …café… » Il sourit. Il se rendort. Il faut du vrai café. Pas un souvenir de café."
-          stop: true
         - if: { flags: [st_delaigue_reveille] }
           say: "delaigue: J'ai déjà le mien, merci. Je le garde. On ne sait jamais quand arrivera la prochaine grève."
           stop: true
+        # plein ou à moitié (l'encreur a bu sa part) : un seul passage PERCO suffit
         - dialogue: st_delaigue_reveil
           take: gobelet
+          unset: st_gobelet_entame
           set: st_delaigue_reveille
       formulaire:
         - if: { notFlags: [st_delaigue_reveille] }

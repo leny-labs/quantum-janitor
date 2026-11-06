@@ -1,7 +1,7 @@
 // Chapitre 1 « La Station Bureaucratique » : Bureau du Sous-Chef Adjoint (st-sous-chef), docs/CHAPTER1.md §6.23–25, §6.31–32.
 // M. Hubert Delaigue, sous-chef adjoint par intérim depuis 19 ans, dort sur son fax. Signe « p.o. » d'un chef absent depuis 1987.
 //   accord (YAML, reclassé + note lue)  → st_souschef_signe : Gary signe p.o.      [st_accord_signe]
-//   gobelet plein (YAML)                → st_delaigue_reveil : « …PRIME ? »       [st_delaigue_reveille] −gobelet
+//   gobelet (YAML, plein ou à moitié)   → st_delaigue_reveil : « …PRIME ? »       [st_delaigue_reveille] −gobelet
 //   formulaire (YAML, réveillé + VU)    → st_delaigue_signature : case D           [st_case_d]
 
 === st_delaigue ===
@@ -33,12 +33,17 @@ gary: Pour la première fois de ma vie, être intérimaire me sert à quelque ch
 bob: Tu as signé pour le remplaçant d'un chef absent, Gary. Je crois que c'est la définition exacte du pouvoir, ici. # mood: love
 -> END
 
-// Gobelet de café plein sur Delaigue (YAML : take gobelet, set st_delaigue_reveille).
+// Gobelet de café sur Delaigue, plein ou à moitié bu par l'encreur (YAML : take gobelet, set st_delaigue_reveille).
 === st_delaigue_reveil ===
 Gary approche le gobelet de café tiède sous le nez de M. Delaigue. Une narine frémit. Puis l'autre.
 delaigue: …café… CAFÉ ? …PRIME ? QUELLE PRIME ? # mood: surprised # shake
 M. Delaigue se redresse d'un bond. La feuille de fax se décolle de sa joue. Il attrape le gobelet à deux mains, comme un trophée.
-delaigue: Du café ! Du vrai ! Tiède ! La grève est finie ? Qui a signé ?
+{ has_flag("st_gobelet_entame"):
+    delaigue: …Il est à moitié vide. # mood: suspicious
+    gary: À moitié plein. Un encreur a bu l'autre moitié.
+    delaigue: Un demi-café pour un sous-chef ADJOINT. C'est exactement la dose réglementaire. Je n'en demandais pas tant. # mood: love
+}
+delaigue: Du vrai café ! Tiède ! La grève est finie ? Qui a signé ?
 gary: Vous. Enfin, moi. Pour vous. P.o.
 delaigue: Un intérimaire qui signe pour un intérimaire ! Cher collègue ! Depuis dix-neuf ans, je n'ai jamais été aussi bien remplacé ! # mood: love
 delaigue: Je garde le gobelet. On ne sait jamais quand arrivera la prochaine grève. # mood: calm

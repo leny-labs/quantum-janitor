@@ -169,7 +169,7 @@ hotspots:
       - if: { flags: [st_couloir_resolu] }
         say: "Un casier gris, porte fermée, étiquette : « STOCK B-7/12 — DERNIER EXEMPLAIRE ». Depuis que le couloir est droit, il est enfin à la bonne distance : à portée de main."
         stop: true
-      - say: "Un casier gris au bout du couloir : « STOCK B-7/12 ». Le dernier formulaire est là. À trois pas. Depuis quarante et un ans, à trois pas."
+      - say: "Un casier gris au bout du couloir : « STOCK B-7/12 ». Le dernier formulaire est là. À trois pas. Personne n'a jamais fait les trois pas."
     use:
       - if: { flags: [st_formulaire] }
         say: "Vide. J'ai vérifié deux fois. Puis une troisième, pour le principe."

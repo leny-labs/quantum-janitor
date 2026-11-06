@@ -90,7 +90,7 @@ hotspots:
     useItem:
       fragment: "Un expresso à l'improbabilité ? Il sortirait du thé. Ou un ours. Je ne prends pas le risque avant mon café. Je n'ai pas de café."
       ticket_douane: "La fente à pièces refuse le ticket. Elle refuse aussi les pièces, en fait. Solidarité."
-      plante: "M. Ficus et PERCO-JUNIOR se connaissent depuis quarante et un ans. Je ne vais pas les séparer deux fois."
+      plante: "M. Ficus et PERCO-JUNIOR ont partagé tous leurs plats du jour. Le même. Je ne vais pas les séparer deux fois."
       cuillere: "Remuer l'eau tiède de PERCO-JUNIOR ? Il la reprendrait avant. Il faut un vrai café. Un café syndiqué. Plus tard."
 
   # M. Ficus, à côté de PERCO-JUNIOR (devant, entre le comptoir et la machine) : payoff différé
@@ -105,11 +105,11 @@ hotspots:
       - { circle: [940, 385, 42], color: "#3e8f4a" }
     look:
       - say: "Un ficus en plastique, dans un pot, à côté de PERCO-JUNIOR. Étiquette : « M. FICUS — MEMBRE HON. DU C... ». La fin est effacée. Quelqu'un l'a beaucoup caressé. Il a l'air important. Pour une plante en plastique."
-      - say: "Ses feuilles sont tachées de café, côté machine. Quarante et un ans de vapeur d'eau tiède. Il est le seul client régulier de la cafétéria."
+      - say: "Ses feuilles sont tachées de café, côté machine. Des années de vapeur d'eau tiède. Il est le seul client régulier de la cafétéria."
     use:
       - give: plante
       - say: "narrateur: Gary prend M. Ficus sous le bras. Le pot est vissé au sol ; il ne le prend pas, seulement la plante. Elle se laisse faire. Elle est en plastique, comme tout le monde ici."
-      - say: "Je ne sais pas pourquoi. Il avait l'air de s'ennuyer, à côté de la machine. Les plantes en plastique, ça a de la mémoire. Celle-ci a quarante et un ans de café tiède à oublier."
+      - say: "Je ne sais pas pourquoi. Il avait l'air de s'ennuyer, à côté de la machine. Les plantes en plastique, ça a de la mémoire. Celle-ci a beaucoup de café tiède à oublier."
     useItem:
       fragment: "L'éclat sur le ficus ? Il pourrait se mettre à pousser. Ou à voter. On n'a pas le temps pour l'un ni pour l'autre."
 
@@ -123,12 +123,12 @@ hotspots:
       - { rect: [1180, 400, 15, 90], color: "#8d93a0" }
     look:
       - say: "Des tables rondes, vissées au sol, comme les chaises de la salle d'attente. Sur l'une, un couvert abandonné : une assiette de purée grise, une tranche de viande non identifiée figée dans sa sauce, des petits pois qui ont renoncé. Et un verre d'eau tiède, à côté."
-      - say: "D'après le menu, c'est le plat du jour. D'après l'odeur, c'est le plat de 1985."
+      - say: "D'après le menu, c'est le plat du jour. D'après l'odeur, c'est le plat du jour d'un autre jour."
       - if: { notItems: [cuillere], notFlags: [st_encreur_cafe] }
         say: "Et une cuillère en plastique, posée à côté de l'assiette. Le seul couvert de la Station qui n'a pas été tamponné. Elle n'attend que moi."
     use: "narrateur: Gary s'assoit une seconde. La chaise grince, puis affiche sur un petit écran : « TEMPS D'ATTENTE ESTIMÉ AVANT SERVICE : 41 ANS »."
     useItem:
-      cuillere: "Je la repose ? Non. Quelqu'un la tamponnerait « OBJET TROUVÉ » et elle attendrait quarante et un ans de plus."
+      cuillere: "Je la repose ? Non. Quelqu'un la tamponnerait « OBJET TROUVÉ » et elle attendrait la fin des temps. Ici, c'est un délai raisonnable."
 
   # cuillère du couvert abandonné (après `tables` : plus petite, prioritaire au clic) → Acte III :
   # remuer le café dans l'encreur sec (items.yaml, encreur + gobelet). Aussi cliquable DANS le zoom
@@ -144,7 +144,7 @@ hotspots:
     use:
       - give: cuillere
       - say: "narrateur: Gary glisse la cuillère dans sa poche de combinaison. Personne ne crie. La caisse ne fait même pas « tchac »."
-      - say: "Elle a survécu à quarante et un plats du jour. LE MÊME. Elle peut survivre à moi."
+      - say: "Elle a survécu à des milliers de plats du jour. LE MÊME. Elle peut survivre à moi."
       - say: "bob: Nécessité de service, Gary. Je témoignerai. Je suis un aspirateur, mon témoignage vaut une miette."
     useItem:
       fragment: "L'éclat sur la cuillère ? Elle se tordrait toute seule. On n'a pas besoin de magie, ici, on a besoin de remuer."

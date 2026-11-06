@@ -14,7 +14,7 @@ background: "#1e2a2a"
 
 onFirstEnter:
   - say: "Le Bureau des Tampons. Un mur entier de tampons, rangés sur des crochets. Des centaines. Ils ont tous l'air d'attendre leur tour."
-  - say: "narrateur: Derrière le comptoir, une dame aux cheveux roux tamponne le vide. CLONK. Elle regarde la feuille qui n'existe pas. CLONK."
+  - say: "narrateur: Derrière le comptoir, une dame aux cheveux roux tamponne le vide. CLONK. Elle regarde la feuille qui n'existe pas. Elle a l'air satisfaite."
   - say: "bob: Elle tamponne sans encre, Gary. C'est le métier le plus pur que j'aie jamais vu."
     mood: love
 
@@ -30,15 +30,15 @@ hotspots:
       - { rect: [155, 30, 970, 125], color: "#6a4a2a", stroke: "#2a2830", text: "412 TAMPONS", size: 16 }
     look:
       - say: "Le mur des tampons. Quatre cent douze, classés par humeur : « VU », « VU MAIS », « VU EN PASSANT », « REFUSÉ », « REFUSÉ AVEC REGRET », « REFUSÉ SANS REGRET »…"
-      - say: "Au milieu, un tampon rouge, seul sur son crochet. Étiquette : « ANNULÉ — NE SERT JAMAIS ». Il a l'air de s'ennuyer depuis quarante et un ans."
+      - say: "Au milieu, un tampon rouge, seul sur son crochet. Étiquette : « ANNULÉ — NE SERT JAMAIS ». Il a l'air de s'ennuyer ferme. Les autres, au moins, servent de temps en temps."
         if: { notFlags: [st_tamponnet] }
       - say: "Un crochet est vide, au milieu : « ANNULÉ — NE SERT JAMAIS ». Il est dans ma poche. Il sert à quelque chose, maintenant. Il ne le sait pas encore."
         if: { flags: [st_tamponnet] }
     use:
       - say: "Je décroche un tampon au hasard : « VU EN RÊVE ». Je le raccroche. On ne joue pas avec l'humeur des gens."
-      - say: "tamponnet: CLONK ! Pas touche ! CLONK. Chacun son crochet."
+      - say: "tamponnet: Pas touche ! Chacun son crochet."
     useItem:
-      tampon_annule: "Le raccrocher ? Il vient de sortir pour la première fois depuis quarante et un ans. Laissons-lui un peu d'air."
+      tampon_annule: "Le raccrocher ? Il prend l'air. Il n'a pas l'habitude : il est encore tout raide. Laissons-le s'acclimater."
       fragment: "L'éclat devant le mur ? Les tampons risquent de s'aligner en phrase. Et je n'ai pas envie de savoir ce qu'ils pensent."
 
   - id: tamponnet
@@ -52,13 +52,13 @@ hotspots:
     use:
       - say: "Je tends la main pour lui dire bonjour."
       - say: "narrateur: CLONK. Mme Tamponnet tamponne la main de Gary. Rien ne s'imprime. Elle a l'air un peu triste."
-      - say: "tamponnet: CLONK. Bonjour. CLONK. Il y a quarante et un ans, vous seriez reparti « VU ». Aujourd'hui, vous repartez… comme vous êtes venu."
+      - say: "tamponnet: Bonjour ! Avant la grève, vous seriez reparti « VU ». Aujourd'hui, vous repartez… comme vous êtes venu."
     talk:
       - dialogue: st_tamponnet
     useItem:
       formulaire:
         - if: { flags: [st_case_b] }
-          say: "tamponnet: Déjà VU ! CLONK. Je ne tamponne pas deux fois la même case. Enfin si, mais seulement pour le plaisir. Pas sur un dossier officiel."
+          say: "tamponnet: Déjà VU ! Je ne tamponne pas deux fois la même case. Enfin si, mais seulement pour le plaisir. Pas sur un dossier officiel."
           stop: true
         # étape 29 (Acte III) : encre au café + case A → « VU »
         - if: { flags: [st_tamponnet_encre, st_case_a] }
@@ -78,17 +78,17 @@ hotspots:
           take: encreur
           set: st_tamponnet_encre
           stop: true
-        - say: "tamponnet: CLONK ? Il est sec, mon petit. Sec comme un règlement intérieur. CLONK."
+        - say: "tamponnet: Il est sec, mon petit. Sec comme un règlement intérieur."
           mood: sad
         - say: "tamponnet: L'encre, c'était le café. Pas de café, pas d'encre. Il faudrait l'imbiber de quelque chose de chaud et de syndiqué."
       tampon_annule:
-        - say: "tamponnet: Gardez-le ! CLONK. Je vous l'ai donné. Ici, on ne reprend jamais rien. On n'annule jamais rien. CLONK."
-      badge: "tamponnet: CLONK ! Un badge ! Ça se tamponne très bien, un badge. Avec de l'encre. CLONK."
-      copies_dossier: "tamponnet: Des copies ! « CONFORME » ! C'est M. Duplicata, ça. Il lèche ses tampons au café, lui. Le chanceux. CLONK."
-      plante: "tamponnet: Oh ! M. Ficus ! Il siégeait au Conseil, avant le déménagement. CLONK. On ne le tamponne pas, il est en plastique. Ça glisse."
-      fragment: "tamponnet: Ça brille ! CLONK. Ça ne se tamponne pas, ça brille. Je ne tamponne que ce qui est mat."
+        - say: "tamponnet: Gardez-le ! Je vous l'ai donné. Ici, on ne reprend jamais rien. On n'annule jamais rien."
+      badge: "tamponnet: Un badge ! Ça se tamponne très bien, un badge. Avec de l'encre."
+      copies_dossier: "tamponnet: Des copies ! « CONFORME » ! C'est M. Duplicata, ça. Il lèche ses tampons au café, lui. Le chanceux."
+      plante: "tamponnet: Oh ! M. Ficus ! Il siégeait au Conseil, avant le déménagement. On ne le tamponne pas, il est en plastique. Ça glisse."
+      fragment: "tamponnet: Ça brille ! Ça ne se tamponne pas, ça brille. Je ne tamponne que ce qui est mat."
       liasse: "tamponnet: Des réclamations vierges ! CLONK CLONK. Je les tamponnerais toutes, si j'avais de l'encre."
-    useItemDefault: "tamponnet: CLONK. Je tamponne tout ce qu'on me tend. CLONK. Mais sans encre, ça ne laisse que de l'espoir."
+    useItemDefault: "tamponnet: CLONK. Je tamponne tout ce qu'on me tend. Mais sans encre, ça ne laisse que de l'espoir."
 
   - id: encreur
     label: Encreur sec
@@ -100,7 +100,7 @@ hotspots:
     look:
       - say: "Un encreur en fer-blanc, couvercle ouvert. Le feutre est sec, craquelé, couleur lilas fatigué. Une étiquette : « ENCRE OFFICIELLE — VOIR DÉLÉGUÉ DU PERSONNEL »."
     use:
-      - say: "tamponnet: Prenez-le, prenez-le ! CLONK. Il ne me sert plus à rien. Si un jour vous trouvez de l'encre… vous savez où me trouver. Là. Toujours là."
+      - say: "tamponnet: Prenez-le, prenez-le ! Il ne me sert plus à rien. Si un jour vous trouvez de l'encre… vous savez où me trouver. Là. Toujours là."
       - say: "J'empoche l'encreur sec. Il est léger comme une promesse non tenue."
         give: encreur
         set: st_encreur_pris

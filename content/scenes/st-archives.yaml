@@ -14,7 +14,7 @@ icon: corridor
 background: "#24202c"
 
 onFirstEnter:
-  - say: "Les Archives Centrales. Des rayonnages jusqu'au plafond. Puis, d'après la poussière, au-delà du plafond. Une odeur de papier qui attend depuis 1985."
+  - say: "Les Archives Centrales. Des rayonnages jusqu'au plafond. Puis, d'après la poussière, au-delà du plafond. Une odeur de papier qui attend quelque chose. Probablement du papier."
   - say: "duplicata: Bonjour. Bonjour. Archives Centrales. Archives Centrales. On ne délivre que des copies. Que des copies."
   - say: "bob: Il a dit tout deux fois, Gary. Tu crois qu'il est en panne ? Je pourrais comprendre. Je suis souvent en panne."
     mood: suspicious
@@ -110,7 +110,7 @@ hotspots:
       - if: { flags: [st_papier] }
         say: "La photocopieuse. Le bac est plein de liasses de réclamations vierges : elle a du papier pour des années. Le voyant « EN PANNE DE PAPIER » s'est éteint, déçu."
         stop: true
-      - say: "Une photocopieuse beige, grosse comme une voiture de 1985. Un panneau sur le capot : « EN PANNE DE PAPIER ». Le bac est vide. Vide depuis assez longtemps pour avoir une odeur."
+      - say: "Une photocopieuse beige, grosse comme une voiture de fonction. Un panneau sur le capot : « EN PANNE DE PAPIER ». Le bac est vide. Vide depuis assez longtemps pour avoir une odeur."
       - if: { flags: [st_dossier_trouve] }
         say: "duplicata: Sans papier, pas de copie. Sans papier, pas de copie. Le papier, c'est au Service des Réclamations. On n'y entre pas. On n'y entre pas."
     use:

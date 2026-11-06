@@ -66,7 +66,7 @@ tache de café et sa main tremble).
 | **SYLVIE** | `sylvie` | **Reine du règlement**, Directrice Générale de l'Existence. Voix des haut-parleurs, des bornes, puis en personne (trône-photocopieuse, acte IV). | MAJUSCULES ; cite des articles qui n'existent pas encore (« ARTICLE 0 : TOUT EST INTERDIT SAUF LE RESTE ») ; craque une seule fois (§8). |
 | **Mme Odile Guichard** | `guichard` | Guichet d'accueil. Ne travaille que de 10 h 12 à 10 h 14. Remet le Formulaire et en énonce les 5 cases. | « C'est pas moi qui décide. » Mange un sandwich depuis 41 ans (le même). |
 | **M. Régis Duplicata** | `duplicata` | Archiviste. Ne délivre que des copies ; certifie « CONFORME ». | **Répète tout deux fois.** Deux fois. Myope, photocopie ses propres lunettes. |
-| **Mme Gisèle Tamponnet** | `tamponnet` | Bureau des Tampons, 412 tampons au mur, encreur sec depuis la grève. | Tamponne tout ce qu'on lui tend, y compris les mains. Parle en onomatopées de tampons (« CLONK. Bonjour. CLONK. »). |
+| **Mme Gisèle Tamponnet** | `tamponnet` | Bureau des Tampons, 412 tampons au mur, encreur sec depuis la grève. | Tamponne tout ce qu'on lui tend, y compris les mains. Parle en onomatopées de tampons : un CLONK par beat, pas par phrase (dette #5). Avec Mme Guichard, seule à porter le compte « quarante et un ans / 1985 » ; les autres PNJ réagissent chacun à leur façon. |
 | **M. Hubert Delaigue** | `delaigue` | Sous-chef adjoint **par intérim** depuis 19 ans ; dort sur son fax. Signe « p.o. » d'un chef absent depuis 1987. | Murmure « …réunion… » en dormant ; se réveille au mot « prime » ou à l'odeur du café. Solidarité instantanée d'intérimaire avec Gary. |
 | **PERCO** | `perco` | Machine à café syndiquée, **déléguée du personnel**, en grève illimitée. Ses gobelets font le piquet. | Voix de percolateur militant, slogans (« CAFÉ TIÈDE, COLÈRE CHAUDE ! »), crachote de la vapeur quand on la contredit. |
 | **Mme Augustine Paraphe** | `paraphe` | Présidente du Conseil (seule membre présente). Vote contre « par principe ». | Paraphe chaque phrase (« … A.P. »). Exige le quorum. |
@@ -175,7 +175,7 @@ l'arbre §6.
 | Capsule pneumatique | `capsule` | 18 (réclamations) | 37 (PERCO → Conseil) | **19** | Vote par procuration. |
 | Copies du dossier Plunk | `copies_dossier` | 19 (archives) | 20 (combinaison avec le formulaire) | 1 | Remplit la case A. |
 | Accord de pause P-15 | `accord` | 22 (pause) | 25 (signature p.o.), 26 (PERCO) | 3 / 4 | Bloqué tant que Gary est un animal (dépendance croisée). |
-| Gobelet de café tiède | `gobelet` | 27 (PERCO) | 28 (combinaison), 31 (Delaigue) | 1 / 4 | Rempli deux fois (étapes 27 et 30) ; Delaigue le garde. |
+| Gobelet de café tiède | `gobelet` | 27 (PERCO) | 28 (combinaison), 31 (Delaigue) | 1 / 4 | Servi une fois, à ras bord (27) : moitié pour l'encreur (28), moitié pour Delaigue (31), qui le garde. |
 | Permis de quitter la dimension | `permis` | 43 (SYLVIE) | 46 (quai) | 3 | Rendu du badge au même moment. |
 
 **Total : 15 objets** (2 hérités + 13 nouveaux). **En poche simultanément** : 2–5 à
@@ -267,14 +267,19 @@ PROPRIÉTAIRE : B.O.B. » ; le vaisseau part en fourrière ; SYLVIE annonce que
 │      me sert à quelque chose. »                                         [st_accord_signe]
 │  26. Pause : accord signé sur PERCO → fin de grève, les gobelets rentrent au
 │      dépôt.                                                     [st_greve_finie] −accord
-│  27. Pause : parler à PERCO → café tiède dans un gobelet (« UN À LA FOIS »). +gobelet
-│  28. Combiner encreur + gobelet → encreur imbibé de café (brun, « conforme ») ; si Gary
-│      a la cuillère, il remue avec et elle fond (bonus).  [st_encreur_cafe] (−cuillere)
+│  27. Pause : parler à PERCO → café tiède « UN À LA FOIS », mais à ras bord (« C'EST LA
+│      REPRISE : RATTRAPAGE DE PAUSE »). Un seul passage : de quoi nourrir l'encreur ET
+│      réveiller Delaigue.                                                       +gobelet
+│  28. Combiner encreur + gobelet → encreur imbibé de café (brun, « conforme »), il boit
+│      la moitié du gobelet ; si Gary a la cuillère, il remue avec et elle fond (bonus).
+│                                           [st_encreur_cafe, st_gobelet_entame] (−cuillere)
 │  29. Tampons : encreur sur Tamponnet → CLONK de joie ; formulaire sur Tamponnet →
 │      « VU » (requiert case A).                                   [st_case_b] −encreur
-│  30. Pause : gobelet sur PERCO → 2e café.                                  [st_cafe2]
-│  31. Sous-chef : gobelet sur Delaigue → « …PRIME ? QUELLE PRIME ? » Réveillé ; il
-│      garde le gobelet.                                     [st_delaigue_reveille] −gobelet
+│  30. (Supprimé, dette #5 : plus de retour Pause pour resservir le gobelet ; le demi-gobelet
+│      suffit. Gobelet sur PERCO → « IL EN RESTE LA MOITIÉ », rien ne change.)
+│  31. Sous-chef : demi-gobelet sur Delaigue → « …PRIME ? » ; « à moitié vide / à moitié
+│      plein » : « la dose réglementaire » pour un sous-chef ADJOINT. Réveillé ; il garde le
+│      gobelet.                           [st_delaigue_reveille] −gobelet (−st_gobelet_entame)
 │  32. Sous-chef : formulaire sur Delaigue → signature hiérarchique (requiert « VU ») ;
 │      il explique l'ascenseur (« il ne prend que les dossiers complets aux trois
 │      quarts ») et le quorum du Conseil.                                     [st_case_d]
@@ -318,7 +323,7 @@ PROPRIÉTAIRE : B.O.B. » ; le vaisseau part en fourrière ; SYLVIE annonce que
 1. **Identité** : ticket 9848 (6) → guichet (9) → couloir (12) → badge aux archives (14)
    → papier volé par la chatière (17–18) → copies (19) → case A / reclassement (20).
 2. **Grève** : reclassement (20) → signature p.o. (25) → fin de grève (26) → café (27)
-   → encre (28) → « VU » (29) → 2e café (30) → Delaigue réveillé (31) → signature (32).
+   → encre, moitié du gobelet (28) → « VU » (29) → Delaigue réveillé à l'autre moitié (31) → signature (32).
 3. **Quorum** : plante prise à l'acte I (5) → Conseil (36) ; capsule prise à l'acte II
    (18) → PERCO, qui ne vote que si la grève est finie (37) ; tampon ANNULÉ (15) →
    égalité brisée (39).
@@ -607,18 +612,19 @@ Checkpoint en salle, cases A, B, D, C remplies : `ChapterDef.endFlag` du ch1 = *
   de la grève), piquet de gobelets (« BRISEUR DE GRÈVE ! », disparaît), panneau syndical, frigo (graine ch.4 :
   le yaourt « PARTI FONDER QUELQUE CHOSE »), tube pneumatique (Acte IV). 22. parler → `st_greve_connue` ;
   panneau → +`accord` (`st_accord_pris`) ; 26. accord signé → −accord, `st_greve_finie` ; 27. parler → +`gobelet`
-  (« un à la fois », sans limite : PERCO en redonne un si on n'en a plus) ; 30. gobelet vide → `st_cafe2`.
+  à ras bord (« un à la fois », sans limite : PERCO en redonne un si on n'en a plus) ; gobelet entamé sur
+  PERCO → « IL EN RESTE LA MOITIÉ » (pas de refill, l'ancien `st_cafe2` a disparu).
   Fausse piste : `fragment` → café froid, « PRÉAVIS RECONDUIT ».
 - **`st-sous-chef`** (`stSousChef`, Ink `st_sous_chef.ink`) : placard à balais, M. Delaigue (billboard GenAI 0
   endormi · 1 réveillé, `st_delaigue_reveille` ; portrait endormi + variante `delaigue-reveille`), plaque « p.i. »
   et note de délégation (GenAI). 23. note → `st_voit_delegation` ; 24. accord sans reclassement → « UN ANIMAL NE
   SIGNE PAS » ; 25. accord (reclassé + note + déduction D4 `st_deduit_po`, §9.2) → `st_accord_signe` ;
-  sans D4, Gary reprend l'accord ; 31. gobelet plein → −gobelet,
-  `st_delaigue_reveille` ; 32. formulaire (réveillé + « VU ») → `st_case_d`.
+  sans D4, Gary reprend l'accord ; 31. gobelet (plein, ou à moitié après l'encreur) → −gobelet,
+  `st_delaigue_reveille` (−`st_gobelet_entame`) ; 32. formulaire (réveillé + « VU ») → `st_case_d`.
 - **Tampons** : 29. `encreur` imbibé sur Tamponnet → −encreur, `st_tamponnet_encre` ; formulaire → `st_case_b`.
   **Archives** : 33. formulaire sur la photocopieuse (`st_case_d` + `st_papier`) → `st_case_c`.
-- **Combinaison** 28 : `encreur` + `gobelet` → `st_encreur_cafe` + `st_gobelet_vide` (le gobelet reste). `cuillere` optionnelle (dette #5) : si en poche (prise à la cafétéria), Gary remue avec, elle fond à moitié (−`cuillere`) ; sinon le café imbibe directement. Pas de backtrack cafétéria.
-  Icônes à variantes (Studio `GENAI_VARIANTS`) : `accord-signe`, `gobelet-vide`, `encreur-cafe`.
+- **Combinaison** 28 : `encreur` + `gobelet` → `st_encreur_cafe` + `st_gobelet_entame` (l'encreur boit la moitié, le reste va à Delaigue : un seul passage Pause après la grève). `cuillere` optionnelle (dette #5) : si en poche (prise à la cafétéria), Gary remue avec, elle fond à moitié (−`cuillere`) ; sinon le café imbibe directement. Pas de backtrack cafétéria.
+  Icônes à variantes (Studio `GENAI_VARIANTS`) : `accord-signe`, `encreur-cafe` (le gobelet garde son icône pleine ; `gobelet-vide.png` n'est plus utilisée).
 - **B.O.B.** : `st_bob_acte3.ink` (après la case A ; reprend Tamponnet/« VU » de l'Acte II). **Carnet** :
   `greve_p15`, `delegation`, `greve_finie`, `delaigue_dort`, `cases_bdc` ; **déduction D4** `d_po`
   (`delegation` + `greve_p15` → `st_deduit_po`, §9.2). **`repair.ts`** : accord rendu tant

@@ -108,12 +108,12 @@ bob: Mme Tamponnet a de l'encre, Gary. Montre-lui le formulaire. Case B : « VU 
 -> END
 
 = reveil
-{ has_flag("st_cafe2") && has_item("gobelet"):
-    bob: Tu as un deuxième café, Gary. Tout chaud. Enfin, tiède. Il y a quelqu'un qui dort et qui en a besoin plus que l'encreur. # mood: love
+{ has_flag("st_gobelet_entame") && has_item("gobelet"):
+    bob: Il te reste un demi-gobelet, Gary. L'encreur a eu sa part. Il y a quelqu'un qui dort, et qui en a besoin plus que toi. # mood: love
     -> END
 }
 { st_bob_acte3.reveil > 1:
-    bob: Un gobelet plein, Gary. PERCO te ressert sans limite. Apporte le café sous le nez de M. Delaigue. # mood: love
+    bob: Du café, Gary. Ton gobelet, ou un autre chez PERCO. Apporte-le sous le nez de M. Delaigue. # mood: love
 - else:
     bob: Il faut une signature hiérarchique, Gary, et la hiérarchie dort. Il se réveille au mot « prime »… ou à l'odeur du café. Les primes, ici, n'existent pas. # mood: suspicious
 }

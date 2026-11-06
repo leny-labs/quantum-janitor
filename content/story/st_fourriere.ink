@@ -26,7 +26,7 @@ Il lève son tampon « ENLÈVEMENT », hésite, le repose. Il prend un carnet ja
 remorque: Amende : 4 096 crédits. Stationnement en travers d'une dimension. Avec circonstances aggravantes : vous l'avez fait exprès d'arriver. # mood: suspicious
 Il glisse le papier jaune sous l'essuie-glace de la capsule. Puis il garde le ticket de douane : « pièce de sortie ».
 gary: Je n'ai pas de crédits.
-remorque: Personne n'a de crédits. C'est pour ça que la fourrière est pleine. Une amende, ça se paie. Ou ça s'annule, si c'est réglementaire. En quarante et un ans, je n'ai jamais rien vu de réglementaire. # mood: calm
+remorque: Personne n'a de crédits. C'est pour ça que la fourrière est pleine. Une amende, ça se paie. Ou ça s'annule, si c'est réglementaire. Depuis que je remorque, j'ai jamais rien vu de réglementaire. Même pas moi. # mood: calm
 -> END
 
 // Tampon ANNULÉ sur l'amende (YAML : set st_vaisseau_libere).

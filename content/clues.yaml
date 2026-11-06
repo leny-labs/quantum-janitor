@@ -12,8 +12,8 @@ clues:
     when: { flags: [st_ticket_9848] }
     title: { fr: "Ticket n° 9 848", en: "Ticket no. 9,848" }
     text:
-      fr: "Le ticket de M. Patience, aspiré par B.O.B. C'est le suivant. Ça fait quarante et un ans que c'est le suivant."
-      en: "Mr Patience's ticket, vacuumed up by B.O.B. It's next. It has been next for forty-one years."
+      fr: "Le ticket de M. Patience, aspiré par B.O.B. C'est le suivant. Ça a toujours été le suivant."
+      en: "Mr Patience's ticket, vacuumed up by B.O.B. It's next. It has always been next."
 
   - id: afficheur_9847
     icon: display
@@ -207,8 +207,8 @@ clues:
     when: { flags: [st_greve_finie] }
     title: { fr: "Fin de la grève", en: "End of the strike" }
     text:
-      fr: "Accord P-15 signé p.o., remis à PERCO : fin du conflit. Elle sert à nouveau du café tiède, « un à la fois », sans limite. L'encre, c'était le café."
-      en: "Agreement P-15 signed p.p., handed to PERCO: dispute over. She serves lukewarm coffee again, “one at a time”, no limit. The ink was coffee."
+      fr: "Accord P-15 signé p.o., remis à PERCO : fin du conflit. Elle sert à nouveau du café tiède, « un à la fois », mais à ras bord pour la reprise. L'encre, c'était le café."
+      en: "Agreement P-15 signed p.p., handed to PERCO: dispute over. She serves lukewarm coffee again, “one at a time”, but filled to the brim for the restart. The ink was coffee."
 
   - id: delaigue_dort
     icon: speech

@@ -284,9 +284,9 @@ export const CHAPTERS: ChapterDef[] = [
       { section: 'Acte III · fin de la grève, encre au café' },
       { go: 'st-pause' },
       { useItem: ['accord', 'perco'] }, // FIN DU CONFLIT (st_greve_finie) −accord
-      { talk: 'perco' }, // café tiède, un à la fois : +gobelet
-      { combine: ['encreur', 'gobelet'] }, // remué à la cuillère (optionnelle) : encreur imbibé (st_encreur_cafe), −cuillere, gobelet vide (st_gobelet_vide)
-      { useItem: ['gobelet', 'perco'] }, // resservi (st_cafe2)
+      { talk: 'perco' }, // café tiède « un à la fois », mais à ras bord (reprise) : +gobelet
+      { combine: ['encreur', 'gobelet'] }, // remué à la cuillère (optionnelle) : encreur imbibé (st_encreur_cafe), −cuillere, il boit la moitié (st_gobelet_entame)
+      { useItem: ['gobelet', 'perco'] }, // il en reste la moitié : pas de refill (rien ne change)
       { go: 'st-couloir-b' },
       { go: 'st-tampons' },
       { useItem: ['encreur', 'tamponnet'] }, // CLONK de joie (st_tamponnet_encre) −encreur
@@ -295,7 +295,7 @@ export const CHAPTERS: ChapterDef[] = [
       { go: 'st-couloir-b' },
       { go: 'st-sous-chef' },
       { useItem: ['formulaire', 'delaigue'] }, // il dort : pas de signature
-      { useItem: ['gobelet', 'delaigue'] }, // …PRIME ? Réveillé, il garde le gobelet (st_delaigue_reveille) −gobelet
+      { useItem: ['gobelet', 'delaigue'] }, // demi-café, « dose réglementaire » : …PRIME ? Réveillé, il garde le gobelet (st_delaigue_reveille) −gobelet
       { useItem: ['formulaire', 'delaigue'] }, // case D, signature « p.i. » ; ascenseur et quorum (st_case_d)
       { talk: 'bob' }, // « en trois exemplaires » : Duplicata
       { go: 'st-couloir-b' },

@@ -105,12 +105,12 @@ async function main() {
         const caseA = checkpoints.find((c) => c.label === 'combiner copies_dossier + formulaire');
         if (!caseA || !caseA.save.flags.includes('st_reclasse') || caseA.save.items.includes('copies_dossier')) throw new Error('Acte II : case A sans reclassement ou copies non agrafées');
         // Acte III (docs/CHAPTER1.md §6.22–33) : grève → p.o. → café → encre → VU → réveil → signature → 3 exemplaires
-        for (const f of ['st_greve_connue', 'st_voit_delegation', 'st_accord_signe', 'st_greve_finie', 'st_encreur_cafe', 'st_cafe2', 'st_tamponnet_encre', 'st_case_b', 'st_delaigue_reveille', 'st_case_d', 'st_case_c']) if (!state.hasFlag(f)) throw new Error(`Acte III : flag ${f} absent`);
+        for (const f of ['st_greve_connue', 'st_voit_delegation', 'st_accord_signe', 'st_greve_finie', 'st_encreur_cafe', 'st_tamponnet_encre', 'st_case_b', 'st_delaigue_reveille', 'st_case_d', 'st_case_c']) if (!state.hasFlag(f)) throw new Error(`Acte III : flag ${f} absent`);
         for (const gone of ['accord', 'encreur', 'gobelet', 'cuillere']) if (s3.hasItem(gone)) throw new Error(`Acte III : « ${gone} » encore en poche à la fin`);
         // encreur + gobelet : la cuillère est optionnelle (dette #5). Sans elle, l'encreur s'imbibe quand même ;
         // avec, même résultat + gag « nécessité de service », et elle est consommée.
         for (const spoon of [false, true]) {
-          const sim = GameState.fromSave({ ...c3.save, flags: c3.save.flags.filter((f) => f !== 'st_encreur_cafe' && f !== 'st_gobelet_vide'), items: spoon ? ['encreur', 'gobelet', 'cuillere'] : ['encreur', 'gobelet'] });
+          const sim = GameState.fromSave({ ...c3.save, flags: c3.save.flags.filter((f) => f !== 'st_encreur_cafe' && f !== 'st_gobelet_entame'), items: spoon ? ['encreur', 'gobelet', 'cuillere'] : ['encreur', 'gobelet'] });
           const sets: string[] = [];
           const takes: string[] = [];
           const says: string[] = [];
@@ -127,9 +127,18 @@ async function main() {
           const fondu = says.some((t) => t.includes('fondu à moitié'));
           const souvient = says.some((t) => t.includes('le feutre se souvient'));
           if (spoon ? !(remue && fondu && !souvient) : (remue || fondu || !souvient)) throw new Error(`Acte III : encreur + gobelet ${tag} cuillère, textes incohérents (remue=${remue}, fondu=${fondu}, souvient=${souvient})`);
-          for (const f of ['st_encreur_cafe', 'st_gobelet_vide']) if (!sets.includes(f)) throw new Error(`Acte III : encreur + gobelet ${tag} cuillère doit poser ${f}`);
+          for (const f of ['st_encreur_cafe', 'st_gobelet_entame']) if (!sets.includes(f)) throw new Error(`Acte III : encreur + gobelet ${tag} cuillère doit poser ${f}`);
           if (spoon ? !takes.includes('cuillere') : takes.length) throw new Error(`Acte III : encreur + gobelet ${tag} cuillère, consommation inattendue (${takes.join(', ') || 'rien'})`);
         }
+        // un seul café (dette #5) : PERCO sert à ras bord, l'encreur en boit la moitié, Delaigue l'autre.
+        // Entre la fin de grève et le réveil de Delaigue, plus aucun retour à la Salle de Pause.
+        const finGreve = checkpoints.findIndex((c) => c.newFlags.includes('st_greve_finie'));
+        const reveil = checkpoints.findIndex((c) => c.newFlags.includes('st_delaigue_reveille'));
+        if (finGreve < 0 || reveil < finGreve) throw new Error('Acte III : fin de grève puis réveil de Delaigue attendus');
+        if (checkpoints.slice(finGreve + 1, reveil).some((c) => c.label === '→ st-pause')) throw new Error('Acte III : retour à la Salle de Pause entre la fin de grève et le réveil de Delaigue');
+        const refill = checkpoints.find((c) => c.label === 'utiliser gobelet sur perco');
+        if (!refill || !refill.save.flags.includes('st_gobelet_entame')) throw new Error('Acte III : PERCO ne doit pas resservir un demi-gobelet');
+        if (!checkpoints[reveil].lost.includes('gobelet') || checkpoints[reveil].save.flags.includes('st_gobelet_entame')) throw new Error('Acte III : Delaigue doit garder le demi-gobelet');
         const unsigned = checkpoints.find((c) => c.label === 'utiliser accord sur perco');
         if (!unsigned || unsigned.save.flags.includes('st_greve_finie') || !unsigned.save.items.includes('accord')) throw new Error('Acte III : un accord non signé ne doit pas finir la grève');
         const asleep = checkpoints.find((c) => c.label === 'utiliser formulaire sur delaigue');

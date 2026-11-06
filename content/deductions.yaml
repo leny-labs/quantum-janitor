@@ -18,8 +18,8 @@ deductions:
       fr: "L'horloge marque 10 h 11. Le guichet ouvre à 10 h 12. Entre le formulaire et moi, il n'y a ni dossier ni règlement : il y a une minute. Une seule. Coincée depuis 1985."
       en: "The clock says 10:11. The desk opens at 10:12. Between me and the form there's no file, no regulation: there's one minute. Just one. Stuck since 1985."
     line:
-      fr: "bob: Une minute de retard en quarante et un ans, Gary. Pour un service public, c'est presque de la ponctualité."
-      en: "bob: One minute late in forty-one years, Gary. For a public service, that's practically punctual."
+      fr: "bob: Une minute de retard, Gary. Pour un service public, c'est presque de la ponctualité."
+      en: "bob: One minute late, Gary. For a public service, that's practically punctual."
     nudge:
       fr: "bob: Deux constatations se regardent de travers dans ton carnet. Ouvre-le avant qu'elles ne déposent un préavis."
       en: "bob: Two findings are glaring at each other in your notebook. Open it before they file a grievance."
@@ -72,8 +72,8 @@ deductions:
       fr: "PERCO veut l'accord P-15 signé « par la direction OU SON INTÉRIMAIRE ». La direction dort. La note dit : en cas d'absence, sommeil compris, tout intérimaire signe p.o. Et depuis la case A, l'intérimaire, c'est moi."
       en: "PERCO wants agreement P-15 signed “by management OR ITS TEMP”. Management is asleep. The memo says: in case of absence, sleep included, any temp signs p.p. And since box A, the temp is me."
     line:
-      fr: "bob: Quarante et un ans de grève, et la solution dormait sur un fax. Je ne sais pas si je dois rire ou déposer un préavis."
-      en: "bob: Forty-one years of strike, and the answer was asleep on a fax. I don't know whether to laugh or file a notice."
+      fr: "bob: Une grève interminable, et la solution dormait sur un fax. Je ne sais pas si je dois rire ou déposer un préavis."
+      en: "bob: An endless strike, and the answer was asleep on a fax. I don't know whether to laugh or file a notice."
     nudge:
       fr: "bob: Deux constatations de ton carnet se tournent autour depuis tout à l'heure, Gary. Laisse-les se mettre d'accord."
       en: "bob: Two findings in your notebook have been circling each other for a while, Gary. Let them come to an agreement."
@@ -108,8 +108,8 @@ deductions:
       fr: "Un POUR, une abstention, un CONTRE de principe : égalité. Personne n'a jamais annulé ce CONTRE. Et moi, j'ai en poche le seul tampon de la Station qui n'a jamais servi : ANNULÉ. Sans le CONTRE, il reste un POUR."
       en: "One FOR, one abstention, one AGAINST on principle: a tie. Nobody has ever cancelled that AGAINST. And I have in my pocket the only stamp in the Station that has never been used: CANCELLED. Without the AGAINST, there's one FOR left."
     line:
-      fr: "narrateur: Gary regarde le tampon. Le tampon, s'il avait des yeux, regarderait Gary. Il attend ça depuis 1985."
-      en: "narrateur: Gary looks at the stamp. The stamp, if it had eyes, would look back. It's been waiting since 1985."
+      fr: "narrateur: Gary regarde le tampon. Le tampon, s'il avait des yeux, regarderait Gary. Il attend ça depuis son premier jour de crochet."
+      en: "narrateur: Gary looks at the stamp. The stamp, if it had eyes, would look back. It's been waiting for this since its first day on the hook."
     nudge:
       fr: "bob: Égalité, Gary. Ton carnet a l'air d'avoir un avis là-dessus. Lui, au moins, ne s'abstient pas."
       en: "bob: A tie, Gary. Your notebook seems to have an opinion on that. At least it doesn't abstain."

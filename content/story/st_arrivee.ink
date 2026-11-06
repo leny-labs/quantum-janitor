@@ -53,7 +53,7 @@ sabot: Pas pris. Mise en fourrière. C'est pas pareil. Pris, c'est du vol. Mise 
 { not has_flag("st_sabot_vu"):
     sabot: Amende : trois dimensions et demie. Plus les frais de garde : une dimension par jour de 24 heures de 10 h 11.
     gary: Il est 10 h 11 depuis quand ?
-    sabot: Depuis quarante et un ans. Ça fait une sacrée garde. # set: st_sabot_vu
+    sabot: Je compte pas. Si je compte, faut que je me facture. Ça fait une sacrée garde. # set: st_sabot_vu
 }
 sabot: Pour la récupérer : le ticket d'entrée. Et le permis de quitter la dimension, signé par la Direction.
 { has_item("ticket_douane"):
@@ -86,7 +86,7 @@ bob: Gary. Le 9 848. C'est le numéro suivant, sur l'afficheur. Il l'a attendu t
 * [« Il n'en a plus besoin… »]
     gary: B.O.B. Il n'en a plus besoin. Et toi, tu aspires. Délicatement.
     bob: Gary. Tu me demandes d'aspirer le ticket d'un mort. # mood: surprised
-    gary: D'un usager. Il a quarante et un ans d'ancienneté.
+    gary: D'un usager. Le plus ancien de la file. Il a de l'ancienneté.
     bob: ...Bon. Je dis quelques mots d'abord. C'est la moindre des choses. # mood: sad
     bob: M. Patience. Nous ne nous connaissions pas. Tu étais assis. Tu attendais. Tu as été le meilleur d'entre nous à ça. # mood: sad
     bob: Tu n'as jamais doublé personne. Tu n'as jamais demandé à parler au responsable. Le responsable ne t'a jamais parlé non plus. # mood: sad
