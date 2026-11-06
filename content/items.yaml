@@ -223,13 +223,15 @@ items:
           stop: true
         # cuillère optionnelle (dette #5) : même résultat mécanique avec ou sans ; avec, c'est le gag
         # « nécessité de service » (ramassée en cafétéria, plateau des tables), et elle est consommée
+        # la branche « sans » passe AVANT le take : runList applique take tout de suite et
+        # réévalue les if suivants sur l'état modifié (sinon les deux textes s'enchaînent)
+        - if: { notItems: [cuillere] }
+          say: "narrateur: Gary verse le café tiède sur le feutre craquelé. Une goutte perle, hésite… puis le feutre se souvient. Il est sec depuis 1985, mais il reconnaît un café syndiqué. Il boit tout, d'une traite. Brun, luisant. Conforme."
         - if: { items: [cuillere] }
           say: "narrateur: Gary verse le café tiède sur le feutre craquelé et remue avec la cuillère de la cafétéria. Nécessité de service. L'encreur boit tout, avec un petit bruit de soulagement. Il devient brun, luisant. Conforme."
         - if: { items: [cuillere] }
           say: "narrateur: La cuillère, elle, a fondu à moitié. Elle a fait son service. Gary la dépose dans la corbeille, avec les honneurs."
           take: cuillere
-        - if: { notItems: [cuillere] }
-          say: "narrateur: Gary verse le café tiède sur le feutre craquelé. Une goutte perle, hésite… puis le feutre se souvient. Il est sec depuis 1985, mais il reconnaît un café syndiqué. Il boit tout, d'une traite. Brun, luisant. Conforme."
         - set: st_encreur_cafe
         - set: st_gobelet_vide
         - say: "bob: De l'encre au café, Gary. Officiellement, c'est de l'encre. Officieusement, ça sent la pause."

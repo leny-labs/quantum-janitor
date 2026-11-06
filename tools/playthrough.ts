@@ -113,13 +113,20 @@ async function main() {
           const sim = GameState.fromSave({ ...c3.save, flags: c3.save.flags.filter((f) => f !== 'st_encreur_cafe' && f !== 'st_gobelet_vide'), items: spoon ? ['encreur', 'gobelet', 'cuillere'] : ['encreur', 'gobelet'] });
           const sets: string[] = [];
           const takes: string[] = [];
+          const says: string[] = [];
+          // comme ActionRunner.runList : take/set appliqués tout de suite, les if suivants voient l'état modifié
           for (const step of [resolveCombine(content, 'encreur', 'gobelet') ?? []].flat()) {
             if (typeof step === 'string' || !sim.check(step.if)) continue;
-            if (step.set) sets.push(...[step.set].flat());
-            if (step.take) takes.push(...[step.take].flat());
+            if (step.say) says.push(step.say);
+            if (step.take) for (const t of [step.take].flat()) { takes.push(t); sim.take(t); }
+            if (step.set) for (const f of [step.set].flat()) { sets.push(f); sim.setFlag(f); }
             if (step.stop) break;
           }
           const tag = spoon ? 'avec' : 'sans';
+          const remue = says.some((t) => t.includes('Nécessité de service'));
+          const fondu = says.some((t) => t.includes('fondu à moitié'));
+          const souvient = says.some((t) => t.includes('le feutre se souvient'));
+          if (spoon ? !(remue && fondu && !souvient) : (remue || fondu || !souvient)) throw new Error(`Acte III : encreur + gobelet ${tag} cuillère, textes incohérents (remue=${remue}, fondu=${fondu}, souvient=${souvient})`);
           for (const f of ['st_encreur_cafe', 'st_gobelet_vide']) if (!sets.includes(f)) throw new Error(`Acte III : encreur + gobelet ${tag} cuillère doit poser ${f}`);
           if (spoon ? !takes.includes('cuillere') : takes.length) throw new Error(`Acte III : encreur + gobelet ${tag} cuillère, consommation inattendue (${takes.join(', ') || 'rien'})`);
         }
