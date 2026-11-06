@@ -42,7 +42,7 @@
     gary: Par principe de quoi ?
     paraphe: Personne ne m'écoute quand je vote pour. Alors je vote contre. Au moins, ça se remarque. A.P. # mood: sad
     paraphe: Une voix pour, une contre, une abstention. Égalité. Avis AJOURNÉ. Prochaine séance : quand elle pourra. A.P. # set: st_vote_egalite
-    bob: Elle vote contre et personne n'a jamais annulé son vote, Gary. Tu as un tampon que personne n'utilise. Je dis ça, je ne dis rien. # mood: suspicious
+    bob: Trente ans sans quorum, Gary, et le jour où il y en a un : égalité. Je crois que la Station l'a fait exprès. # mood: sad
     -> END
 }
 paraphe: Égalité. Ajourné. Ce n'est pas un refus, jeune homme. C'est pire : c'est une attente. A.P. # mood: sad

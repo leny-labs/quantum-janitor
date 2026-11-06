@@ -32,7 +32,7 @@ bob: Ce n'est pas le même extincteur, Gary. C'est l'extincteur. Il n'y en a qu'
 Gary pousse la porte, traverse le couloir, passe la porte B-3, et revient. Néons. Porte B-1. Extincteur. # set: st_couloir_glisse
 Mais M. Ficus n'est plus à gauche de l'extincteur. Il est une porte plus à gauche. Exactement une.
 gary: Le ficus n'a pas bougé. C'est le couloir qui a glissé.
-bob: Un repère sans procédure, Gary. Le couloir ne sait pas quoi en faire. Suis la plante. # mood: love
+bob: Un repère sans procédure, Gary. Le couloir ne sait pas quoi en faire. Il glisse autour. # mood: love
 -> st_couloir_suivre
 
 === st_couloir_suivre ===

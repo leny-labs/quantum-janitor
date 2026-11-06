@@ -14,7 +14,7 @@
     gary: Comment ça, aucun Gary ? Je suis là. Je suis Gary.
     duplicata: Vous êtes là, c'est votre affaire. Votre affaire. Le fichier, lui, ne connaît que les pièces d'identité. Les pièces d'identité.
     duplicata: Présentez une pièce au fichier. Au fichier. Il lit la pièce, pas la personne. Pas la personne. La personne, c'est toujours mal orthographié.
-    bob: Une pièce d'identité, Gary. Tu en as une. Elle a même un défaut que la RH n'a jamais voulu corriger. # mood: suspicious
+    bob: Il te demande tes papiers, Gary. Dans une autre dimension. Il y a des choses qui ne changent jamais. # mood: sad
     -> END
 }
 { not has_flag("st_dossier_trouve"):

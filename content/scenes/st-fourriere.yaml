@@ -98,14 +98,14 @@ hotspots:
     rect: [800, 250, 130, 80]
     art:
       - { rect: [805, 255, 120, 70], color: "#ffd166", stroke: "#c0392b", text: "AMENDE", size: 12 }
-    look: "L'amende, glissée sous l'essuie-glace : « 4 096 CRÉDITS — STATIONNEMENT EN TRAVERS D'UNE DIMENSION ». Je n'ai pas de crédits. Je n'ai que des objets. Dont un tampon que personne n'utilise."
-    use: "Je ne vais pas payer 4 096 crédits. Je ne sais même pas ce qu'est un crédit. Je sais ce qu'est un tampon."
+    look: "L'amende, glissée sous l'essuie-glace : « 4 096 CRÉDITS — STATIONNEMENT EN TRAVERS D'UNE DIMENSION ». Je n'ai pas de crédits. Je n'ai que des objets. Et un dossier humain, ce qui ici ne vaut pas grand-chose."
+    use: "Je ne vais pas payer 4 096 crédits. Je ne sais même pas ce qu'est un crédit. Ici, je doute que quelqu'un le sache."
     useItem:
       tampon_annule:
         - dialogue: st_remorque_annule
           set: st_vaisseau_libere
       permis: "Le permis ne paie pas l'amende. Il permet de partir. L'amende, elle, permet de rester. Pour toujours."
-    useItemDefault: "Ça ne paie pas une amende. Ça ne l'annule pas non plus. Il me faut quelque chose d'officiel. Et d'inutilisé."
+    useItemDefault: "Ça ne paie pas une amende. Ça ne l'annule pas non plus. Ici, seul ce qui est officiel compte."
 
   - id: bob
     label: B.O.B.

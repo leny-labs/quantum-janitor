@@ -138,7 +138,7 @@ hotspots:
       - { rect: [1135, 95, 80, 350], color: "#c9ced6", stroke: "#2a2830", text: "TUBE", size: 12 }
     look:
       - say: "Un terminal de tube pneumatique. Une étiquette : « DESTINATIONS : CONSEIL · PAUSE · DIRECTION ». Le tube aspire l'air de la pièce, doucement, comme quelqu'un qui retient un soupir."
-      - say: "bob: Un tube qui monte au Conseil, Gary. Avec une capsule, on pourrait y envoyer quelque chose. Plus tard. Retiens-le."
+      - say: "bob: Un tube qui monte au Conseil, Gary. Le seul moyen de transport de la Station qui ne fait jamais la queue."
         mood: calm
     use: "J'approche l'oreille du tube. FLOUP. Il m'aspire une mèche de cheveux. Enfin, une antenne. J'ai vraiment des antennes."
     useItem:

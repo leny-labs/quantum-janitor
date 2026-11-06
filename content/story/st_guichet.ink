@@ -20,8 +20,8 @@
     bob: Et le formulaire, on l'obtient où, madame ? # mood: calm
     guichard: Au guichet.
     Le rideau au-dessus d'elle tressaille de deux centimètres. CLONK. Puis on entend l'élastique claquer. # shake
-    gary: B.O.B. Garde le ticket de douane et M. Ficus. J'ai le pressentiment qu'on en aura besoin. Beaucoup plus tard.
-    bob: En trois exemplaires, Gary. Le pressentiment aussi. # mood: sad # set: st_guichard_ferme
+    gary: Le formulaire est au guichet. Le guichet est fermé. Et le formulaire doit être rempli pour ouvrir le guichet.
+    bob: En trois exemplaires, Gary. Le désespoir aussi. # mood: sad # set: st_guichard_ferme
     -> END
 }
 guichard: C'est toujours fermé.

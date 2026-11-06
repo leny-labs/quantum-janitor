@@ -126,7 +126,7 @@ hotspots:
           take: plante
           set: st_plante_posee
         - say: "Un repère sans formulaire, sans tampon, sans avis. Le couloir peut toujours boucler. Lui, il ne bougera pas."
-        - say: "bob: Maintenant, pousse une porte, Gary. Et regarde bien où il est quand on revient."
+        - say: "bob: Il est bien, là, Gary. On dirait qu'il a toujours habité ici. Il en a l'air content. Enfin, autant qu'il peut."
           mood: love
     useItemDefault: "Il faut un repère qui ne suive aucune procédure. Ça, ça en suit forcément une."
 

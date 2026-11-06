@@ -8,8 +8,8 @@ Gary tient le dernier Formulaire B-7/12. Vierge. Cinq cases. M. Ficus sous le br
 sylvie: AVIS À LA CLIENTÈLE. LES BUREAUX DE L'AILE B OUVRIRONT DÈS QUE LE RÈGLEMENT LE PERMETTRA. MERCI DE VOTRE PATIENCE. # mood: love
 gary: Le règlement. Toujours le règlement.
 bob: Alors on va le lire, Gary. Article par article. Et on va lui permettre. # mood: calm
-gary: B.O.B. Garde le ticket de douane. J'ai le pressentiment qu'on en aura besoin. Beaucoup plus tard.
-bob: En trois exemplaires, Gary. Le pressentiment aussi. # mood: sad
+gary: Article par article. Il doit y en avoir des milliers.
+bob: En trois exemplaires, Gary. Ça en fait trois fois plus. # mood: sad
 -> END
 
 // Fin du chapitre 1 (docs/CHAPTER1.md §8) : permis sur la capsule à la fourrière (`end: st_suite`, EndScene).

@@ -109,7 +109,7 @@ hotspots:
     use:
       - give: plante
       - say: "narrateur: Gary prend M. Ficus sous le bras. Le pot est vissé au sol ; il ne le prend pas, seulement la plante. Elle se laisse faire. Elle est en plastique, comme tout le monde ici."
-      - say: "Je ne sais pas pourquoi. J'ai le sentiment qu'il me servira. Plus tard. Beaucoup plus tard. Les plantes en plastique, ça a de la mémoire."
+      - say: "Je ne sais pas pourquoi. Il avait l'air de s'ennuyer, à côté de la machine. Les plantes en plastique, ça a de la mémoire. Celle-ci a quarante et un ans de café tiède à oublier."
     useItem:
       fragment: "L'éclat sur le ficus ? Il pourrait se mettre à pousser. Ou à voter. On n'a pas le temps pour l'un ni pour l'autre."
 
