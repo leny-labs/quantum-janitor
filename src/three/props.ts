@@ -862,8 +862,11 @@ export const SCRIBE_SHEET = `${import.meta.env.BASE_URL}props/ch1/scribe-sheet.p
  * Le corps et la tête de la cellule 4 sont pixel-identiques au repos (seul le bras change).
  * Tout est transparent sous `SABOT_DESK_PX` (= bas du tampon à l'impact) : le billboard est calé
  * pour que cette ligne tombe pile sur le plateau 3D, et à l'impact le tampon est posé dessus.
+ * v6 : même planche, mais l'emmanchure du bras au tampon est repeinte localement (≈ 450–650 px par
+ * cellule) : le contour noir épais + l'ombre entre manche et gilet, qui se lisaient comme un trou,
+ * sont remplacés par la manche beige jusqu'au liseré orange (pont opaque, 1 px de trait au plus).
  */
-export const SABOT_SHEET = `${import.meta.env.BASE_URL}props/st/sabot-sheet-v5.png`;
+export const SABOT_SHEET = `${import.meta.env.BASE_URL}props/st/sabot-sheet-v6.png`;
 export const SABOT_FRAMES = 5;
 export const SABOT_DESK_PX = 441;
 /** Centre du tampon à l'impact (cellule 4), en px de planche depuis la gauche. */
