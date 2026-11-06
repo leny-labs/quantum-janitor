@@ -842,7 +842,7 @@ export function billboardSheet(url: string, frames: number, h: number, aspect: n
  *   Reine : 0 repos · 1 mandibules écartées (la cellule « antennes qui ondulent » a été retirée de
  *     la planche : antennes en mât jusqu'au halo du trône)
  *   Scribe : 0 repos · 1 mandibules écartées · 2 antennes qui ondulent (hors cycle, même défaut)
- *   Sabot : 0 repos · 1 clignement · 2 parle · 3 agacé · 4 coup de tampon
+ *   Sabot : 0 repos · 1 clignement · 2 parle · 3 agacé · 4 coup de tampon (corps sans bras levé + couche SABOT_ARM_URL)
  *   Patience (avec / sans ticket) : 0 repos · 1 mâchoire ouverte · 2 soupir (crâne penché)
  */
 /**
@@ -855,7 +855,16 @@ export const REINE_SHEET = `${import.meta.env.BASE_URL}props/ch1/reine-planche-v
 export const REINE_FRAMES = 2;
 export const REINE_SHEET_ASPECT = 729 / 1024;
 export const SCRIBE_SHEET = `${import.meta.env.BASE_URL}props/ch1/scribe-sheet.png`;
-export const SABOT_SHEET = `${import.meta.env.BASE_URL}props/st/sabot-sheet.png`;
+/** v2 : la cellule 4 (coup de tampon) = repos sans le bras levé ; le bras qui frappe est une couche à part. */
+export const SABOT_SHEET = `${import.meta.env.BASE_URL}props/st/sabot-sheet-v2.png`;
+/**
+ * Bras + tampon de M. Sabot, découpé dans l'ancienne cellule « coup de tampon » (189 × 163 px de
+ * planche) : posé en 3D sur le plateau du comptoir, devant le billboard, pour que le tampon frappe
+ * vraiment la table (et pas un papier peint sur le plan du sprite, en retrait derrière le plateau).
+ * Ancre = milieu du dessous du tampon.
+ */
+export const SABOT_ARM_URL = `${import.meta.env.BASE_URL}props/st/sabot-bras.png`;
+export const SABOT_ARM_PX = { w: 189, h: 163, anchorX: 0.759, anchorY: 0.006, cellX: 187.5 };
 export const PATIENCE_SHEET = `${import.meta.env.BASE_URL}props/st/patience-sheet.png`;
 export const PATIENCE_EMPTY_SHEET = `${import.meta.env.BASE_URL}props/st/patience-vide-sheet.png`;
 /**
@@ -873,6 +882,7 @@ export const ROACH_ACTOR: ActorLoops = {
     { frame: 1, duration: 150 },
   ],
 };
+/** Pas de `talk` ni de `listen` : seul le portrait de la boîte de dialogue parle, le billboard reste au guichet et tamponne. */
 export const SABOT_ACTOR: ActorLoops = {
   idle: [
     { frame: 0, duration: 1900 },
@@ -886,16 +896,6 @@ export const SABOT_ACTOR: ActorLoops = {
     { frame: 0, duration: 300 },
     { frame: 4, duration: 240 },
   ],
-  talk: [
-    { frame: 2, duration: 140 },
-    { frame: 3, duration: 110 },
-    { frame: 2, duration: 170 },
-    { frame: 0, duration: 100 },
-    { frame: 2, duration: 150 },
-    { frame: 3, duration: 130 },
-  ],
-  // entre deux répliques : il vous toise, agacé
-  listen: 3,
 };
 export const PATIENCE_ACTOR: ActorLoops = {
   idle: [
