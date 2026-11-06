@@ -19,7 +19,7 @@ import { speaking } from '../../engine/speaking';
 import type { Condition } from '../../engine/types';
 import type { RoomBuild } from './index';
 import { against, backDoor, shell, wallPanels } from './shell';
-import type { Stage } from '../Stage';
+import type { ShotSpec, Stage } from '../Stage';
 
 const BEIGE = { top: '#cfc6a6', bottom: '#8f8668' };
 const FLOOR = { a: '#5d5a52', b: '#66625a', joint: '#3a3832', tile: 0.8 };
@@ -374,19 +374,24 @@ export const stSas: RoomBuild = {
 
 /** Chaise (px) occupée par M. Patience : la rangée de sièges la saute, son sprite apporte la sienne. */
 const PATIENCE_CHAIR = 265;
+/** Plan d'examen de M. Patience assis, en pied (cadré sur son sprite, pas sur le rect cliquable). */
+const PATIENCE_SHOT = { of: 'squelette', px: [292, 380], fill: 0.82, orbit: -6, aim: [-0.3, -0.16, 0], fov: 40 } satisfies ShotSpec;
 
 /** 2. Salle d'Attente. */
 export const stAttente: RoomBuild = {
   camera: { pos: [0, 2.2, 8.2], look: [0, 1.85, 0], fov: 50 },
   shots: {
     afficheur: { fill: 0.75, fov: 40 },
-    squelette: { fill: 0.85, orbit: -6, fov: 42 },
+    // M. Patience en entier (crâne, pieds, main au ticket) : même plan avant / après la prise
+    squelette: PATIENCE_SHOT,
     distributeur: { fill: 0.9, orbit: 6, fov: 42 },
     // détails (sous-hotspots du YAML) : plans serrés
     horloge: { fill: 0.9, fov: 36 },
     horaires: { fill: 0.9, orbit: 4, fov: 36 },
     affiche_patience: { fill: 0.9, orbit: -4, fov: 36 },
-    ticket_patience: { px: [340, 352], fill: 0.6, orbit: 6, lift: 0.1, fov: 36 },
+    // ticket 9 848 (`smart: look`) : pas de macro, le personnage entier qui le tend ; clic sur le
+    // ticket dans le plan = Utiliser (tirer, puis B.O.B. et son aspiration)
+    ticket_patience: { ...PATIENCE_SHOT, picks: ['ticket_patience'] },
     // aspiration du ticket 9 848 (# aspir) : léger push-in, plus bas ; M. Patience (gauche) et
     // B.O.B. (droite) restent dans le champ, le sol devant B.O.B. au-dessus de la bulle
     [BobAspirRig.SHOT]: { of: 'bob', cam: { pos: [0.4, 1.75, 6.6], look: [0.1, 0.55, 1.6], fov: 50 } },
@@ -454,6 +459,11 @@ export const stAttente: RoomBuild = {
     s.when({ notFlags: ['st_ticket_9848'] }, withTicket);
     s.when({ flags: ['st_ticket_9848'] }, emptyHand);
     s.spot('squelette', at(withTicket, pc.x + 0.12, 0, pz), at(emptyHand, pc.x + 0.12, 0, pz));
+    // cible de clic du ticket dans le plan d'examen (le ticket fait partie du sprite) : plaque
+    // invisible sur la main, masquée avec le hotspot une fois le ticket aspiré
+    const tk = s.fit([318, 334, 46, 38], pz + 0.06);
+    const tkHit = new THREE.Mesh(new THREE.PlaneGeometry(tk.w, tk.h), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+    s.spot('ticket_patience', at(tkHit, tk.x, tk.y, tk.z));
     s.animate((t) => {
       const f = actorFrame('patience', PATIENCE_ACTOR, t);
       withTicket.userData.setFrame(f);

@@ -113,8 +113,11 @@ hotspots:
       - say: "« LA PATIENCE EST UNE VERTU (ART. 12) ». Un article de loi. La patience est réglementaire. Ne pas être patient, c'est une infraction."
       - say: "Juste en dessous, M. Patience. Je ne sais pas qui a été accroché en premier. L'affiche, j'espère."
 
+  # 1er clic = Regarder : plan sur M. Patience en entier, ticket tendu ; clic sur le ticket dans
+  # ce plan = Utiliser (pickVerb) : Gary tire, puis B.O.B. prend la main (st_patience → # aspir)
   - id: ticket_patience
     label: Ticket « 9 848 »
+    smart: look
     rect: [318, 336, 44, 34]
     if: { notFlags: [st_ticket_9848] }
     look:
@@ -122,9 +125,14 @@ hotspots:
         set: st_voit_patience
       - say: "Un seul numéro après celui de l'afficheur. Il était le suivant. Il a attendu d'être appelé. Il l'attend encore."
     use:
+      # déjà tiré une fois : B.O.B. directement (indice, ou l'aspiration si on a tout vu)
+      - if: { flags: [st_main_serree] }
+        dialogue: st_patience
+        stop: true
       - say: "narrateur: Gary tire doucement sur le ticket. Les phalanges ne bougent pas d'un millimètre. Quarante et un ans de patience, ça fait une sacrée poigne."
         set: st_main_serree
       - say: "Il ne lâche rien. Pas avec des doigts, en tout cas. Il faudrait quelque chose de plus... aspirant."
+      - dialogue: st_patience
     useItem:
       ticket_douane: "Lui proposer un échange ? Un ticket de douane contre son 9 848 ? Il ne fait pas d'échange. Il n'a même jamais fait la queue ailleurs."
       badge: "« GARRY PLUNK ». Il ne regarde même pas. Il en a vu passer, des badges. Il les a tous vus repasser."

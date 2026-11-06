@@ -101,6 +101,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
    * le reste du « Regarder » est sauté et l'objet est pris dans le plan, avant le retour.
    */
   private zoomPick: string | null = null;
+  /** Horodatage (horloge de scène) à partir duquel un clic dans le plan d'examen peut prendre l'objet. */
+  private zoomPickArmAt = 0;
   /** Plan d'arrivée en cours de travel : coupe sèche vers la vue de la pièce. */
   private skipCine: (() => void) | null = null;
   /** `# couloir_out` reçu pendant le dialogue : sortie de boucle à jouer à la fin de l'interaction. */
@@ -205,7 +207,8 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
         const pick = this.room.spotAt(p.x, p.y);
         if (pick && this.busy) {
           // pendant la réplique du « Regarder » : on saute la suite, la prise suit dans le plan
-          if (this.dialogueBox.isOpen && !this.skipCine) {
+          // (pas le clic qui vient d'ouvrir le plan : même pixel que l'objet dans la vue pièce)
+          if (this.dialogueBox.isOpen && !this.skipCine && this.time.now >= this.zoomPickArmAt) {
             this.zoomPick = pick;
             this.dialogueBox.dismiss();
           }
@@ -426,6 +429,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
       const move = shot ? this.room.examine(shot) : null;
       if (move) this.scenes.spots(false);
       this.zoomPick = null;
+      this.zoomPickArmAt = this.time.now + 250;
       let parked = false;
       try {
         await this.runner.run(i);
@@ -537,13 +541,14 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   /**
    * `# aspir` : B.O.B. aspire le ticket 9 848 et le recrache aux pieds de Gary, pendant
    * la réplique SHLUUUP (sans bloquer le dialogue). Petit travel vers B.O.B. le temps du
-   * geste, sauf si la caméra est déjà sur un plan d'examen.
+   * geste — y compris depuis le plan de M. Patience (prise du ticket dans le zoom), qui ne
+   * cadre pas B.O.B. ; seul un plan déjà sur l'aspiration (debug `?shot=`) reste.
    */
   private async bobAspir(): Promise<void> {
     const rig = this.room.rig<BobAspirRig>('bobAspir');
     if (!rig || rig.busy) return;
     rig.onCue = (c) => bobCue(this, c);
-    const move = this.room.examining ? null : this.room.examine(BobAspirRig.SHOT);
+    const move = this.room.examining === BobAspirRig.SHOT ? null : this.room.examine(BobAspirRig.SHOT);
     if (move) this.scenes.spots(false);
     try {
       await rig.play();
