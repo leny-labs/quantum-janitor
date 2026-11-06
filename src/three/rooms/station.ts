@@ -296,9 +296,9 @@ export const stSas: RoomBuild = {
     const glass = at(plane(gr.w * 0.92, gr.h * 0.55, '#bfe6ff', { opacity: 0.22 }), 0, gr.h * 0.7, 0.5);
     booth.add(at(label(tr('props.station.pound'), gr.w * 0.9, gr.h * 0.12, { color: '#ffffff', bold: true }), 0, gr.h * 0.3, 0.51));
     // M. Sabot (planche GenAI) derrière la vitre : le comptoir lui cache les jambes ; il cligne et
-    // tamponne. Le bras est peint d'un seul tenant dans la planche (montée → mi-descente → impact) ;
-    // le billboard est calé pour que le bord de comptoir peint (SABOT_DESK_PX) tombe pile sur le
-    // plateau 3D : à l'impact, le tampon est posé sur le formulaire, à plat sur le plateau.
+    // tamponne. Le bras est peint d'un seul tenant dans la planche (tampon levé → impact) ;
+    // le billboard est calé pour que sa ligne de coupe (SABOT_DESK_PX = bas du tampon à l'impact)
+    // tombe pile sur le plateau 3D : à l'impact, le tampon est posé sur le formulaire.
     const deskY = gr.h * 0.42;
     const sabotH = gr.h * 0.92;
     const sabotPx = sabotH / 768; // planche 768 px de haut
@@ -330,7 +330,7 @@ export const stSas: RoomBuild = {
       sabot.userData.setFrame(f);
       const hit = f === 4;
       if (hit) (sheetA.material as THREE.Material & { map: THREE.Texture | null }).map = formStamped;
-      stampShadow.material.opacity = hit ? 0.4 : f === 6 ? 0.15 : 0;
+      stampShadow.material.opacity = hit ? 0.4 : 0;
     });
 
     // ── porte-gobelet orphelin (resté du vaisseau) ──
