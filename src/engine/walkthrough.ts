@@ -322,12 +322,10 @@ export const CHAPTERS: ChapterDef[] = [
       { go: 'st-ascenseur' },
       { useItem: ['formulaire', 'fente'] }, // DOSSIER COMPLET → Niveau 12 (st_ascenseur_direction)
       { useItem: ['fragment', 'coffre'] }, // DÉPÔT AU GUICHET. MÊME POUR LES MIRACLES.
-      { talk: 'sylvie' }, // DÉPÔT AU GUICHET UNIQUEMENT ; le guichet referme (st_sylvie_refuse)
+      { talk: 'sylvie' }, // DÉPÔT AU GUICHET UNIQUEMENT (st_sylvie_refuse) ; le guichet reste ouvert (10 h 12)
       { go: 'st-ascenseur' },
       { go: 'st-couloir-b' },
       { go: 'st-guichet' },
-      { useItem: ['formulaire', 'guichard'] }, // fermé, 10 h 11
-      { useItem: ['fragment', 'horloge'] }, // 2e passage : 10 h 12 (st_guichet_ouvert)
       { useItem: ['formulaire', 'guichard'] }, // dépôt, tube vers la Direction (st_dossier_depose) −formulaire
       { go: 'st-couloir-b' },
       { go: 'st-ascenseur' },

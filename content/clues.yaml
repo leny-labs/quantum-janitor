@@ -248,8 +248,8 @@ clues:
     when: { flags: [st_sylvie_refuse] }
     title: { fr: "« Dépôt au guichet uniquement »", en: "“Desk submission only”" }
     text:
-      fr: "SYLVIE ne reçoit pas le public : le dossier doit arriver par le guichet, à 10 h 12. Le guichet a refermé. L'éclat sait faire passer la minute."
-      en: "SYLVIE doesn't receive the public: the file must come through the desk, at 10:12. The desk has closed again. The shard knows how to push the minute."
+      fr: "SYLVIE ne reçoit pas le public : le dossier doit arriver par le guichet, à 10 h 12. Douze étages plus bas. Pour franchir trois mètres."
+      en: "SYLVIE doesn't receive the public: the file must come through the desk, at 10:12. Twelve floors down. To cross three metres."
 
   - id: permis_sortie
     icon: ticket

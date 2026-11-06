@@ -161,7 +161,7 @@ bob: Gary. Elle vient de nous rendre service. En quarante et un ans, c'est la pr
 
 // B-7/12 trouvé dans le couloir (st_formulaire) : Mme Guichard constate.
 === st_guichard_formulaire ===
-// Acte IV (docs/CHAPTER1.md §6.42) : dépôt du dossier complet, à 10 h 12, après le refus de SYLVIE
+// Acte IV (docs/CHAPTER1.md §6.42) : dépôt du dossier complet, à 10 h 12 (guichet resté ouvert depuis l'Acte I), après le refus de SYLVIE
 { has_flag("st_dossier_depose"):
     guichard: Votre dossier est parti par tube. C'est pas moi qui décide, maintenant. C'est la Direction. Bon courage.
     -> END
@@ -172,7 +172,7 @@ bob: Gary. Elle vient de nous rendre service. En quarante et un ans, c'est la pr
         -> END
     }
     { not has_flag("st_guichet_ouvert"):
-        guichard: C'est fermé. Il est 10 h 11. Revenez à 10 h 12. Vous savez faire, il paraît.
+        guichard: C'est fermé. Il est 10 h 11. Revenez à 10 h 12.
         -> END
     }
     -> st_guichard_depot

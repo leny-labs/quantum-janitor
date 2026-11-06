@@ -90,9 +90,9 @@ bob: La Direction, Gary. Parle à SYLVIE. En personne. Enfin, en écrans. # mood
 
 = depot
 { st_bob_acte4.depot > 1:
-    bob: L'horloge du Guichet d'Accueil, Gary. L'éclat, pile quand la trotteuse hésite. Puis le formulaire à Mme Guichard. # mood: love
+    bob: Redescends au Guichet d'Accueil, Gary. Le formulaire à Mme Guichard. Il y est encore 10 h 12. Il y sera toujours 10 h 12. # mood: love
 - else:
-    bob: Dépôt au guichet. À 10 h 12. Tu l'as déjà fait, Gary. Tu as quelque chose d'improbable sur toi. Toujours le même. # mood: suspicious
+    bob: Elle ne reçoit que les tubes, Gary. Et les tubes, ça part d'en bas. # mood: suspicious
 }
 -> END
 

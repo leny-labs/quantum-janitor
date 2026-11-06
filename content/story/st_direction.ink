@@ -1,5 +1,5 @@
 // Chapitre 1 « La Station Bureaucratique » : Direction Générale de l'Existence (st-direction), docs/CHAPTER1.md §6.41, §6.43, §8.
-//   parler (avant le dépôt) → « DÉPÔT AU GUICHET UNIQUEMENT » ; le guichet referme   [st_sylvie_refuse]
+//   parler (avant le dépôt) → « DÉPÔT AU GUICHET UNIQUEMENT » (guichet toujours ouvert) [st_sylvie_refuse]
 //   parler (dossier déposé) → le coffre s'ouvre                                      [st_coffre_ouvert]
 //   éclat sur le coffre     → st_sylvie_restitution : fusion, craquage, badge, permis (YAML : st_eclat2)
 
@@ -28,11 +28,13 @@
     sylvie: DÉPÔT AU GUICHET UNIQUEMENT. # mood: calm
     gary: Mais vous êtes la Direction. Le dossier va à la Direction. Je suis à la Direction.
     sylvie: LE DOSSIER VA À LA DIRECTION PAR LE GUICHET. LA DIRECTION NE REÇOIT PAS LE PUBLIC. ELLE REÇOIT LES TUBES. # mood: calm
-    sylvie: LE GUICHET OUVRE DE 10 H 12 À 10 H 14. IL EST 10 H 11. IL EST TOUJOURS 10 H 11. # mood: love # unset: st_guichet_ouvert # set: st_sylvie_refuse
-    bob: Le guichet a refermé, Gary. L'horloge est revenue à 10 h 11. Tu sais ce qu'il te reste à faire. Tu l'as déjà fait. # mood: sad
+    sylvie: LE GUICHET EST OUVERT DE 10 H 12 À 10 H 14. IL EST 10 H 12. IL N'EST JAMAIS 10 H 14. VOUS AVEZ LE TEMPS. # mood: love # set: st_sylvie_refuse
+    gary: Vous êtes là. Juste là. Je pourrais vous le tendre.
+    sylvie: VOUS POURRIEZ. JE NE POURRAIS PAS LE PRENDRE. JE N'AI PAS DE MAINS. J'AI UN TUBE. # mood: calm
+    bob: Douze étages pour franchir trois mètres, Gary. C'est presque de l'ingénierie. # mood: sad
     -> END
 }
-sylvie: DÉPÔT AU GUICHET, GARRY. 10 H 12. JE SAIS QUE VOUS SAVEZ FAIRE. JE VOUS AI VU FAIRE. JE VOIS TOUT. C'EST MON MÉTIER. # mood: calm
+sylvie: DÉPÔT AU GUICHET, GARRY. JE NE REÇOIS QUE LES TUBES. JE VOUS VOIS ENCORE LÀ. JE VOIS TOUT. C'EST MON MÉTIER. # mood: calm
 -> END
 
 // Éclat sur le coffre ouvert (YAML : give badge, set st_eclat2, give permis). Le craquage de SYLVIE (§8).

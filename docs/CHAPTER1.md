@@ -163,7 +163,7 @@ l'arbre §6.
 | Objet | id | Ramassé (étape) | Utilisé (étape) | Écart | Remarque |
 |---|---|---|---|---|---|
 | Badge « Garry » | `badge` | départ (0) | 14 (fichier des archives) | **14** | Payoff du double R. Duplicata le garde comme pièce justificative ; rendu par SYLVIE à l'étape 43. |
-| Éclat contenu 1/4096 | `fragment` | départ (0) | 8, 42 (horloge), 43 (coffre) | 8 / 34 / 1 | **Réutilisé** : l'improbabilité fait avancer l'horloge ; fusionne avec le 2e éclat. |
+| Éclat contenu 1/4096 | `fragment` | départ (0) | 8 (horloge), 43 (coffre) | 8 / 35 | **Réutilisé** : l'improbabilité fait avancer l'horloge ; fusionne avec le 2e éclat. |
 | Ticket de douane | `ticket_douane` | 2 (sas) | 44 (fourrière) | **42** | Le plus long payoff du chapitre ; fausse piste au distributeur de tickets. |
 | Plante en plastique (M. Ficus) | `plante` | 5 (cafétéria, à côté de PERCO-JUNIOR) | 11 (couloir), 36 (Conseil) | 6 / **31** | **Double usage** : repère dans le couloir infini, puis membre honoraire au quorum. |
 | Ticket n° 9848 | `ticket_9848` | 6 (B.O.B. l'aspire) | 9 (guichet) | 3 | Court, tutoriel du chapitre. |
@@ -182,7 +182,7 @@ l'arbre §6.
 l'acte I, 6–8 aux actes II–III (pic à 8 aux étapes 18–19, 22–25, 27–28), 4–6 à
 l'acte IV. **6 objets à écart ≥ 5** : `ticket_douane` (42), `plante` (31),
 `tampon_annule` (24/30), `capsule` (19), `badge` (14), `encreur` (12), plus `fragment`
-(34 entre ses deux usages d'horloge).
+(35 entre l'horloge et le coffre).
 
 **Combinaisons** : `copies_dossier` + `formulaire` → case A ; `encreur` + `gobelet` →
 encreur imbibé (requiert `cuillere`, consommée) ; (refus drôles) `plante` + `gobelet` (« elle est en plastique, Gary ;
@@ -297,10 +297,11 @@ PROPRIÉTAIRE : B.O.B. » ; le vaisseau part en fourrière ; SYLVIE annonce que
        paraphe.                                                               [st_case_e]
    40. Ascenseur : formulaire complet → DIRECTION GÉNÉRALE.
    41. Direction : SYLVIE en personne (Ink st_sylvie) → « DÉPÔT AU GUICHET
-       UNIQUEMENT. » Le coffre pulse.                                     [st_sylvie_refuse]
-   42. Guichet : éclat sur l'horloge (2e fois ; B.O.B. : « tu l'as déjà fait ») → 10 h 12,
-       formulaire sur Mme Guichard → tube pneumatique vers la Direction.
-                                                                     [st_dossier_depose]
+       UNIQUEMENT. » (elle est à trois mètres ; elle ne reçoit que les tubes). Le coffre
+       pulse. Le guichet, lui, est resté ouvert depuis l'acte I (10 h 12).  [st_sylvie_refuse]
+   42. Guichet : formulaire sur Mme Guichard → tampon « REÇU », tube pneumatique vers la
+       Direction. (Pas de 2e horloge : un seul retournement administratif en fin de
+       chapitre — cf. review 2026-11-06, dette #2.)                    [st_dossier_depose]
    43. Direction : parler à SYLVIE → le coffre s'ouvre : « PROUVEZ QUE L'OBJET EST À
        VOUS. » Éclat sur le coffre → les deux éclats se reconnaissent et fusionnent
        (2/4096) ; SYLVIE craque (§8), rend le badge, délivre le permis.
@@ -321,7 +322,7 @@ PROPRIÉTAIRE : B.O.B. » ; le vaisseau part en fourrière ; SYLVIE annonce que
 3. **Quorum** : plante prise à l'acte I (5) → Conseil (36) ; capsule prise à l'acte II
    (18) → PERCO, qui ne vote que si la grève est finie (37) ; tampon ANNULÉ (15) →
    égalité brisée (39).
-4. **Sortie** : ticket de douane (2) + horloge apprise à l'acte I (8 → 42) + tampon
+4. **Sortie** : ticket de douane (2) + guichet ouvert à l'acte I (8 → 42) + tampon
    (15 → 45) + permis (43) → décollage (46).
 
 ### 6.2 Dépendances croisées
@@ -334,7 +335,7 @@ PROPRIÉTAIRE : B.O.B. » ; le vaisseau part en fourrière ; SYLVIE annonce que
 | 3 exemplaires (archives) | pas de papier (réclamations, via la chatière) **et** pas de signature |
 | Ascenseur → Conseil | case C (archives) |
 | Quorum (Conseil) | plante (attente, acte I) + vote de PERCO (pause, grève finie + capsule des réclamations) |
-| Dépôt (guichet) | avis du Conseil + savoir manipuler l'horloge (acte I) |
+| Dépôt (guichet) | avis du Conseil + refus de SYLVIE + guichet ouvert (horloge, acte I) |
 | Sortie (fourrière) | ticket de douane (sas, acte I) + tampon ANNULÉ (tampons, acte II) + permis (Direction) |
 
 ### 6.3 Indices B.O.B. (`st_bob`)
@@ -370,8 +371,8 @@ tampon que personne n'utilise. »).
   ouverte après le reclassement.
 - PERCO sert un café « un à la fois » sans limite après la grève ; le papier reste dans
   le bac de la photocopieuse ; le tampon ANNULÉ n'est jamais consommé.
-- L'éclat fait avancer l'horloge autant de fois que nécessaire (le guichet referme
-  après chaque passage, sans perte).
+- Une fois à 10 h 12 (acte I), le guichet reste ouvert jusqu'à la fin du chapitre ;
+  l'éclat sur l'horloge ouverte ne fait rien (« on perdrait la moitié des heures d'ouverture »).
 - Invariants `repair.ts` à prévoir : `st_case_a` ⇒ pas de `copies_dossier` ;
   `st_dossier_trouve` ∧ ¬`st_eclat2` ⇒ pas de `badge` ; `st_eclat2` ⇒ `badge` ∧
   `permis` (avant 46) ; `st_ficus` ⇒ pas de `plante` ; `st_formulaire` ⇒ `formulaire`
@@ -622,11 +623,11 @@ Le chapitre se termine : permis sur la capsule à la fourrière → **`end: st_s
   connu) → −capsule, `st_vote_perco`.
 - **`st-direction`** (`stDirection`, Ink `st_direction.ink`) : SYLVIE (modèle `sylvie()` + mur d'écrans « VU »),
   trône-photocopieuse, coffre des Objets Trouvés (GenAI). 41. parler → « DÉPÔT AU GUICHET UNIQUEMENT »,
-  `st_sylvie_refuse`, **unset `st_guichet_ouvert`** (l'horloge revient à 10 h 11) ; après le dépôt, parler →
+  `st_sylvie_refuse` (le guichet reste ouvert : plus de 2e horloge) ; après le dépôt, parler →
   `st_coffre_ouvert` ; 43. éclat sur le coffre → `st_sylvie_restitution` (fusion 2/4096, craquage §8), +badge
   +`permis`, `st_eclat2`. Fausse piste : éclat sur le coffre avant le dépôt.
-- **Guichet** : 42. éclat sur l'horloge (après le refus) → `st_guichet_ouvert` à nouveau ; formulaire sur
-  Mme Guichard (case E + refus + ouvert) → `st_guichard_depot`, −formulaire, `st_dossier_depose`.
+- **Guichet** : 42. formulaire sur Mme Guichard (case E + refus + ouvert) → `st_guichard_depot`, −formulaire,
+  `st_dossier_depose`. (L'horloge rejouée a été coupée : le refus de SYLVIE ne referme plus le guichet.)
 - **`st-fourriere`** (`stFourriere`, Ink `st_fourriere.ink`) : capsule CS-07 (GenAI 0 sabot · 1 libérée), M. Sabot
   dans sa guérite, panneau des tarifs (GenAI). 44. ticket de douane (permis en poche) → −ticket, `st_amende` ;
   45. tampon ANNULÉ sur l'amende → `st_vaisseau_libere` ; 46. permis sur la capsule → −permis, `end: st_suite`.

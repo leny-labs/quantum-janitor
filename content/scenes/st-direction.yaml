@@ -1,7 +1,7 @@
 # Chapitre 1 « La Station Bureaucratique » — 12. Direction Générale de l'Existence (docs/CHAPTER1.md §4, §6.41, §6.43, §8).
 # Rendu 3D : src/three/rooms/station.ts (stDirection). `art:` = repli 2D.
 # SYLVIE en personne : mur d'écrans au-dessus d'un trône-photocopieuse ; coffre des Objets Trouvés (le 2e éclat pulse).
-#   parler à SYLVIE (avant le dépôt) → « DÉPÔT AU GUICHET UNIQUEMENT » ; le guichet referme (10 h 11) [st_sylvie_refuse]
+#   parler à SYLVIE (avant le dépôt) → « DÉPÔT AU GUICHET UNIQUEMENT » ; le guichet reste ouvert (10 h 12) [st_sylvie_refuse]
 #   parler à SYLVIE (dossier déposé) → le coffre s'ouvre : « PROUVEZ QUE L'OBJET EST À VOUS »        [st_coffre_ouvert]
 #   éclat sur le coffre ouvert       → fusion 2/4096, SYLVIE craque, badge rendu, permis              [st_eclat2] +badge +permis
 id: st-direction

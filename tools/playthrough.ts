@@ -161,8 +161,12 @@ async function main() {
         for (const gone of ['plante', 'capsule', 'formulaire', 'ticket_douane', 'permis']) if (state.hasItem(gone)) throw new Error(`Acte IV : « ${gone} » encore en poche à la fin`);
         const early4 = checkpoints.find((c) => c.label === 'utiliser fragment sur coffre');
         if (!early4 || early4.save.flags.includes('st_eclat2')) throw new Error('Acte IV : l\'éclat sur le coffre avant le dépôt ne doit rien ouvrir');
-        const closed = checkpoints.find((c) => c.label === 'utiliser formulaire sur guichard');
-        if (!closed || closed.save.flags.includes('st_dossier_depose') || !closed.save.items.includes('formulaire')) throw new Error('Acte IV : dépôt accepté guichet fermé');
+        // un seul twist admin (dépôt au guichet) : le refus de SYLVIE ne referme plus le guichet, le dépôt passe du premier coup
+        const refus = checkpoints.find((c) => c.label === 'parler à sylvie' && c.save.flags.includes('st_sylvie_refuse'));
+        if (!refus || !refus.save.flags.includes('st_guichet_ouvert')) throw new Error('Acte IV : le refus de SYLVIE ne doit plus refermer le guichet');
+        const depot = checkpoints.find((c) => c.label === 'utiliser formulaire sur guichard');
+        if (!depot || !depot.save.flags.includes('st_dossier_depose') || depot.save.items.includes('formulaire')) throw new Error('Acte IV : le dépôt au guichet (ouvert) devait passer du premier coup');
+        if (checkpoints.filter((c) => c.label === 'utiliser fragment sur horloge').length !== 2) throw new Error('Acte IV : l\'horloge ne doit plus être rejouée (2 usages, tous deux à l\'Acte I)');
         const urne = checkpoints.find((c) => c.label === 'utiliser tampon_annule sur urne');
         if (!urne || urne.save.flags.includes('st_case_e')) throw new Error('Acte IV : annulation acceptée avant le vote');
         const boot = checkpoints.find((c) => c.label === 'utiliser permis sur capsule_vaisseau');
