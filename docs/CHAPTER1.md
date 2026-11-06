@@ -169,8 +169,8 @@ l'arbre §6.
 | Ticket n° 9848 | `ticket_9848` | 6 (B.O.B. l'aspire) | 9 (guichet) | 3 | Court, tutoriel du chapitre. |
 | Formulaire B-7/12 | `formulaire` | 9 (guichet) | 20, 29, 32, 33, 34, 40, 42 | — | **Fil rouge** réutilisé 7 fois ; état par flags `st_case_a…e`. |
 | Tampon « ANNULÉ » | `tampon_annule` | 15 (tampons) | 39 (Conseil), 45 (fourrière) | **24 / 30** | **Réutilisé** ; fausse piste sur la borne du sas (« on n'annule pas un statut »). |
-| Encreur sec → imbibé | `encreur` | 16 (tampons) | 28 (combinaison), 29 (Tamponnet) | **12 / 13** | Combinaison avec le café (remué à la cuillère). |
-| Cuillère en plastique | `cuillere` | 5 (cafétéria, plateau des tables) | 28 (remuer le café dans l'encreur) | **23** | Sans elle, le café « reste en surface du feutre ». Consommée (fond à moitié). |
+| Encreur sec → imbibé | `encreur` | 16 (tampons) | 28 (combinaison), 29 (Tamponnet) | **12 / 13** | Combinaison avec le café (remué à la cuillère si Gary en a une — optionnelle). |
+| Cuillère en plastique | `cuillere` | 5 (cafétéria, plateau des tables) | 28 (remuer le café dans l'encreur, bonus) | **23** | **Optionnelle** (dette #5) : sans elle, l'encreur s'imbibe quand même (« le feutre se souvient »). Avec, gag « nécessité de service », consommée (fond à moitié). |
 | Liasse de réclamations vierges | `liasse` | 18 (réclamations) | 19 (photocopieuse) | 1 | Le papier reste dans le bac : resservira à l'étape 33 (via la machine). |
 | Capsule pneumatique | `capsule` | 18 (réclamations) | 37 (PERCO → Conseil) | **19** | Vote par procuration. |
 | Copies du dossier Plunk | `copies_dossier` | 19 (archives) | 20 (combinaison avec le formulaire) | 1 | Remplit la case A. |
@@ -185,7 +185,7 @@ l'acte IV. **6 objets à écart ≥ 5** : `ticket_douane` (42), `plante` (31),
 (35 entre l'horloge et le coffre).
 
 **Combinaisons** : `copies_dossier` + `formulaire` → case A ; `encreur` + `gobelet` →
-encreur imbibé (requiert `cuillere`, consommée) ; (refus drôles) `plante` + `gobelet` (« elle est en plastique, Gary ;
+encreur imbibé (`cuillere` optionnelle : si en poche, remue et est consommée) ; (refus drôles) `plante` + `gobelet` (« elle est en plastique, Gary ;
 elle n'a pas soif, elle a des principes »), `ticket_9848` + `ticket_douane`
 (« deux tickets ne font pas un rendez-vous »), `tampon_annule` + `formulaire`
 (« tu veux annuler ta propre demande ? C'est très local, comme réflexe »).
@@ -213,7 +213,7 @@ PROPRIÉTAIRE : B.O.B. » ; le vaisseau part en fourrière ; SYLVIE annonce que
 │   4. Attente : regarder le squelette (ticket 9848), l'afficheur (9 847), le
 │      distributeur vide.                                                    [st_voit_patience]
 │   5. Cafétéria (porte du fond de l'attente) : prendre M. Ficus, à côté de PERCO-JUNIOR,
-│      et la cuillère en plastique du plateau abandonné.            +plante +cuillere
+│      et (optionnel) la cuillère en plastique du plateau abandonné. +plante (+cuillere)
 │   6. Attente : parler à B.O.B. (option « Il n'en a plus besoin… ») → B.O.B. aspire le
 │      ticket ; éloge funèbre.                                 [st_ticket_9848] +ticket_9848
 │   7. Guichet : rideau baissé, horloge 10 h 11, horaires 10 h 12–10 h 14.   [st_voit_horloge]
@@ -268,8 +268,8 @@ PROPRIÉTAIRE : B.O.B. » ; le vaisseau part en fourrière ; SYLVIE annonce que
 │  26. Pause : accord signé sur PERCO → fin de grève, les gobelets rentrent au
 │      dépôt.                                                     [st_greve_finie] −accord
 │  27. Pause : parler à PERCO → café tiède dans un gobelet (« UN À LA FOIS »). +gobelet
-│  28. Combiner encreur + gobelet → remué à la cuillère, encreur imbibé de café (brun,
-│      « conforme ») ; sans cuillère, le café reste en surface.  [st_encreur_cafe] −cuillere
+│  28. Combiner encreur + gobelet → encreur imbibé de café (brun, « conforme ») ; si Gary
+│      a la cuillère, il remue avec et elle fond (bonus).  [st_encreur_cafe] (−cuillere)
 │  29. Tampons : encreur sur Tamponnet → CLONK de joie ; formulaire sur Tamponnet →
 │      « VU » (requiert case A).                                   [st_case_b] −encreur
 │  30. Pause : gobelet sur PERCO → 2e café.                                  [st_cafe2]
@@ -451,9 +451,9 @@ inventaire ; `npm run playthrough` passe ch0 inchangé + stub ch1.
 - **Cafétéria** (`st-cafeteria`, sortie `vers_cafeteria` au fond de l'attente, `dir: up`) : zooms
   examine (`smart: look`) réduits à `menu`, `vitrine`, `comptoir`, `cafe` (PERCO-JUNIOR) ; `tables`, `bob`
   en look simple ; réplique d'arrivée. Ramassages : `plante` (M. Ficus, devant entre le comptoir et
-  PERCO-JUNIOR) et `cuillere` (plateau des tables, requise pour `encreur` + `gobelet`, Acte III).
+  PERCO-JUNIOR) et `cuillere` (plateau des tables, bonus optionnel pour `encreur` + `gobelet`, Acte III).
   Pièce 3D `stCafeteria` ; GenAI `public/props/st/platdujour-{fr,en}.jpg` (menu à lettres) et
-  `sandwich.png` (détouré, vitrine + hublot de la porte). Sur le chemin critique depuis t259 (plante, cuillère).
+  `sandwich.png` (détouré, vitrine + hublot de la porte). Sur le chemin critique depuis t259 (plante ; la cuillère n'est plus requise depuis la dette #5).
 - **Guichet** (`st-guichet`, sortie `vers_guichet` de l'attente, `requires: ticket_9848`) : salle
   jouable. Pièce 3D `stGuichet` (mauve administratif, accents `#8a6db0`) : comptoir à deux baies,
   Mme Guichard derrière la vitre (billboard GenAI `public/props/st/guichard-sheet.png`, 2 cellules
@@ -617,7 +617,7 @@ Checkpoint en salle, cases A, B, D, C remplies : `ChapterDef.endFlag` du ch1 = *
   `st_delaigue_reveille` ; 32. formulaire (réveillé + « VU ») → `st_case_d`.
 - **Tampons** : 29. `encreur` imbibé sur Tamponnet → −encreur, `st_tamponnet_encre` ; formulaire → `st_case_b`.
   **Archives** : 33. formulaire sur la photocopieuse (`st_case_d` + `st_papier`) → `st_case_c`.
-- **Combinaison** 28 : `encreur` + `gobelet` (avec `cuillere`, prise à la cafétéria) → `st_encreur_cafe` + `st_gobelet_vide` (le gobelet reste), −`cuillere`. Sans cuillère : gag, rien ne change.
+- **Combinaison** 28 : `encreur` + `gobelet` → `st_encreur_cafe` + `st_gobelet_vide` (le gobelet reste). `cuillere` optionnelle (dette #5) : si en poche (prise à la cafétéria), Gary remue avec, elle fond à moitié (−`cuillere`) ; sinon le café imbibe directement. Pas de backtrack cafétéria.
   Icônes à variantes (Studio `GENAI_VARIANTS`) : `accord-signe`, `gobelet-vide`, `encreur-cafe`.
 - **B.O.B.** : `st_bob_acte3.ink` (après la case A ; reprend Tamponnet/« VU » de l'Acte II). **Carnet** :
   `greve_p15`, `delegation`, `greve_finie`, `delaigue_dort`, `cases_bdc` ; **déduction D4** `d_po`

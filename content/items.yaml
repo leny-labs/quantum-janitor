@@ -221,16 +221,16 @@ items:
         - if: { flags: [st_gobelet_vide] }
           say: "Le gobelet est vide. Une trace de café au fond, pas assez pour un encreur. PERCO ressert. Sans limite. Un à la fois."
           stop: true
-        # sans la cuillère de la cafétéria (st-cafeteria, plateau des tables), le café ne prend pas
-        - if: { notItems: [cuillere] }
-          say: "narrateur: Gary verse une goutte de café sur le feutre craquelé. Elle perle, roule, et reste en surface. Le feutre refuse. Il est sec depuis 1985 ; il a pris des habitudes."
-        - if: { notItems: [cuillere] }
-          say: "Il faudrait faire pénétrer. Remuer. Avec quelque chose de fin et de jetable. Même une cuillère de cantine."
-          stop: true
-        - say: "narrateur: Gary verse le café tiède sur le feutre craquelé et remue avec la cuillère de la cafétéria. L'encreur boit tout, avec un petit bruit de soulagement. Il devient brun, luisant. Conforme."
-          set: st_encreur_cafe
-        - say: "narrateur: La cuillère, elle, a fondu à moitié. Elle a fait son service. Gary la dépose dans la corbeille, avec les honneurs."
+        # cuillère optionnelle (dette #5) : même résultat mécanique avec ou sans ; avec, c'est le gag
+        # « nécessité de service » (ramassée en cafétéria, plateau des tables), et elle est consommée
+        - if: { items: [cuillere] }
+          say: "narrateur: Gary verse le café tiède sur le feutre craquelé et remue avec la cuillère de la cafétéria. Nécessité de service. L'encreur boit tout, avec un petit bruit de soulagement. Il devient brun, luisant. Conforme."
+        - if: { items: [cuillere] }
+          say: "narrateur: La cuillère, elle, a fondu à moitié. Elle a fait son service. Gary la dépose dans la corbeille, avec les honneurs."
           take: cuillere
+        - if: { notItems: [cuillere] }
+          say: "narrateur: Gary verse le café tiède sur le feutre craquelé. Une goutte perle, hésite… puis le feutre se souvient. Il est sec depuis 1985, mais il reconnaît un café syndiqué. Il boit tout, d'une traite. Brun, luisant. Conforme."
+        - set: st_encreur_cafe
         - set: st_gobelet_vide
         - say: "bob: De l'encre au café, Gary. Officiellement, c'est de l'encre. Officieusement, ça sent la pause."
           mood: love

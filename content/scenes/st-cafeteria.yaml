@@ -4,7 +4,7 @@
 # `st-pause` (Salle de Pause / grève de PERCO, aile B). Lore : d'où vient le sandwich de
 # Mme Guichard depuis 41 ans (sandwich consigné, rendu le soir, revendu le lendemain).
 # Deux ramassages à payoff différé : M. Ficus (`plante`, à côté de PERCO-JUNIOR → couloir B,
-# Conseil) et la cuillère du plateau (`cuillere`, pour remuer le café dans l'encreur, Acte III).
+# Conseil) et la cuillère du plateau (`cuillere`, bonus optionnel pour remuer le café dans l'encreur, Acte III).
 id: st-cafeteria
 title: Cafétéria
 sector: Station Bureaucratique · Niveau 0 · Restauration administrative
