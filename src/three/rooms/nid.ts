@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { at, box, cyl, glow, mat, pool, sphere, torus } from '../kit';
-import { REINE_ASPECT, REINE_SHEET, ROACH_ACTOR, actorFrame, billboardSheet, seau } from '../props';
+import { REINE_ASPECT, REINE_FRAMES, REINE_SHEET, ROACH_ACTOR, actorFrame, billboardSheet, seau } from '../props';
 import { bobSpot } from './bobspot';
 import { candle, crowd, drip, eggLamps, hive, mist, puddle, rib, shaft, vaultArch } from './hive';
 import type { RoomBuild } from './index';
@@ -14,9 +14,10 @@ const VELVET = '#5b2a86';
 /** Nid Royal (ch.1) : salle du trône de chitine, la Reine GenAI sur son trône, l'autel du Seau. */
 export const nid: RoomBuild = {
   camera: { pos: [0, 2.3, 9], look: [0, 2.15, 0], fov: 50 },
-  intro: 'reine',
+  // pas de plan d'arrivée sur la Reine : elle ne parle jamais « en grand », seulement dans la
+  // barre de dialogue (portrait). Le travel « Regarder » reste cadré large, comme Mme Guichard.
   shots: {
-    reine: { fill: 0.92, lift: 0.25, px: [680, 160] },
+    reine: { fill: 0.7, lift: 0.25, px: [680, 160] },
     autel: { fill: 0.62, lift: 0.2, orbit: -8 },
     courtisans: { fill: 0.75, orbit: 10 },
   },
@@ -133,8 +134,8 @@ export const nid: RoomBuild = {
     const qz = tz + u * 0.18;
     const top = s.wallAt(680, 44, qz).y;
     const qh = top - seatY;
-    // planche : antennes qui ondulent, mandibules qui s'écartent quand elle parle
-    const queen = billboardSheet(REINE_SHEET, 3, qh, REINE_ASPECT, { tint: '#fff2e2', shadow: u * 0.16 });
+    // planche 2 cellules (repos · mandibules) ; jamais synchronisée sur le dialogue (ROACH_ACTOR)
+    const queen = billboardSheet(REINE_SHEET, REINE_FRAMES, qh, REINE_ASPECT, { tint: '#fff2e2', shadow: u * 0.16 });
     queen.position.set(tx + u * 0.02, seatY, qz);
     const qs = queen.userData.sprite as THREE.Sprite;
     const qBase = qs.scale.clone();

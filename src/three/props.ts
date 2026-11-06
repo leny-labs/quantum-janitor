@@ -839,32 +839,32 @@ export function billboardSheet(url: string, frames: number, h: number, aspect: n
 /**
  * Planches in-world (_briefs/polish-placements/genai/tools/strip.py : seules
  * les zones qui bougent viennent des variantes GenAI, le reste est l'image fixe).
- *   Reine / Scribe : 0 repos · 1 mandibules écartées (parle) · 2 antennes qui ondulent
+ *   Reine : 0 repos · 1 mandibules écartées (la cellule « antennes qui ondulent » a été retirée de
+ *     la planche : antennes en mât jusqu'au halo du trône)
+ *   Scribe : 0 repos · 1 mandibules écartées · 2 antennes qui ondulent (hors cycle, même défaut)
  *   Sabot : 0 repos · 1 clignement · 2 parle · 3 agacé · 4 coup de tampon
  *   Patience (avec / sans ticket) : 0 repos · 1 mâchoire ouverte · 2 soupir (crâne penché)
  */
 export const REINE_SHEET = `${import.meta.env.BASE_URL}props/ch1/reine-sheet.png`;
+export const REINE_FRAMES = 2;
 export const SCRIBE_SHEET = `${import.meta.env.BASE_URL}props/ch1/scribe-sheet.png`;
 export const SABOT_SHEET = `${import.meta.env.BASE_URL}props/st/sabot-sheet.png`;
 export const PATIENCE_SHEET = `${import.meta.env.BASE_URL}props/st/patience-sheet.png`;
 export const PATIENCE_EMPTY_SHEET = `${import.meta.env.BASE_URL}props/st/patience-vide-sheet.png`;
-/** Cafards parlants : antennes qui ondulent au repos, mandibules qui s'écartent en parlant. */
+/**
+ * Cafards parlants (Reine, Scribe) : règle absolue, comme Mme Guichard — pas de boucle `talk`, le
+ * billboard ne se synchronise jamais sur le dialogue (seul le portrait de la boîte de dialogue
+ * parle). Au repos, de loin en loin, un petit cliquetis de mandibules. Jamais la frame 2 (antennes).
+ */
 export const ROACH_ACTOR: ActorLoops = {
   idle: [
-    { frame: 0, duration: 1600 },
-    { frame: 2, duration: 900 },
-    { frame: 0, duration: 2300 },
-    { frame: 2, duration: 700 },
-  ],
-  talk: [
-    { frame: 1, duration: 170 },
-    { frame: 0, duration: 120 },
-    { frame: 1, duration: 210 },
-    { frame: 0, duration: 140 },
+    { frame: 0, duration: 5200 },
+    { frame: 1, duration: 140 },
+    { frame: 0, duration: 110 },
+    { frame: 1, duration: 120 },
+    { frame: 0, duration: 7400 },
     { frame: 1, duration: 150 },
-    { frame: 2, duration: 160 },
   ],
-  listen: 0,
 };
 export const SABOT_ACTOR: ActorLoops = {
   idle: [
