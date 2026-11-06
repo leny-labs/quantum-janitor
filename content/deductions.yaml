@@ -6,6 +6,8 @@
 #   line   réplique affichée sous la conclusion (« bob: … », « narrateur: … » ou Gary)
 #   nudge  relance de B.O.B. quand la paire est réunie mais pas déduite (une fois par session ;
 #          repli : carnet.nudge dans src/i18n)
+#   piste  facultatif : prochaine hypothèse affichée sous la conclusion (« → tenter … », façon
+#          Detective Grimoire) — dans la fiche du carnet et sous le verdict VALIDÉ
 # Mauvaise paire : réplique absurde (src/i18n, carnet.rejected), aucune pénalité.
 deductions:
   - id: d_minute
@@ -21,6 +23,9 @@ deductions:
     nudge:
       fr: "bob: Deux constatations se regardent de travers dans ton carnet. Ouvre-le avant qu'elles ne déposent un préavis."
       en: "bob: Two findings are glaring at each other in your notebook. Open it before they file a grievance."
+    piste:
+      fr: "→ tenter de pousser la minute : l'éclat sur l'horloge, et noter ce qui bouge"
+      en: "→ try to push the minute: the shard on the clock, and note what moves"
 
   - id: d_horloge
     # D1 + tremblement/éclat, ou directement l'horloge 10 h 11 + tremblement (le joueur voit le lien sans passer par D1).
@@ -36,6 +41,9 @@ deductions:
     nudge:
       fr: "bob: Tu as la minute. Tu as le tremblement. Il manque juste que tu les fasses se parler. Carnet."
       en: "bob: You have the minute. You have the tremor. All that's missing is introducing them. Notebook."
+    piste:
+      fr: "→ tenter l'éclat sur l'horloge, pile quand la trotteuse hésite"
+      en: "→ try the shard on the clock, right when the second hand dithers"
 
   - id: d_formulaire
     needs: [guichet_ouvert, guichard_rupture]
@@ -50,3 +58,61 @@ deductions:
     nudge:
       fr: "bob: Guichet ouvert, rupture au tableau. C'est le moment de déduire, pas de faire la queue derrière M. Patience."
       en: "bob: Desk open, out of stock on the board. Time to deduce, not to queue behind Mr Patience."
+    piste:
+      fr: "→ tenter de reparler à Mme Guichard : une rupture de stock, ça doit bien avoir son article"
+      en: "→ try talking to Mrs Guichard again: an out-of-stock must have its own article"
+
+  # ── Aile B (après l'Acte I) : chaque conclusion débloque le geste correspondant ──
+  # Acte III : sans d_po, Gary ne signe pas l'accord P-15 (st-sous-chef, accord sur Delaigue).
+  - id: d_po
+    needs: [delegation, greve_p15]
+    set: st_deduit_po
+    title: { fr: "Je signe pour ordre", en: "I sign per pro" }
+    text:
+      fr: "PERCO veut l'accord P-15 signé « par la direction OU SON INTÉRIMAIRE ». La direction dort. La note dit : en cas d'absence, sommeil compris, tout intérimaire signe p.o. Et depuis la case A, l'intérimaire, c'est moi."
+      en: "PERCO wants agreement P-15 signed “by management OR ITS TEMP”. Management is asleep. The memo says: in case of absence, sleep included, any temp signs p.p. And since box A, the temp is me."
+    line:
+      fr: "bob: Quarante et un ans de grève, et la solution dormait sur un fax. Je ne sais pas si je dois rire ou déposer un préavis."
+      en: "bob: Forty-one years of strike, and the answer was asleep on a fax. I don't know whether to laugh or file a notice."
+    nudge:
+      fr: "bob: Deux constatations de ton carnet se tournent autour depuis tout à l'heure, Gary. Laisse-les se mettre d'accord."
+      en: "bob: Two findings in your notebook have been circling each other for a while, Gary. Let them come to an agreement."
+    piste:
+      fr: "→ tenter de signer l'accord P-15 p.o., sur le bureau de M. Delaigue"
+      en: "→ try signing agreement P-15 p.p., at Mr Delaigue's desk"
+
+  # Acte IV : sans d_ficus, Gary ne pose pas la plante sur le siège honoraire (st-conseil, siège).
+  - id: d_ficus
+    needs: [quorum, tableau_membres]
+    set: st_deduit_ficus
+    title: { fr: "M. Ficus, membre honoraire", en: "Mr Ficus, honorary member" }
+    text:
+      fr: "Quorum : trois. Le membre honoraire, M. Ficus, « en plastique depuis le déménagement », n'a plus été vu depuis. J'ai dans ma poche un M. Ficus en plastique qui a dénoué un couloir. Ce n'est pas un homonyme."
+      en: "Quorum: three. The honorary member, Mr Ficus, “plastic since the move”, hasn't been seen since. I have a plastic Mr Ficus in my pocket who untangled a corridor. It's not a namesake."
+    line:
+      fr: "bob: Tu transportes un membre du Conseil dans ta poche depuis l'Acte I, Gary. J'espère que tu l'as tutoyé."
+      en: "bob: You've been carrying a Council member in your pocket since Act I, Gary. I hope you were on first-name terms."
+    nudge:
+      fr: "bob: Il manque quelqu'un au Conseil, Gary. Personne ne lit jamais rien, ici. Toi, tu notes. Je crois que ton carnet sait où il est."
+      en: "bob: Someone's missing from the Council, Gary. Nobody reads anything here. You take notes. I think your notebook knows where they are."
+    piste:
+      fr: "→ tenter de faire siéger M. Ficus au siège du membre honoraire"
+      en: "→ try seating Mr Ficus in the honorary member's chair"
+
+  # Acte IV : sans d_annule, Gary ne tamponne pas l'urne après l'égalité (st-conseil, urne).
+  - id: d_annule
+    needs: [vote_egalite, tampon_annule_trouve]
+    set: st_deduit_annule
+    title: { fr: "Sans le CONTRE, un POUR", en: "Without the AGAINST, one FOR" }
+    text:
+      fr: "Un POUR, une abstention, un CONTRE de principe : égalité. Personne n'a jamais annulé ce CONTRE. Et moi, j'ai en poche le seul tampon de la Station qui n'a jamais servi : ANNULÉ. Sans le CONTRE, il reste un POUR."
+      en: "One FOR, one abstention, one AGAINST on principle: a tie. Nobody has ever cancelled that AGAINST. And I have in my pocket the only stamp in the Station that has never been used: CANCELLED. Without the AGAINST, there's one FOR left."
+    line:
+      fr: "narrateur: Gary regarde le tampon. Le tampon, s'il avait des yeux, regarderait Gary. Il attend ça depuis 1985."
+      en: "narrateur: Gary looks at the stamp. The stamp, if it had eyes, would look back. It's been waiting since 1985."
+    nudge:
+      fr: "bob: Égalité, Gary. Ton carnet a l'air d'avoir un avis là-dessus. Lui, au moins, ne s'abstient pas."
+      en: "bob: A tie, Gary. Your notebook seems to have an opinion on that. At least it doesn't abstain."
+    piste:
+      fr: "→ tenter le tampon ANNULÉ sur le bulletin CONTRE, dans l'urne"
+      en: "→ try the CANCELLED stamp on the AGAINST ballot, in the ballot box"

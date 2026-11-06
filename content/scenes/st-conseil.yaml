@@ -2,10 +2,13 @@
 # Rendu 3D : src/three/rooms/station.ts (stConseil). `art:` = repli 2D.
 # Mme Augustine Paraphe, présidente (seule membre présente), vote contre « par principe ». Paraphe chaque phrase.
 #   parler à Paraphe              → quorum de 3 (tableau des membres)                [st_quorum_connu]
-#   plante sur le siège honoraire → M. Ficus siège                                    [st_ficus] −plante
+#   regarder le tableau           → membres : Paraphe, PERCO, M. Ficus (honoraire)   [st_voit_tableau]
+#   plante sur le siège honoraire → sans carnet d_ficus : Gary reprend le pot
+#                                   avec d_ficus : M. Ficus siège                      [st_ficus] −plante
 #   (Pause : capsule sur PERCO → procuration par le tube)                             [st_vote_perco]
 #   parler à Paraphe (quorum)     → POUR / abstention / CONTRE : égalité, AJOURNÉ     [st_vote_egalite]
-#   tampon ANNULÉ sur l'urne      → « ON N'ANNULE JAMAIS RIEN… DONC C'EST VALABLE »   [st_case_e]
+#   tampon ANNULÉ sur l'urne      → sans carnet d_annule : Gary n'ose pas
+#                                   avec d_annule : « ON N'ANNULE JAMAIS RIEN… DONC C'EST VALABLE » [st_case_e]
 id: st-conseil
 title: Salle du Conseil
 sector: Station Bureaucratique · Niveau 7 · Conseil
@@ -40,10 +43,17 @@ hotspots:
           say: "paraphe: Déjà paraphé, jeune homme. Je ne paraphe jamais deux fois. Sauf mes phrases. A.P."
           stop: true
         - say: "paraphe: Un avis du Conseil exige un vote du Conseil. Un vote exige le quorum. Le quorum exige trois membres. Je suis une. A.P."
-      plante: "paraphe: Il vote déjà mieux que vous. Mais pas sur la table, jeune homme. À son siège. A.P."
+      plante:
+        - if: { notFlags: [st_deduit_ficus] }
+          say: "paraphe: Les plantes vertes relèvent de l'Intendance, jeune homme. Pas du Conseil. A.P."
+          stop: true
+        - say: "paraphe: Il vote déjà mieux que vous. Mais pas sur la table, jeune homme. À son siège. A.P."
       tampon_annule:
-        - if: { flags: [st_vote_egalite], notFlags: [st_case_e] }
+        - if: { flags: [st_vote_egalite, st_deduit_annule], notFlags: [st_case_e] }
           say: "paraphe: Pas sur moi, jeune homme. Sur mon bulletin. Dans l'urne. On n'annule pas une présidente. On annule un vote. A.P."
+          stop: true
+        - if: { flags: [st_vote_egalite], notFlags: [st_case_e] }
+          say: "paraphe: Un tampon ? Sur une présidente, en pleine séance ? Hors ordre du jour. A.P."
           stop: true
         - say: "paraphe: Annuler quoi ? Il n'y a encore rien eu. Ici, on n'annule jamais rien. Surtout pas avant. A.P."
       fragment: "paraphe: Un miracle ? Nous votons contre les miracles depuis 1985. Par principe. A.P."
@@ -58,7 +68,8 @@ hotspots:
       - { rect: [135, 65, 190, 290], color: "#f6efdc", stroke: "#2a2830", text: "MEMBRES", size: 14 }
     look:
       - say: "« CONSEIL — MEMBRES. PRÉSIDENTE : A. PARAPHE. REPRÉSENTANT DU PERSONNEL : PERCO. MEMBRE HONORAIRE : M. FICUS. QUORUM : 3. »"
-      - say: "M. Ficus. Membre honoraire. « En plastique depuis le déménagement », précise une note au crayon. Je l'ai dans ma poche depuis une heure."
+        set: st_voit_tableau
+      - say: "M. Ficus. Membre honoraire. « En plastique depuis le déménagement », précise une note au crayon. Ce nom me dit quelque chose."
         if: { notFlags: [st_ficus] }
       - say: "Et PERCO, représentant du personnel. Elle ne quitte jamais la Salle de Pause. Il faudrait qu'elle vote… à distance."
         if: { notFlags: [st_vote_perco] }
@@ -80,6 +91,9 @@ hotspots:
       - say: "Je m'assieds. Mme Paraphe me fixe. « Vous n'êtes pas honoraire, jeune homme. Vous êtes intérimaire. » Je me relève. A.P."
     useItem:
       plante:
+        - if: { notFlags: [st_deduit_ficus] }
+          say: "Je pose le pot sur le siège… puis je le reprends. Mme Paraphe a haussé un sourcil d'un millimètre. Au Conseil, c'est une motion de censure. On n'assoit pas n'importe quoi sur un siège de membre sans savoir pourquoi."
+          stop: true
         - say: "narrateur: Gary pose M. Ficus sur le siège du membre honoraire. Le pot tombe pile dans le rond de poussière. Comme s'il revenait du déménagement."
           take: plante
           set: st_ficus
@@ -98,7 +112,7 @@ hotspots:
         say: "L'urne. Le bulletin de Mme Paraphe porte un grand « ANNULÉ » rouge par-dessus son « CONTRE ». Et, dans la marge, ses initiales. Elle l'a paraphé. Elle a l'air presque émue."
         stop: true
       - if: { flags: [st_vote_egalite] }
-        say: "L'urne transparente. Trois bulletins : « POUR » (taché de café), « ABSTENTION » (une feuille en plastique) et « CONTRE », paraphé. Égalité. Au-dessus du sien, rien ne dit qu'on ne peut pas l'annuler."
+        say: "L'urne transparente. Trois bulletins : « POUR » (taché de café), « ABSTENTION » (une feuille en plastique) et « CONTRE », paraphé. Égalité. Le « CONTRE » de la présidente a l'air très sûr de lui. Il n'a jamais été contredit."
         stop: true
       - say: "Une urne transparente, vide, sauf un bulletin « CONTRE » paraphé, posé là par habitude. Personne n'a jamais rien annulé dedans. Personne n'a jamais rien mis d'autre dedans."
     useItem:
@@ -108,6 +122,9 @@ hotspots:
           stop: true
         - if: { notFlags: [st_vote_egalite] }
           say: "Annuler quoi ? Il n'y a pas encore eu de vote. Pour l'instant, le seul bulletin, c'est un vieux « CONTRE » de principe. Il faut un vrai vote d'abord."
+          stop: true
+        - if: { notFlags: [st_deduit_annule] }
+          say: "Je lève le tampon au-dessus de l'urne. Mme Paraphe me fixe. Le bulletin « CONTRE » me fixe. Je redescends le tampon. Ici, chaque geste a un article ; je n'ai pas encore compris lequel est le mien."
           stop: true
         - dialogue: st_conseil_annule
           set: st_case_e

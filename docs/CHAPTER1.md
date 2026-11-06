@@ -486,7 +486,9 @@ poser ; re-clic = retirer ; Entrée = déduire). Échap / C / « Ranger » / cli
 - **Données** : `content/clues.yaml` (indice = `id`, `title` / `text` `{fr, en}`, `icon` = pictogramme
   dessiné ou `item:<id>`, `when` = condition sur flags / objets **déjà posés** par les looks et
   dialogues) et `content/deductions.yaml` (`needs: [a, b]` ordre libre, ou liste de paires ;
-  `set: flag` ; `line` facultative affichée sous la conclusion). Moteur pur : `src/engine/clues.ts`.
+  `set: flag` ; `line` facultative affichée sous la conclusion ; `nudge` = relance de B.O.B. quand la
+  paire est réunie ; `piste` facultative = prochaine hypothèse « → tenter … », en rouge tampon dans la
+  fiche de la conclusion et sous le verdict VALIDÉ). Moteur pur : `src/engine/clues.ts`.
 - **Persistance** : rien de neuf à sauver — indice noté = `when` vrai, conclusion = son flag `set`.
   Sauvegardes, /creator, `?flags=` / `?items=` marchent tels quels ; pas de migration. Seul l'état
   « nouveau » (pastille) est en mémoire. Une conclusion devient une pièce combinable.
@@ -506,9 +508,24 @@ poser ; re-clic = retirer ; Entrée = déduire). Échap / C / « Ranger » / cli
     (le lecteur de l'Aile B a une réplique nouvelle) ; la suite : article 47bis et couloir B (§9.3).
   - B.O.B. (`st_bob_guichet`) gradue : horloge tremblée → « ouvre ton carnet » ; D1 → rapprocher la
     minute et l'éclat ; D2 → « vise l'horloge » ; guichet ouvert → « parle-lui » ; rupture → D3.
+- **Aile B** (dette #4 de la review : le carnet ne servait qu'à l'Acte I) — chaque conclusion **gate**
+  le geste qui marchait avant sans elle ; sans la déduction, Gary voit les pièces sans les relier
+  (réplique de refus, rien n'est consommé) ; B.O.B. (« parler à ») pointe le carnet, le geste seulement
+  après la déduction :
+  - D4 `d_po` « Je signe pour ordre » = `delegation` (`st_voit_delegation`) + `greve_p15`
+    (`st_greve_connue`) → `st_deduit_po`. Gate : accord sur M. Delaigue (reclassé + note + D4) →
+    `st_accord_signe` (§9.5).
+  - D5 `d_ficus` « M. Ficus, membre honoraire » = `quorum` (`st_quorum_connu`, allégé : plus les noms)
+    + `tableau_membres` (nouveau, `st_voit_tableau` posé par le look du tableau) → `st_deduit_ficus`.
+    Gate : plante sur le siège honoraire → `st_ficus` (§9.6). La réplique principale de B.O.B. au
+    quorum ne parle plus de « plante ».
+  - D6 `d_annule` « Sans le CONTRE, un POUR » = `vote_egalite` + `tampon_annule_trouve` →
+    `st_deduit_annule`. Gate : tampon ANNULÉ sur l'urne après l'égalité → `st_case_e` (§9.6).
+    Mme Paraphe ne dicte plus « sur mon bulletin, dans l'urne » avant la déduction.
 - **Contrôles** : `validate-content` (ids uniques indices + déductions, pictos, conditions, paires
-  connues, flags `set` comptés comme posés) ; `playthrough` rejoue la chaîne (étapes `deduce` du
-  walkthrough) et vérifie rejet / ordre libre. L'`endFlag` du ch.1 reste `st_guichard_ferme`.
+  connues, flags `set` comptés comme posés, `piste` / `nudge` facultatifs) ; `playthrough` rejoue la
+  chaîne (étapes `deduce` du walkthrough), vérifie rejet / ordre libre, et que chaque geste gated de
+  l'Aile B est d'abord refusé sans sa déduction. L'`endFlag` du ch.1 reste `st_guichard_ferme`.
 
 ### 9.3 Aile B v1 — fin de l'Acte I (Accueil)
 
@@ -571,7 +588,8 @@ walkthrough joue encore l'étape 21, `st_sait_greve`, teaser de l'Acte III). Pas
   `copies_dossier` ; fausses pistes : `tampon_annule` sur la borne du sas, sur le formulaire, etc.
 - **B.O.B.** : `st_bob_acte2.ink` (une étape bloquante = un stitch, 1re demande vague, ensuite précise),
   appelé depuis les trois bureaux et le couloir. **Carnet** : indices `aucun_gary`, `dossier_garry`,
-  `tampon_annule_trouve`, `chatiere_ouverte`, `case_a`, `greve` (pas de déduction : puzzles objet).
+  `tampon_annule_trouve`, `chatiere_ouverte`, `case_a`, `greve` (pas de déduction à l'Acte II : puzzles
+  objet ; `tampon_annule_trouve` resservira à D6, §9.2).
 - **`repair.ts`** (§6.5) : `st_dossier_trouve` ∧ ¬`st_eclat2` ⇒ pas de badge ; `st_case_a` ⇒ pas de copies
   (+ `st_reclasse`) ; `st_papier` ⇒ pas de liasse (copies rendues si case A vide) ; `st_formulaire` ∧
   ¬`st_dossier_depose` ⇒ formulaire.
@@ -594,14 +612,16 @@ Checkpoint en salle, cases A, B, D, C remplies : `ChapterDef.endFlag` du ch1 = *
 - **`st-sous-chef`** (`stSousChef`, Ink `st_sous_chef.ink`) : placard à balais, M. Delaigue (billboard GenAI 0
   endormi · 1 réveillé, `st_delaigue_reveille` ; portrait endormi + variante `delaigue-reveille`), plaque « p.i. »
   et note de délégation (GenAI). 23. note → `st_voit_delegation` ; 24. accord sans reclassement → « UN ANIMAL NE
-  SIGNE PAS » ; 25. accord (reclassé + note) → `st_accord_signe` ; 31. gobelet plein → −gobelet,
+  SIGNE PAS » ; 25. accord (reclassé + note + déduction D4 `st_deduit_po`, §9.2) → `st_accord_signe` ;
+  sans D4, Gary reprend l'accord ; 31. gobelet plein → −gobelet,
   `st_delaigue_reveille` ; 32. formulaire (réveillé + « VU ») → `st_case_d`.
 - **Tampons** : 29. `encreur` imbibé sur Tamponnet → −encreur, `st_tamponnet_encre` ; formulaire → `st_case_b`.
   **Archives** : 33. formulaire sur la photocopieuse (`st_case_d` + `st_papier`) → `st_case_c`.
 - **Combinaison** 28 : `encreur` + `gobelet` (avec `cuillere`, prise à la cafétéria) → `st_encreur_cafe` + `st_gobelet_vide` (le gobelet reste), −`cuillere`. Sans cuillère : gag, rien ne change.
   Icônes à variantes (Studio `GENAI_VARIANTS`) : `accord-signe`, `gobelet-vide`, `encreur-cafe`.
 - **B.O.B.** : `st_bob_acte3.ink` (après la case A ; reprend Tamponnet/« VU » de l'Acte II). **Carnet** :
-  `greve_p15`, `delegation`, `greve_finie`, `delaigue_dort`, `cases_bdc`. **`repair.ts`** : accord rendu tant
+  `greve_p15`, `delegation`, `greve_finie`, `delaigue_dort`, `cases_bdc` ; **déduction D4** `d_po`
+  (`delegation` + `greve_p15` → `st_deduit_po`, §9.2). **`repair.ts`** : accord rendu tant
   que la grève dure, retiré après ; encreur rendu jusqu'à Tamponnet, retiré après.
 - **GenAI** : `_briefs/acte3/genai/` ; captures `_briefs/acte3/shoot.mjs` → `/tmp/qj-acte3/`.
 
@@ -618,8 +638,9 @@ Le chapitre se termine : permis sur la capsule à la fourrière → **`end: st_s
   Direction. Porte de droite : Conseil puis Direction selon le dernier étage choisi.
 - **`st-conseil`** (`stConseil`, Ink `st_conseil.ink`) : Mme Paraphe (GenAI planche + portrait ; « … A.P. »),
   tableau des membres (GenAI), siège honoraire, urne, tube d'arrivée. 35. parler → `st_quorum_connu` ;
-  36. plante sur le siège → −plante, `st_ficus` ; 38. parler (quorum) → `st_vote_egalite` ; 39. tampon ANNULÉ
-  sur l'urne → `st_case_e` (refusé avant le vote). **Pause** : 37. capsule sur PERCO (grève finie + quorum
+  tableau → `st_voit_tableau` ; 36. plante sur le siège (déduction D5 `st_deduit_ficus`) → −plante, `st_ficus` ;
+  38. parler (quorum) → `st_vote_egalite` ; 39. tampon ANNULÉ sur l'urne (déduction D6 `st_deduit_annule`) →
+  `st_case_e` (refusé avant le vote, et après sans D6). **Pause** : 37. capsule sur PERCO (grève finie + quorum
   connu) → −capsule, `st_vote_perco`.
 - **`st-direction`** (`stDirection`, Ink `st_direction.ink`) : SYLVIE (modèle `sylvie()` + mur d'écrans « VU »),
   trône-photocopieuse, coffre des Objets Trouvés (GenAI). 41. parler → « DÉPÔT AU GUICHET UNIQUEMENT »,
@@ -633,7 +654,8 @@ Le chapitre se termine : permis sur la capsule à la fourrière → **`end: st_s
   45. tampon ANNULÉ sur l'amende → `st_vaisseau_libere` ; 46. permis sur la capsule → −permis, `end: st_suite`.
 - **Objets** : `permis` (GenAI) ; variante d'icône `fragment2` (2/4096, `st_eclat2`) ; `look` du badge rendu, de
   l'éclat fusionné, du formulaire complet. **B.O.B.** : `st_bob_acte4.ink`. **Carnet** : `quorum`,
-  `vote_egalite`, `depot_guichet`, `permis_sortie`. **`repair.ts`** : `st_ficus` ⇒ pas de plante, `st_vote_perco`
+  `tableau_membres`, `vote_egalite`, `depot_guichet`, `permis_sortie` ; **déductions D5** `d_ficus` et **D6**
+  `d_annule` (§9.2). **`repair.ts`** : `st_ficus` ⇒ pas de plante, `st_vote_perco`
   ⇒ pas de capsule, `st_amende` ⇒ pas de ticket, `st_eclat2` ⇒ badge + permis (avant la fin).
 - **GenAI** : `_briefs/acte4/genai/` ; captures `_briefs/acte4/shoot.mjs` → `/tmp/qj-acte4/`.
 - **Pas encore** : gros plan `st-formulaire` (le `look` du formulaire sert de tableau de bord) ; pièces

@@ -350,7 +350,7 @@ export function notifyNoted(scene: Phaser.Scene, x: number, y: number, fresh: Cl
 
 // ── overlay ──────────────────────────────────────────────────────────
 
-type Piece = { id: string; title: string; text: string; icon?: string; conclusion: boolean };
+type Piece = { id: string; title: string; text: string; icon?: string; conclusion: boolean; /** « → tenter … » (conclusions) */ piste?: string };
 
 type Result = { kind: 'ok' | 'already'; d: DeductionDef } | { kind: 'rejected'; line: string } | null;
 
@@ -494,6 +494,9 @@ export class CarnetOverlay {
         wheel: () => this.toWorld(this.wheelX, v.y + v.h / 2),
         /** Point au milieu de la liste, coordonnées jeu. */
         list: () => this.toWorld(v.x + v.w / 2, v.y + v.h / 2),
+        /** Clic simulé sur une pièce (captures) ; `deduce` = bouton DÉDUIRE. */
+        pick: (id: string) => this.pick(id),
+        deduce: () => this.deduce(),
       };
     }
 
@@ -513,7 +516,7 @@ export class CarnetOverlay {
     const L = lang();
     return {
       clues: knownClues(this.state, this.carnet).map((c) => ({ id: c.id, title: clueText(c.title, L), text: clueText(c.text, L), icon: c.icon, conclusion: false })),
-      conclusions: concluded(this.state, this.carnet).map((d) => ({ id: d.id, title: clueText(d.title, L), text: clueText(d.text, L), icon: d.icon ?? 'conclusion', conclusion: true })),
+      conclusions: concluded(this.state, this.carnet).map((d) => ({ id: d.id, title: clueText(d.title, L), text: clueText(d.text, L), icon: d.icon ?? 'conclusion', conclusion: true, piste: d.piste ? clueText(d.piste, L) : undefined })),
     };
   }
 
@@ -561,7 +564,7 @@ export class CarnetOverlay {
     const rx = this.split + 22;
     const rw = this.pw - rx - 30;
     const focus = all.find((p) => p.id === this.focus);
-    const detailH = 150;
+    const detailH = 180;
     const dg = s.add.graphics();
     dg.fillStyle(0xfffaf0, 0.9);
     dg.fillRect(rx, 100, rw, detailH);
@@ -571,7 +574,10 @@ export class CarnetOverlay {
     if (focus) {
       this.dyn.add(pieceIcon(s, this.state, focus.icon, rx + 32, 132, 40));
       this.dyn.add(s.add.text(rx + 62, 112, focus.title, { fontFamily: FONT, fontSize: '17px', fontStyle: '700', color: focus.conclusion ? RED : INK, wordWrap: { width: rw - 74 } }));
-      this.dyn.add(s.add.text(rx + 14, 160, focus.text, { fontFamily: FONT, fontSize: '14px', color: INK, wordWrap: { width: rw - 28 }, lineSpacing: 2 }).setMaxLines(5));
+      const body = s.add.text(rx + 14, 160, focus.text, { fontFamily: FONT, fontSize: '14px', color: INK, wordWrap: { width: rw - 28 }, lineSpacing: 2 }).setMaxLines(focus.piste ? 4 : 6);
+      this.dyn.add(body);
+      // piste « → tenter … » (façon Detective Grimoire) : la prochaine hypothèse, sous la conclusion
+      if (focus.piste) this.dyn.add(this.piste(focus.piste, rx + 14, body.y + body.height + 6, rw - 28));
     } else {
       this.dyn.add(s.add.text(rx + 16, 116, t('carnet.hint'), { fontFamily: FONT, fontSize: '14px', fontStyle: 'italic', color: DIM, wordWrap: { width: rw - 32 } }));
     }
@@ -632,7 +638,11 @@ export class CarnetOverlay {
         this.dyn.add(s.add.text(rx + 14, vy + 10, clueText(d.title, L).toUpperCase(), { fontFamily: FONT, fontSize: '16px', fontStyle: '700', color: RED, wordWrap: { width: rw - 150 } }).setLetterSpacing(1));
         // le texte de la conclusion est dans la fiche au-dessus : ici, la réplique (ou « déjà conclu »)
         if (r.kind === 'already') this.dyn.add(s.add.text(rx + 14, vy + 60, t('carnet.already'), { fontFamily: MONO, fontSize: '14px', fontStyle: 'bold', color: INK, wordWrap: { width: rw - 28 } }));
-        else if (d.line) this.dyn.add(this.speech(clueText(d.line, L), rx + 14, vy + 60, rw - 28));
+        else if (d.line) {
+          const said = this.speech(clueText(d.line, L), rx + 14, vy + 52, rw - 28);
+          this.dyn.add(said);
+          if (d.piste) this.dyn.add(this.piste(clueText(d.piste, L), rx + 14, Math.min(said.y + said.height + 8, vy + vh - 40), rw - 28));
+        }
         const stamp = s.add.text(rx + rw - 16, vy + 8, t('carnet.validated'), { fontFamily: DISPLAY, fontSize: '26px', color: TEAL }).setOrigin(1, 0).setAngle(-9);
         const frame = s.add.graphics();
         frame.lineStyle(3, hex(TEAL), 1);
@@ -646,6 +656,11 @@ export class CarnetOverlay {
         }
       }
     }
+  }
+
+  /** Piste « → tenter … » : rouge tampon (la réplique de B.O.B. est sarcelle), deux lignes au plus. */
+  private piste(text: string, x: number, y: number, w: number): Phaser.GameObjects.Text {
+    return this.scene.add.text(x, y, text, { fontFamily: FONT, fontSize: '13px', fontStyle: 'bold italic', color: RED, wordWrap: { width: w } }).setMaxLines(2); // i18n-ignore
   }
 
   /** Réplique (« bob: … ») sous la conclusion : italique, couleur du locuteur (B.O.B. = sarcelle). */

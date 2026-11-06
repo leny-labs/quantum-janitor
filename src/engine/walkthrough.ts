@@ -276,6 +276,9 @@ export const CHAPTERS: ChapterDef[] = [
       { useItem: ['accord', 'delaigue'] }, // il dort, pas de note lue : Gary n'ose pas
       { look: 'plaque' }, // « p.i. » depuis dix-neuf ans
       { look: 'note' }, // « tout intérimaire signe p.o. » (st_voit_delegation)
+      { useItem: ['accord', 'delaigue'] }, // note lue, mais sans déduction : Gary reprend l'accord
+      { talk: 'bob' }, // « deux d'entre elles parlent de la même signature » (carnet, pas le geste)
+      { deduce: ['delegation', 'greve_p15'] }, // D4 « Je signe pour ordre » (st_deduit_po)
       { useItem: ['accord', 'delaigue'] }, // Gary signe p.o. avec le stylo enchaîné (st_accord_signe)
       { go: 'st-couloir-b' },
       { section: 'Acte III · fin de la grève, encre au café' },
@@ -303,8 +306,10 @@ export const CHAPTERS: ChapterDef[] = [
       { go: 'st-ascenseur' }, // mur de droite : case D requise
       { useItem: ['formulaire', 'fente'] }, // AVIS DU CONSEIL REQUIS → Niveau 7 (st_ascenseur_conseil)
       { talk: 'paraphe' }, // quorum de 3 (st_quorum_connu)
-      { look: 'tableau' }, // PERCO (personnel), M. FICUS (honoraire)
-      { useItem: ['plante', 'paraphe'] }, // « il vote déjà mieux que vous » (rien n'est consommé)
+      { look: 'tableau' }, // PERCO (personnel), M. FICUS (honoraire) (st_voit_tableau)
+      { useItem: ['plante', 'paraphe'] }, // « l'Intendance, pas le Conseil » (rien n'est consommé)
+      { useItem: ['plante', 'siege'] }, // sans déduction : Gary reprend le pot
+      { deduce: ['quorum', 'tableau_membres'] }, // D5 « M. Ficus, membre honoraire » (st_deduit_ficus)
       { useItem: ['plante', 'siege'] }, // M. Ficus siège (st_ficus) −plante
       { talk: 'paraphe' }, // quorum non atteint : PERCO absente
       { useItem: ['tampon_annule', 'urne'] }, // rien à annuler avant le vote
@@ -316,7 +321,9 @@ export const CHAPTERS: ChapterDef[] = [
       { go: 'st-ascenseur' },
       { go: 'st-conseil' }, // la porte de droite mène au Conseil (st_ascenseur_conseil)
       { talk: 'paraphe' }, // POUR / abstention / CONTRE : égalité, AJOURNÉ (st_vote_egalite)
-      { talk: 'bob' }, // « un tampon que personne n'utilise »
+      { talk: 'bob' }, // « personne n'a jamais annulé son vote… relis-toi »
+      { useItem: ['tampon_annule', 'urne'] }, // après le vote, sans déduction : Gary n'ose pas
+      { deduce: ['vote_egalite', 'tampon_annule_trouve'] }, // D6 « Sans le CONTRE, un POUR » (st_deduit_annule)
       { useItem: ['tampon_annule', 'urne'] }, // ON N'ANNULE JAMAIS RIEN… DONC C'EST VALABLE (st_case_e)
       { section: 'Acte IV · la Direction, le dépôt, la restitution' },
       { go: 'st-ascenseur' },

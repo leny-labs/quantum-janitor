@@ -15,7 +15,7 @@
     gary: Et vous êtes combien ?
     paraphe: Une. Depuis 1985. Le représentant du personnel est en grève, ou à la pause, ce qui revient au même. Le membre honoraire n'a plus été vu depuis le déménagement. A.P. # mood: sad
     paraphe: Consultez le tableau des membres, si vous voulez vous rendre utile. Personne ne le lit jamais. A.P. # set: st_quorum_connu
-    bob: Trois membres, Gary. Elle, quelqu'un du personnel, et un honoraire. Il y a des gens, ici, que tu connais. Et une plante. # mood: suspicious
+    bob: Trois membres, Gary, et une seule présente. Ici, quand quelqu'un manque, ce n'est jamais qu'il n'existe pas. C'est qu'il est rangé ailleurs. # mood: suspicious
     -> END
 }
 { not has_flag("st_ficus") || not has_flag("st_vote_perco"):

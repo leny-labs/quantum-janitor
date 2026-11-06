@@ -36,6 +36,8 @@ export interface DeductionDef {
   line?: MapText;
   /** Relance de B.O.B. quand la paire est réunie mais pas encore déduite (« bob: … ») ; repli i18n `carnet.nudge`. */
   nudge?: MapText;
+  /** Prochaine hypothèse (« → tenter … », façon Detective Grimoire), affichée sous la conclusion. Facultatif. */
+  piste?: MapText;
   icon?: string;
 }
 
@@ -98,7 +100,6 @@ export function deduce(state: GameState, c: Carnet, a: string, b: string): Deduc
 /**
  * Déductions prêtes : une paire `needs` entièrement combinable (indices notés / conclusions)
  * et flag `set` pas encore posé. Ordre du YAML.
- * (Plus tard : piste « prochaine hypothèse » dans la fiche du carnet, façon Detective Grimoire.)
  */
 export function readyDeductions(state: GameState, c: Carnet): DeductionDef[] {
   const usable = usableIds(state, c);

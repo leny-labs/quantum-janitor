@@ -169,6 +169,20 @@ async function main() {
         if (checkpoints.filter((c) => c.label === 'utiliser fragment sur horloge').length !== 2) throw new Error('Acte IV : l\'horloge ne doit plus être rejouée (2 usages, tous deux à l\'Acte I)');
         const urne = checkpoints.find((c) => c.label === 'utiliser tampon_annule sur urne');
         if (!urne || urne.save.flags.includes('st_case_e')) throw new Error('Acte IV : annulation acceptée avant le vote');
+        // déductions de l'Aile B : chaque geste exige sa conclusion du carnet (le premier essai, sans elle, est refusé)
+        const gated: [string, string, string][] = [
+          ['utiliser accord sur delaigue', 'st_deduit_po', 'st_accord_signe'],
+          ['utiliser plante sur siege', 'st_deduit_ficus', 'st_ficus'],
+          ['utiliser tampon_annule sur urne', 'st_deduit_annule', 'st_case_e'],
+        ];
+        for (const [label, deduit, flag] of gated) {
+          const tries = checkpoints.filter((c) => c.label === label);
+          const ok = tries.find((c) => c.save.flags.includes(flag));
+          if (!ok || !ok.save.flags.includes(deduit)) throw new Error(`carnet : ${flag} posé sans la déduction ${deduit}`);
+          const refused = tries.filter((c) => !c.save.flags.includes(deduit));
+          if (!refused.length || refused.some((c) => c.save.flags.includes(flag))) throw new Error(`carnet : « ${label} » sans ${deduit} devait être refusé`);
+          if (deduit === 'st_deduit_annule' && !refused.some((c) => c.save.flags.includes('st_vote_egalite'))) throw new Error('carnet : le tampon après le vote, sans déduction, devait être refusé');
+        }
         const boot = checkpoints.find((c) => c.label === 'utiliser permis sur capsule_vaisseau');
         if (!boot || !boot.save.items.includes('permis') || boot.save.ended) throw new Error('Acte IV : décollage avec le sabot');
         // carnet de déduction : la chaîne de l'horloge ouvre le guichet (docs/CHAPTER1.md)
@@ -177,7 +191,7 @@ async function main() {
         if (hasCarnet(start, carnet)) throw new Error('carnet : aucun indice attendu à l\'arrivée dans l\'interlude');
         const firstClue = checkpoints.find((c) => hasCarnet(GameState.fromSave(c.save), carnet));
         if (!firstClue) throw new Error('carnet : jamais d\'indice noté');
-        for (const f of ['st_voit_horaires', 'st_deduit_minute', 'st_deduit_horloge', 'st_guichet_ouvert', 'st_guichard_rupture', 'st_deduit_formulaire']) {
+        for (const f of ['st_voit_horaires', 'st_deduit_minute', 'st_deduit_horloge', 'st_guichet_ouvert', 'st_guichard_rupture', 'st_deduit_formulaire', 'st_deduit_po', 'st_voit_tableau', 'st_deduit_ficus', 'st_deduit_annule']) {
           if (!state.hasFlag(f)) throw new Error(`carnet : flag ${f} absent à la fin`);
         }
         // l'horloge ne s'ouvre pas sans la déduction D2

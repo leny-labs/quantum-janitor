@@ -232,8 +232,16 @@ clues:
     when: { flags: [st_quorum_connu] }
     title: { fr: "Quorum : trois membres", en: "Quorum: three members" }
     text:
-      fr: "Mme Paraphe, seule présente, exige le quorum. Membres : la présidente, PERCO (représentant du personnel, qui ne quitte pas la pause) et M. Ficus (membre honoraire, « en plastique depuis le déménagement »)."
-      en: "Mrs Paraphe, the only one present, demands a quorum. Members: the chair, PERCO (staff rep, never leaves the break room) and Mr Ficus (honorary member, “plastic since the move”)."
+      fr: "Il faut trois membres pour voter l'avis de la case E. Je n'en vois qu'une : Mme Paraphe, la présidente. Le représentant du personnel est « à la pause » ; le membre honoraire n'a plus été vu depuis le déménagement."
+      en: "It takes three members to vote on the box E opinion. I can only see one: Mrs Paraphe, the chair. The staff rep is “on break”; the honorary member hasn't been seen since the move."
+
+  - id: tableau_membres
+    icon: speech
+    when: { flags: [st_voit_tableau] }
+    title: { fr: "Tableau des membres du Conseil", en: "Council members board" }
+    text:
+      fr: "« PRÉSIDENTE : A. PARAPHE. REPRÉSENTANT DU PERSONNEL : PERCO. MEMBRE HONORAIRE : M. FICUS. QUORUM : 3. » Au crayon, à côté de M. Ficus : « en plastique depuis le déménagement »."
+      en: "“CHAIR: A. PARAPHE. STAFF REPRESENTATIVE: PERCO. HONORARY MEMBER: MR FICUS. QUORUM: 3.” In pencil, next to Mr Ficus: “plastic since the move”."
 
   - id: vote_egalite
     icon: stamp

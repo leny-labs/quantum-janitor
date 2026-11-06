@@ -52,11 +52,23 @@ bob: Quatre cases sur cinq, Gary. L'Ascenseur à Formulaires, au fond du couloir
 bob: Le Conseil, Gary. Parle à Mme Paraphe. Elle a l'air de quelqu'un qui attend qu'on lui parle depuis longtemps. # mood: calm
 -> END
 
+// sans la déduction d_ficus (carnet) : on pointe le tableau, puis le carnet ; le geste ensuite
 = ficus
-{ st_bob_acte4.ficus > 1:
+{ has_flag("st_deduit_ficus"):
     bob: M. Ficus, Gary. Membre honoraire. Pose-le sur le siège du membre honoraire, au Conseil. # mood: love
+    -> END
+}
+{ not has_flag("st_voit_tableau"):
+    bob: Lis le tableau des membres, Gary. Personne ne le lit jamais. Toi, tu lis tout : c'est ton défaut, c'est notre chance. # mood: suspicious
+    -> END
+}
+-> ficus_carnet
+
+= ficus_carnet
+{ st_bob_acte4.ficus_carnet > 1:
+    bob: Le quorum, et les noms au mur, Gary. Dans ton carnet. Le troisième membre, tu le connais. Tu l'as dans ta poche depuis une heure. # mood: love
 - else:
-    bob: Lis le tableau des membres. Le troisième, tu le connais. Tu l'as dans ta poche depuis une heure. # mood: suspicious
+    bob: Elle compte ses membres, Gary. Le tableau les nomme. Toi, tu notes. Il y a un carnet qui attend qu'on s'en serve. # mood: suspicious
 }
 -> END
 
@@ -72,11 +84,16 @@ bob: Le Conseil, Gary. Parle à Mme Paraphe. Elle a l'air de quelqu'un qui atten
 bob: Le quorum est atteint, Gary. Parle à Mme Paraphe : qu'elle ouvre la séance. # mood: calm
 -> END
 
+// sans la déduction d_annule (carnet) : on pointe le carnet ; le geste ensuite
 = egalite
-{ st_bob_acte4.egalite > 1:
+{ has_flag("st_deduit_annule"):
     bob: Le tampon ANNULÉ, Gary. Sur son bulletin, dans l'urne. « On n'annule jamais rien »… donc c'est valable. # mood: love
+    -> END
+}
+{ st_bob_acte4.egalite > 1:
+    bob: L'égalité, Gary, et ce que t'a confié Mme Tamponnet. Dans ton carnet, côte à côte. Laisse-les voter. # mood: love
 - else:
-    bob: Elle vote contre. Personne n'a jamais annulé son vote. Tu as un tampon que personne n'utilise. # mood: suspicious
+    bob: Elle vote contre. Personne n'a jamais annulé son vote. Tu notes tout, Gary : relis-toi. # mood: suspicious
 }
 -> END
 

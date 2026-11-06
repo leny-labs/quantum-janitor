@@ -4,7 +4,8 @@
 # (GenAI : endormi / réveillé, frame pilotée par `st_delaigue_reveille`).
 #   note de délégation punaisée            → « tout intérimaire signe p.o. »          [st_voit_delegation]
 #   accord sur Delaigue (sans reclassement) → « UN ANIMAL NE SIGNE PAS » (garde-fou §6.24)
-#   accord sur Delaigue (reclassé + note)   → Gary signe « p.o. »                       [st_accord_signe]
+#   accord sur Delaigue (reclassé + note, sans déduction) → Gary n'ose pas (les deux pièces ne se parlent pas encore)
+#   accord sur Delaigue (reclassé + note + carnet d_po)   → Gary signe « p.o. »         [st_accord_signe]
 #   gobelet plein sur Delaigue              → « …PRIME ? » réveillé, il garde le gobelet [st_delaigue_reveille] −gobelet
 #   formulaire sur Delaigue (réveillé + VU) → signature hiérarchique, ascenseur, quorum [st_case_d]
 id: st-sous-chef
@@ -56,6 +57,9 @@ hotspots:
           stop: true
         - if: { notFlags: [st_voit_delegation] }
           say: "Je lui glisse l'accord sous la main. Sa main ne bouge pas. Il dort. Je ne vais quand même pas signer à sa place… Enfin, est-ce que j'ai le droit ? Il doit bien y avoir une note quelque part."
+          stop: true
+        - if: { notFlags: [st_deduit_po] }
+          say: "Je lui glisse l'accord sous la main. Le stylo enchaîné me regarde. La note me regarde. L'accord me regarde. Tout le monde a l'air d'attendre que je comprenne quelque chose. Je reprends l'accord. Pas de signature sans raisonnement écrit : c'est ce qui me distingue d'un animal. Sur papier."
           stop: true
         - dialogue: st_souschef_signe
           set: st_accord_signe

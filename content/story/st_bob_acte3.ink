@@ -67,8 +67,20 @@ bob: L'accord P-15, Gary. Sur le panneau syndical de la Salle de Pause. Prends-l
 }
 -> END
 
+// sans la déduction d_po (carnet) : on pointe le carnet, pas le geste
 = signer
+{ not has_flag("st_deduit_po"):
+    -> signer_carnet
+}
 bob: Tu as lu la note, Gary : sommeil compris, tout intérimaire signe p.o. Donne l'accord à M. Delaigue. Enfin, à sa main. C'est toi qui signeras. # mood: love
+-> END
+
+= signer_carnet
+{ st_bob_acte3.signer_carnet > 1:
+    bob: Ce que veut PERCO et ce qui est punaisé au-dessus du fax, Gary. Mets-les côte à côte dans ton carnet. Les papiers, ça se comprend mieux à deux. # mood: love
+- else:
+    bob: Tu as lu beaucoup de choses aujourd'hui, Gary. Deux d'entre elles parlent de la même signature. Elles ne le savent pas encore. # mood: suspicious
+}
 -> END
 
 = fin_greve

@@ -296,6 +296,8 @@ for (const it of content.items.values()) {
     text(d.title, 'title', w);
     text(d.text, 'text', w);
     if (d.line) text(d.line, 'line', w);
+    if (d.nudge) text(d.nudge, 'nudge', w);
+    if (d.piste) text(d.piste, 'piste', w);
     icon(d.icon, w);
     if (!d.set) err(`${w} : flag « set » manquant`);
     else {
