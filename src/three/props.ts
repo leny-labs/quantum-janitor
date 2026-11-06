@@ -856,16 +856,18 @@ export const REINE_FRAMES = 2;
 export const REINE_SHEET_ASPECT = 729 / 1024;
 export const SCRIBE_SHEET = `${import.meta.env.BASE_URL}props/ch1/scribe-sheet.png`;
 /**
- * v3 : 7 cellules. 4-5-6 = coup de tampon, bras d'un seul tenant (épaule → poing → tampon), tête
- * d'origine recollée pixel pour pixel (visage et casquette stables). Le bord du comptoir de ces
- * cellules est à `SABOT_DESK_PX` depuis le haut : le billboard est calé pour que cette ligne tombe
- * pile sur le plateau 3D, et à l'impact le tampon est posé dessus.
+ * v4 : 7 cellules. Torse + bras régénérés d'un seul tenant (GenAI inpainting, même image source) :
+ * le bras reste collé au flanc, avant-bras DEVANT le gilet — jamais de vide entre bras et torse,
+ * aucune couche bras à part. Seule la tête vient de la planche d'origine (posée par-dessus avec
+ * son alpha : visage et casquette stables, pas de liseré). 4 impact · 5 montée · 6 mi-descente.
+ * Le bord du comptoir de toutes les cellules est à `SABOT_DESK_PX` depuis le haut : le billboard
+ * est calé pour que cette ligne tombe pile sur le plateau 3D, et à l'impact le tampon est posé dessus.
  */
-export const SABOT_SHEET = `${import.meta.env.BASE_URL}props/st/sabot-sheet-v3.png`;
+export const SABOT_SHEET = `${import.meta.env.BASE_URL}props/st/sabot-sheet-v4.png`;
 export const SABOT_FRAMES = 7;
-export const SABOT_DESK_PX = 397;
+export const SABOT_DESK_PX = 448;
 /** Centre du tampon à l'impact (cellule 4), en px de planche depuis la gauche. */
-export const SABOT_STAMP_PX = 157;
+export const SABOT_STAMP_PX = 245;
 export const PATIENCE_SHEET = `${import.meta.env.BASE_URL}props/st/patience-sheet.png`;
 export const PATIENCE_EMPTY_SHEET = `${import.meta.env.BASE_URL}props/st/patience-vide-sheet.png`;
 /**

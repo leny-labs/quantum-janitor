@@ -217,7 +217,7 @@ export const stSas: RoomBuild = {
     bienvenue: { fill: 0.9, fov: 38 },
     affiche_animaux: { fill: 0.85, orbit: 4, fov: 36 },
     fente: { px: [707, 288], fill: 0.72, aim: [0, 0.2, 0], fov: 36, picks: ['fente'] },
-    pupitre_sabot: { px: [200, 325], fill: 0.4, orbit: -5, aim: [0, 0.05, 0], fov: 38 },
+    pupitre_sabot: { px: [200, 325], fill: 0.4, orbit: -5, aim: [0, 0.38, 0], fov: 38 },
   },
   intro: 'portique',
   build(s) {
