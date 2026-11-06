@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { lang, t as tr } from '../../i18n';
 import { at, beam, box, cyl, glow, label, plane, pool, sphere, stripeTexture, torus } from '../kit';
-import { CAPSULE_ASPECT, CAPSULE_SHEET, DELAIGUE_ASPECT, DELAIGUE_SHEET, DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PARAPHE_ACTOR, PARAPHE_ASPECT, PARAPHE_SHEET, PATIENCE_SHEET, PERCO_ASPECT, PERCO_SHEET, REMORQUE_ACTOR, REMORQUE_ASPECT, REMORQUE_SHEET, SABOT_ACTOR, SABOT_ARM_PX, SABOT_ARM_URL, SABOT_ASPECT, SABOT_SHEET, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet } from '../props';
+import { CAPSULE_ASPECT, CAPSULE_SHEET, DELAIGUE_ASPECT, DELAIGUE_SHEET, DUPLICATA_ACTOR, DUPLICATA_ASPECT, DUPLICATA_SHEET, GUICHARD_ACTOR, GUICHARD_ASPECT, GUICHARD_FRAMES, GUICHARD_SHEET, PATIENCE_ACTOR, PATIENCE_ASPECT, PATIENCE_EMPTY_SHEET, PARAPHE_ACTOR, PARAPHE_ASPECT, PARAPHE_SHEET, PATIENCE_SHEET, PERCO_ASPECT, PERCO_SHEET, REMORQUE_ACTOR, REMORQUE_ASPECT, REMORQUE_SHEET, SABOT_ACTOR, SABOT_ASPECT, SABOT_DESK_PX, SABOT_FRAMES, SABOT_SHEET, SABOT_STAMP_PX, SIEGE_ASPECT, SIEGE_URL, TAMPONNET_ACTOR, TAMPONNET_ASPECT, TAMPONNET_SHEET, actorFrame, billboard, billboardSheet } from '../props';
 import { BobAspirRig } from './bobaspire';
 import { guichardBall } from '../guichardBall';
 import { guichardChain } from '../guichardChain';
@@ -296,48 +296,41 @@ export const stSas: RoomBuild = {
     const glass = at(plane(gr.w * 0.92, gr.h * 0.55, '#bfe6ff', { opacity: 0.22 }), 0, gr.h * 0.7, 0.5);
     booth.add(at(label(tr('props.station.pound'), gr.w * 0.9, gr.h * 0.12, { color: '#ffffff', bold: true }), 0, gr.h * 0.3, 0.51));
     // M. Sabot (planche GenAI) derrière la vitre : le comptoir lui cache les jambes ; il cligne et
-    // tamponne. Le billboard est enfoncé derrière le plateau (les feuilles peintes sur son ventre
-    // passent sous le plan du comptoir) ; ses feuilles sont de vrais plans 3D posés sur le plateau, et
-    // le bras qui tamponne est une couche à part, posée sur ces feuilles, devant le billboard.
+    // tamponne. Le bras est peint d'un seul tenant dans la planche (montée → mi-descente → impact) ;
+    // le billboard est calé pour que le bord de comptoir peint (SABOT_DESK_PX) tombe pile sur le
+    // plateau 3D : à l'impact, le tampon est posé sur le formulaire, à plat sur le plateau.
     const deskY = gr.h * 0.42;
     const sabotH = gr.h * 0.92;
     const sabotPx = sabotH / 768; // planche 768 px de haut
-    const sabot = billboardSheet(SABOT_SHEET, 5, sabotH, SABOT_ASPECT, { tint: '#fff4e6', shadow: 0.01 });
-    sabot.position.set(0, -gr.h * 0.06, -0.32);
-    // deux feuilles à plat sur le plateau, sous le point de frappe
-    const stampX = (SABOT_ARM_PX.cellX - 579 / 2) * sabotPx;
-    const stampZ = 0.02;
-    // le formulaire tamponné dépasse devant le tampon (vu presque à hauteur de plateau)
-    const sheetA = at(plane(0.5, 0.36, '#ffffff', { map: sabotFormTexture(true) }), stampX + 0.02, deskY + 0.004, stampZ - 0.1);
-    sheetA.rotation.set(-Math.PI / 2, 0, 0.1);
-    const sheetB = at(plane(0.46, 0.33, '#ffffff', { map: sabotFormTexture(false) }), stampX + 0.46, deskY + 0.002, stampZ - 0.14);
+    const sabot = billboardSheet(SABOT_SHEET, SABOT_FRAMES, sabotH, SABOT_ASPECT, { tint: '#fff4e6', shadow: 0.01 });
+    const sabotZ = -0.32;
+    // sprite.center.y = 0.008 : son bas est à 0,8 % de sa hauteur sous position.y
+    sabot.position.set(0, deskY - (768 - SABOT_DESK_PX) * sabotPx + sabotH * 0.008, sabotZ);
+    // formulaire sous le point de frappe (à cheval sur le plan du billboard : le tampon tombe en son
+    // milieu) ; le coup de tampon rouge apparaît au premier impact
+    const stampX = (SABOT_STAMP_PX - (768 * SABOT_ASPECT) / 2) * sabotPx;
+    const formStamped = sabotFormTexture(true);
+    const sheetA = at(plane(0.58, 0.5, '#ffffff', { map: sabotFormTexture(false) }), stampX + 0.05, deskY + 0.004, sabotZ + 0.14);
+    sheetA.rotation.set(-Math.PI / 2, 0, 0.08);
+    const sheetB = at(plane(0.46, 0.33, '#ffffff', { map: sabotFormTexture(false) }), stampX + 0.58, deskY + 0.002, sabotZ + 0.18);
     sheetB.rotation.set(-Math.PI / 2, 0, -0.07);
-    const arm = billboard(SABOT_ARM_URL, SABOT_ARM_PX.h * sabotPx, SABOT_ARM_PX.w / SABOT_ARM_PX.h, { tint: '#fff4e6', shadow: 0 });
-    (arm.userData.sprite as THREE.Sprite).center.set(SABOT_ARM_PX.anchorX, SABOT_ARM_PX.anchorY);
-    arm.position.set(stampX, deskY + 0.006, stampZ);
-    arm.visible = false;
-    // ombre de contact du tampon sur la feuille : plus sombre quand il est écrasé
+    // ombre de contact du tampon sur la feuille, à l'impact
     const stampShadow = at(
-      new THREE.Mesh(new THREE.CircleGeometry(0.2, 20), new THREE.MeshBasicMaterial({ color: '#12060a', transparent: true, opacity: 0, depthWrite: false })),
+      new THREE.Mesh(new THREE.CircleGeometry(0.16, 20), new THREE.MeshBasicMaterial({ color: '#12060a', transparent: true, opacity: 0, depthWrite: false })),
       stampX,
       deskY + 0.008,
-      stampZ,
+      sabotZ + 0.04,
     );
     stampShadow.rotation.x = -Math.PI / 2;
-    stampShadow.scale.set(1, 0.5, 1);
-    booth.add(sabot, sheetA, sheetB, stampShadow, arm, glass);
+    stampShadow.scale.set(1, 0.45, 1);
+    booth.add(sabot, sheetA, sheetB, stampShadow, glass);
     s.spot('guerite', at(booth, gr.x, 0, against(gr.z, 1)));
-    let stampAt = -1;
     s.animate((t) => {
       const f = actorFrame('sabot', SABOT_ACTOR, t);
       sabot.userData.setFrame(f);
       const hit = f === 4;
-      if (hit && !arm.visible) stampAt = t;
-      arm.visible = hit;
-      // le coup : le tampon tombe en 70 ms puis reste écrasé sur la feuille
-      const lift = hit ? Math.max(0, 1 - (t - stampAt) / 0.07) : 1;
-      arm.position.y = deskY + 0.006 + lift * gr.h * 0.05;
-      stampShadow.material.opacity = hit ? 0.42 * (1 - lift * 0.6) : 0;
+      if (hit) (sheetA.material as THREE.Material & { map: THREE.Texture | null }).map = formStamped;
+      stampShadow.material.opacity = hit ? 0.4 : f === 6 ? 0.15 : 0;
     });
 
     // ── porte-gobelet orphelin (resté du vaisseau) ──

@@ -842,7 +842,7 @@ export function billboardSheet(url: string, frames: number, h: number, aspect: n
  *   Reine : 0 repos · 1 mandibules écartées (la cellule « antennes qui ondulent » a été retirée de
  *     la planche : antennes en mât jusqu'au halo du trône)
  *   Scribe : 0 repos · 1 mandibules écartées · 2 antennes qui ondulent (hors cycle, même défaut)
- *   Sabot : 0 repos · 1 clignement · 2 parle · 3 agacé · 4 coup de tampon (corps sans bras levé + couche SABOT_ARM_URL)
+ *   Sabot : 0 repos · 1 clignement · 2 parle · 3 agacé · 4 impact (tampon sur le plateau) · 5 montée · 6 mi-descente
  *   Patience (avec / sans ticket) : 0 repos · 1 mâchoire ouverte · 2 soupir (crâne penché)
  */
 /**
@@ -855,16 +855,17 @@ export const REINE_SHEET = `${import.meta.env.BASE_URL}props/ch1/reine-planche-v
 export const REINE_FRAMES = 2;
 export const REINE_SHEET_ASPECT = 729 / 1024;
 export const SCRIBE_SHEET = `${import.meta.env.BASE_URL}props/ch1/scribe-sheet.png`;
-/** v2 : la cellule 4 (coup de tampon) = repos sans le bras levé ; le bras qui frappe est une couche à part. */
-export const SABOT_SHEET = `${import.meta.env.BASE_URL}props/st/sabot-sheet-v2.png`;
 /**
- * Bras + tampon de M. Sabot, découpé dans l'ancienne cellule « coup de tampon » (189 × 163 px de
- * planche) : posé en 3D sur le plateau du comptoir, devant le billboard, pour que le tampon frappe
- * vraiment la table (et pas un papier peint sur le plan du sprite, en retrait derrière le plateau).
- * Ancre = milieu du dessous du tampon.
+ * v3 : 7 cellules. 4-5-6 = coup de tampon, bras d'un seul tenant (épaule → poing → tampon), tête
+ * d'origine recollée pixel pour pixel (visage et casquette stables). Le bord du comptoir de ces
+ * cellules est à `SABOT_DESK_PX` depuis le haut : le billboard est calé pour que cette ligne tombe
+ * pile sur le plateau 3D, et à l'impact le tampon est posé dessus.
  */
-export const SABOT_ARM_URL = `${import.meta.env.BASE_URL}props/st/sabot-bras.png`;
-export const SABOT_ARM_PX = { w: 189, h: 163, anchorX: 0.759, anchorY: 0.006, cellX: 187.5 };
+export const SABOT_SHEET = `${import.meta.env.BASE_URL}props/st/sabot-sheet-v3.png`;
+export const SABOT_FRAMES = 7;
+export const SABOT_DESK_PX = 397;
+/** Centre du tampon à l'impact (cellule 4), en px de planche depuis la gauche. */
+export const SABOT_STAMP_PX = 157;
 export const PATIENCE_SHEET = `${import.meta.env.BASE_URL}props/st/patience-sheet.png`;
 export const PATIENCE_EMPTY_SHEET = `${import.meta.env.BASE_URL}props/st/patience-vide-sheet.png`;
 /**
@@ -884,17 +885,26 @@ export const ROACH_ACTOR: ActorLoops = {
 };
 /** Pas de `talk` ni de `listen` : seul le portrait de la boîte de dialogue parle, le billboard reste au guichet et tamponne. */
 export const SABOT_ACTOR: ActorLoops = {
+  // coup de tampon : montée (5) → mi-descente (6) → impact (4) → retour (6) → repos
   idle: [
     { frame: 0, duration: 1900 },
     { frame: 1, duration: 120 },
     { frame: 0, duration: 1400 },
-    { frame: 4, duration: 260 },
+    { frame: 5, duration: 130 },
+    { frame: 6, duration: 60 },
+    { frame: 4, duration: 300 },
+    { frame: 6, duration: 80 },
     { frame: 0, duration: 1600 },
     { frame: 1, duration: 110 },
     { frame: 0, duration: 900 },
-    { frame: 4, duration: 240 },
+    { frame: 5, duration: 110 },
+    { frame: 6, duration: 50 },
+    { frame: 4, duration: 220 },
+    { frame: 5, duration: 110 },
+    { frame: 6, duration: 50 },
+    { frame: 4, duration: 280 },
+    { frame: 6, duration: 80 },
     { frame: 0, duration: 300 },
-    { frame: 4, duration: 240 },
   ],
 };
 export const PATIENCE_ACTOR: ActorLoops = {
