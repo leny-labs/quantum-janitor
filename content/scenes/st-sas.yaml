@@ -151,8 +151,11 @@ hotspots:
       - say: "« LES ANIMAUX DOIVENT ÊTRE ACCOMPAGNÉS ». Un pictogramme : un bonhomme, une laisse, un chien. Le chien, aujourd'hui, c'est moi."
       - say: "Tampon rouge en dessous : « VU ». Quelqu'un a vu l'affiche. Et l'a tamponnée. Pour prouver qu'il l'avait vue."
 
+  # clic gauche = Regarder : petit zoom sur le stub D-0001 (stSas.shots.fente) ; dans le zoom,
+  # clic sur le ticket = Prendre (shots.fente.picks), comme la cuillère de la cafétéria.
   - id: fente
     label: Fente « TICKET D'ENTRÉE »
+    smart: look
     useLabel: Prendre un ticket
     rect: [678, 212, 64, 94]
     if: { notFlags: [st_ticket_douane] }

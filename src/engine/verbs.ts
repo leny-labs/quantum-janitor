@@ -50,3 +50,12 @@ export function smartVerb(h: Hotspot): HotspotVerb | null {
   if (h.smart) return pick(h.smart) ?? verbs[0];
   return pick('talk') ?? pick('use') ?? verbs[0];
 }
+
+/**
+ * Verbe joué au clic sur un objet ramassable DANS un plan d'examen (`ShotSpec.picks`) :
+ * on est déjà en train de le regarder, donc Utiliser (« Prendre ») passe avant `smart:`
+ * (ticket du sas en `smart: look` : zoom d'abord, prise dans le zoom).
+ */
+export function pickVerb(h: Hotspot): HotspotVerb | null {
+  return hotspotVerbs(h).find((v) => v.kind === 'use') ?? smartVerb(h);
+}

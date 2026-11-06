@@ -187,7 +187,7 @@ export const stSas: RoomBuild = {
     // détails (sous-hotspots du YAML) : plans serrés
     bienvenue: { fill: 0.9, fov: 38 },
     affiche_animaux: { fill: 0.85, orbit: 4, fov: 36 },
-    fente: { px: [707, 288], fill: 0.45, aim: [0, 0.12, 0], fov: 40 },
+    fente: { px: [707, 288], fill: 0.72, aim: [0, 0.2, 0], fov: 36, picks: ['fente'] },
     pupitre_sabot: { px: [200, 325], fill: 0.4, orbit: -5, aim: [0, 0.05, 0], fov: 38 },
   },
   intro: 'portique',

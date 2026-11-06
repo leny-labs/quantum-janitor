@@ -8,7 +8,7 @@ import { Inventory } from '../engine/Inventory';
 import { lineMood } from '../engine/mood';
 import { SceneManager } from '../engine/SceneManager';
 import type { Action, CharacterDef, Exit, Hotspot, Interaction } from '../engine/types';
-import { hotspotVerbs, smartVerb, type HotspotVerb } from '../engine/verbs';
+import { hotspotVerbs, pickVerb, smartVerb, type HotspotVerb } from '../engine/verbs';
 import { END_SCENE_ID, getSession, type Session } from '../session';
 import { actBreak, endKnotOf } from '../engine/walkthrough';
 import { RoomRenderer, RoomView } from '../three/RoomRenderer';
@@ -891,7 +891,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
   /** Verbe direct d'un hotspot ramassable du plan d'examen (prise de la cuillère…), joué dans le plan. */
   private async runPick(id: string): Promise<void> {
     const h = this.scenes.current().hotspots?.find((x) => x.id === id);
-    const v = h ? smartVerb(h) : null;
+    const v = h ? pickVerb(h) : null;
     this.room.highlight(null);
     if (!v) return;
     await this.runner.run(v.action);
@@ -922,7 +922,7 @@ export class RoomScene extends Phaser.Scene implements ActionHost {
     this.room.highlight(id);
     if (this.busy) return;
     const h = id ? this.scenes.current().hotspots?.find((x) => x.id === id) : undefined;
-    const v = h ? smartVerb(h) : null;
+    const v = h ? pickVerb(h) : null;
     this.hover.set(h && v ? t('hud.smart', { verb: v.label, target: h.label }) : null);
     setCursor(this, h && v ? verbCursor(this.verbIcon(v, h)) : 'default');
   }
